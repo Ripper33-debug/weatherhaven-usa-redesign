@@ -40,7 +40,7 @@ To share it, deploy it as a **new** Vercel project (`npx vercel`), not the produ
 - Lighthouse on a local production build:
   - Desktop homepage: 96 performance, 100 accessibility, 96 best practices, 100 SEO.
   - Desktop MECC page: 98 / 100 / 96 / 100.
-  - Simulated mid-range phone homepage: about 65 performance. Most of that is the Sentry bundle and the hero film.
+  - Simulated mid-range phone homepage: 65–70 performance, mostly held back by the Sentry monitoring bundle. The hero film now waits for page load before it downloads.
 - At 390 px, no public page scrolls sideways.
 - Every internal link, image and external news link returns 200.
 - An independent review covered bugs, accessibility, content accuracy and SOF/admin regressions. Its findings were fixed or are listed below.

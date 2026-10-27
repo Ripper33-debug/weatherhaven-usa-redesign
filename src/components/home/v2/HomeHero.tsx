@@ -22,17 +22,25 @@ export function HomeHero() {
   // Reduced motion starts paused; after that the visitor's own choice wins.
   const [userPaused, setUserPaused] = useState<boolean | null>(null);
   const paused = userPaused ?? reduced;
+  const userPausedRef = useRef(false);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
     const onPlaying = () => setPlaying(true);
     video.addEventListener("playing", onPlaying);
-    if (!prefersReducedMotion()) {
+    // The poster is the first paint; the film only starts downloading once the page has loaded.
+    const start = () => {
+      if (prefersReducedMotion() || userPausedRef.current) return;
       loadSource(video);
       void video.play().catch(() => undefined);
-    }
-    return () => video.removeEventListener("playing", onPlaying);
+    };
+    if (document.readyState === "complete") start();
+    else window.addEventListener("load", start, { once: true });
+    return () => {
+      video.removeEventListener("playing", onPlaying);
+      window.removeEventListener("load", start);
+    };
   }, []);
 
   const togglePlayback = () => {
@@ -41,9 +49,11 @@ export function HomeHero() {
     if (paused) {
       loadSource(video);
       void video.play().catch(() => undefined);
+      userPausedRef.current = false;
       setUserPaused(false);
     } else {
       video.pause();
+      userPausedRef.current = true;
       setUserPaused(true);
     }
   };
