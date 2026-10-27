@@ -51,14 +51,14 @@ export const metadata: Metadata = {
     title: "Weatherhaven USA | Rapidly deployable shelters, camps and field hospitals",
     description:
       "Expandable containers, soft-wall, inflatable and polar shelters that ship as cargo and stand up in minutes.",
-    images: [{ url: "/hero/hero-poster.jpg", width: 1200, height: 630, alt: "Weatherhaven expandable shelter at dawn" }],
+    images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "Weatherhaven expandable shelter at dusk: Ships in a container. Stands up in minutes." }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Weatherhaven USA | Rapidly deployable shelters, camps and field hospitals",
     description:
       "Expandable containers, soft-wall, inflatable and polar shelters that ship as cargo and stand up in minutes.",
-    images: ["/hero/hero-poster.jpg"],
+    images: ["/og-image.jpg"],
   },
 };
 

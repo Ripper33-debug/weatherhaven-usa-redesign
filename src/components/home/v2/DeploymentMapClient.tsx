@@ -207,7 +207,7 @@ export function DeploymentMapClient({
             role="img"
             aria-label={`World map with ${visible.length} Weatherhaven deployment sites`}
           >
-            <path d={dotPath} className="v2-map-dots" style={{ strokeWidth: 2.4 * Math.max(scale, 0.45) }} />
+            <path d={dotPath} className="v2-map-dots" style={{ strokeWidth: 2.4 * Math.max(scale, 0.8) }} />
             {visible.map((p) => {
               const active = p.id === selected?.id;
               return (

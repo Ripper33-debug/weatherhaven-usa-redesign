@@ -45,6 +45,7 @@ git apply redesign.patch
 Then copy the new media from this folder's `public/` into the repo and commit it. The patch can't include these files because they are binary:
 
 - `public/weatherhaven-logo-reverse.png` and `public/weatherhaven-logo-reverse@2x.png`
+- `public/og-image.jpg` (the 1200×630 card shown when a link is shared)
 - `public/hero/hero-poster.jpg`, `deploy-poster.jpg` and `built-poster.jpg`
 - `public/hero/hero-1080.mp4`, `hero-720.mp4`, `built-720.mp4` and `deploy-720.mp4`
 
