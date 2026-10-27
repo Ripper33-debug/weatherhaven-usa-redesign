@@ -958,6 +958,19 @@ input.wh-input:focus-visible {
   border-color: rgba(77, 159, 255, 0.45);
 }
 
+/* Layout-affecting defaults live in a layer so Tailwind utilities (hidden, max-w-*) win. */
+@layer components {
+  .v2-btn {
+    display: inline-flex;
+  }
+  .v2-lead {
+    max-width: 62ch;
+  }
+  .v2-body {
+    max-width: 68ch;
+  }
+}
+
 /* ==========================================================================
    Public site v2 — "deployed" design language
    Navy-black night, snow-white type, Weatherhaven signal orange.
@@ -1052,14 +1065,12 @@ body .wh-v2 .wh-marketing-display {
   font-size: clamp(1.05rem, 1.35vw, 1.25rem);
   line-height: 1.6;
   color: #c3ccd8;
-  max-width: 62ch;
 }
 
 .v2-body {
   font-size: 1rem;
   line-height: 1.65;
   color: var(--v2-muted);
-  max-width: 68ch;
 }
 
 .v2-small {
@@ -1115,7 +1126,6 @@ body .wh-v2 .wh-marketing-display {
 .v2-btn {
   --v2-chamfer: 9px;
   position: relative;
-  display: inline-flex;
   min-height: 48px;
   align-items: center;
   justify-content: center;

@@ -50,7 +50,7 @@ function Corner({ x, y }: { x: number; y: number }) {
   return <rect x={x - 3} y={y - 3} width={6} height={6} fill="var(--v2-snow)" />;
 }
 
-function Drawing({ p }: { p: number }) {
+function Drawing({ p, compact = false }: { p: number; compact?: boolean }) {
   const ship = ease(seg(p, 0, 0.2));
   const place = ease(seg(p, 0.2, 0.38));
   const expand = seg(p, 0.4, 0.8);
@@ -86,7 +86,12 @@ function Drawing({ p }: { p: number }) {
   const wingDepth = P_WING * floorT;
 
   return (
-    <svg viewBox="40 40 720 520" className="h-auto w-full" role="img" aria-labelledby="deploy-drawing-title">
+    <svg
+      viewBox={compact ? "205 40 450 520" : "40 40 720 520"}
+      className="h-auto w-full"
+      role="img"
+      aria-labelledby="deploy-drawing-title"
+    >
       <title id="deploy-drawing-title">
         Technical drawing of a MECC expandable container unfolding from 96 inches to 243 inches wide, growing from
         160 to 420 square feet of floor.
@@ -101,15 +106,15 @@ function Drawing({ p }: { p: number }) {
       </defs>
 
       {/* drawing frame labels */}
-      <text x="60" y="70" fill="var(--v2-muted)" fontSize="13" fontWeight="500">
+      <text x={compact ? 215 : 60} y="70" fill="var(--v2-muted)" fontSize="13" fontWeight="500">
         End elevation
       </text>
-      <text x="60" y="350" fill="var(--v2-muted)" fontSize="13" fontWeight="500">
+      <text x={compact ? 215 : 60} y="350" fill="var(--v2-muted)" fontSize="13" fontWeight="500">
         Plan view
       </text>
 
       {/* ground */}
-      <line x1="80" y1={ground} x2={720} y2={ground} stroke="var(--v2-line-strong)" strokeWidth="1" />
+      <line x1={compact ? 205 : 80} y1={ground} x2={compact ? 655 : 720} y2={ground} stroke="var(--v2-line-strong)" strokeWidth="1" />
       {Array.from({ length: 33 }).map((_, i) => (
         <line
           key={i}
@@ -261,12 +266,12 @@ function Drawing({ p }: { p: number }) {
 
       {/* floor area readout */}
       <g opacity={ship}>
-        <text x="720" y="362" textAnchor="end" fill="var(--v2-muted)" fontSize="13">
+        <text x={compact ? 645 : 720} y={compact ? 74 : 362} textAnchor="end" fill="var(--v2-muted)" fontSize="13">
           Floor area
         </text>
         <text
-          x="720"
-          y="398"
+          x={compact ? 645 : 720}
+          y={compact ? 108 : 398}
           textAnchor="end"
           fill="var(--v2-snow)"
           fontSize="34"
@@ -284,6 +289,15 @@ export function HomeDeploySequence() {
   const sectionRef = useRef<HTMLElement>(null);
   const [p, setP] = useState(0);
   const [reduced, setReduced] = useState(false);
+  const [compact, setCompact] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 1023px)");
+    const sync = () => setCompact(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
 
   useEffect(() => {
     if (prefersReducedMotion()) {
@@ -328,7 +342,7 @@ export function HomeDeploySequence() {
             <h2 id="deploy-heading" className="v2-h1 max-w-[14ch] text-snow">
               One container. Three times the floor.
             </h2>
-            <p className="v2-body mt-4 hidden sm:block">
+            <p className="v2-body mt-4 hidden lg:block">
               Every MECC leaves the factory as a 20-ft shipping container and arrives as a building.
             </p>
             <ol className="mt-8 hidden space-y-1 lg:block">
@@ -362,7 +376,7 @@ export function HomeDeploySequence() {
           </div>
 
           <div className="relative">
-            <Drawing p={p} />
+            <Drawing p={p} compact={compact} />
             {/* phones and tablets: active step under the drawing */}
             <div className="mt-2 min-h-[7.5rem] lg:hidden" aria-live="polite">
               <p className="text-[1.05rem] font-semibold text-snow">

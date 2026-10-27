@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Link from "next/link";
-import { StickyContactBar } from "@/components/marketing/StickyContactBar";
-import { ProductDetailView } from "@/components/products/ProductDetailView";
-import { contactUrl } from "@/lib/contact-url";
+import { SystemDetail } from "@/components/systems/SystemDetail";
 import { getProductDetailImages } from "@/lib/product-gallery";
 import { getPublishedProductBySlug, listPublishedProducts } from "@/app/api/_lib/catalog-products";
-import { resolveProductShareImageUrl, shareMetadataFromImage } from "@/lib/share-metadata";
+import { pageMeta } from "@/lib/page-meta";
+import { productCover } from "@/lib/product-covers";
+import { pickProductsFromCatalog } from "@/lib/published-catalog";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -21,36 +20,27 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const product = await getPublishedProductBySlug(slug);
   if (!product) return { title: "System not found" };
-  const shareImage = resolveProductShareImageUrl(product);
-  return {
-    title: `${product.name} — Weatherhaven USA`,
+  return pageMeta({
+    title: `${product.name}: ${product.subtitle}`,
     description: product.description,
-    ...shareMetadataFromImage(shareImage, product.name),
-  };
+    path: `/configurable-solutions/${product.slug}`,
+    image: productCover(product.slug, product.coverImageUrl),
+    imageAlt: `Weatherhaven ${product.name}`,
+  });
 }
 
-export default async function ProductDetailPage({ params }: Props) {
+export default async function SystemPage({ params }: Props) {
   const { slug } = await params;
   const [product, catalog] = await Promise.all([getPublishedProductBySlug(slug), listPublishedProducts()]);
   if (!product) notFound();
 
-  const galleryImages = getProductDetailImages(product.slug, {
+  const gallery = getProductDetailImages(product.slug, {
     coverImageUrl: product.coverImageUrl,
     galleryImageUrls: product.galleryImageUrls,
   });
+  const cover = productCover(product.slug, product.coverImageUrl);
+  const images = [cover, ...gallery.filter((src) => src !== cover)];
+  const related = pickProductsFromCatalog(catalog, product.relatedSlugs).slice(0, 3);
 
-  return (
-    <div className="bg-[#080a0c] text-white">
-      <div className="mx-auto max-w-[1400px] px-6 pb-4 pt-24 sm:px-6 sm:pt-28 lg:px-12">
-        <Link
-          href="/configurable-solutions"
-          className="text-sm font-medium text-[#8a9099] transition-colors duration-300 hover:text-white"
-        >
-          ← All shelter systems
-        </Link>
-      </div>
-      <ProductDetailView product={product} galleryImages={galleryImages} showCompare catalog={catalog} />
-      <StickyContactBar contactHref={contactUrl({ system: product.slug, inquiry: "Program Requirement" })} />
-    </div>
-  );
+  return <SystemDetail product={product} images={images} related={related} />;
 }

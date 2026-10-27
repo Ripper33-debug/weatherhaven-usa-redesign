@@ -10,7 +10,6 @@ import { Footer } from "@/components/Footer";
 import { SiteEnhancements } from "@/components/site/SiteEnhancements";
 import { SiteChrome } from "@/components/site/SiteChrome";
 import { AuthHashRedirect } from "@/components/auth/AuthHashRedirect";
-import { company } from "@/lib/site";
 import { getSiteUrl } from "@/lib/site-url";
 
 const geistSans = GeistSans;
@@ -40,24 +39,26 @@ export const metadata: Metadata = {
     apple: [{ url: "/apple-icon.svg", type: "image/svg+xml" }],
   },
   title: {
-    default: `${company.shortName} | Deployable Shelter Systems`,
-    template: `%s | ${company.shortName}`,
+    default: "Weatherhaven USA | Rapidly deployable shelters, camps and field hospitals",
+    template: "%s | Weatherhaven USA",
   },
-  description: company.description,
+  description:
+    "Expandable containers, soft-wall, inflatable and polar shelters that ship as cargo and stand up in minutes. Fielded in 95+ countries since 1981.",
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: siteUrl,
-    siteName: company.shortName,
-    title: `${company.shortName} — Deployable Shelter Systems`,
-    description: company.description,
-    images: [{ url: "/products/ehmecc.jpg", width: 1200, height: 630, alt: company.shortName }],
+    siteName: "Weatherhaven USA",
+    title: "Weatherhaven USA | Rapidly deployable shelters, camps and field hospitals",
+    description:
+      "Expandable containers, soft-wall, inflatable and polar shelters that ship as cargo and stand up in minutes.",
+    images: [{ url: "/hero/hero-poster.jpg", width: 1200, height: 630, alt: "Weatherhaven expandable shelter at dawn" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: `${company.shortName} — Deployable Shelter Systems`,
-    description: company.description,
-    images: ["/products/ehmecc.jpg"],
+    title: "Weatherhaven USA | Rapidly deployable shelters, camps and field hospitals",
+    description:
+      "Expandable containers, soft-wall, inflatable and polar shelters that ship as cargo and stand up in minutes.",
+    images: ["/hero/hero-poster.jpg"],
   },
 };
 

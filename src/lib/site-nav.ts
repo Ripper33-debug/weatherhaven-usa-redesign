@@ -13,7 +13,7 @@ export const NAV_CTA = { href: "/contact", label: "Talk to an expert" } as const
 export const NAV_SOF = { href: "/sof-solutions", label: "SOF portal" } as const;
 
 /** Display order inside each family: best-known, best-documented systems first. */
-const FAMILY_ORDER: string[] = [
+export const FAMILY_ORDER: string[] = [
   "mecc",
   "ehmecc",
   "trecc",
