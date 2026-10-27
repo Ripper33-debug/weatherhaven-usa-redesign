@@ -24,12 +24,33 @@ function zoneSort(a: CampZoneLayout, b: CampZoneLayout): number {
   return a.row - b.row || a.col - b.col || a.label.localeCompare(b.label);
 }
 
+/** Break a zone label into lines that fit its block (roughly 5.2 px per character at 9 px). */
+function wrapLabel(label: string, width: number): string[] {
+  const max = Math.max(6, Math.floor((width - 12) / 5.2));
+  const lines: string[] = [];
+  let line = "";
+  for (const word of label.split(" ")) {
+    const next = line ? `${line} ${word}` : word;
+    if (next.length > max && line) {
+      lines.push(line);
+      line = word;
+    } else {
+      line = next;
+    }
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+
 export function CampLayoutDiagram({
   zones,
   animate = true,
+  labelFont,
 }: {
   zones: CampZoneLayout[];
   animate?: boolean;
+  /** Public pages pass the marketing face; the SOF planner keeps the original monospace. */
+  labelFont?: string;
 }) {
   const ordered = useMemo(() => [...zones].sort(zoneSort), [zones]);
   const [revealIndex, setRevealIndex] = useState(0);
@@ -86,15 +107,25 @@ export function CampLayoutDiagram({
               stroke="rgba(241,133,34,0.35)"
               strokeWidth={1}
             />
-            <text
-              x={x + 8}
-              y={y + 18}
-              fill="#e2e8f0"
-              fontSize={10}
-              fontFamily="ui-monospace, monospace"
-            >
-              {zone.label}
-            </text>
+            {labelFont ? (
+              <text x={x + 7} y={y + 16} fill="#eef2f6" fontSize={9} fontWeight={500} style={{ fontFamily: labelFont }}>
+                {wrapLabel(zone.label, w).map((line, i) => (
+                  <tspan key={line} x={x + 7} dy={i === 0 ? 0 : 11}>
+                    {line}
+                  </tspan>
+                ))}
+              </text>
+            ) : (
+              <text
+                x={x + 8}
+                y={y + 18}
+                fill="#e2e8f0"
+                fontSize={10}
+                fontFamily="ui-monospace, monospace"
+              >
+                {zone.label}
+              </text>
+            )}
           </g>
         );
       })}

@@ -22,16 +22,15 @@ export const CAPABILITY_CATEGORIES: CapabilityCategory[] = [
   {
     id: "shelter",
     label: "Shelter Systems",
-    headline:
-      "Portable turnkey shelters and camps — softwall tensioned fabric and expandable containers engineered for rapid setup and redeployment.",
+    headline: "Soft-wall fabric shelters and expandable containers that set up fast and redeploy for years.",
     paragraphs: [
-      "Weatherhaven designs, manufactures, and installs portable turnkey shelters, camps, and field hospitals with a focus on mobility, performance, and sustainable environmental development.",
-      "Structures require no special tools, site preparations, or foundations beyond general construction knowledge — supporting remote and extreme environments.",
+      "Weatherhaven designs, builds and installs shelters, camps and field hospitals. Every system is meant to be struck, moved and stood up again when the mission changes.",
+      "Most systems need no special tools, site preparation or foundations, which is what makes them practical in remote and extreme locations.",
     ],
     features: [
-      "Softwall and expandable container shelter lines",
-      "Redeployable systems for repeated worldwide deployment",
-      "Lightweight, compact transport to reduce fuel and site impact",
+      "Soft-wall, inflatable, polar and expandable container lines",
+      "Built to be redeployed again and again",
+      "Compact to transport, saving fuel and lift",
     ],
     relatedSlugs: ["series-4", "mecc", "airbeam-lp"],
     diagramLabel: "Modular frame — multi-bay spine",
@@ -39,15 +38,15 @@ export const CAPABILITY_CATEGORIES: CapabilityCategory[] = [
   {
     id: "ecu",
     label: "Environmental Control",
-    headline: "Climate protection from -50°C to +50°C — designed for the world's harshest environments.",
+    headline: "Shelters built for roughly −50 °C to +50 °C, from polar ice to desert heat.",
     paragraphs: [
-      "Weatherhaven shelters are designed to provide protection from extreme temperature and weather, including solar shade systems that reduce power generation and fuel convoy requirements.",
-      "Thermal packages are sized from envelope loads and theater requirements for each program.",
+      "Insulated walls, environmental control units and solar shades are specified together. Solar shade systems cut the cooling load, which means less generator power and fewer fuel convoys.",
+      "Heating and cooling are sized for each program’s climate and use.",
     ],
     features: [
-      "Arctic through desert operational bands",
-      "Solar shade and ECU integration",
-      "Efficient protection for workers and equipment in extreme heat",
+      "Arctic, temperate and desert configurations",
+      "Solar shade and environmental control unit integration",
+      "Protection for people and equipment in extreme heat and cold",
     ],
     relatedSlugs: ["endurance", "polarhaven", "ehmecc"],
     diagramLabel: "ECU yard — split package",
@@ -55,15 +54,15 @@ export const CAPABILITY_CATEGORIES: CapabilityCategory[] = [
   {
     id: "power",
     label: "Power Systems",
-    headline: "Integrated power for deployed operations — composed with shelter and camp utility spines.",
+    headline: "Power distribution planned with the camp, not added after it.",
     paragraphs: [
-      "Power distribution is integrated with turnkey camp and shelter systems — from need assessment and design through installation and in-service support.",
-      "PDU branches, surge isolation, and grounding plans follow load studies for each deployment.",
+      "Weatherhaven plans power alongside the shelters and camp layout, from needs assessment and design through installation and in-service support.",
+      "Distribution, protection and grounding are laid out from a load study for each deployment.",
     ],
     features: [
-      "Generator, shore power, and hybrid configurations",
-      "Camp-scale utility distribution",
-      "Sized for maintenance, C2, and clinical loads",
+      "Generator, shore power and hybrid configurations",
+      "Camp-wide utility distribution",
+      "Sized for maintenance, command and clinical loads",
     ],
     relatedSlugs: ["mecc", "ehmecc", "trecc"],
     diagramLabel: "PDU spine — gen-set yard",
@@ -71,15 +70,15 @@ export const CAPABILITY_CATEGORIES: CapabilityCategory[] = [
   {
     id: "flooring",
     label: "Flooring & Infrastructure",
-    headline: "Modular flooring, interconnectors, corridors, and Solarshade accessories for full system integration.",
+    headline: "Floors, connectors and corridors that join single shelters into one camp.",
     paragraphs: [
-      "Modular flooring, interconnectors, corridors, and accessories integrate shelters into cohesive camp systems.",
-      "Subfloor and site-class packages match traffic lanes, cable egress, and operational requirements.",
+      "Modular floors, interconnectors, corridors and Solarshade accessories link shelters so people and cables move between them under cover.",
+      "Subfloor packages are matched to the site and to the traffic each area will take.",
     ],
     features: [
-      "Site-class-dependent subfloor packages",
-      "Cable egress and maintenance access",
-      "Camp circulation and utility spine integration",
+      "Subfloor packages matched to the site",
+      "Cable routing and maintenance access",
+      "Covered circulation between shelters",
     ],
     relatedSlugs: ["ateps", "mecc", "trecc"],
     diagramLabel: "Subfloor grid — cable chase",
@@ -87,16 +86,15 @@ export const CAPABILITY_CATEGORIES: CapabilityCategory[] = [
   {
     id: "c2",
     label: "Command & Control",
-    headline:
-      "Headquarters Shelter System (HQSS) and command configurations — modular, climate-protected, and expeditionary.",
+    headline: "Command posts and headquarters that go up fast and hold their climate.",
     paragraphs: [
-      "Weatherhaven was awarded Canada's Headquarters Shelter System (HQSS) acquisition and in-service support contracts — fielding advanced tactical shelter for command environments.",
-      "Softwall and expandable command configurations support TOC and JOC layouts with blackout and climate control where required.",
+      "Weatherhaven won Canada’s Headquarters Shelter System (HQSS) acquisition and in-service support contracts, fielding tactical shelters for command.",
+      "Soft-wall and expandable configurations support tactical and joint operations center layouts, with blackout and climate control where required.",
     ],
     features: [
       "HQSS tactical headquarters shelter system",
-      "Softwall command and C2-ready layouts",
-      "Rapid emplacement for expeditionary headquarters",
+      "Soft-wall and expandable command layouts",
+      "Fast setup for expeditionary headquarters",
     ],
     relatedSlugs: ["ehmecc", "rdmss", "trecc"],
     diagramLabel: "TOC cell — comms spine",
@@ -104,16 +102,15 @@ export const CAPABILITY_CATEGORIES: CapabilityCategory[] = [
   {
     id: "medical",
     label: "Medical Configuration",
-    headline:
-      "Mobile medical shelters and field hospitals aligned with WHO and UN foreign field hospital guidelines.",
+    headline: "Clinics and field hospitals for military, humanitarian and emergency response missions.",
     paragraphs: [
-      "From mobile clinics to field hospitals, Weatherhaven provides medical shelter solutions for military, humanitarian, and emergency response missions.",
-      "Expandable containers can deploy on trucks and trailers for fast on-site medical services in remote areas.",
+      "Configurations range from a single mobile clinic to a full field hospital, aligned with WHO and UN guidance for foreign field hospitals.",
+      "Expandable containers travel on trucks and trailers, so medical teams can open on site quickly in remote areas.",
     ],
     features: [
       "Field hospitals and mobile clinics",
-      "Rapid transport, installation, and flexible layouts",
-      "Redeployable medical infrastructure worldwide",
+      "Fast transport and installation, flexible layouts",
+      "Redeployable medical infrastructure",
     ],
     relatedSlugs: ["airbeam-lp", "bmecc", "hercon"],
     diagramLabel: "Clinical flow — utility chase",
@@ -121,16 +118,15 @@ export const CAPABILITY_CATEGORIES: CapabilityCategory[] = [
   {
     id: "aviation",
     label: "Aviation Support",
-    headline:
-      "Maintenance shelters and workshops for aviation and vehicle support — including helicopter maintenance since 1984.",
+    headline: "Maintenance shelters and workshops for aircraft and vehicles, first delivered to the Canadian Forces in 1984.",
     paragraphs: [
-      "Portable shelters support maintenance shops, simulation training, and unmanned systems operations in remote locations.",
-      "Large-span configurations provide high-bay clearance for forward operating maintenance environments.",
+      "Portable shelters house maintenance shops, simulation training and unmanned systems operations in remote locations.",
+      "Large-span configurations give the clear height that forward maintenance work needs.",
     ],
     features: [
       "Helicopter and aviation maintenance shelters",
-      "Workshop and simulation training configurations",
-      "High-bay and recovery lane options",
+      "Workshop and simulator training configurations",
+      "High-bay, clear-span options",
     ],
     relatedSlugs: ["mex-26", "series-4", "mecc"],
     diagramLabel: "MX bay — high clearance",
@@ -138,16 +134,15 @@ export const CAPABILITY_CATEGORIES: CapabilityCategory[] = [
   {
     id: "camp",
     label: "Camp Integration",
-    headline:
-      "Turnkey camp systems — shelter, utilities, logistics, installation, demobilization, refurbishment, and storage.",
+    headline: "Complete camps: shelter, utilities, logistics, installation, and what happens after the mission.",
     paragraphs: [
-      "Weatherhaven provides everything needed to live and work in turnkey shelter systems — from needs assessment and shelter design to installation and equipment.",
-      "At mission end, systems can be demobilized, refurbished, and stored ready for the next deployment.",
+      "Weatherhaven supplies everything needed to live and work in a camp, from needs assessment and shelter design to installation and equipment.",
+      "When the mission ends, systems are taken down, refurbished and stored ready for the next deployment.",
     ],
     features: [
-      "Workforce, military, and humanitarian camp integration",
-      "Phased emplacement aligned to lift windows",
-      "Global logistics and regional support teams",
+      "Workforce, military and humanitarian camps",
+      "Phased setup planned around transport",
+      "Global logistics and regional support",
     ],
     relatedSlugs: ["mecc", "hercon", "rdmss"],
     diagramLabel: "Campus spine — multi-bay",

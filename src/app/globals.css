@@ -1367,3 +1367,15 @@ body .wh-v2 .wh-marketing-display {
     padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
   }
 }
+
+/* v2: section labels on public pages read as plain sub-headings */
+.wh-v2 .wh-label {
+  font-family: var(--font-wh);
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--v2-snow);
+}
+.wh-v2 .wh-label::before {
+  display: none;
+}

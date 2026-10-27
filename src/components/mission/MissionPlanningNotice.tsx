@@ -8,7 +8,7 @@ export function MissionPlanningNotice({ className = "" }: { className?: string }
       role="note"
     >
       <p className="text-sm leading-relaxed text-[#c5c9ce]">
-        <strong className="font-medium text-white">Planning tool</strong> — use this to scope a conversation with
+        <strong className="font-medium text-white">Planning tool.</strong> Use this to scope a conversation with
         Weatherhaven. Results are indicative only and are{" "}
         <strong className="font-medium text-white">not a formal quote or contract offer</strong>. Need a program
         response?{" "}
