@@ -33,6 +33,14 @@ To share it, deploy it as a **new** Vercel project (`npx vercel`), not the produ
 - **News:** 12 real releases with direct links (Supacat, Battlefield 2027, Land Forces, DVD, MSPO and others), merged with anything in the CMS.
 - **Untouched:** the SOF portal and admin keep their original design and behavior.
 
+## How it was checked
+
+- `npm run lint` is clean and all 161 tests pass. `npm run build` succeeds, including every SOF and admin route.
+- The SOF portal pages (`/sof-solutions` and `/sof-solutions/request-access`) were screenshotted next to the untouched original at desktop and phone widths, and they are pixel-identical.
+- At 390 px, no public page scrolls sideways.
+- Every internal link, image and external news link returns 200.
+- An independent review covered bugs, accessibility, content accuracy and SOF/admin regressions. Its findings were fixed or are listed below.
+
 ## Bringing it into the real repo
 
 The redesign is also provided as `redesign.patch`, a diff against commit `e0f53c3` of the original repo:
