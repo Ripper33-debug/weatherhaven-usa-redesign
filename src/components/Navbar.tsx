@@ -84,9 +84,12 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, [pathname]);
 
-  useEffect(() => {
+  // Close the systems menu on navigation (adjusting state during render, not in an effect).
+  const [menuPath, setMenuPath] = useState(pathname);
+  if (menuPath !== pathname) {
+    setMenuPath(pathname);
     setSystemsOpen(false);
-  }, [pathname]);
+  }
 
   useEffect(() => {
     if (!systemsOpen) return;

@@ -164,23 +164,34 @@ function seedProduct(p: ProductSeed): Product {
  * product names (e.g. ATEPS as a "power system"). When a row still has those placeholders,
  * show the verified content instead — CMS photos, status and ordering are kept.
  */
+/** Names the original seed used that have since been corrected. */
+const LEGACY_PRODUCT_NAMES = new Set(["Airbeam HP", "Airbeam LP", "HerCon", "Non-Expandable ISO Containers"]);
+
+/**
+ * CMS rows seeded from the old static catalog carry placeholder specs. Swap those for the verified
+ * content, but never overwrite anything an editor actually changed.
+ */
 export function upgradeLegacyProductContent(product: Product): Product {
   const content = getProductContent(product.slug);
   if (!content || !hasLegacyPlaceholderSpecs(product.specs)) return product;
+  // Placeholder values (not just an empty list) mean the row is an untouched copy of the old seed.
+  const untouchedSeed = (product.specs?.length ?? 0) > 0;
   const line = WEATHERHAVEN_PRODUCT_LINES.find((l) => l.slug === product.slug);
+  const fill = <T,>(current: T[] | undefined, verified: T[]) =>
+    untouchedSeed || !current || current.length === 0 ? verified : current;
   return {
     ...product,
-    name: content.name,
-    subtitle: content.fullName,
-    tag: line?.tag ?? product.tag,
-    description: content.description,
-    overview: content.overview,
-    features: content.highlights,
+    name: LEGACY_PRODUCT_NAMES.has(product.name) ? content.name : product.name,
+    subtitle: untouchedSeed || !product.subtitle ? content.fullName : product.subtitle,
+    tag: untouchedSeed ? (line?.tag ?? product.tag) : product.tag,
+    description: untouchedSeed || !product.description ? content.description : product.description,
+    overview: fill(product.overview, content.overview),
+    features: fill(product.features, content.highlights),
     specs: content.specs,
-    configurations: content.configurations,
-    missionTypes: line?.missionTypes ?? product.missionTypes,
-    mobilities: line?.mobilities ?? product.mobilities,
-    sizes: line?.sizes ?? product.sizes,
+    configurations: fill(product.configurations, content.configurations),
+    missionTypes: untouchedSeed ? (line?.missionTypes ?? product.missionTypes) : product.missionTypes,
+    mobilities: untouchedSeed ? (line?.mobilities ?? product.mobilities) : product.mobilities,
+    sizes: untouchedSeed ? (line?.sizes ?? product.sizes) : product.sizes,
   };
 }
 

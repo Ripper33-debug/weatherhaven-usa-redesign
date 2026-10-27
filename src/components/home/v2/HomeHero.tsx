@@ -3,41 +3,48 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { prefersReducedMotion } from "@/lib/effects/media";
+import { useClientMediaQuery } from "@/hooks/useClientMediaQuery";
 
 /**
  * Full-bleed film hero. Poster paints first (LCP), the clip fades in once it can play.
  * Phones get a lighter 720p encode.
  */
+function loadSource(video: HTMLVideoElement) {
+  if (video.getAttribute("src")) return;
+  const small = window.matchMedia("(max-width: 767px)").matches;
+  video.src = small ? "/hero/hero-720.mp4" : "/hero/hero.mp4";
+}
+
 export function HomeHero() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
-  const [paused, setPaused] = useState(false);
+  const reduced = useClientMediaQuery("(prefers-reduced-motion: reduce)");
+  // Reduced motion starts paused; after that the visitor's own choice wins.
+  const [userPaused, setUserPaused] = useState<boolean | null>(null);
+  const paused = userPaused ?? reduced;
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
-    if (prefersReducedMotion()) {
-      video.pause();
-      setPaused(true);
-      return;
-    }
-    const small = window.matchMedia("(max-width: 767px)").matches;
-    video.src = small ? "/hero/hero-720.mp4" : "/hero/hero.mp4";
     const onPlaying = () => setPlaying(true);
     video.addEventListener("playing", onPlaying);
-    void video.play().catch(() => undefined);
+    if (!prefersReducedMotion()) {
+      loadSource(video);
+      void video.play().catch(() => undefined);
+    }
     return () => video.removeEventListener("playing", onPlaying);
   }, []);
 
   const togglePlayback = () => {
     const video = videoRef.current;
     if (!video) return;
-    if (video.paused) {
-      void video.play();
-      setPaused(false);
+    if (paused) {
+      loadSource(video);
+      void video.play().catch(() => undefined);
+      setUserPaused(false);
     } else {
       video.pause();
-      setPaused(true);
+      setUserPaused(true);
     }
   };
 

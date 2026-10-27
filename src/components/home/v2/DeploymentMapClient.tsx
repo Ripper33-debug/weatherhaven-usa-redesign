@@ -81,7 +81,8 @@ export function DeploymentMapClient({
     return c;
   }, [pins]);
 
-  const selected = pins.find((p) => p.id === selectedId) ?? visible[0] ?? pins[0];
+  // The selection always stays inside the current filter.
+  const selected = visible.find((p) => p.id === selectedId) ?? visible[0] ?? pins.find((p) => p.id === selectedId);
   const hovered = hoverId ? pins.find((p) => p.id === hoverId) : null;
 
   const animateTo = useCallback((target: { x: number; y: number; w: number; h: number }) => {
@@ -112,14 +113,11 @@ export function DeploymentMapClient({
 
   useEffect(() => () => cancelAnimationFrame(rafRef.current), []);
 
-  // Zoom to the selected theater's pins, keeping the map's aspect ratio.
-  useEffect(() => {
-    if (theater === "all") {
-      animateTo(FULL(width, height));
-      return;
-    }
-    const inTheater = pins.filter((p) => p.theater === theater);
-    if (inTheater.length === 0) return;
+  // Zoom to a theater's pins, keeping the map's aspect ratio.
+  const viewFor = (t: string) => {
+    if (t === "all") return FULL(width, height);
+    const inTheater = pins.filter((p) => p.theater === t);
+    if (inTheater.length === 0) return FULL(width, height);
     const xs = inTheater.map((p) => p.x);
     const ys = inTheater.map((p) => p.y);
     const pad = 60;
@@ -145,13 +143,14 @@ export function DeploymentMapClient({
     y0 = Math.max(0, Math.min(y0, height - h));
     x1 = x0 + w;
     y1 = y0 + h;
-    animateTo({ x: x0, y: y0, w: x1 - x0, h: y1 - y0 });
-  }, [theater, pins, width, height, animateTo]);
+    return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+  };
 
-  // Keep the selection inside the current filter.
-  useEffect(() => {
-    if (!visible.some((p) => p.id === selectedId) && visible[0]) setSelectedId(visible[0].id);
-  }, [visible, selectedId]);
+  const chooseTheater = (t: string) => {
+    setTheater(t);
+    animateTo(viewFor(t));
+  };
+
 
   const scale = view.w / width; // < 1 when zoomed in
   const pinR = 3.4 * Math.max(scale, 0.35);
@@ -185,7 +184,7 @@ export function DeploymentMapClient({
           Region
           <select
             value={theater}
-            onChange={(e) => setTheater(e.target.value)}
+            onChange={(e) => chooseTheater(e.target.value)}
             className="h-10 min-w-[12rem] border border-line-strong bg-hull px-3 text-[0.9rem] text-snow"
           >
             <option value="all">Whole world</option>
@@ -263,7 +262,7 @@ export function DeploymentMapClient({
           {theater !== "all" ? (
             <button
               type="button"
-              onClick={() => setTheater("all")}
+              onClick={() => chooseTheater("all")}
               className="absolute left-0 top-0 bg-ink/80 px-3 py-2 text-[0.85rem] text-snow hover:text-signal"
             >
               Show whole world

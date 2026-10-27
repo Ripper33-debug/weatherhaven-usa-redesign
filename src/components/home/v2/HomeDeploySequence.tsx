@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { prefersReducedMotion } from "@/lib/effects/media";
+import { useClientMediaQuery } from "@/hooks/useClientMediaQuery";
 
 /**
  * Scroll-driven technical drawing of a MECC going from stowed to deployed.
@@ -287,24 +287,14 @@ function Drawing({ p, compact = false }: { p: number; compact?: boolean }) {
 
 export function HomeDeploySequence() {
   const sectionRef = useRef<HTMLElement>(null);
-  const [p, setP] = useState(0);
-  const [reduced, setReduced] = useState(false);
-  const [compact, setCompact] = useState(false);
+  const [scrollP, setP] = useState(0);
+  const reduced = useClientMediaQuery("(prefers-reduced-motion: reduce)");
+  const compact = useClientMediaQuery("(max-width: 1023px)");
+  // Reduced motion shows the finished drawing, no scroll scrub.
+  const p = reduced ? 1 : scrollP;
 
   useEffect(() => {
-    const mq = window.matchMedia("(max-width: 1023px)");
-    const sync = () => setCompact(mq.matches);
-    sync();
-    mq.addEventListener("change", sync);
-    return () => mq.removeEventListener("change", sync);
-  }, []);
-
-  useEffect(() => {
-    if (prefersReducedMotion()) {
-      setReduced(true);
-      setP(1);
-      return;
-    }
+    if (reduced) return;
     let raf = 0;
     const update = () => {
       raf = 0;
@@ -326,7 +316,7 @@ export function HomeDeploySequence() {
       window.removeEventListener("resize", onScroll);
       if (raf) cancelAnimationFrame(raf);
     };
-  }, []);
+  }, [reduced]);
 
   const active = p < 0.2 ? 0 : p < 0.4 ? 1 : p < 0.8 ? 2 : 3;
 
