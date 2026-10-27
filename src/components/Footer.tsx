@@ -1,101 +1,136 @@
+import Image from "next/image";
 import Link from "next/link";
-import { WeatherhavenLogoLink } from "@/components/brand/WeatherhavenLogoLink";
-import { COMPANY_CONTACT, companyPhoneHref } from "@/lib/company-facts";
-import { company, footerColumns, legalLinks } from "@/lib/site";
 import { NavAdminLink } from "@/components/navigation/NavAdminLink";
+import { COMPANY_CONTACT, companyPhoneHref } from "@/lib/company-facts";
+import { company, legalLinks } from "@/lib/site";
+import { NAV_CTA, SYSTEMS_BY_FAMILY } from "@/lib/site-nav";
+
+const companyLinks = [
+  { href: "/capabilities", label: "Capabilities" },
+  { href: "/#deployments", label: "Global deployments" },
+  { href: "/news", label: "News" },
+  { href: "/events", label: "Events and briefings" },
+  { href: "/resources", label: "Resources" },
+];
+
+const programLinks = [
+  { href: "/mission-solution-builder", label: "Mission builder" },
+  { href: "/configurable-solutions", label: "Compare systems" },
+  { href: "/sof-solutions", label: "SOF portal" },
+  { href: "/sof-solutions/request-access", label: "Request SOF access" },
+];
 
 export function Footer() {
+  const year = new Date().getFullYear();
   return (
-    <footer data-global-footer className="border-t border-white/[0.08] bg-[#080a0c]">
-      <div className="wh-marketing-divider" />
-      <div className="mx-auto max-w-[1400px] px-4 py-16 sm:px-6 sm:py-20 lg:px-12">
-        <div className="grid gap-14 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="sm:col-span-2">
-            <WeatherhavenLogoLink href="/" height={36} className="sm:h-10" />
-            <p className="mt-1 font-mono text-[10px] font-medium tracking-[0.2em] text-[#8a9099]">
-              {COMPANY_CONTACT.legalName}
-            </p>
-            <p className="mt-2 max-w-md text-xs leading-relaxed text-[#8a9099] sm:text-sm">
-              {COMPANY_CONTACT.headquartersAddress}
-            </p>
-            <p className="mt-6 max-w-md text-sm leading-relaxed text-[#8a9099] sm:text-base">{company.description}</p>
-            <p className="mt-4 max-w-md text-sm font-medium leading-relaxed text-white">{company.tagline}</p>
-            <p className="mt-4 text-sm text-[#8a9099]">
-              <a href={companyPhoneHref(COMPANY_CONTACT.phone)} className="text-white/80 hover:text-white">
-                Tel {COMPANY_CONTACT.phone}
+    <footer data-global-footer className="border-t border-line bg-ink text-snow">
+      <div className="v2-wrap grid gap-10 py-16 sm:py-20 lg:grid-cols-[1.1fr_2fr] lg:gap-16">
+        <div>
+          <Image
+            src="/weatherhaven-logo-reverse@2x.png"
+            alt="Weatherhaven"
+            width={222}
+            height={21}
+            style={{ width: 222, height: "auto" }}
+          />
+          <p className="v2-small mt-6 max-w-sm">
+            Rapidly deployable shelters, camps and field hospitals for military, medical and polar operations since
+            1981.
+          </p>
+          <div className="mt-8 space-y-5 text-[0.9rem] leading-relaxed">
+            <div>
+              <p className="font-semibold text-snow">US office</p>
+              <p className="text-muted">{COMPANY_CONTACT.legalName}</p>
+              <p className="text-muted">889 Erie Avenue, North Tonawanda, NY 14120</p>
+              <a href={companyPhoneHref(COMPANY_CONTACT.phone)} className="v2-link mt-1 inline-block">
+                {COMPANY_CONTACT.phone}
               </a>
-              {" · "}
-              <Link href="/contact" className="text-white/80 hover:text-white">
-                Contact our team
-              </Link>
-              {" · "}
-              <a
-                href={COMPANY_CONTACT.contactPageUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-white/80 hover:text-white"
-              >
-                Corporate site
-              </a>
-            </p>
-            <p className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#8a9099]">
-              <NavAdminLink placement="footer" />
-              <span className="text-white/20" aria-hidden>
-                ·
-              </span>
-              <Link href="/sof-solutions/login" className="hover:text-white">
-                SOF member sign-in
-              </Link>
-            </p>
+            </div>
+            <div>
+              <p className="font-semibold text-snow">Global headquarters</p>
+              <p className="text-muted">{COMPANY_CONTACT.globalLegalName}</p>
+              <p className="text-muted">#130-8610 Glenlyon Parkway, Burnaby, BC V5J 0B6</p>
+            </div>
           </div>
-          {footerColumns.map((col) => (
-            <div key={col.title}>
-              <p className="wh-marketing-eyebrow">{col.title}</p>
-              <ul className="mt-4 space-y-3">
-                {col.links.map((link) => (
-                  <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      className="text-sm text-[#8a9099] transition hover:text-white"
-                    >
-                      {link.label}
+          <Link href={NAV_CTA.href} className="v2-btn mt-8">
+            {NAV_CTA.label}
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3 lg:grid-cols-4">
+          {SYSTEMS_BY_FAMILY.map((family) => (
+            <div key={family.id} className={family.id === "expandable" ? "" : ""}>
+              <p className="text-[0.9rem] font-semibold text-snow">{family.name}</p>
+              <ul className="mt-4 space-y-2.5">
+                {family.systems.map((s) => (
+                  <li key={s.slug}>
+                    <Link href={s.href} className="text-[0.9rem] text-muted no-underline transition-colors hover:text-snow">
+                      {s.name}
                     </Link>
                   </li>
                 ))}
               </ul>
             </div>
           ))}
-        </div>
-        <div className="mt-12 flex flex-col gap-4 border-t border-white/[0.08] pt-10 text-xs leading-relaxed text-[#8a9099] sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="font-mono tracking-wide">
-              © {new Date().getFullYear()} {company.name} All rights reserved.
-            </p>
-            <p className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
-              {legalLinks.map((link) => (
-                <Link key={link.href} href={link.href} className="text-[#8a9099] hover:text-white">
-                  {link.label}
-                </Link>
+            <p className="text-[0.9rem] font-semibold text-snow">Company</p>
+            <ul className="mt-4 space-y-2.5">
+              {companyLinks.map((l) => (
+                <li key={l.href}>
+                  <Link href={l.href} className="text-[0.9rem] text-muted no-underline transition-colors hover:text-snow">
+                    {l.label}
+                  </Link>
+                </li>
               ))}
-            </p>
+            </ul>
           </div>
-          <div className="flex flex-col items-start gap-3 sm:items-end">
-            <Link
-              href="/sof-solutions"
-              className="text-[12px] text-[rgba(255,255,255,0.3)] no-underline transition hover:text-[rgba(255,255,255,0.6)]"
-            >
-              Special Operations Portal
-            </Link>
-            <p className="max-w-xl sm:text-right">
-              Export-controlled technical data may apply. Distribution limited to authorized recipients and programs of
-              record.
-            </p>
+          <div>
+            <p className="text-[0.9rem] font-semibold text-snow">Programs</p>
+            <ul className="mt-4 space-y-2.5">
+              {programLinks.map((l) => (
+                <li key={l.href}>
+                  <Link href={l.href} className="text-[0.9rem] text-muted no-underline transition-colors hover:text-snow">
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
+              <li>
+                <a
+                  href="https://www.weatherhaven.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[0.9rem] text-muted no-underline transition-colors hover:text-snow"
+                >
+                  Weatherhaven global site
+                </a>
+              </li>
+            </ul>
           </div>
         </div>
-        <p className="mt-6 max-w-4xl border-l border-white/10 pl-5 text-[11px] leading-relaxed text-[#8a9099]">
-          Reference to U.S. Department of Defense organizations or visual style does not imply endorsement. Shelter and
-          infrastructure descriptions are illustrative of capability classes and may vary by contract and theater.
-        </p>
+      </div>
+
+      <div className="border-t border-line">
+        <div className="v2-wrap flex flex-col gap-6 py-8 text-[0.8rem] leading-relaxed text-muted lg:flex-row lg:items-start lg:justify-between">
+          <div className="space-y-2">
+            <p>
+              © {year} {company.name} All rights reserved.
+            </p>
+            <p>ISO 9001:2015 and ISO 14001 certified. CAGE code 0EYW4.</p>
+          </div>
+          <p className="max-w-xl lg:text-right">
+            Export-controlled technical data may apply; detailed specifications are released to authorized programs.
+            Configurations and performance vary by contract and theater. References to U.S. Department of Defense
+            organizations do not imply endorsement.
+          </p>
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+            {legalLinks.map((l) => (
+              <Link key={l.href} href={l.href} className="text-muted no-underline hover:text-snow">
+                {l.label}
+              </Link>
+            ))}
+            <NavAdminLink placement="footer" />
+          </div>
+        </div>
       </div>
     </footer>
   );

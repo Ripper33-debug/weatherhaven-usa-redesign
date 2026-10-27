@@ -1,0 +1,82 @@
+"use client";
+
+import { useEffect, useRef } from "react";
+import { prefersReducedMotion } from "@/lib/effects/media";
+
+const LIFECYCLE = ["Design", "Manufacture", "Deliver", "Install", "Demobilize", "Refurbish and store"] as const;
+
+const CREDENTIALS = [
+  { title: "ISO 9001:2015 and ISO 14001", body: "Certified quality and environmental management." },
+  { title: "Developed with the US Army", body: "TRECC was co-developed with US Army DEVCOM and tested to MIL-STD-810G." },
+  { title: "US entity, US contracting", body: "Weatherhaven Resources Inc., North Tonawanda, NY. CAGE 0EYW4." },
+] as const;
+
+/** Factory film band: plays only while on screen, never with reduced motion. */
+export function HomeFactory() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || prefersReducedMotion()) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          if (!video.src) video.src = "/hero/built-720.mp4";
+          void video.play().catch(() => undefined);
+        } else {
+          video.pause();
+        }
+      },
+      { rootMargin: "100px" },
+    );
+    io.observe(video);
+    return () => io.disconnect();
+  }, []);
+
+  return (
+    <section aria-labelledby="factory-heading" className="border-t border-line bg-hull">
+      <div className="relative h-[46svh] min-h-[320px] overflow-hidden">
+        <video
+          ref={videoRef}
+          muted
+          loop
+          playsInline
+          preload="none"
+          poster="/hero/built-poster.jpg"
+          aria-hidden
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+        <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-hull via-hull/30 to-transparent" />
+      </div>
+      <div className="v2-wrap relative -mt-24 pb-20 sm:pb-28">
+        <div className="grid gap-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:gap-16">
+          <div>
+            <h2 id="factory-heading" className="v2-h1 max-w-[15ch] text-snow">
+              Designed, built and supported by one company.
+            </h2>
+            <p className="v2-lead mt-6">
+              Weatherhaven engineers and manufactures every system it sells, from more than 200,000 ft² of
+              manufacturing space, and stays with the program until the last shelter is refurbished and stored.
+            </p>
+            <ol className="mt-10 grid grid-cols-2 gap-px bg-line sm:grid-cols-3">
+              {LIFECYCLE.map((stage, i) => (
+                <li key={stage} className="bg-hull py-4 pr-4">
+                  <span className="v2-figure block text-[0.95rem] text-signal">{String(i + 1).padStart(2, "0")}</span>
+                  <span className="mt-1 block text-[1rem] font-semibold text-snow">{stage}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+          <ul className="self-end border-t border-line">
+            {CREDENTIALS.map((c) => (
+              <li key={c.title} className="border-b border-line py-6">
+                <p className="v2-h3 text-snow">{c.title}</p>
+                <p className="mt-2 text-[0.95rem] leading-relaxed text-muted">{c.body}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </section>
+  );
+}

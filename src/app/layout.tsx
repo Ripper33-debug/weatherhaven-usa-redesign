@@ -74,9 +74,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${archivo.variable} h-full overflow-x-hidden`}
+      className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${archivo.variable} h-full overflow-x-clip`}
     >
-      <body className="flex min-h-full min-w-0 flex-col overflow-x-hidden font-sans text-zinc-100 antialiased">
+      <body className="flex min-h-full min-w-0 flex-col overflow-x-clip font-sans text-zinc-100 antialiased">
         <AuthHashRedirect />
         <AnalyticsProvider>
           <SiteEnhancements>
@@ -84,7 +84,7 @@ export default function RootLayout({
               nav={<Navbar />}
               footer={<Footer />}
             >
-              <main id="main-content" className="min-w-0 flex-1 overflow-x-hidden focus:outline-none">
+              <main id="main-content" className="min-w-0 flex-1 overflow-x-clip focus:outline-none">
                 {children}
               </main>
             </SiteChrome>

@@ -27,7 +27,7 @@ export const PRODUCT_FAMILIES: {
     name: "Expandable containers",
     summary:
       "Hard-wall shelters that ship as ISO containers, pallets or trailers and unfold to two or three times their footprint in minutes.",
-    cover: "/products/ehmecc/gallery/13-NATO_EHMECCs_deployed.jpg",
+    cover: "/products/hqss.jpg",
   },
   {
     id: "softwall",
@@ -47,7 +47,7 @@ export const PRODUCT_FAMILIES: {
     name: "Polar shelters",
     summary:
       "Insulated shelters built for the coldest places people work, used by national Antarctic programs since 1988.",
-    cover: "/products/polarhaven/gallery/01-IMG_0691.jpg",
+    cover: "/products/polar-chief/gallery/01-com-PolarChief149.jpg",
   },
 ];
 

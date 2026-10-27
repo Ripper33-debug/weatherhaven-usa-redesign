@@ -3,6 +3,7 @@ import "server-only";
 import {
   isPlaceholderNewsRelease,
   legacyRowsAsNews,
+  mergeWithVerifiedNews,
   type NewsReleaseInsert,
   type NewsReleaseRow,
 } from "@/lib/news-releases";
@@ -93,9 +94,9 @@ export async function listNewsReleases(options?: {
     ? rows.filter((row) => row.status === "published" && !isPlaceholderNewsRelease(row))
     : rows;
 
-  if (options?.publishedOnly && published.length === 0) {
-    const legacy = legacyRowsAsNews().filter((row) => !isPlaceholderNewsRelease(row));
-    return options?.limit ? legacy.slice(0, options.limit) : legacy;
+  if (options?.publishedOnly) {
+    const merged = mergeWithVerifiedNews(published).filter((row) => !isPlaceholderNewsRelease(row));
+    return options?.limit ? merged.slice(0, options.limit) : merged;
   }
 
   return options?.limit ? published.slice(0, options.limit) : published;

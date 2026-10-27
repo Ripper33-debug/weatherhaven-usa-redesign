@@ -31,10 +31,10 @@ export function SiteChrome({
   }
 
   return (
-    <div className={`min-w-0 max-w-full overflow-x-hidden ${publicSite ? "wh-v2" : ""}`}>
+    <div className={`min-w-0 max-w-full overflow-x-clip ${publicSite ? "wh-v2" : ""}`}>
       <SkipToContent />
       {!sofMicrosite && nav}
-      <div className="min-w-0 max-w-full overflow-x-hidden">{children}</div>
+      <div className="min-w-0 max-w-full overflow-x-clip">{children}</div>
       {!sofMicrosite && footer}
     </div>
   );
