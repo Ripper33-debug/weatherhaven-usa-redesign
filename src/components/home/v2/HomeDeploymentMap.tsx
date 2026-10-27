@@ -11,12 +11,30 @@ function cleanLabel(label: string, lat: number): string {
   return label;
 }
 
-function cleanProgram(title: string, label: string): string {
+const COUNTRY_FIXES: Record<string, string> = { Gemany: "Germany" };
+const PROGRAM_NAMES: Record<string, string> = {
+  UN: "United Nations",
+  NATO: "NATO",
+  Coalition: "Coalition forces",
+  "UN and Coalition": "United Nations and coalition forces",
+};
+
+/** My Maps titles read "Somalia (UN)": split into the country and the program it served. */
+function splitTitle(title: string, label: string): { country: string; program?: string } {
+  let country = title;
   if (/^(commercial|defence|medical)/i.test(title)) {
     const parts = label.split(",");
-    return parts[parts.length - 1].trim();
+    country = parts[parts.length - 1].trim();
   }
-  return title;
+  const m = country.match(/^(.*?)\s*\((.+)\)\s*$/);
+  if (m && !/\b(UN|NATO|Coalition)\b/.test(m[2])) {
+    // "Sudan (South)" is a place, not a program.
+    const place = `${m[2]} ${m[1]}`.trim();
+    return { country: place };
+  }
+  const base = (m ? m[1] : country).trim();
+  const program = m?.[2]?.replace(/^including\s+/i, "").replace("&", "and").trim();
+  return { country: COUNTRY_FIXES[base] ?? base, program: program ? (PROGRAM_NAMES[program] ?? program) : undefined };
 }
 
 export function HomeDeploymentMap() {
@@ -30,8 +48,8 @@ export function HomeDeploymentMap() {
         y: xy[1],
         lat: d.lat,
         kind: deploymentPinKind(d.category),
-        label: cleanLabel(d.label, d.lat),
-        program: cleanProgram(d.title, d.label),
+        label: cleanLabel(d.label, d.lat).replace(/\bGemany\b/g, "Germany"),
+        ...splitTitle(d.title, d.label),
         theater: d.theaterId,
       },
     ];

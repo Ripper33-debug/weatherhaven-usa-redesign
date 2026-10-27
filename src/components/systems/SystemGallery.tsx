@@ -32,7 +32,7 @@ export function SystemGallery({ images, name }: { images: string[]; name: string
   const current = images[index];
 
   return (
-    <div>
+    <div className="min-w-0">
       <div className="relative aspect-[4/3] overflow-hidden bg-hull">
         <Image
           key={current}

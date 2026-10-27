@@ -50,7 +50,7 @@ export function SystemDetail({
             </ol>
           </nav>
 
-          <div className="grid gap-10 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] lg:gap-14">
+          <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] lg:gap-14">
             <SystemGallery images={images} name={`Weatherhaven ${product.name}`} />
             <div className="flex flex-col">
               <h1 className="v2-h1 text-snow">{product.name}</h1>

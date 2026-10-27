@@ -13,7 +13,8 @@ export type MapPin = {
   lat: number;
   kind: PinKind;
   label: string;
-  program: string;
+  country: string;
+  program?: string;
   theater: string;
 };
 
@@ -287,8 +288,18 @@ export function DeploymentMapClient({
             </p>
             <h3 className="v2-h3 mt-2 text-snow">{selected.label}</h3>
             <dl className="mt-4 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-[0.9rem]">
-              <dt className="text-muted">Program</dt>
-              <dd className="text-snow">{selected.program}</dd>
+              {!selected.label.includes(selected.country) ? (
+                <>
+                  <dt className="text-muted">Country</dt>
+                  <dd className="text-snow">{selected.country}</dd>
+                </>
+              ) : null}
+              {selected.program ? (
+                <>
+                  <dt className="text-muted">Program</dt>
+                  <dd className="text-snow">{selected.program}</dd>
+                </>
+              ) : null}
               {theaterInfo ? (
                 <>
                   <dt className="text-muted">Region</dt>
