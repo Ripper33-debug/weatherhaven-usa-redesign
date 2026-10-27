@@ -1,0 +1,89 @@
+import type { Metadata, Viewport } from "next";
+import { Analytics } from "@vercel/analytics/next";
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
+import { Playfair_Display } from "next/font/google";
+import "./globals.css";
+import { AnalyticsProvider } from "@/components/AnalyticsProvider";
+import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
+import { SiteEnhancements } from "@/components/site/SiteEnhancements";
+import { SiteChrome } from "@/components/site/SiteChrome";
+import { AuthHashRedirect } from "@/components/auth/AuthHashRedirect";
+import { company } from "@/lib/site";
+import { getSiteUrl } from "@/lib/site-url";
+
+const geistSans = GeistSans;
+const geistMono = GeistMono;
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-serif",
+  display: "swap",
+});
+
+const siteUrl = getSiteUrl();
+
+export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
+  icons: {
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+    shortcut: "/icon.svg",
+    apple: [{ url: "/apple-icon.svg", type: "image/svg+xml" }],
+  },
+  title: {
+    default: `${company.shortName} | Deployable Shelter Systems`,
+    template: `%s | ${company.shortName}`,
+  },
+  description: company.description,
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: siteUrl,
+    siteName: company.shortName,
+    title: `${company.shortName} — Deployable Shelter Systems`,
+    description: company.description,
+    images: [{ url: "/products/ehmecc.jpg", width: 1200, height: 630, alt: company.shortName }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${company.shortName} — Deployable Shelter Systems`,
+    description: company.description,
+    images: ["/products/ehmecc.jpg"],
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#080a0c",
+  colorScheme: "dark",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html
+      lang="en"
+      className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} h-full overflow-x-hidden`}
+    >
+      <body className="flex min-h-full min-w-0 flex-col overflow-x-hidden font-sans text-zinc-100 antialiased">
+        <AuthHashRedirect />
+        <AnalyticsProvider>
+          <SiteEnhancements>
+            <SiteChrome
+              nav={<Navbar />}
+              footer={<Footer />}
+            >
+              <main id="main-content" className="min-w-0 flex-1 overflow-x-hidden focus:outline-none">
+                {children}
+              </main>
+            </SiteChrome>
+          </SiteEnhancements>
+        </AnalyticsProvider>
+        <Analytics />
+      </body>
+    </html>
+  );
+}

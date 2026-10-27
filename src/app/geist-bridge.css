@@ -1,0 +1,83 @@
+/**
+ * Maps Vercel Geist tokens onto Weatherhaven brand colors.
+ * See ~/.cursor/skills/vercel-design/SKILL.md
+ */
+:root {
+  /* Geist spacing (8px grid) */
+  --geist-space-1: 4px;
+  --geist-space-2: 8px;
+  --geist-space-3: 12px;
+  --geist-space-4: 16px;
+  --geist-space-6: 24px;
+  --geist-space-8: 32px;
+  --geist-space-12: 48px;
+  --geist-space-16: 64px;
+  --geist-space-24: 96px;
+  --geist-space-32: 128px;
+
+  /* Shape */
+  --geist-radius-sm: 4px;
+  --geist-radius-md: 6px;
+  --geist-radius-lg: 8px;
+  --geist-radius-pill: 100px;
+
+  /* Weatherhaven × Geist semantic colors */
+  --geist-background: var(--wh-bg);
+  --geist-background-secondary: #0d0f12;
+  --geist-foreground: #f4f4f5;
+  --geist-foreground-secondary: #8a9099;
+  --geist-border: var(--wh-border);
+  --geist-border-strong: rgba(255, 255, 255, 0.15);
+  --geist-accent: var(--wh-accent);
+
+  /* Typography scale */
+  --geist-text-xs: 0.75rem;
+  --geist-text-sm: 0.875rem;
+  --geist-text-base: 1rem;
+  --geist-text-lg: 1.125rem;
+  --geist-text-xl: 1.5rem;
+  --geist-leading-tight: 1.15;
+  --geist-leading-base: 1.5;
+  --geist-tracking-tight: -0.04em;
+  --geist-tracking-normal: -0.01em;
+
+  /* Layered shadow (ambient + direct) */
+  --geist-shadow-panel:
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+    0 1px 2px rgba(0, 0, 0, 0.24),
+    0 12px 40px rgba(0, 0, 0, 0.42);
+  --geist-shadow-elevated:
+    0 0 0 1px rgba(255, 255, 255, 0.06) inset,
+    0 2px 8px rgba(0, 0, 0, 0.28),
+    0 24px 64px rgba(0, 0, 0, 0.48);
+}
+
+.geist-tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+.geist-mono-label {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: var(--geist-text-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body[data-marketing-page="true"] h2,
+body[data-marketing-page="true"] h3,
+body[data-marketing-page="true"] [id] {
+  scroll-margin-top: calc(4.5rem + var(--geist-space-4));
+}
+
+@media (min-width: 640px) {
+  body[data-marketing-page="true"] h2,
+  body[data-marketing-page="true"] h3,
+  body[data-marketing-page="true"] [id] {
+    scroll-margin-top: calc(5.5rem + var(--geist-space-4));
+  }
+}

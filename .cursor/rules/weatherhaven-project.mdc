@@ -1,0 +1,36 @@
+---
+description: Weatherhaven SOF Next.js app stack and conventions
+alwaysApply: true
+---
+
+# Weatherhaven Special Forces
+
+## Stack
+
+- Next.js 16 (App Router), React 19, TypeScript (strict)
+- Tailwind CSS v4 (`src/app/globals.css` with `@import "tailwindcss"`)
+- Supabase (auth + data), Resend (email), Three.js, Leaflet
+- Vitest for unit tests in `src/**/*.test.ts`
+
+## Layout
+
+- Routes and pages: `src/app/`
+- Shared UI: `src/components/`
+- Server utilities and data: `src/lib/`
+- Import alias: `@/*` → `src/*`
+- Supabase SQL: `supabase/`
+- Env template: `.env.example` (never commit `.env.local`)
+
+## Product areas
+
+- Marketing: `/`, `/capabilities`, `/configurable-solutions`, `/contact`, etc.
+- SOF portal: `/sof-solutions/*` (login, request-access, `/sof-solutions/secure/*`)
+- Admin dashboard: `/admin`
+- 3D / map tools: mission-solution-builder, tactical-map (redirects in `next.config.ts`)
+
+## Conventions
+
+- After implementation changes: run `npm run lint`, `npm run test`, and `npm run build` before finishing.
+- Marketing pages must not cause horizontal page scroll; use `overflow-x-hidden` on layouts and avoid `overflow-x-auto` on marketing UI except inside contained tables.
+- Lead flow uses `access_requests` as the single source of truth (`POST /api/request-access`).
+- See `docs/PRODUCTION.md` for env vars and deploy checklist; `AGENTS.md` for commit/push workflow when the user allows it.

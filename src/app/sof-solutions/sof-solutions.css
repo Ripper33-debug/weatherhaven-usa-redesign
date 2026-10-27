@@ -1,0 +1,47 @@
+/* SOF Solutions page — scoped cinematic system (no rounded corners in subtree) */
+.sof-solutions-root {
+  --sof-bg: #080a0c;
+  --sof-bg-elevated: #0d0f12;
+  --sof-text: #ffffff;
+  --sof-muted: #8a9099;
+  --sof-accent: #4d9fff;
+  --sof-divider: rgba(255, 255, 255, 0.08);
+  background-color: var(--sof-bg);
+  color: var(--sof-text);
+  min-height: 100vh;
+}
+
+.sof-solutions-root * {
+  border-radius: 0 !important;
+}
+
+.sof-solutions-root h1,
+.sof-solutions-root h2,
+.sof-solutions-root h3,
+.sof-solutions-root h4 {
+  letter-spacing: -0.02em;
+}
+
+.sof-section {
+  padding: 80px 24px;
+  border-top: 1px solid var(--sof-divider);
+}
+
+@media (min-width: 768px) {
+  .sof-section {
+    padding: 120px 80px;
+  }
+}
+
+.sof-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--sof-accent);
+}
+
+.sof-label-tight {
+  font-size: 10px;
+  letter-spacing: 0.15em;
+}

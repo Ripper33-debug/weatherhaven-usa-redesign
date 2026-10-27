@@ -1,0 +1,49 @@
+<!--
+  Supabase → Authentication → Email Templates → Reset password
+
+  Subject (recommended):
+  Weatherhaven Programs — Reset your platform password
+
+  Paste this HTML into the template body. The reset button uses `/auth/confirm` (server-side) — do not replace `{{ .TokenHash }}` or `{{ .SiteURL }}`.
+-->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#080a0c;margin:0;padding:32px 16px;">
+  <tr>
+    <td align="center">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background-color:#0d0f12;border:1px solid rgba(255,255,255,0.08);">
+        <tr>
+          <td style="padding:32px 28px 24px;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+            <p style="margin:0;font-size:15px;font-weight:600;letter-spacing:0.04em;color:#fafafa;">Weatherhaven</p>
+            <p style="margin:6px 0 0;font-size:10px;font-weight:500;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,0.45);">Deployable shelter systems</p>
+            <div style="height:1px;margin:20px 0 0;background:linear-gradient(90deg,#4d9fff 0%,rgba(77,159,255,0.35) 35%,rgba(255,255,255,0.08) 100%);"></div>
+            <p style="margin:20px 0 0;font-size:11px;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099;">Platform password reset</p>
+            <h1 style="margin:12px 0 0;font-family:'Playfair Display',Georgia,'Times New Roman',serif;font-size:24px;font-weight:600;line-height:1.3;color:#fafafa;">Reset your password</h1>
+            <p style="margin:16px 0 0;font-size:15px;line-height:1.6;color:#8a9099;">
+              We received a request to reset the password for your Weatherhaven platform account
+              (<span style="color:#c5c9ce;">{{ .Email }}</span>).
+            </p>
+            <p style="margin:16px 0 0;font-size:15px;line-height:1.6;color:#8a9099;">
+              Use the button below to choose a new password. This link expires for your security.
+            </p>
+            <table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0 0;">
+              <tr>
+                <td style="background-color:#4d9fff;border-radius:2px;">
+                  <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&amp;type=recovery&amp;next=/auth/reset-password" style="display:inline-block;padding:14px 24px;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;font-weight:600;letter-spacing:0.02em;color:#080a0c;text-decoration:none;">Set a new password</a>
+                </td>
+              </tr>
+            </table>
+            <p style="margin:24px 0 0;font-size:13px;line-height:1.55;color:#8a9099;">
+              If you did not request this, you can ignore this message. Your password will not change.
+            </p>
+            <p style="margin:12px 0 0;font-size:12px;line-height:1.5;color:rgba(255,255,255,0.35);word-break:break-all;">
+              Or copy this link: {{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&amp;type=recovery&amp;next=/auth/reset-password
+            </p>
+            <div style="height:1px;margin:28px 0 20px;background:rgba(255,255,255,0.08);"></div>
+            <p style="margin:0;font-size:12px;line-height:1.5;color:#8a9099;">
+              Weatherhaven Programs · Platform sign-in at {{ .SiteURL }}/login
+            </p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
