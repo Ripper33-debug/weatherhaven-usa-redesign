@@ -37,6 +37,10 @@ To share it, deploy it as a **new** Vercel project (`npx vercel`), not the produ
 
 - `npm run lint` is clean and all 161 tests pass. `npm run build` succeeds, including every SOF and admin route.
 - The SOF portal pages (`/sof-solutions` and `/sof-solutions/request-access`) were screenshotted next to the untouched original at desktop and phone widths, and they are pixel-identical.
+- Lighthouse on a local production build:
+  - Desktop homepage: 96 performance, 100 accessibility, 96 best practices, 100 SEO.
+  - Desktop MECC page: 98 / 100 / 96 / 100.
+  - Simulated mid-range phone homepage: about 65 performance. Most of that is the Sentry bundle and the hero film.
 - At 390 px, no public page scrolls sideways.
 - Every internal link, image and external news link returns 200.
 - An independent review covered bugs, accessibility, content accuracy and SOF/admin regressions. Its findings were fixed or are listed below.

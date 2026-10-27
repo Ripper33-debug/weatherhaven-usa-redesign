@@ -21,6 +21,7 @@ function Logo({ height = 24, priority = false }: { height?: number; priority?: b
       width={width}
       height={height}
       priority={priority}
+      unoptimized
       style={{ width, height: "auto" }}
     />
   );
