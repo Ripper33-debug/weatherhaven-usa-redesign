@@ -1290,6 +1290,15 @@ body .wh-v2 .wh-marketing-display {
   stroke-width: 2.4;
 }
 
+.v2-pin:focus {
+  outline: none;
+}
+
+.v2-pin:focus-visible .v2-pin-core {
+  stroke: #eef2f6;
+  stroke-width: 2.5px;
+}
+
 .v2-pin {
   cursor: pointer;
   transition: opacity 0.25s ease;

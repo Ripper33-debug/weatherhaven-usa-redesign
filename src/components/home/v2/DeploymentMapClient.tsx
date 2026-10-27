@@ -70,6 +70,7 @@ export function DeploymentMapClient({
   const [view, setView] = useState(FULL(width, height));
   const viewRef = useRef(view);
   const rafRef = useRef(0);
+  const svgRef = useRef<SVGSVGElement>(null);
 
   const visible = useMemo(
     () => pins.filter((p) => (kind === "all" || p.kind === kind) && (theater === "all" || p.theater === theater)),
@@ -156,10 +157,27 @@ export function DeploymentMapClient({
   const scale = view.w / width; // < 1 when zoomed in
   const pinR = 3.4 * Math.max(scale, 0.35);
   const index = visible.findIndex((p) => p.id === selected?.id);
-  const go = (delta: number) => {
+  const go = (delta: number, focusPin = false) => {
     if (visible.length === 0) return;
     const next = visible[(index + delta + visible.length) % visible.length];
     setSelectedId(next.id);
+    if (focusPin) {
+      requestAnimationFrame(() => svgRef.current?.querySelector<SVGGElement>('[data-active="true"]')?.focus());
+    }
+  };
+
+  // Pins use a roving tab stop: Tab reaches the selected site, arrow keys move between sites.
+  const onPinKey = (e: React.KeyboardEvent<SVGGElement>, id: string) => {
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+      e.preventDefault();
+      go(1, true);
+    } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+      e.preventDefault();
+      go(-1, true);
+    } else if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      setSelectedId(id);
+    }
   };
 
   const theaterInfo = theaters.find((t) => t.id === selected?.theater);
@@ -202,10 +220,11 @@ export function DeploymentMapClient({
         {/* Map */}
         <div className="relative">
           <svg
+            ref={svgRef}
             viewBox={`${view.x} ${view.y} ${view.w} ${view.h}`}
             className="h-auto w-full touch-manipulation select-none"
-            role="img"
-            aria-label={`World map with ${visible.length} Weatherhaven deployment sites`}
+            role="group"
+            aria-label={`World map with ${visible.length} Weatherhaven deployment sites. Use the arrow keys to move between sites.`}
           >
             <path d={dotPath} className="v2-map-dots" style={{ strokeWidth: 2.4 * Math.max(scale, 0.8) }} />
             {visible.map((p) => {
@@ -215,6 +234,11 @@ export function DeploymentMapClient({
                   key={p.id}
                   className="v2-pin"
                   data-active={active}
+                  role="button"
+                  tabIndex={active ? 0 : -1}
+                  aria-pressed={active}
+                  aria-label={p.label}
+                  onKeyDown={(e) => onPinKey(e, p.id)}
                   onClick={() => setSelectedId(p.id)}
                   onMouseEnter={() => setHoverId(p.id)}
                   onMouseLeave={() => setHoverId((h) => (h === p.id ? null : h))}
