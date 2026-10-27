@@ -4,10 +4,15 @@ This folder is a separate copy of `weatherhaven-special-forces-may` with the pub
 
 ## Run it
 
+The download carries the code and the new media only. The existing photos (about 390 MB) are copied from your original project by a one-time script, which only reads the original:
+
 ```bash
-npm install
-npm run dev        # http://localhost:3000
+cd ~/Downloads/weatherhaven-usa-redesign     # wherever you unzipped it
+bash finish-setup.sh                          # copies public/ media from ~/weatherhaven-special-forces-may, runs npm install
+npm run dev                                   # http://localhost:3000
 ```
+
+If the original lives somewhere else, pass its path: `bash finish-setup.sh ~/path/to/weatherhaven-special-forces-may`.
 
 Without a `.env.local`, the site runs on the built-in content (verified specs, news, deployments). Forms and sign-in won't submit, which is the safe default for a demo. If you want live CMS data, copy `.env.local` over from the original folder, but then the contact form and mission builder would write to the real database and send real notification emails.
 
