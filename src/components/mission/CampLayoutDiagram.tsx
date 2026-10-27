@@ -9,15 +9,24 @@ const GAP = 8;
 const PAD = 16;
 const REVEAL_MS = 420;
 
+/** Original palette, still used by the SOF deployment planner. */
 const ZONE_FILL: Record<string, string> = {
-  entry: "rgba(241,133,34,0.12)",
-  command: "rgba(241,133,34,0.22)",
+  entry: "rgba(77,159,255,0.12)",
+  command: "rgba(77,159,255,0.22)",
   medical: "rgba(16,185,129,0.18)",
   maintenance: "rgba(245,158,11,0.18)",
   accommodation: "rgba(148,163,184,0.15)",
   sustainment: "rgba(168,85,247,0.15)",
-  logistics: "rgba(241,133,34,0.1)",
+  logistics: "rgba(77,159,255,0.1)",
   power: "rgba(255,255,255,0.06)",
+};
+
+/** Public-site palette: Weatherhaven orange in place of the portal blue. */
+const ZONE_FILL_V2: Record<string, string> = {
+  ...ZONE_FILL,
+  entry: "rgba(241,133,34,0.12)",
+  command: "rgba(241,133,34,0.22)",
+  logistics: "rgba(241,133,34,0.1)",
 };
 
 function zoneSort(a: CampZoneLayout, b: CampZoneLayout): number {
@@ -49,7 +58,7 @@ export function CampLayoutDiagram({
 }: {
   zones: CampZoneLayout[];
   animate?: boolean;
-  /** Public pages pass the marketing face; the SOF planner keeps the original monospace. */
+  /** Public pages pass the marketing face and get the orange palette; the SOF planner keeps the original look. */
   labelFont?: string;
 }) {
   const ordered = useMemo(() => [...zones].sort(zoneSort), [zones]);
@@ -81,7 +90,7 @@ export function CampLayoutDiagram({
       role="img"
       aria-label="Indicative camp layout by zone"
     >
-      <rect x={0} y={0} width={width} height={height} fill="#101824" rx={4} />
+      <rect x={0} y={0} width={width} height={height} fill={labelFont ? "#101824" : "#0d0f12"} rx={4} />
       {ordered.map((zone, index) => {
         const visible = index < visibleCount;
         const x = PAD + zone.col * (CELL + GAP);
@@ -103,8 +112,8 @@ export function CampLayoutDiagram({
               y={y}
               width={w}
               height={h}
-              fill={ZONE_FILL[zone.id] ?? "rgba(255,255,255,0.08)"}
-              stroke="rgba(241,133,34,0.35)"
+              fill={(labelFont ? ZONE_FILL_V2 : ZONE_FILL)[zone.id] ?? "rgba(255,255,255,0.08)"}
+              stroke={labelFont ? "rgba(241,133,34,0.35)" : "rgba(77,159,255,0.35)"}
               strokeWidth={1}
             />
             {labelFont ? (

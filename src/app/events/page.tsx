@@ -51,17 +51,20 @@ const BRIEFINGS = [
   {
     title: "Capability briefing",
     body: "A closed-door walkthrough of systems and camp layouts matched to your program requirements and release controls.",
-    inquiry: "Capability briefing",
+    inquiry: "Demo Request",
+    subject: "Capability briefing request",
   },
   {
     title: "Mission builder walkthrough",
     body: "A guided session in the mission builder: inputs, layout zones, parts list and the PDF export for procurement packages.",
-    inquiry: "Mission builder walkthrough",
+    inquiry: "Demo Request",
+    subject: "Mission builder walkthrough request",
   },
   {
     title: "Post-show follow-up",
     body: "Met us at a show? Pick up the conversation with the specialist for your system and theater.",
-    inquiry: "Trade show follow-up",
+    inquiry: "Program Requirement",
+    subject: "Follow-up from a trade show",
   },
 ] as const;
 
@@ -110,7 +113,7 @@ export default async function EventsPage() {
               <li key={b.title} className="flex flex-col bg-ink py-6 md:px-6 md:first:pl-0">
                 <h3 className="v2-h3 text-snow">{b.title}</h3>
                 <p className="mt-3 flex-1 text-[0.95rem] leading-relaxed text-muted">{b.body}</p>
-                <Link href={contactUrl({ inquiry: b.inquiry })} className="v2-link mt-6 self-start text-[0.95rem]">
+                <Link href={contactUrl({ inquiry: b.inquiry, subject: b.subject })} className="v2-link mt-6 self-start text-[0.95rem]">
                   Request this briefing
                 </Link>
               </li>

@@ -80,6 +80,7 @@ function urlFormDefaults(
   product: Product | undefined,
   deploymentNotes: string,
   prefill: ContactPrefillPayload | null,
+  subjectParam = "",
 ): Partial<FormState> {
   if (prefill) {
     const inquiry =
@@ -100,7 +101,7 @@ function urlFormDefaults(
       ? inquiryParam
       : "Program Requirement";
   const program = product ? `${product.name} (${product.code})` : "";
-  const subject = product ? `Discussion: ${product.name}` : "";
+  const subject = product ? `Discussion: ${product.name}` : subjectParam.slice(0, 160);
   const message = deploymentNotes
     ? `Deployment context from planner:\n${deploymentNotes}`
     : "";
@@ -411,6 +412,7 @@ export function ContactEngineeringForm() {
   const systemSlug = searchParams.get("system")?.trim() ?? "";
   const inquiryParam = searchParams.get("inquiry")?.trim() ?? "";
   const deploymentParam = searchParams.get("deployment")?.trim() ?? "";
+  const subjectParam = searchParams.get("subject")?.trim() ?? "";
   const [sessionPrefill] = useState<ContactPrefillPayload | null>(() => {
     if (handoff !== "camp-plan") return null;
     const payload = readContactPrefill();
@@ -423,13 +425,13 @@ export function ContactEngineeringForm() {
     [catalog, resolvedSlug],
   );
   const urlDefaults = useMemo(
-    () => urlFormDefaults(inquiryParam, product, deploymentParam, sessionPrefill),
-    [inquiryParam, product, deploymentParam, sessionPrefill],
+    () => urlFormDefaults(inquiryParam, product, deploymentParam, sessionPrefill, subjectParam),
+    [inquiryParam, product, deploymentParam, sessionPrefill, subjectParam],
   );
 
   return (
     <ContactEngineeringFormInner
-      key={`${handoff}:${resolvedSlug}:${inquiryParam}:${deploymentParam}`}
+      key={`${handoff}:${resolvedSlug}:${inquiryParam}:${deploymentParam}:${subjectParam}`}
       urlDefaults={urlDefaults}
       product={product}
     />

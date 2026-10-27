@@ -140,7 +140,7 @@ export default function ResourcesPage() {
                 </div>
                 <div>
                   <dt className="text-muted">Certifications</dt>
-                  <dd className="text-snow">ISO 9001:2015, ISO 14001</dd>
+                  <dd className="text-snow">ISO 9001:2015</dd>
                 </div>
                 <div>
                   <dt className="text-muted">Phone</dt>

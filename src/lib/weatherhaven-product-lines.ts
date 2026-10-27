@@ -85,7 +85,7 @@ export const WEATHERHAVEN_PRODUCT_LINES: WeatherhavenProductLine[] = [
     name: "MECC",
     subtitle: "Mobile Expandable Container Configuration",
     tag: "EXPANDABLE CONTAINER",
-    description: "Weatherhaven’s original expandable shelter: a 20-ft ISO container that unfolds to triple its floor space.",
+    description: "Weatherhaven’s original expandable shelter: a 20-ft ISO container that unfolds to nearly triple its floor space.",
     missionTypes: ["maintenance", "logistics", "c2"],
     environments: ["arctic", "desert", "tropical", "maritime"],
     mobilities: ["iso", "ground"],

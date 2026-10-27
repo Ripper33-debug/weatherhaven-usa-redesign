@@ -53,10 +53,11 @@ export function SystemsCatalog({ products }: { products: Product[] }) {
   const params = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const initialFamily = (params.get("family") as FamilyFilter) || "all";
-  const [family, setFamily] = useState<FamilyFilter>(
-    PRODUCT_FAMILIES.some((f) => f.id === initialFamily) ? initialFamily : "all",
-  );
+  // The family filter lives in the URL, so menu links and the back button always agree with the list.
+  const familyParam = params.get("family");
+  const family: FamilyFilter = PRODUCT_FAMILIES.some((f) => f.id === familyParam)
+    ? (familyParam as ProductFamily)
+    : "all";
   const [mission, setMission] = useState<ProductFilterMission>("all");
   const [environment, setEnvironment] = useState<ProductFilterEnvironment>("all");
   const [mobility, setMobility] = useState<ProductFilterMobility>("all");
@@ -73,7 +74,6 @@ export function SystemsCatalog({ products }: { products: Product[] }) {
   const anyFilter = family !== "all" || mission !== "all" || environment !== "all" || mobility !== "all" || search.trim() !== "";
 
   const chooseFamily = (f: FamilyFilter) => {
-    setFamily(f);
     const q = new URLSearchParams(params.toString());
     if (f === "all") q.delete("family");
     else q.set("family", f);
@@ -98,7 +98,7 @@ export function SystemsCatalog({ products }: { products: Product[] }) {
 
   return (
     <div className="bg-ink pb-24">
-      <div className="sticky top-16 z-30 border-b border-line bg-ink/95 backdrop-blur-xl lg:top-[72px]">
+      <div className="z-30 border-b border-line bg-ink/95 backdrop-blur-xl sm:sticky sm:top-16 lg:top-[72px]">
         <div className="v2-wrap flex flex-col gap-3 py-3 xl:flex-row xl:items-center xl:justify-between">
           <div role="group" aria-label="Shelter family" className="flex flex-wrap gap-2">
             {[{ id: "all" as const, name: "All systems" }, ...PRODUCT_FAMILIES].map((f) => (

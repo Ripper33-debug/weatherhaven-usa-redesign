@@ -12,7 +12,7 @@ import { useClientMediaQuery } from "@/hooks/useClientMediaQuery";
 function loadSource(video: HTMLVideoElement) {
   if (video.getAttribute("src")) return;
   const small = window.matchMedia("(max-width: 767px)").matches;
-  video.src = small ? "/hero/hero-720.mp4" : "/hero/hero.mp4";
+  video.src = small ? "/hero/hero-720.mp4" : "/hero/hero-1080.mp4";
 }
 
 export function HomeHero() {
@@ -99,7 +99,7 @@ export function HomeHero() {
       <button
         type="button"
         onClick={togglePlayback}
-        className="absolute bottom-5 right-5 hidden h-10 items-center gap-2 px-3 text-[0.8rem] font-medium text-snow/70 transition-colors hover:text-snow sm:flex"
+        className="absolute right-3 top-20 flex h-10 items-center gap-2 bg-ink/40 px-3 text-[0.8rem] font-medium text-snow/80 transition-colors hover:text-snow sm:bottom-5 sm:right-5 sm:top-auto sm:bg-transparent"
         aria-label={paused ? "Play background video" : "Pause background video"}
       >
         <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden>

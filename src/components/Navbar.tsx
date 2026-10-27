@@ -76,6 +76,10 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [systemsOpen, setSystemsOpen] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const openedAt = useRef(0);
+  const systemsButtonRef = useRef<HTMLButtonElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -94,7 +98,9 @@ export function Navbar() {
   useEffect(() => {
     if (!systemsOpen) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setSystemsOpen(false);
+      if (e.key !== "Escape") return;
+      setSystemsOpen(false);
+      systemsButtonRef.current?.focus();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -102,10 +108,55 @@ export function Navbar() {
 
   useBodyScrollLock(open);
 
+  // Mobile menu: move focus in, keep Tab inside, close on Escape, hand focus back on close.
+  useEffect(() => {
+    if (!open) return;
+    const dialog = dialogRef.current;
+    const returnTo = menuButtonRef.current;
+    dialog?.querySelector<HTMLElement>("[data-autofocus]")?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setOpen(false);
+        return;
+      }
+      if (e.key !== "Tab" || !dialog) return;
+      const items = dialog.querySelectorAll<HTMLElement>("a[href], button:not([disabled])");
+      if (items.length === 0) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      returnTo?.focus();
+    };
+  }, [open, setOpen]);
+
   const openSystems = useCallback(() => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
-    setSystemsOpen(true);
+    setSystemsOpen((was) => {
+      if (!was) openedAt.current = Date.now();
+      return true;
+    });
   }, []);
+
+  // A click right after hover (or a touch tap, which fires both) should open, not toggle shut.
+  const onSystemsClick = () => {
+    if (systemsOpen && Date.now() - openedAt.current < 400) return;
+    if (!systemsOpen) openedAt.current = Date.now();
+    setSystemsOpen(!systemsOpen);
+  };
+
+  const onSystemsBlur = (e: React.FocusEvent<HTMLDivElement>) => {
+    if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setSystemsOpen(false);
+  };
   const scheduleClose = useCallback(() => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
     closeTimer.current = setTimeout(() => setSystemsOpen(false), 140);
@@ -128,7 +179,7 @@ export function Navbar() {
     <>
       <header
         data-global-nav
-        className={`fixed inset-x-0 top-0 z-50 transition-[background-color,box-shadow] duration-300 ${
+        className={`${publicSite ? "fixed inset-x-0" : "sticky"} top-0 z-50 transition-[background-color,box-shadow] duration-300 ${
           solid ? "bg-ink/92 shadow-[0_1px_0_rgb(148_170_196/0.16)] backdrop-blur-xl" : "bg-transparent"
         }`}
         onMouseLeave={scheduleClose}
@@ -138,14 +189,16 @@ export function Navbar() {
             <Logo priority />
           </Link>
 
-          <nav aria-label="Main" className="hidden flex-1 items-center gap-1 lg:flex">
+          <nav aria-label="Main" className="hidden flex-1 items-center gap-1 xl:flex">
+            <div onBlur={onSystemsBlur}>
             <button
+              ref={systemsButtonRef}
               type="button"
               aria-expanded={systemsOpen}
               aria-controls="systems-menu"
-              onClick={() => setSystemsOpen((v) => !v)}
+              onClick={onSystemsClick}
               onMouseEnter={openSystems}
-              className={`flex h-10 items-center gap-1.5 px-3 text-[0.95rem] font-medium transition-colors ${
+              className={`flex h-10 items-center gap-1.5 whitespace-nowrap px-3 text-[0.95rem] font-medium transition-colors ${
                 systemsOpen || systemsActive ? "text-snow" : "text-snow/80 hover:text-snow"
               }`}
             >
@@ -160,6 +213,18 @@ export function Navbar() {
                 <path d="M1.5 3.5 5 7l3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.5" />
               </svg>
             </button>
+            {systemsOpen ? (
+              <div
+                id="systems-menu"
+                role="region"
+                aria-label="Systems"
+                onMouseEnter={openSystems}
+                className="absolute inset-x-0 top-full border-t border-line bg-ink shadow-[0_24px_48px_rgb(0_0_0/0.35)]"
+              >
+                <SystemsMenu onNavigate={() => setSystemsOpen(false)} />
+              </div>
+            ) : null}
+            </div>
             {NAV_LINKS.map((link) => {
               const active = link.href !== "/#deployments" && pathname.startsWith(link.href);
               return (
@@ -167,7 +232,7 @@ export function Navbar() {
                   key={link.href}
                   href={link.href}
                   onMouseEnter={scheduleClose}
-                  className={`flex h-10 items-center px-3 text-[0.95rem] font-medium no-underline transition-colors ${
+                  className={`flex h-10 items-center whitespace-nowrap px-3 text-[0.95rem] font-medium no-underline transition-colors ${
                     active ? "text-snow" : "text-snow/80 hover:text-snow"
                   }`}
                   aria-current={active ? "page" : undefined}
@@ -179,22 +244,23 @@ export function Navbar() {
           </nav>
 
           <div className="ml-auto flex items-center gap-2 sm:gap-4">
-            <span className="hidden lg:inline-flex">
+            <span className="hidden xl:inline-flex">
               <NavAdminLink />
             </span>
             <Link
               href={NAV_SOF.href}
-              className="hidden items-center gap-1.5 text-[0.875rem] font-medium text-snow/70 no-underline transition-colors hover:text-snow md:inline-flex"
+              className="hidden items-center gap-1.5 whitespace-nowrap text-[0.875rem] font-medium text-snow/70 no-underline transition-colors hover:text-snow md:inline-flex"
             >
               <IconLock size={15} stroke={1.75} aria-hidden />
               {NAV_SOF.label}
             </Link>
-            <Link href={NAV_CTA.href} className="v2-btn hidden !min-h-10 !py-2 !text-[0.9rem] sm:inline-flex">
+            <Link href={NAV_CTA.href} className="v2-btn hidden whitespace-nowrap !min-h-10 !py-2 !text-[0.9rem] sm:inline-flex">
               {NAV_CTA.label}
             </Link>
             <button
+              ref={menuButtonRef}
               type="button"
-              className="-mr-2 flex h-11 w-11 items-center justify-center text-snow lg:hidden"
+              className="-mr-2 flex h-11 w-11 items-center justify-center text-snow xl:hidden"
               aria-expanded={open}
               aria-controls="mobile-nav"
               aria-label="Open menu"
@@ -205,25 +271,16 @@ export function Navbar() {
           </div>
         </div>
 
-        <div
-          id="systems-menu"
-          role="region"
-          aria-label="Systems"
-          hidden={!systemsOpen}
-          onMouseEnter={openSystems}
-          className="hidden border-t border-line bg-ink lg:block"
-        >
-          {systemsOpen ? <SystemsMenu onNavigate={() => setSystemsOpen(false)} /> : null}
-        </div>
       </header>
 
       {open ? (
         <div
+          ref={dialogRef}
           id="mobile-nav"
           role="dialog"
           aria-modal="true"
           aria-label="Site menu"
-          className="wh-v2 fixed inset-0 z-[100] flex flex-col overflow-y-auto bg-ink lg:hidden"
+          className="wh-v2 fixed inset-0 z-[100] flex flex-col overflow-y-auto bg-ink xl:hidden"
         >
           <div className="v2-wrap flex h-16 shrink-0 items-center justify-between">
             <Link href="/" aria-label="Weatherhaven home" onClick={() => setOpen(false)}>
@@ -231,6 +288,7 @@ export function Navbar() {
             </Link>
             <button
               type="button"
+              data-autofocus
               className="-mr-2 flex h-11 w-11 items-center justify-center text-snow"
               aria-label="Close menu"
               onClick={() => setOpen(false)}

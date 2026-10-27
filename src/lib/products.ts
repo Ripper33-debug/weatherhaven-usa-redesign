@@ -166,32 +166,36 @@ function seedProduct(p: ProductSeed): Product {
  */
 /** Names the original seed used that have since been corrected. */
 const LEGACY_PRODUCT_NAMES = new Set(["Airbeam HP", "Airbeam LP", "HerCon", "Non-Expandable ISO Containers"]);
+/** The generic feature and configuration sets every product got from the original seed. */
+const LEGACY_FEATURE_TITLES = ["Rapid deployment", "Redeployable", "Turnkey support"];
+const LEGACY_CONFIGURATION_TITLES = ["Standard configuration"];
+
+const sameTitles = (rows: { title: string }[] | undefined, titles: string[]) =>
+  !!rows && rows.length === titles.length && rows.every((r, i) => r.title === titles[i]);
 
 /**
- * CMS rows seeded from the old static catalog carry placeholder specs. Swap those for the verified
- * content, but never overwrite anything an editor actually changed.
+ * CMS rows seeded from the old static catalog carry placeholder specs and generic copy. Swap each
+ * field for the verified content only while it still looks like the original seed, so anything an
+ * editor actually changed wins.
  */
 export function upgradeLegacyProductContent(product: Product): Product {
   const content = getProductContent(product.slug);
   if (!content || !hasLegacyPlaceholderSpecs(product.specs)) return product;
-  // Placeholder values (not just an empty list) mean the row is an untouched copy of the old seed.
-  const untouchedSeed = (product.specs?.length ?? 0) > 0;
-  const line = WEATHERHAVEN_PRODUCT_LINES.find((l) => l.slug === product.slug);
-  const fill = <T,>(current: T[] | undefined, verified: T[]) =>
-    untouchedSeed || !current || current.length === 0 ? verified : current;
+  // The seed wrote the description as the first overview paragraph; if they still match, neither was edited.
+  const seedCopy = !product.overview?.length || product.overview[0] === product.description;
   return {
     ...product,
     name: LEGACY_PRODUCT_NAMES.has(product.name) ? content.name : product.name,
-    subtitle: untouchedSeed || !product.subtitle ? content.fullName : product.subtitle,
-    tag: untouchedSeed ? (line?.tag ?? product.tag) : product.tag,
-    description: untouchedSeed || !product.description ? content.description : product.description,
-    overview: fill(product.overview, content.overview),
-    features: fill(product.features, content.highlights),
+    subtitle: seedCopy || !product.subtitle ? content.fullName : product.subtitle,
+    description: seedCopy || !product.description ? content.description : product.description,
+    overview: seedCopy ? content.overview : product.overview,
+    features:
+      !product.features?.length || sameTitles(product.features, LEGACY_FEATURE_TITLES) ? content.highlights : product.features,
     specs: content.specs,
-    configurations: fill(product.configurations, content.configurations),
-    missionTypes: untouchedSeed ? (line?.missionTypes ?? product.missionTypes) : product.missionTypes,
-    mobilities: untouchedSeed ? (line?.mobilities ?? product.mobilities) : product.mobilities,
-    sizes: untouchedSeed ? (line?.sizes ?? product.sizes) : product.sizes,
+    configurations:
+      !product.configurations?.length || sameTitles(product.configurations, LEGACY_CONFIGURATION_TITLES)
+        ? content.configurations
+        : product.configurations,
   };
 }
 

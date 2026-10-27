@@ -1241,6 +1241,16 @@ body .wh-v2 .wh-marketing-display {
   outline-offset: 3px;
 }
 
+/* The chamfer clip-path hides an outside outline, so solid buttons get an inset ring. */
+.wh-v2 .v2-btn:focus-visible {
+  outline: 2px solid var(--v2-ink);
+  outline-offset: -5px;
+}
+.wh-v2 .v2-btn-ghost:focus-visible {
+  outline: 2px solid var(--v2-signal);
+  outline-offset: 2px;
+}
+
 /* Inputs on public pages */
 .wh-v2 .wh-input {
   border-radius: 0;

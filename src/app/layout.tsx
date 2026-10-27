@@ -40,7 +40,7 @@ export const metadata: Metadata = {
   },
   title: {
     default: "Weatherhaven USA | Rapidly deployable shelters, camps and field hospitals",
-    template: "%s | Weatherhaven USA",
+    template: "%s | Weatherhaven",
   },
   description:
     "Expandable containers, soft-wall, inflatable and polar shelters that ship as cargo and stand up in minutes. Fielded in 95+ countries since 1981.",

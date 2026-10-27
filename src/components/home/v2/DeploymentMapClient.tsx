@@ -18,7 +18,7 @@ export type MapPin = {
   theater: string;
 };
 
-type Theater = { id: string; label: string; region: string };
+type Theater = { id: string; label: string };
 
 const KINDS: { id: PinKind; label: string; color: string }[] = [
   { id: "military", label: "Defense and peacekeeping", color: "#f18522" },
@@ -83,7 +83,7 @@ export function DeploymentMapClient({
   }, [pins]);
 
   // The selection always stays inside the current filter.
-  const selected = visible.find((p) => p.id === selectedId) ?? visible[0] ?? pins.find((p) => p.id === selectedId);
+  const selected = visible.find((p) => p.id === selectedId) ?? visible[0];
   const hovered = hoverId ? pins.find((p) => p.id === hoverId) : null;
 
   const animateTo = useCallback((target: { x: number; y: number; w: number; h: number }) => {
@@ -191,7 +191,7 @@ export function DeploymentMapClient({
             <option value="all">Whole world</option>
             {theaters.map((t) => (
               <option key={t.id} value={t.id}>
-                {t.label}: {t.region.replace("&", "and")}
+                {t.label}
               </option>
             ))}
           </select>
@@ -304,7 +304,7 @@ export function DeploymentMapClient({
                 <>
                   <dt className="text-muted">Region</dt>
                   <dd className="text-snow">
-                    {theaterInfo.label}, {theaterInfo.region.replace("&", "and")}
+                    {theaterInfo.label}
                   </dd>
                 </>
               ) : null}
@@ -325,7 +325,22 @@ export function DeploymentMapClient({
               </span>
             </div>
           </aside>
-        ) : null}
+        ) : (
+          <aside className="flex flex-col justify-center border-t border-line pt-6 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
+            <p className="v2-h3 text-snow">No documented sites match both filters.</p>
+            <p className="mt-2 text-[0.95rem] text-muted">Try another mission type or region.</p>
+            <button
+              type="button"
+              onClick={() => {
+                setKind("all");
+                chooseTheater("all");
+              }}
+              className="v2-btn v2-btn-ghost mt-6 self-start"
+            >
+              Show all sites
+            </button>
+          </aside>
+        )}
       </div>
       <p className="mt-6 text-[0.8rem] text-muted">
         Site data from Weatherhaven&apos;s deployment records. Base map: Natural Earth.

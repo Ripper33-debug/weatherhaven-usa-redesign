@@ -26,7 +26,7 @@ export const PRODUCT_FAMILIES: {
     id: "expandable",
     name: "Expandable containers",
     summary:
-      "Hard-wall shelters that ship as ISO containers, pallets or trailers and unfold to two or three times their footprint in minutes.",
+      "Hard-wall shelters that ship as ISO containers, pallets or trailers and unfold to two to three times their shipping footprint in minutes.",
     cover: "/products/hqss.jpg",
   },
   {
@@ -80,14 +80,14 @@ export const PRODUCT_CONTENT: Record<string, ProductContent> = {
     name: "MECC",
     fullName: "Mobile Expandable Container Configuration",
     description:
-      "Weatherhaven's original expandable shelter: a 20-ft ISO container whose insulated wings fold out to triple its floor space.",
+      "Weatherhaven's original expandable shelter: a 20-ft ISO container whose insulated wings fold out to nearly triple its floor space.",
     keySpec: "420 ft² from one 20-ft ISO container",
     overview: [
-      "The MECC ships, stacks and lifts like any 20-ft ISO container. On site, two people fold out its insulated wings in about 10 to 15 minutes, tripling the floor space with no special skills or tools.",
+      "The MECC ships, stacks and lifts like any 20-ft ISO container. On site, two people fold out its insulated wings in about 10 to 15 minutes, nearly tripling the floor space with no special skills or tools.",
       "It is built for a 15 to 20 year field life and fits out as a command post, clinic, workshop, office or accommodation module, alone or joined into a larger camp.",
     ],
     highlights: [
-      { title: "Triples its footprint", description: "From a standard 20-ft ISO container to 420 ft² of insulated floor." },
+      { title: "Nearly triples its footprint", description: "From a standard 20-ft ISO container to 420 ft² of insulated floor." },
       { title: "Two people, about 15 minutes", description: "No special skills or tools to deploy or strike." },
       { title: "Moves like cargo", description: "ISO and CSC certified, stacks nine high, lifts by forklift, crane or helicopter." },
     ],
@@ -115,7 +115,7 @@ export const PRODUCT_CONTENT: Record<string, ProductContent> = {
     name: "EHMECC",
     fullName: "Extended Height Mobile Expandable Container Configuration",
     description:
-      "A 20-ft ISO container that unfolds to triple its floor space and raises its roof to a 12-ft interior: room for a full headquarters.",
+      "A 20-ft ISO container that unfolds to nearly triple its floor space and raises its roof to a 12-ft interior: room for a full headquarters.",
     keySpec: "420 ft² with 12-ft interior height",
     overview: [
       "The EHMECC takes the MECC's expanding design and lifts the roof, giving 144 inches of interior height across 420 ft² of floor. The extra volume suits headquarters, large command posts and equipment that won't fit under a standard ceiling.",

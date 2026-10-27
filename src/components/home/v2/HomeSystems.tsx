@@ -35,7 +35,7 @@ export function HomeSystems() {
       <div className="v2-wrap">
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.8fr)] lg:items-end">
           <h2 id="systems-heading" className="v2-h1 max-w-[21ch] text-snow">
-            From a one-person polar tent to a battalion headquarters.
+            From a polar tent to a full field hospital.
           </h2>
           <p className="v2-body lg:justify-self-end">
             Four families of shelter, all designed and built by Weatherhaven, all engineered to be struck and

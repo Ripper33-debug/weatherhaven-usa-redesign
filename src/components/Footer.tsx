@@ -115,7 +115,7 @@ export function Footer() {
             <p>
               © {year} {company.name} All rights reserved.
             </p>
-            <p>ISO 9001:2015 and ISO 14001 certified. CAGE code 0EYW4.</p>
+            <p>ISO 9001:2015 certified. CAGE code 0EYW4.</p>
           </div>
           <p className="max-w-xl lg:text-right">
             Export-controlled technical data may apply; detailed specifications are released to authorized programs.

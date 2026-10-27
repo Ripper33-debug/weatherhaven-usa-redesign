@@ -192,11 +192,14 @@ export function mergeWithVerifiedNews(cmsRows: NewsReleaseRow[]): NewsReleaseRow
   const byKey = new Map<string, NewsReleaseRow>();
   for (const row of verified) byKey.set(row.slug, row);
   for (const row of cmsRows) {
+    // Same story only when slug, exact title or article URL match; never on a shared title prefix.
     const match = verified.find(
       (v) =>
         v.slug === row.slug ||
         normalizeTitle(v.title) === normalizeTitle(row.title) ||
-        normalizeTitle(row.title).startsWith(normalizeTitle(v.title).slice(0, 24)),
+        (!isBareHomepageLink(row.external_url) &&
+          Boolean(row.external_url?.trim()) &&
+          v.external_url?.trim() === row.external_url?.trim()),
     );
     if (match && isBareHomepageLink(row.external_url)) continue;
     if (match) byKey.delete(match.slug);
@@ -237,5 +240,5 @@ export function legacyRowsAsNews(): NewsReleaseRow[] {
     published_at: row.published_at,
     created_at: row.published_at,
     updated_at: row.published_at,
-  }));
+  })).sort((a, b) => new Date(b.published_at ?? 0).getTime() - new Date(a.published_at ?? 0).getTime());
 }

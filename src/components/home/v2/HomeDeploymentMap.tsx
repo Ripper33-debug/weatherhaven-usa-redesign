@@ -1,5 +1,5 @@
 import worldDots from "@/data/world-dots.json";
-import { DEPLOYMENT_THEATERS, GLOBAL_DEPLOYMENTS } from "@/lib/global-deployments";
+import { GLOBAL_DEPLOYMENTS } from "@/lib/global-deployments";
 import { deploymentPinKind } from "@/lib/deployment-pin-style";
 import { DeploymentMapClient, type MapPin } from "@/components/home/v2/DeploymentMapClient";
 
@@ -37,6 +37,40 @@ function splitTitle(title: string, label: string): { country: string; program?: 
   return { country: COUNTRY_FIXES[base] ?? base, program: program ? (PROGRAM_NAMES[program] ?? program) : undefined };
 }
 
+/**
+ * Plain geographic regions, derived from each pin's country. (The theater tags in the imported
+ * My Maps data are unreliable, e.g. Tokyo filed under CENTCOM, so the homepage doesn't use them.)
+ */
+const REGIONS = [
+  { id: "north-america", label: "North America" },
+  { id: "latin-america", label: "Latin America and the Caribbean" },
+  { id: "europe", label: "Europe" },
+  { id: "africa", label: "Africa" },
+  { id: "middle-east", label: "Middle East and Central Asia" },
+  { id: "asia-pacific", label: "Asia-Pacific" },
+  { id: "polar", label: "Arctic and Antarctic" },
+] as const;
+
+const REGION_COUNTRIES: Record<string, string[]> = {
+  "north-america": ["Canada", "United States"],
+  "latin-america": ["Argentina", "Belize", "Bolivia", "Brazil", "Chile", "Colombia", "Cuba", "Ecuador", "French Guiana", "Guatemala", "Guyana", "Haiti", "Mexico", "Panama", "Peru", "Suriname", "Trinidad & Tobago", "Venezuela"],
+  europe: ["Belgium", "Bosnia & Herzegovina", "Croatia", "France", "Germany", "Greece", "Iceland", "Ireland", "Italy", "Kosovo", "Latvia", "Lithuania", "Macedonia", "Netherlands", "Norway", "Poland", "Romania", "Sweden", "Switzerland", "Turkey", "United Kingdom"],
+  africa: ["Algeria", "Angola", "Burkina Faso", "Burundi", "Congo", "Cote d’Ivoire", "Democratic Republic of the Congo", "Eritrea", "Ethiopia", "Ghana", "Guinea", "Lesotho", "Mali", "Mauritania", "Morocco", "Mozambique", "Namibia", "Niger", "Rwanda", "Seychelles", "Sierra Leone", "Somalia", "South Africa", "South Sudan", "Sudan", "Tanzania", "Western Sahara"],
+  "middle-east": ["Afghanistan", "Iraq", "Jordan", "Kazakhstan", "Kuwait", "Kyrgyzstan", "Lebanon", "Qatar", "Saudi Arabia", "UAE"],
+  "asia-pacific": ["Australia", "Cambodia", "East Timor", "India", "Indonesia", "Japan", "South Korea", "Marshall Islands", "Mongolia", "Nepal", "New Zealand", "Papua New Guinea", "Singapore"],
+  polar: ["Antarctica", "Greenland"],
+};
+
+function regionFor(country: string, lat: number, lng: number): string {
+  if (Math.abs(lat) >= 66) return "polar";
+  for (const [id, countries] of Object.entries(REGION_COUNTRIES)) if (countries.includes(country)) return id;
+  // Fallback by coordinates for anything the list doesn't name.
+  if (lng < -30) return lat > 15 ? "north-america" : "latin-america";
+  if (lng < 40) return lat > 35 ? "europe" : "africa";
+  if (lng < 75 && lat > 12) return "middle-east";
+  return "asia-pacific";
+}
+
 export function HomeDeploymentMap() {
   const pins: MapPin[] = GLOBAL_DEPLOYMENTS.flatMap((d) => {
     const xy = (worldDots.pins as Record<string, number[]>)[d.id];
@@ -50,12 +84,12 @@ export function HomeDeploymentMap() {
         kind: deploymentPinKind(d.category),
         label: cleanLabel(d.label, d.lat).replace(/\bGemany\b/g, "Germany"),
         ...splitTitle(d.title, d.label),
-        theater: d.theaterId,
+        theater: regionFor(splitTitle(d.title, d.label).country, d.lat, d.lng),
       },
     ];
   });
 
-  const theaters = DEPLOYMENT_THEATERS.map((t) => ({ id: t.id, label: t.label, region: t.headline }));
+  const theaters = REGIONS.filter((r) => pins.some((p) => p.theater === r.id)).map((r) => ({ id: r.id, label: r.label }));
 
   // Build the dot path once on the server: one path, round caps, zero-length segments.
   const dots = worldDots.dots as number[];

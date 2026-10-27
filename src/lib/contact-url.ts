@@ -2,12 +2,15 @@
 export function contactUrl(params?: {
   system?: string;
   inquiry?: string;
+  /** Pre-fills the subject line (e.g. which briefing was requested). */
+  subject?: string;
   /** Pre-fills the message field (e.g. deployment coordinates). */
   deployment?: string;
 }): string {
   const q = new URLSearchParams();
   if (params?.system?.trim()) q.set("system", params.system.trim());
   if (params?.inquiry?.trim()) q.set("inquiry", params.inquiry.trim());
+  if (params?.subject?.trim()) q.set("subject", params.subject.trim());
   if (params?.deployment?.trim()) q.set("deployment", params.deployment.trim());
   const query = q.toString();
   return query ? `/contact?${query}` : "/contact";

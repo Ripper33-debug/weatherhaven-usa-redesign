@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { prefersReducedMotion } from "@/lib/effects/media";
+import { useClientMediaQuery } from "@/hooks/useClientMediaQuery";
 
 const LIFECYCLE = ["Design", "Manufacture", "Deliver", "Install", "Demobilize", "Refurbish and store"] as const;
 
 const CREDENTIALS = [
-  { title: "ISO 9001:2015 and ISO 14001", body: "Certified quality and environmental management." },
+  { title: "ISO 9001:2015", body: "Certified quality management at the Burnaby and Brockville plants." },
   { title: "Developed with the US Army", body: "TRECC was co-developed with US Army DEVCOM and tested to MIL-STD-810G." },
   { title: "US entity, US contracting", body: "Weatherhaven Resources Inc., North Tonawanda, NY. CAGE 0EYW4." },
 ] as const;
@@ -14,14 +15,23 @@ const CREDENTIALS = [
 /** Factory film band: plays only while on screen, never with reduced motion. */
 export function HomeFactory() {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const userPaused = useRef(false);
+  const reduced = useClientMediaQuery("(prefers-reduced-motion: reduce)");
+  const [pausedChoice, setPaused] = useState<boolean | null>(null);
+  const paused = pausedChoice ?? reduced;
 
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || prefersReducedMotion()) return;
+    if (!video) return;
+    if (prefersReducedMotion()) {
+      userPaused.current = true;
+      return;
+    }
     const io = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          if (!video.src) video.src = "/hero/built-720.mp4";
+          if (userPaused.current) return;
+          if (!video.getAttribute("src")) video.src = "/hero/built-720.mp4";
           void video.play().catch(() => undefined);
         } else {
           video.pause();
@@ -47,6 +57,30 @@ export function HomeFactory() {
           className="absolute inset-0 h-full w-full object-cover"
         />
         <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-hull via-hull/30 to-transparent" />
+        <button
+          type="button"
+          onClick={() => {
+            const video = videoRef.current;
+            if (!video) return;
+            if (video.paused) {
+              userPaused.current = false;
+              if (!video.getAttribute("src")) video.src = "/hero/built-720.mp4";
+              void video.play().catch(() => undefined);
+              setPaused(false);
+            } else {
+              userPaused.current = true;
+              video.pause();
+              setPaused(true);
+            }
+          }}
+          aria-label={paused ? "Play factory video" : "Pause factory video"}
+          className="absolute right-3 top-3 flex h-10 items-center gap-2 bg-ink/40 px-3 text-[0.8rem] font-medium text-snow/80 transition-colors hover:text-snow sm:right-5 sm:top-5"
+        >
+          <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden>
+            {paused ? <path d="M3 1.5v9l7-4.5z" fill="currentColor" /> : <path d="M3 1.5h2v9H3zM7 1.5h2v9H7z" fill="currentColor" />}
+          </svg>
+          {paused ? "Play film" : "Pause film"}
+        </button>
       </div>
       <div className="v2-wrap relative -mt-24 pb-20 sm:pb-28">
         <div className="grid gap-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:gap-16">
@@ -55,8 +89,8 @@ export function HomeFactory() {
               Designed, built and supported by one company.
             </h2>
             <p className="v2-lead mt-6">
-              Weatherhaven engineers and manufactures every system it sells, from more than 200,000 ft² of
-              manufacturing space, and stays with the program until the last shelter is refurbished and stored.
+              Weatherhaven engineers and manufactures every system it sells, then stays with the program until the
+              last shelter is refurbished and stored.
             </p>
             <ol className="mt-10 grid grid-cols-2 gap-px bg-line sm:grid-cols-3">
               {LIFECYCLE.map((stage, i) => (
