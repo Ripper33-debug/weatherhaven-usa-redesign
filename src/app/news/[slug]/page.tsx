@@ -3,9 +3,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getNewsReleaseBySlug } from "@/app/api/_lib/news-releases";
-import { PageHero } from "@/components/site/PageHero";
+import { V2PageHeader } from "@/components/site/V2PageHeader";
 import { MarketingSection } from "@/components/marketing/MarketingSection";
-import { btnMarketingLink } from "@/lib/cta-buttons";
 import { formatNewsDate, isExternalNewsLink } from "@/lib/news-releases";
 import { shareMetadataFromImage } from "@/lib/share-metadata";
 
@@ -37,17 +36,18 @@ export default async function NewsReleasePage({ params }: Props) {
   }
 
   return (
-    <div className="bg-[#080a0c] text-white">
-      <PageHero
-        label="News release"
+    <div className="bg-ink text-snow">
+      <V2PageHeader
+        crumbs={[{ href: "/", label: "Home" }, { href: "/news", label: "News" }, { label: formatNewsDate(release.published_at) }]}
         title={release.title}
-        description={release.summary ?? undefined}
+        lead={release.summary ?? undefined}
+        wide
       />
 
-      <MarketingSection className="mx-auto max-w-[760px] px-6 py-16 sm:py-20">
-        <p className="text-xs tracking-wide text-[#8a9099]">{formatNewsDate(release.published_at)}</p>
+      <MarketingSection className="v2-wrap max-w-[860px] py-16 sm:py-20">
+        <p className="text-[0.9rem] text-muted">{formatNewsDate(release.published_at)}</p>
         {release.cover_image_url ? (
-          <div className="relative mt-8 aspect-[16/9] w-full overflow-hidden border border-white/[0.08]">
+          <div className="relative mt-8 aspect-[16/9] w-full overflow-hidden bg-hull">
             <Image
               src={release.cover_image_url}
               alt=""
@@ -60,16 +60,16 @@ export default async function NewsReleasePage({ params }: Props) {
           </div>
         ) : null}
         {release.body ? (
-          <div className="prose-invert mt-8 whitespace-pre-wrap text-base leading-relaxed text-[#c8ccd2]">
+          <div className="mt-8 whitespace-pre-wrap text-[1.05rem] leading-relaxed text-snow/85">
             {release.body}
           </div>
         ) : release.summary ? (
-          <p className="mt-8 text-base leading-relaxed text-[#c8ccd2]">{release.summary}</p>
+          <p className="mt-8 text-[1.05rem] leading-relaxed text-snow/85">{release.summary}</p>
         ) : null}
 
-        <div className="mt-14 border-t border-white/[0.08] pt-10">
-          <Link href="/news" className={btnMarketingLink}>
-            ← All news
+        <div className="mt-14 border-t border-line pt-10">
+          <Link href="/news" className="v2-link">
+            All news
           </Link>
         </div>
       </MarketingSection>

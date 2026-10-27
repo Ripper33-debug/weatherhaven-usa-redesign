@@ -1,6 +1,5 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { WeatherhavenLogoLink } from "@/components/brand/WeatherhavenLogoLink";
 import { legalLinks } from "@/lib/site";
 
 export function LegalDocumentLayout({
@@ -15,22 +14,20 @@ export function LegalDocumentLayout({
   children: ReactNode;
 }) {
   return (
-    <div className="bg-[#080a0c] text-white">
-      <div className="mx-auto max-w-3xl px-6 py-16 sm:px-8 sm:py-24 lg:py-28">
-        <WeatherhavenLogoLink href="/" height={28} className="sm:h-8" />
-        <h1 className="font-serif mt-4 text-3xl leading-tight sm:text-4xl">{title}</h1>
-        {subtitle ? <p className="mt-4 text-sm leading-relaxed text-[#8a9099]">{subtitle}</p> : null}
-        <p className="mt-6 text-xs text-[#8a9099]">Last updated {updated}</p>
-        <div className="prose-legal mt-10 space-y-6 text-sm leading-relaxed text-[#c4c8cf]">{children}</div>
-        <nav className="mt-14 flex flex-wrap gap-4 border-t border-white/[0.08] pt-8 text-sm">
+    <div className="bg-ink text-snow">
+      <div className="v2-wrap max-w-[860px] pb-24 pt-32 sm:pt-36">
+        <h1 className="v2-h1 text-snow">{title}</h1>
+        {subtitle ? <p className="v2-lead mt-5">{subtitle}</p> : null}
+        <p className="mt-6 text-[0.9rem] text-muted">Last updated {updated}</p>
+        <div className="mt-10 space-y-6 text-[1rem] leading-relaxed text-snow/80 [&_a]:text-snow [&_a]:underline [&_a]:decoration-signal/60 [&_h2]:mt-10 [&_h2]:text-[1.35rem] [&_h2]:font-semibold [&_h2]:text-snow [&_h3]:font-semibold [&_h3]:text-snow">
+          {children}
+        </div>
+        <nav aria-label="Legal" className="mt-14 flex flex-wrap gap-6 border-t border-line pt-8 text-[0.95rem]">
           {legalLinks.map((link) => (
-            <Link key={link.href} href={link.href} className="text-[#8a9099] hover:text-white">
+            <Link key={link.href} href={link.href} className="text-muted no-underline hover:text-snow">
               {link.label}
             </Link>
           ))}
-          <Link href="/" className="text-[#4d9fff] hover:underline">
-            Back to site
-          </Link>
         </nav>
       </div>
     </div>

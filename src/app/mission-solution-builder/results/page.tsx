@@ -7,8 +7,8 @@ const CampPlanResults = dynamic(
   {
     loading: () => (
       <div className="flex min-h-[60vh] items-center justify-center px-6">
-        <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#8a9099]">
-          Loading camp package…
+        <p className="text-[0.95rem] text-muted">
+          Loading your camp package
         </p>
       </div>
     ),
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 export default async function CampPlanResultsPage() {
   const products = await listPublishedProducts();
   return (
-    <div className="bg-[#080a0c] pt-16 text-white lg:pt-[4.25rem]">
+    <div className="bg-ink text-snow">
       <CampPlanResults products={products} />
     </div>
   );

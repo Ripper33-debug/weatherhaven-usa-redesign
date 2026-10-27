@@ -32,7 +32,7 @@ import type { Product } from "@/lib/products";
 import { btnMarketingLink, btnMarketingPrimary } from "@/lib/cta-buttons";
 
 const inputClass =
-  "mt-1.5 w-full border border-[rgba(255,255,255,0.12)] bg-[#0d0f12] px-3 py-2.5 text-sm text-white outline-none focus:border-[rgba(255,255,255,0.35)]";
+  "mt-1.5 w-full border border-[rgba(255,255,255,0.12)] bg-[#101824] px-3 py-2.5 text-sm text-white outline-none focus:border-[rgba(255,255,255,0.35)]";
 
 function readMissionFromStorage(): MissionBuilderState | null {
   if (typeof window === "undefined") return null;
@@ -151,7 +151,7 @@ export function CampPlanResults({ products }: { products: Product[] }) {
   if (!mounted || !state || !plan) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center px-4 py-20">
-        <p className="text-sm text-[#8a9099]">Building your camp package…</p>
+        <p className="text-sm text-[#93a1b5]">Building your camp package…</p>
       </div>
     );
   }
@@ -159,7 +159,7 @@ export function CampPlanResults({ products }: { products: Product[] }) {
   if (submitted) {
     return (
       <div className="flex min-h-[50vh] flex-col items-center justify-center px-4 py-20 text-center">
-        <p className="wh-label text-[#4d9fff]">Package submitted</p>
+        <p className="wh-label text-[#f18522]">Package submitted</p>
         <p className="mt-2 font-mono text-sm text-white">{plan.packageId}</p>
         <p className="mt-6 max-w-lg text-base text-white">
           Your camp layout and parts list were sent to programs. A Weatherhaven expert will follow up within 48 hours.
@@ -181,10 +181,10 @@ export function CampPlanResults({ products }: { products: Product[] }) {
       />
       <MissionPlanningNotice className="px-4 sm:px-6 lg:px-12" />
 
-      <section className="bg-[#080a0c] px-4 py-12 sm:px-6 lg:px-12">
+      <section className="bg-[#0a0f17] px-4 py-12 sm:px-6 lg:px-12">
         <div className="mx-auto max-w-[1400px]">
           <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-            <p className="font-mono text-xs text-[#4d9fff]">Package ID: {plan.packageId}</p>
+            <p className="font-mono text-xs text-[#f18522]">Package ID: {plan.packageId}</p>
             <div className="flex flex-wrap items-center gap-3">
               <button type="button" onClick={downloadPdfExport} className={btnMarketingLink}>
                 Download PDF
@@ -199,9 +199,9 @@ export function CampPlanResults({ products }: { products: Product[] }) {
           </div>
 
           <div className="grid gap-10 lg:grid-cols-2">
-            <div className="border border-[rgba(255,255,255,0.08)] bg-[#0d0f12] p-6">
-              <p className="wh-label text-[#4d9fff]">Indicative camp layout</p>
-              <p className="mt-2 text-sm text-[#8a9099]">
+            <div className="border border-[rgba(255,255,255,0.08)] bg-[#101824] p-6">
+              <p className="wh-label text-[#f18522]">Indicative camp layout</p>
+              <p className="mt-2 text-sm text-[#93a1b5]">
                 Zone blocks show logical placement — not survey-grade site planning.
               </p>
               <div className="mt-6 overflow-x-auto">
@@ -209,15 +209,15 @@ export function CampPlanResults({ products }: { products: Product[] }) {
               </div>
             </div>
 
-            <div className="border border-[rgba(255,255,255,0.08)] bg-[#0d0f12] p-6">
-              <p className="wh-label text-[#4d9fff]">Program pricing</p>
-              <p className="mt-4 text-sm text-[#8a9099]">{plan.rom.label}</p>
-              <p className="mt-3 text-sm text-[#8a9099]">{plan.rom.disclaimer}</p>
+            <div className="border border-[rgba(255,255,255,0.08)] bg-[#101824] p-6">
+              <p className="wh-label text-[#f18522]">Program pricing</p>
+              <p className="mt-4 text-sm text-[#93a1b5]">{plan.rom.label}</p>
+              <p className="mt-3 text-sm text-[#93a1b5]">{plan.rom.disclaimer}</p>
               {summary.length > 0 ? (
                 <ul className="mt-8 space-y-2 border-t border-white/[0.08] pt-6 text-sm">
                   {summary.slice(0, 6).map((row) => (
                     <li key={row.label} className="flex justify-between gap-4">
-                      <span className="text-[#8a9099]">{row.label}</span>
+                      <span className="text-[#93a1b5]">{row.label}</span>
                       <span className="text-white">{row.value}</span>
                     </li>
                   ))}
@@ -226,17 +226,17 @@ export function CampPlanResults({ products }: { products: Product[] }) {
             </div>
           </div>
 
-          <div className="mt-10 border border-[rgba(255,255,255,0.08)] bg-[#0d0f12]">
+          <div className="mt-10 border border-[rgba(255,255,255,0.08)] bg-[#101824]">
             <div className="border-b border-white/[0.08] px-6 py-4">
-              <p className="wh-label text-[#4d9fff]">Parts list</p>
-              <p className="mt-1 text-sm text-[#8a9099]">
+              <p className="wh-label text-[#f18522]">Parts list</p>
+              <p className="mt-1 text-sm text-[#93a1b5]">
                 Quantities are planning placeholders until engineering exchange.
               </p>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full min-w-[640px] border-collapse text-left text-sm">
                 <thead>
-                  <tr className="border-b border-white/[0.08] text-[11px] tracking-wide text-[#8a9099] uppercase">
+                  <tr className="border-b border-white/[0.08] text-[11px] tracking-wide text-[#93a1b5] uppercase">
                     <th className="px-6 py-3 font-medium">Qty</th>
                     <th className="px-6 py-3 font-medium">Code</th>
                     <th className="px-6 py-3 font-medium">System</th>
@@ -248,17 +248,17 @@ export function CampPlanResults({ products }: { products: Product[] }) {
                   {plan.lineItems.map((line) => (
                     <tr key={`${line.slug}-${line.zoneId}`} className="border-b border-white/[0.06]">
                       <td className="px-6 py-3 tabular-nums text-white">{line.qty}</td>
-                      <td className="px-6 py-3 font-mono text-[#4d9fff]">{line.code}</td>
+                      <td className="px-6 py-3 font-mono text-[#f18522]">{line.code}</td>
                       <td className="px-6 py-3 text-white">
                         <Link
                           href={`/configurable-solutions/${line.slug}`}
-                          className="hover:text-[#4d9fff]"
+                          className="hover:text-[#f18522]"
                         >
                           {line.name}
                         </Link>
                       </td>
-                      <td className="px-6 py-3 text-[#8a9099]">{CAMP_ZONE_LABELS[line.zoneId]}</td>
-                      <td className="px-6 py-3 text-[#8a9099]">{line.notes ?? "—"}</td>
+                      <td className="px-6 py-3 text-[#93a1b5]">{CAMP_ZONE_LABELS[line.zoneId]}</td>
+                      <td className="px-6 py-3 text-[#93a1b5]">{line.notes ?? "—"}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -266,18 +266,18 @@ export function CampPlanResults({ products }: { products: Product[] }) {
             </div>
           </div>
 
-          <div className="mx-auto mt-12 max-w-lg border border-[rgba(255,255,255,0.08)] bg-[#0d0f12] p-6">
-            <p className="wh-label text-[#4d9fff]">Send package to programs</p>
+          <div className="mx-auto mt-12 max-w-lg border border-[rgba(255,255,255,0.08)] bg-[#101824] p-6">
+            <p className="wh-label text-[#f18522]">Send package to programs</p>
             <div className="mt-4 space-y-4">
-              <label className="block text-xs uppercase tracking-wide text-[#8a9099]">
+              <label className="block text-xs uppercase tracking-wide text-[#93a1b5]">
                 Contact name
                 <input className={inputClass} value={contactName} onChange={(e) => setContactName(e.target.value)} />
               </label>
-              <label className="block text-xs uppercase tracking-wide text-[#8a9099]">
+              <label className="block text-xs uppercase tracking-wide text-[#93a1b5]">
                 Organization
                 <input className={inputClass} value={contactOrg} onChange={(e) => setContactOrg(e.target.value)} />
               </label>
-              <label className="block text-xs uppercase tracking-wide text-[#8a9099]">
+              <label className="block text-xs uppercase tracking-wide text-[#93a1b5]">
                 Official email
                 <input
                   type="email"

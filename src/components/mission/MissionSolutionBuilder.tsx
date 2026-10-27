@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { IconChevronDown } from "@tabler/icons-react";
-import { PageHero } from "@/components/site/PageHero";
 import { MissionPlanningNotice } from "@/components/mission/MissionPlanningNotice";
 import { FormSubmitEmailWarning } from "@/components/site/FormSubmitFeedback";
 import { trackEvent } from "@/lib/analytics";
@@ -28,7 +27,7 @@ import {
 import { usePublishedCatalog } from "@/lib/use-published-catalog";
 
 const inputClass =
-  "mt-1.5 w-full border border-[rgba(255,255,255,0.12)] bg-[#0d0f12] px-3 py-2.5 text-sm text-white outline-none focus:border-[rgba(255,255,255,0.35)]";
+  "mt-1.5 w-full border border-[rgba(255,255,255,0.12)] bg-[#101824] px-3 py-2.5 text-sm text-white outline-none focus:border-[rgba(255,255,255,0.35)]";
 
 const selectClass = inputClass;
 
@@ -72,9 +71,9 @@ function Section({
         aria-expanded={open}
         aria-controls={`section-${id}`}
       >
-        <span className="font-mono text-[11px] font-medium tracking-[0.15em] text-[#4d9fff]">{label}</span>
+        <span className="font-mono text-[11px] font-medium tracking-[0.15em] text-[#f18522]">{label}</span>
         <IconChevronDown
-          className={`shrink-0 text-[#8a9099] transition-transform ${open ? "rotate-180" : ""}`}
+          className={`shrink-0 text-[#93a1b5] transition-transform ${open ? "rotate-180" : ""}`}
           size={18}
           aria-hidden
         />
@@ -137,15 +136,15 @@ function MissionBuilderProgress({
                 aria-current={active ? "step" : undefined}
                 className={`inline-flex items-center gap-2 border px-2.5 py-1.5 font-mono text-[10px] tracking-[0.12em] uppercase transition ${
                   active
-                    ? "border-[#4d9fff]/50 bg-[#4d9fff]/10 text-white"
+                    ? "border-[#f18522]/50 bg-[#f18522]/10 text-white"
                     : complete
-                      ? "border-white/15 text-[#8a9099] hover:border-white/25 hover:text-white"
-                      : "border-white/10 text-[#8a9099] hover:border-white/20 hover:text-white"
+                      ? "border-white/15 text-[#93a1b5] hover:border-white/25 hover:text-white"
+                      : "border-white/10 text-[#93a1b5] hover:border-white/20 hover:text-white"
                 }`}
               >
                 <span
                   className={`inline-flex h-4 w-4 shrink-0 items-center justify-center text-[9px] ${
-                    complete ? "text-[#4d9fff]" : active ? "text-white" : "text-[#8a9099]"
+                    complete ? "text-[#f18522]" : active ? "text-white" : "text-[#93a1b5]"
                   }`}
                   aria-hidden
                 >
@@ -280,7 +279,7 @@ export function MissionSolutionBuilder() {
   if (submitted) {
     return (
       <div className="flex min-h-[50vh] flex-col items-center justify-center px-4 py-20 text-center">
-        <p className="wh-label text-[#4d9fff]">Profile submitted</p>
+        <p className="wh-label text-[#f18522]">Profile submitted</p>
         <p className="mt-6 max-w-lg text-base text-white">
           Request received. A Weatherhaven expert will contact you within 48 hours.
         </p>
@@ -291,18 +290,13 @@ export function MissionSolutionBuilder() {
 
   return (
     <>
-      <PageHero
-        label="Mission solution builder"
-        title="Define your requirement. We'll compose the solution."
-        description="Work through your operational parameters and receive a tailored shelter system recommendation."
-      />
       <MissionPlanningNotice className="px-4 sm:px-6 lg:px-12" />
 
-      <section className="bg-[#080a0c]">
+      <section className="bg-[#0a0f17]">
         <div className="mx-auto grid max-w-[1400px] gap-12 px-4 py-12 sm:px-6 lg:grid-cols-[1fr_360px] lg:gap-16 lg:px-12 lg:py-16">
           <div>
             {prefillBanner && (
-              <div className="mb-8 border-l-2 border-[#4d9fff] bg-[#0d0f12] px-5 py-4">
+              <div className="mb-8 border-l-2 border-[#f18522] bg-[#101824] px-5 py-4">
                 <p className="text-sm text-white">
                   We&apos;ve pre-loaded your mission profile from your earlier session.
                 </p>
@@ -326,7 +320,7 @@ export function MissionSolutionBuilder() {
               >
                 {sec.id === "env" && (
                   <>
-                    <label className="block text-xs uppercase tracking-wide text-[#8a9099]">
+                    <label className="block text-xs uppercase tracking-wide text-[#93a1b5]">
                       Environment type
                       <select className={selectClass} value={state.environment} onChange={(e) => patch("environment", e.target.value)}>
                         <option value="">Select…</option>
@@ -339,16 +333,16 @@ export function MissionSolutionBuilder() {
                       </select>
                     </label>
                     <div className="grid gap-4 sm:grid-cols-2">
-                      <label className="text-xs uppercase tracking-wide text-[#8a9099]">
+                      <label className="text-xs uppercase tracking-wide text-[#93a1b5]">
                         Min °F
                         <input type="number" className={inputClass} value={state.tempMin} onChange={(e) => patch("tempMin", e.target.value)} />
                       </label>
-                      <label className="text-xs uppercase tracking-wide text-[#8a9099]">
+                      <label className="text-xs uppercase tracking-wide text-[#93a1b5]">
                         Max °F
                         <input type="number" className={inputClass} value={state.tempMax} onChange={(e) => patch("tempMax", e.target.value)} />
                       </label>
                     </div>
-                    <label className="block text-xs uppercase tracking-wide text-[#8a9099]">
+                    <label className="block text-xs uppercase tracking-wide text-[#93a1b5]">
                       Elevation
                       <select className={selectClass} value={state.elevation} onChange={(e) => patch("elevation", e.target.value)}>
                         <option value="">Select…</option>
@@ -358,7 +352,7 @@ export function MissionSolutionBuilder() {
                         <option value="10000ft+">10000 ft+</option>
                       </select>
                     </label>
-                    <label className="block text-xs uppercase tracking-wide text-[#8a9099]">
+                    <label className="block text-xs uppercase tracking-wide text-[#93a1b5]">
                       Precipitation
                       <select className={selectClass} value={state.precipitation} onChange={(e) => patch("precipitation", e.target.value)}>
                         <option value="">Select…</option>
@@ -372,7 +366,7 @@ export function MissionSolutionBuilder() {
                 )}
                 {sec.id === "fn" && (
                   <>
-                    <label className="block text-xs uppercase tracking-wide text-[#8a9099]">
+                    <label className="block text-xs uppercase tracking-wide text-[#93a1b5]">
                       Primary function
                       <select className={selectClass} value={state.primaryFunction} onChange={(e) => patch("primaryFunction", e.target.value)}>
                         <option value="">Select…</option>
@@ -384,7 +378,7 @@ export function MissionSolutionBuilder() {
                         <option value="logistics">Logistics</option>
                       </select>
                     </label>
-                    <label className="block text-xs uppercase tracking-wide text-[#8a9099]">
+                    <label className="block text-xs uppercase tracking-wide text-[#93a1b5]">
                       Secondary function (optional)
                       <select className={selectClass} value={state.secondaryFunction} onChange={(e) => patch("secondaryFunction", e.target.value)}>
                         <option value="">None</option>
@@ -396,7 +390,7 @@ export function MissionSolutionBuilder() {
                         <option value="logistics">Logistics</option>
                       </select>
                     </label>
-                    <label className="block text-xs uppercase tracking-wide text-[#8a9099]">
+                    <label className="block text-xs uppercase tracking-wide text-[#93a1b5]">
                       Classification
                       <select className={selectClass} value={state.classification} onChange={(e) => patch("classification", e.target.value)}>
                         <option value="">Select…</option>
@@ -406,7 +400,7 @@ export function MissionSolutionBuilder() {
                         <option value="TS/SCI">TS/SCI</option>
                       </select>
                     </label>
-                    <label className="block text-xs uppercase tracking-wide text-[#8a9099]">
+                    <label className="block text-xs uppercase tracking-wide text-[#93a1b5]">
                       Personnel count
                       <input type="number" min={1} className={inputClass} value={state.personnelCount} onChange={(e) => patch("personnelCount", e.target.value)} />
                     </label>
@@ -414,7 +408,7 @@ export function MissionSolutionBuilder() {
                 )}
                 {sec.id === "mob" && (
                   <>
-                    <label className="block text-xs uppercase tracking-wide text-[#8a9099]">
+                    <label className="block text-xs uppercase tracking-wide text-[#93a1b5]">
                       Primary transport
                       <select className={selectClass} value={state.primaryTransport} onChange={(e) => patch("primaryTransport", e.target.value)}>
                         <option value="">Select…</option>
@@ -425,7 +419,7 @@ export function MissionSolutionBuilder() {
                         <option value="lapes">LAPES</option>
                       </select>
                     </label>
-                    <label className="block text-xs uppercase tracking-wide text-[#8a9099]">
+                    <label className="block text-xs uppercase tracking-wide text-[#93a1b5]">
                       Secondary transport (optional)
                       <select className={selectClass} value={state.secondaryTransport} onChange={(e) => patch("secondaryTransport", e.target.value)}>
                         <option value="">None</option>
@@ -436,11 +430,11 @@ export function MissionSolutionBuilder() {
                         <option value="lapes">LAPES</option>
                       </select>
                     </label>
-                    <label className="block text-xs uppercase tracking-wide text-[#8a9099]">
+                    <label className="block text-xs uppercase tracking-wide text-[#93a1b5]">
                       Max package weight (lbs)
                       <input type="number" className={inputClass} value={state.maxWeight} onChange={(e) => patch("maxWeight", e.target.value)} />
                     </label>
-                    <p className="text-xs uppercase tracking-wide text-[#8a9099]">Max package dimensions (ft)</p>
+                    <p className="text-xs uppercase tracking-wide text-[#93a1b5]">Max package dimensions (ft)</p>
                     <div className="grid grid-cols-3 gap-3">
                       <input placeholder="L" className={inputClass} value={state.dimLength} onChange={(e) => patch("dimLength", e.target.value)} />
                       <input placeholder="W" className={inputClass} value={state.dimWidth} onChange={(e) => patch("dimWidth", e.target.value)} />
@@ -450,11 +444,11 @@ export function MissionSolutionBuilder() {
                 )}
                 {sec.id === "time" && (
                   <>
-                    <label className="block text-xs uppercase tracking-wide text-[#8a9099]">
+                    <label className="block text-xs uppercase tracking-wide text-[#93a1b5]">
                       Required fielding date
                       <input type="date" className={inputClass} value={state.fieldingDate} onChange={(e) => patch("fieldingDate", e.target.value)} />
                     </label>
-                    <label className="block text-xs uppercase tracking-wide text-[#8a9099]">
+                    <label className="block text-xs uppercase tracking-wide text-[#93a1b5]">
                       Setup time available
                       <select className={selectClass} value={state.setupTime} onChange={(e) => patch("setupTime", e.target.value)}>
                         <option value="">Select…</option>
@@ -465,7 +459,7 @@ export function MissionSolutionBuilder() {
                         <option value="7plus">7+ days</option>
                       </select>
                     </label>
-                    <label className="block text-xs uppercase tracking-wide text-[#8a9099]">
+                    <label className="block text-xs uppercase tracking-wide text-[#93a1b5]">
                       Duration of deployment
                       <select className={selectClass} value={state.deploymentDuration} onChange={(e) => patch("deploymentDuration", e.target.value)}>
                         <option value="">Select…</option>
@@ -476,7 +470,7 @@ export function MissionSolutionBuilder() {
                         <option value="12plus">12+ months</option>
                       </select>
                     </label>
-                    <label className="block text-xs uppercase tracking-wide text-[#8a9099]">
+                    <label className="block text-xs uppercase tracking-wide text-[#93a1b5]">
                       Resupply frequency
                       <select className={selectClass} value={state.resupplyFrequency} onChange={(e) => patch("resupplyFrequency", e.target.value)}>
                         <option value="">Select…</option>
@@ -490,7 +484,7 @@ export function MissionSolutionBuilder() {
                 )}
                 {sec.id === "power" && (
                   <>
-                    <label className="block text-xs uppercase tracking-wide text-[#8a9099]">
+                    <label className="block text-xs uppercase tracking-wide text-[#93a1b5]">
                       Power source
                       <select className={selectClass} value={state.powerSource} onChange={(e) => patch("powerSource", e.target.value)}>
                         <option value="">Select…</option>
@@ -500,7 +494,7 @@ export function MissionSolutionBuilder() {
                         <option value="Hybrid">Hybrid</option>
                       </select>
                     </label>
-                    <label className="block text-xs uppercase tracking-wide text-[#8a9099]">
+                    <label className="block text-xs uppercase tracking-wide text-[#93a1b5]">
                       Power requirement (kW)
                       <input type="number" className={inputClass} value={state.powerKw} onChange={(e) => patch("powerKw", e.target.value)} />
                     </label>
@@ -509,11 +503,11 @@ export function MissionSolutionBuilder() {
                       ECU required
                     </label>
                     <div className="grid gap-4 sm:grid-cols-2">
-                      <label className="text-xs uppercase tracking-wide text-[#8a9099]">
+                      <label className="text-xs uppercase tracking-wide text-[#93a1b5]">
                         Climate min °F
                         <input type="number" className={inputClass} value={state.climateMin} onChange={(e) => patch("climateMin", e.target.value)} />
                       </label>
-                      <label className="text-xs uppercase tracking-wide text-[#8a9099]">
+                      <label className="text-xs uppercase tracking-wide text-[#93a1b5]">
                         Climate max °F
                         <input type="number" className={inputClass} value={state.climateMax} onChange={(e) => patch("climateMax", e.target.value)} />
                       </label>
@@ -522,7 +516,7 @@ export function MissionSolutionBuilder() {
                 )}
                 {sec.id === "extra" && (
                   <>
-                    <p className="text-xs uppercase tracking-wide text-[#8a9099]">Special requirements</p>
+                    <p className="text-xs uppercase tracking-wide text-[#93a1b5]">Special requirements</p>
                     <div className="space-y-2">
                       {SPECIAL_OPTS.map((opt) => (
                         <label key={opt} className="flex items-center gap-3 text-sm text-white">
@@ -536,11 +530,11 @@ export function MissionSolutionBuilder() {
                         </label>
                       ))}
                     </div>
-                    <label className="block text-xs uppercase tracking-wide text-[#8a9099]">
+                    <label className="block text-xs uppercase tracking-wide text-[#93a1b5]">
                       Notes
                       <textarea rows={4} className={`${inputClass} min-h-[100px] resize-y`} value={state.notes} onChange={(e) => patch("notes", e.target.value)} />
                     </label>
-                    <p className="text-[13px] text-[#8a9099]">
+                    <p className="text-[13px] text-[#93a1b5]">
                       Technical documents can be shared during the follow-on exchange.
                     </p>
                   </>
@@ -550,15 +544,15 @@ export function MissionSolutionBuilder() {
           </div>
 
           <aside className="lg:sticky lg:top-24 lg:self-start">
-            <div className="border border-[rgba(255,255,255,0.08)] bg-[#0d0f12] p-6">
-              <p className="wh-label text-[#4d9fff]">Your mission profile</p>
+            <div className="border border-[rgba(255,255,255,0.08)] bg-[#101824] p-6">
+              <p className="wh-label text-[#f18522]">Your mission profile</p>
               {summary.length === 0 ? (
-                <p className="mt-4 text-sm text-[#8a9099]">Complete sections to build your profile summary.</p>
+                <p className="mt-4 text-sm text-[#93a1b5]">Complete sections to build your profile summary.</p>
               ) : (
                 <ul className="mt-4 space-y-2 text-sm">
                   {summary.map((row) => (
                     <li key={row.label} className="flex justify-between gap-4 border-b border-white/[0.06] py-2">
-                      <span className="text-[#8a9099]">{row.label}</span>
+                      <span className="text-[#93a1b5]">{row.label}</span>
                       <span className="text-right text-white">{row.value}</span>
                     </li>
                   ))}
@@ -566,12 +560,12 @@ export function MissionSolutionBuilder() {
               )}
 
               {campPreview ? (
-                <div className="mt-8 border border-[#4d9fff]/25 bg-[#4d9fff]/[0.06] p-4">
-                  <p className="text-[11px] font-medium tracking-wide text-[#4d9fff] uppercase">
+                <div className="mt-8 border border-[#f18522]/25 bg-[#f18522]/[0.06] p-4">
+                  <p className="text-[11px] font-medium tracking-wide text-[#f18522] uppercase">
                     Camp package preview
                   </p>
-                  <p className="mt-2 text-sm text-[#8a9099]">{campPreview.rom.label}</p>
-                  <p className="mt-1 text-xs text-[#8a9099]">
+                  <p className="mt-2 text-sm text-[#93a1b5]">{campPreview.rom.label}</p>
+                  <p className="mt-1 text-xs text-[#93a1b5]">
                     {campPreview.lineItems.length} systems · {campPreview.zones.length} zones
                   </p>
                 </div>
@@ -581,35 +575,35 @@ export function MissionSolutionBuilder() {
                 type="button"
                 disabled={!campReady}
                 onClick={handleGenerateCampPackage}
-                className="mt-6 flex min-h-11 w-full items-center justify-center border border-[#4d9fff] bg-[#4d9fff]/10 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#4d9fff] transition hover:bg-[#4d9fff]/20 disabled:cursor-not-allowed disabled:opacity-40"
+                className="mt-6 flex min-h-11 w-full items-center justify-center border border-[#f18522] bg-[#f18522]/10 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#f18522] transition hover:bg-[#f18522]/20 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Generate camp package
               </button>
 
-              <p className="wh-label mt-8 text-[#4d9fff]">Recommended systems</p>
+              <p className="wh-label mt-8 text-[#f18522]">Recommended systems</p>
               <div className="mt-4 space-y-3">
                 {recommended.map((p) => (
                   <Link
                     key={p.slug}
                     href={`/configurable-solutions/${p.slug}`}
-                    className="block border border-[rgba(255,255,255,0.08)] bg-[#080a0c] p-4 no-underline transition hover:border-[rgba(255,255,255,0.2)]"
+                    className="block border border-[rgba(255,255,255,0.08)] bg-[#0a0f17] p-4 no-underline transition hover:border-[rgba(255,255,255,0.2)]"
                   >
-                    <p className="font-mono text-[10px] text-[#4d9fff]">{p.code}</p>
+                    <p className="font-mono text-[10px] text-[#f18522]">{p.code}</p>
                     <p className="mt-1 text-sm font-medium text-white">{p.name}</p>
                   </Link>
                 ))}
               </div>
 
               <div className="mt-8 space-y-4 border-t border-white/[0.08] pt-6">
-                <label className="block text-xs uppercase tracking-wide text-[#8a9099]">
+                <label className="block text-xs uppercase tracking-wide text-[#93a1b5]">
                   Contact name
                   <input className={inputClass} value={state.contactName} onChange={(e) => patch("contactName", e.target.value)} required />
                 </label>
-                <label className="block text-xs uppercase tracking-wide text-[#8a9099]">
+                <label className="block text-xs uppercase tracking-wide text-[#93a1b5]">
                   Organization
                   <input className={inputClass} value={state.contactOrg} onChange={(e) => patch("contactOrg", e.target.value)} required />
                 </label>
-                <label className="block text-xs uppercase tracking-wide text-[#8a9099]">
+                <label className="block text-xs uppercase tracking-wide text-[#93a1b5]">
                   Official email
                   <input type="email" className={inputClass} value={state.contactEmail} onChange={(e) => patch("contactEmail", e.target.value)} required />
                 </label>

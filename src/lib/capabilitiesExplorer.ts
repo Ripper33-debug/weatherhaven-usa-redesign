@@ -33,7 +33,7 @@ export const CAPABILITY_CATEGORIES: CapabilityCategory[] = [
       "Redeployable systems for repeated worldwide deployment",
       "Lightweight, compact transport to reduce fuel and site impact",
     ],
-    relatedSlugs: ["series-4", "non-expandable-iso-containers", "ateps"],
+    relatedSlugs: ["series-4", "mecc", "airbeam-lp"],
     diagramLabel: "Modular frame — multi-bay spine",
   },
   {
@@ -65,7 +65,7 @@ export const CAPABILITY_CATEGORIES: CapabilityCategory[] = [
       "Camp-scale utility distribution",
       "Sized for maintenance, C2, and clinical loads",
     ],
-    relatedSlugs: ["ehmecc", "ateps", "series-4"],
+    relatedSlugs: ["mecc", "ehmecc", "trecc"],
     diagramLabel: "PDU spine — gen-set yard",
   },
   {
@@ -98,7 +98,7 @@ export const CAPABILITY_CATEGORIES: CapabilityCategory[] = [
       "Softwall command and C2-ready layouts",
       "Rapid emplacement for expeditionary headquarters",
     ],
-    relatedSlugs: ["ehmecc", "series-4", "non-expandable-iso-containers"],
+    relatedSlugs: ["ehmecc", "rdmss", "trecc"],
     diagramLabel: "TOC cell — comms spine",
   },
   {
@@ -132,7 +132,7 @@ export const CAPABILITY_CATEGORIES: CapabilityCategory[] = [
       "Workshop and simulation training configurations",
       "High-bay and recovery lane options",
     ],
-    relatedSlugs: ["mts", "mecc", "mex-26"],
+    relatedSlugs: ["mex-26", "series-4", "mecc"],
     diagramLabel: "MX bay — high clearance",
   },
   {
@@ -149,7 +149,7 @@ export const CAPABILITY_CATEGORIES: CapabilityCategory[] = [
       "Phased emplacement aligned to lift windows",
       "Global logistics and regional support teams",
     ],
-    relatedSlugs: ["ateps", "hercon", "trecc"],
+    relatedSlugs: ["mecc", "hercon", "rdmss"],
     diagramLabel: "Campus spine — multi-bay",
   },
 ];

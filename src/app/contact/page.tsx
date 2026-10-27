@@ -1,21 +1,24 @@
 import type { Metadata } from "next";
-import { PageHero } from "@/components/site/PageHero";
+import { V2PageHeader } from "@/components/site/V2PageHeader";
+import { pageMeta } from "@/lib/page-meta";
 import { ContactPageSections } from "./ContactPageSections";
 
-export const metadata: Metadata = {
-  title: "Contact — Weatherhaven USA",
-  description: "Talk to a Weatherhaven Expert about deployable shelter and camp requirements.",
-};
+export const metadata: Metadata = pageMeta({
+  title: "Talk to an expert",
+  description:
+    "Tell a Weatherhaven expert about your deployment. US office in North Tonawanda, NY; replies usually within 48 hours.",
+  path: "/contact",
+});
 
 export default function ContactPage() {
   return (
-    <div className="bg-[#080a0c] text-white">
-      <PageHero
-        label="Contact"
-        title="Talk to a Weatherhaven Expert."
-        description="Share your requirement and a member of our team will respond within 48 hours."
+    <>
+      <V2PageHeader
+        crumbs={[{ href: "/", label: "Home" }, { label: "Contact" }]}
+        title="Talk to a Weatherhaven expert."
+        lead="Tell us the mission, the climate and the number of people. A specialist will come back with a starting configuration."
       />
       <ContactPageSections />
-    </div>
+    </>
   );
 }

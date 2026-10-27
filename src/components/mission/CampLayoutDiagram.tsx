@@ -10,13 +10,13 @@ const PAD = 16;
 const REVEAL_MS = 420;
 
 const ZONE_FILL: Record<string, string> = {
-  entry: "rgba(77,159,255,0.12)",
-  command: "rgba(77,159,255,0.22)",
+  entry: "rgba(241,133,34,0.12)",
+  command: "rgba(241,133,34,0.22)",
   medical: "rgba(16,185,129,0.18)",
   maintenance: "rgba(245,158,11,0.18)",
   accommodation: "rgba(148,163,184,0.15)",
   sustainment: "rgba(168,85,247,0.15)",
-  logistics: "rgba(77,159,255,0.1)",
+  logistics: "rgba(241,133,34,0.1)",
   power: "rgba(255,255,255,0.06)",
 };
 
@@ -60,7 +60,7 @@ export function CampLayoutDiagram({
       role="img"
       aria-label="Indicative camp layout by zone"
     >
-      <rect x={0} y={0} width={width} height={height} fill="#0d0f12" rx={4} />
+      <rect x={0} y={0} width={width} height={height} fill="#101824" rx={4} />
       {ordered.map((zone, index) => {
         const visible = index < visibleCount;
         const x = PAD + zone.col * (CELL + GAP);
@@ -83,7 +83,7 @@ export function CampLayoutDiagram({
               width={w}
               height={h}
               fill={ZONE_FILL[zone.id] ?? "rgba(255,255,255,0.08)"}
-              stroke="rgba(77,159,255,0.35)"
+              stroke="rgba(241,133,34,0.35)"
               strokeWidth={1}
             />
             <text

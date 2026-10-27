@@ -7,7 +7,6 @@ import { createClient } from "@/lib/supabase/client";
 import { trackEvent } from "@/lib/analytics";
 import { trackLead } from "@/lib/track-lead";
 import { fetchWithCsrf } from "@/lib/csrf-client";
-import { btnMarketingOutline, btnMarketingPrimary } from "@/lib/cta-buttons";
 import { filterConfirmationBullets } from "@/lib/form-submit-messages";
 import { FormSubmitEmailWarning } from "@/components/site/FormSubmitFeedback";
 import type { Product } from "@/lib/products";
@@ -40,7 +39,7 @@ export const CONTACT_REGIONS = [
 const CONTACT_METHODS = ["Email", "Phone", "Secure Message"] as const;
 
 const inputClass =
-  "mt-1.5 w-full border border-[rgba(255,255,255,0.12)] bg-[#0d0f12] px-3 py-2.5 text-sm text-white outline-none placeholder:text-[#8a9099] focus:border-[rgba(255,255,255,0.35)]";
+  "mt-1.5 w-full border border-line-strong bg-ink px-3 py-3 text-[0.95rem] text-snow outline-none placeholder:text-muted/70 focus:border-signal focus:shadow-[0_0_0_3px_rgb(241_133_34/0.18)]";
 
 type FormState = {
   full_name: string;
@@ -215,22 +214,22 @@ function ContactEngineeringFormInner({
     const firstName = submittedName !== "Not provided" ? submittedName.split(/\s+/)[0] : "there";
     return (
       <div className="flex flex-col items-center justify-center px-6 py-16 text-center sm:px-8 sm:py-20">
-        <p className="wh-marketing-eyebrow text-[#4d9fff]">Message sent</p>
-        <h2 className="wh-marketing-display mt-6 max-w-lg text-2xl text-white sm:text-3xl">
+        <p className="text-[0.9rem] font-semibold text-signal">Message sent</p>
+        <h2 className="v2-h2 mt-4 max-w-lg text-snow">
           We&apos;ll be in touch, {firstName}.
         </h2>
         {submitWarning ? (
           <FormSubmitEmailWarning message={submitWarning} />
         ) : null}
-        <ul className="mt-8 max-w-md space-y-3 text-left text-sm text-[#8a9099]">
+        <ul className="mt-8 max-w-md space-y-3 text-left text-sm text-muted">
           {filterConfirmationBullets(WHAT_HAPPENS_NEXT, Boolean(submitWarning)).map((line) => (
             <li key={line} className="flex gap-3">
-              <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[#4d9fff]" aria-hidden />
+              <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-signal" aria-hidden />
               {line}
             </li>
           ))}
         </ul>
-        <Link href="/" className={`mt-10 inline-flex no-underline ${btnMarketingPrimary}`}>
+        <Link href="/" className={"v2-btn mt-10"}>
           Back to home
         </Link>
       </div>
@@ -238,12 +237,12 @@ function ContactEngineeringFormInner({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 border border-white/[0.08] bg-[#0d0f12] p-6 sm:p-8">
+    <form onSubmit={handleSubmit} className="space-y-6 border border-line bg-hull p-6 sm:p-8">
       {product && (
-        <div className="border border-[#4d9fff]/25 bg-[#4d9fff]/[0.06] px-4 py-3 text-sm text-[#8a9099]">
+        <div className="border border-signal/30 bg-signal/[0.06] px-4 py-3 text-sm text-muted">
           <span className="text-white">Inquiry about {product.name}</span> — we&apos;ve prefilled context from
           the system page.{" "}
-          <Link href={`/configurable-solutions/${product.slug}`} className="text-[#4d9fff] hover:underline">
+          <Link href={`/configurable-solutions/${product.slug}`} className="text-signal hover:underline">
             View system
           </Link>
         </div>
@@ -251,13 +250,13 @@ function ContactEngineeringFormInner({
 
       <div className="flex items-center gap-3" aria-label={`Step ${step} of 2`}>
         <span
-          className={`flex h-8 w-8 items-center justify-center text-xs font-medium ${step === 1 ? "bg-white text-[#080a0c]" : "border border-white/20 text-[#8a9099]"}`}
+          className={`flex h-8 w-8 items-center justify-center text-xs font-medium ${step === 1 ? "bg-snow text-ink" : "border border-white/20 text-muted"}`}
         >
           1
         </span>
         <span className="h-px flex-1 bg-white/10" aria-hidden />
         <span
-          className={`flex h-8 w-8 items-center justify-center text-xs font-medium ${step === 2 ? "bg-white text-[#080a0c]" : "border border-white/20 text-[#8a9099]"}`}
+          className={`flex h-8 w-8 items-center justify-center text-xs font-medium ${step === 2 ? "bg-snow text-ink" : "border border-white/20 text-muted"}`}
         >
           2
         </span>
@@ -271,8 +270,8 @@ function ContactEngineeringFormInner({
 
       {step === 1 ? (
         <>
-          <p className="text-sm text-[#8a9099]">Step 1 — essentials (about 30 seconds)</p>
-          <label className="block text-xs font-medium uppercase tracking-wide text-[#8a9099]">
+          <p className="text-sm text-muted">Step 1 — essentials (about 30 seconds)</p>
+          <label className="block text-[0.875rem] font-medium text-muted">
             Organization
             <input
               required
@@ -281,7 +280,7 @@ function ContactEngineeringFormInner({
               onChange={(e) => patch("organization", e.target.value)}
             />
           </label>
-          <label className="block text-xs font-medium uppercase tracking-wide text-[#8a9099]">
+          <label className="block text-[0.875rem] font-medium text-muted">
             Work email
             <input
               required
@@ -292,7 +291,7 @@ function ContactEngineeringFormInner({
               onChange={(e) => patch("email", e.target.value)}
             />
           </label>
-          <label className="block text-xs font-medium uppercase tracking-wide text-[#8a9099]">
+          <label className="block text-[0.875rem] font-medium text-muted">
             Your region
             <select
               required
@@ -308,7 +307,7 @@ function ContactEngineeringFormInner({
               ))}
             </select>
           </label>
-          <label className="block text-xs font-medium uppercase tracking-wide text-[#8a9099]">
+          <label className="block text-[0.875rem] font-medium text-muted">
             Inquiry type
             <select
               required
@@ -323,32 +322,32 @@ function ContactEngineeringFormInner({
               ))}
             </select>
           </label>
-          <button type="button" onClick={goToStep2} className={`w-full ${btnMarketingPrimary}`}>
+          <button type="button" onClick={goToStep2} className={"v2-btn w-full"}>
             Continue
           </button>
         </>
       ) : (
         <>
-          <p className="text-sm text-[#8a9099]">Step 2 — optional details (or send now)</p>
+          <p className="text-sm text-muted">Step 2 — optional details (or send now)</p>
           <div className="grid gap-6 sm:grid-cols-2">
-            <label className="block text-xs font-medium uppercase tracking-wide text-[#8a9099]">
+            <label className="block text-[0.875rem] font-medium text-muted">
               Full name
               <input className={inputClass} value={form.full_name} onChange={(e) => patch("full_name", e.target.value)} />
             </label>
-            <label className="block text-xs font-medium uppercase tracking-wide text-[#8a9099]">
+            <label className="block text-[0.875rem] font-medium text-muted">
               Role / title
               <input className={inputClass} value={form.role} onChange={(e) => patch("role", e.target.value)} />
             </label>
           </div>
-          <label className="block text-xs font-medium uppercase tracking-wide text-[#8a9099]">
+          <label className="block text-[0.875rem] font-medium text-muted">
             Program or unit
             <input className={inputClass} value={form.program} onChange={(e) => patch("program", e.target.value)} />
           </label>
-          <label className="block text-xs font-medium uppercase tracking-wide text-[#8a9099]">
+          <label className="block text-[0.875rem] font-medium text-muted">
             Subject
             <input className={inputClass} value={form.subject} onChange={(e) => patch("subject", e.target.value)} />
           </label>
-          <label className="block text-xs font-medium uppercase tracking-wide text-[#8a9099]">
+          <label className="block text-[0.875rem] font-medium text-muted">
             Message
             <textarea
               rows={5}
@@ -359,7 +358,7 @@ function ContactEngineeringFormInner({
             />
           </label>
           <fieldset>
-            <legend className="text-xs font-medium uppercase tracking-wide text-[#8a9099]">
+            <legend className="text-[0.875rem] font-medium text-muted">
               Preferred contact method
             </legend>
             <div className="mt-3 flex flex-wrap gap-6">
@@ -379,7 +378,7 @@ function ContactEngineeringFormInner({
             </div>
           </fieldset>
           {form.contact_method === "Phone" && (
-            <label className="block text-xs font-medium uppercase tracking-wide text-[#8a9099]">
+            <label className="block text-[0.875rem] font-medium text-muted">
               Phone number
               <input
                 type="tel"
@@ -390,23 +389,17 @@ function ContactEngineeringFormInner({
             </label>
           )}
           <div className="flex flex-col gap-3 sm:flex-row">
-            <button type="button" onClick={() => setStep(1)} className={`${btnMarketingOutline} w-full sm:w-auto`}>
+            <button type="button" onClick={() => setStep(1)} className={"v2-btn v2-btn-ghost w-full sm:w-auto"}>
               Back
             </button>
-            <button type="submit" disabled={loading} className={`${btnMarketingPrimary} w-full flex-1 disabled:opacity-60`}>
+            <button type="submit" disabled={loading} className={"v2-btn w-full flex-1 disabled:opacity-60"}>
               {loading ? "Sending…" : "Submit inquiry"}
             </button>
           </div>
         </>
       )}
 
-      <ul className="border-t border-white/[0.06] pt-6 text-xs leading-relaxed text-[#8a9099]">
-        {WHAT_HAPPENS_NEXT.map((line) => (
-          <li key={line} className="mt-2 first:mt-0">
-            {line}
-          </li>
-        ))}
-      </ul>
+
     </form>
   );
 }

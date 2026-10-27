@@ -979,6 +979,20 @@ input.wh-input:focus-visible {
    Scoped to .wh-v2 so the SOF portal and admin console keep their own look.
    ========================================================================== */
 
+:root {
+  --v2-ink: #0a0f17;
+  --v2-hull: #101824;
+  --v2-hull-2: #172233;
+  --v2-line: rgb(148 170 196 / 0.16);
+  --v2-line-strong: rgb(148 170 196 / 0.32);
+  --v2-muted: #93a1b5;
+  --v2-snow: #eef2f6;
+  --v2-signal: #f18522;
+  --v2-chamfer: 10px;
+  --v2-gutter: clamp(1.25rem, 4vw, 3rem);
+  --v2-max: 1320px;
+}
+
 .wh-v2 {
   --v2-ink: #0a0f17;
   --v2-hull: #101824;
