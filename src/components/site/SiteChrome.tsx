@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { isAuthGatePage } from "@/lib/auth-routes";
 import { isAdminPath } from "@/lib/route-context";
 import { SkipToContent } from "@/components/navigation/SkipToContent";
+import { isPublicSitePage } from "@/lib/marketing-pages";
 
 export function SiteChrome({
   children,
@@ -18,6 +19,7 @@ export function SiteChrome({
   const bare = isAuthGatePage(pathname);
   const adminConsole = isAdminPath(pathname);
   const sofMicrosite = pathname === "/sof-solutions" || pathname.startsWith("/sof-solutions/");
+  const publicSite = isPublicSitePage(pathname);
 
   if (bare || adminConsole) {
     return (
@@ -29,7 +31,7 @@ export function SiteChrome({
   }
 
   return (
-    <div className="min-w-0 max-w-full overflow-x-hidden">
+    <div className={`min-w-0 max-w-full overflow-x-hidden ${publicSite ? "wh-v2" : ""}`}>
       <SkipToContent />
       {!sofMicrosite && nav}
       <div className="min-w-0 max-w-full overflow-x-hidden">{children}</div>

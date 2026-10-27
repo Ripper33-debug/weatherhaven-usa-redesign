@@ -98,6 +98,7 @@ import {
   WEATHERHAVEN_PRODUCT_LINES,
   type WeatherhavenProductLine,
 } from "@/lib/weatherhaven-product-lines";
+import { getProductContent, hasLegacyPlaceholderSpecs } from "@/lib/product-content";
 
 const defaultDownloads = [
   { name: "Military solutions", type: "Web", size: "—", href: "https://www.weatherhaven.com/military" },
@@ -126,26 +127,22 @@ function lineToSeed(line: WeatherhavenProductLine): ProductSeed {
 }
 
 function seedProduct(p: ProductSeed): Product {
+  const content = getProductContent(p.slug);
   return {
     ...p,
-    overview: [
+    name: content?.name ?? p.name,
+    subtitle: content?.fullName ?? p.subtitle,
+    description: content?.description ?? p.description,
+    overview: content?.overview ?? [
       p.description,
       p.overviewExtra ??
         "Weatherhaven provides design, manufacture, delivery, installation, demobilization, refurbishment, and storage—ready for the next deployment.",
     ],
-    features: [
-      { title: "Rapid deployment", description: "From setup to fully operational in as little as 20 minutes (system-dependent)." },
+    features: content?.highlights ?? [
       { title: "Redeployable", description: "Engineered to be repeatedly deployed anywhere in the world." },
       { title: "Turnkey support", description: "Design, manufacture, installation, demobilization, refurbishment, and storage." },
     ],
-    specs: [
-      { label: "Footprint", value: "Mission-configured (technical exchange)" },
-      { label: "Personnel", value: "Sized to CONOPS" },
-      { label: "Transport", value: "Air, ground, and sea options" },
-      { label: "Setup Time", value: "Hours to days (system-dependent)" },
-      { label: "Climate Rating", value: "Arctic through desert bands" },
-      { label: "Power Requirement", value: "Integrated per deployment" },
-    ],
+    specs: content?.specs ?? [],
     compareScores: {
       footprint: 7,
       personnel: 7,
@@ -155,10 +152,35 @@ function seedProduct(p: ProductSeed): Product {
       power: 7,
       priceRange: 6,
     },
-    configurations: [
-      { title: "Standard configuration", description: "Defined through needs assessment and engineering exchange." },
+    configurations: content?.configurations ?? [
+      { title: "Configured to your requirement", description: "Defined with a Weatherhaven expert for each program." },
     ],
     downloads: defaultDownloads,
+  };
+}
+
+/**
+ * CMS rows seeded before Oct 2026 carry a generic placeholder spec sheet and some wrong
+ * product names (e.g. ATEPS as a "power system"). When a row still has those placeholders,
+ * show the verified content instead — CMS photos, status and ordering are kept.
+ */
+export function upgradeLegacyProductContent(product: Product): Product {
+  const content = getProductContent(product.slug);
+  if (!content || !hasLegacyPlaceholderSpecs(product.specs)) return product;
+  const line = WEATHERHAVEN_PRODUCT_LINES.find((l) => l.slug === product.slug);
+  return {
+    ...product,
+    name: content.name,
+    subtitle: content.fullName,
+    tag: line?.tag ?? product.tag,
+    description: content.description,
+    overview: content.overview,
+    features: content.highlights,
+    specs: content.specs,
+    configurations: content.configurations,
+    missionTypes: line?.missionTypes ?? product.missionTypes,
+    mobilities: line?.mobilities ?? product.mobilities,
+    sizes: line?.sizes ?? product.sizes,
   };
 }
 

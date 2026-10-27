@@ -9,6 +9,19 @@
   --color-wh-accent: #4d9fff;
   --color-wh-success: #4ade80;
   --color-wh-error: #f87171;
+
+  /* Public site (v2) palette — navy-black night, snow, Weatherhaven signal orange */
+  --font-wh: var(--font-archivo), "Archivo", ui-sans-serif, system-ui, sans-serif;
+  --color-ink: #0a0f17;
+  --color-hull: #101824;
+  --color-hull-2: #172233;
+  --color-line: rgb(148 170 196 / 0.16);
+  --color-line-strong: rgb(148 170 196 / 0.32);
+  --color-muted: #93a1b5;
+  --color-snow: #eef2f6;
+  --color-signal: #f18522;
+  --color-signal-soft: #f6a45c;
+  --color-ice: #8ec5e6;
 }
 
 :root {
@@ -943,4 +956,388 @@ input.wh-input:focus-visible {
   outline: 2px solid #4d9fff;
   outline-offset: 0;
   border-color: rgba(77, 159, 255, 0.45);
+}
+
+/* ==========================================================================
+   Public site v2 — "deployed" design language
+   Navy-black night, snow-white type, Weatherhaven signal orange.
+   One family (Archivo); headlines use its expanded widths.
+   Chamfered corners echo ISO container corner castings.
+   Scoped to .wh-v2 so the SOF portal and admin console keep their own look.
+   ========================================================================== */
+
+.wh-v2 {
+  --v2-ink: #0a0f17;
+  --v2-hull: #101824;
+  --v2-hull-2: #172233;
+  --v2-line: rgb(148 170 196 / 0.16);
+  --v2-line-strong: rgb(148 170 196 / 0.32);
+  --v2-muted: #93a1b5;
+  --v2-snow: #eef2f6;
+  --v2-signal: #f18522;
+  --v2-chamfer: 10px;
+  --v2-gutter: clamp(1.25rem, 4vw, 3rem);
+  --v2-max: 1320px;
+
+  font-family: var(--font-archivo), "Archivo", ui-sans-serif, system-ui, sans-serif;
+  font-variation-settings: "wdth" 100;
+  background-color: var(--v2-ink);
+  color: var(--v2-snow);
+  letter-spacing: -0.005em;
+  font-feature-settings: "kern" 1;
+}
+
+body:has(.wh-v2) {
+  background-color: #0a0f17;
+}
+
+body .wh-v2 h1,
+body .wh-v2 h2,
+body .wh-v2 h3,
+body .wh-v2 h4,
+body .wh-v2 .wh-marketing-display {
+  font-family: var(--font-archivo), "Archivo", ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.wh-v2 ::selection {
+  background: rgb(241 133 34 / 0.35);
+  color: #fff;
+}
+
+.v2-wrap {
+  width: 100%;
+  max-width: var(--v2-max);
+  margin-inline: auto;
+  padding-inline: var(--v2-gutter);
+}
+
+/* Type scale (ratio ≈ 1.333, perfect fourth) */
+.v2-display {
+  font-variation-settings: "wdth" 118;
+  font-weight: 640;
+  font-size: clamp(2.6rem, 6.6vw, 6rem);
+  line-height: 0.96;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+.v2-h1 {
+  font-variation-settings: "wdth" 116;
+  font-weight: 620;
+  font-size: clamp(2.2rem, 4.6vw, 4.25rem);
+  line-height: 1;
+  letter-spacing: -0.028em;
+  text-wrap: balance;
+}
+
+.v2-h2 {
+  font-variation-settings: "wdth" 112;
+  font-weight: 600;
+  font-size: clamp(1.75rem, 3.2vw, 3rem);
+  line-height: 1.04;
+  letter-spacing: -0.024em;
+  text-wrap: balance;
+}
+
+.v2-h3 {
+  font-variation-settings: "wdth" 108;
+  font-weight: 600;
+  font-size: clamp(1.2rem, 1.6vw, 1.5rem);
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+}
+
+.v2-lead {
+  font-size: clamp(1.05rem, 1.35vw, 1.25rem);
+  line-height: 1.6;
+  color: #c3ccd8;
+  max-width: 62ch;
+}
+
+.v2-body {
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--v2-muted);
+  max-width: 68ch;
+}
+
+.v2-small {
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--v2-muted);
+}
+
+/* Small sentence-case label used only where it names what follows */
+.v2-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.9rem;
+  font-weight: 560;
+  font-variation-settings: "wdth" 104;
+  color: var(--v2-signal);
+  letter-spacing: 0;
+}
+
+.v2-kicker::before {
+  content: "";
+  width: 18px;
+  height: 2px;
+  background: currentColor;
+}
+
+/* Data values: condensed-width figures for specs and stats */
+.v2-figure {
+  font-variation-settings: "wdth" 84;
+  font-variant-numeric: tabular-nums lining-nums;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.v2-tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Chamfered corners (container corner castings) */
+.v2-chamfer {
+  clip-path: polygon(
+    var(--v2-chamfer) 0,
+    100% 0,
+    100% calc(100% - var(--v2-chamfer)),
+    calc(100% - var(--v2-chamfer)) 100%,
+    0 100%,
+    0 var(--v2-chamfer)
+  );
+}
+
+/* Buttons */
+.v2-btn {
+  --v2-chamfer: 9px;
+  position: relative;
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.85rem 1.6rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-variation-settings: "wdth" 108;
+  letter-spacing: 0;
+  text-decoration: none;
+  color: #1b0e02;
+  background: var(--v2-signal);
+  clip-path: polygon(
+    var(--v2-chamfer) 0,
+    100% 0,
+    100% calc(100% - var(--v2-chamfer)),
+    calc(100% - var(--v2-chamfer)) 100%,
+    0 100%,
+    0 var(--v2-chamfer)
+  );
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+  touch-action: manipulation;
+}
+
+.v2-btn:hover {
+  background: #ff9a3e;
+}
+
+.v2-btn-ghost {
+  color: var(--v2-snow);
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--v2-line-strong);
+  clip-path: none;
+  border-radius: 0;
+}
+
+.v2-btn-ghost:hover {
+  background: rgb(238 242 246 / 0.06);
+  box-shadow: inset 0 0 0 1px rgb(238 242 246 / 0.6);
+}
+
+.v2-btn-light {
+  color: var(--v2-ink);
+  background: var(--v2-snow);
+}
+
+.v2-btn-light:hover {
+  background: #fff;
+}
+
+.v2-link {
+  color: var(--v2-snow);
+  text-decoration: underline;
+  text-decoration-color: rgb(241 133 34 / 0.6);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 0.3em;
+  transition: text-decoration-color 0.2s ease, color 0.2s ease;
+}
+
+.v2-link:hover {
+  text-decoration-color: var(--v2-signal);
+}
+
+/* Hairline rule and grid helpers */
+.v2-rule {
+  height: 1px;
+  background: var(--v2-line);
+}
+
+/* Container data plate — the riveted ID plate on a shipping container */
+.v2-plate {
+  --v2-chamfer: 14px;
+  position: relative;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.035), rgb(255 255 255 / 0) 40%),
+    var(--v2-hull);
+  box-shadow: inset 0 0 0 1px var(--v2-line-strong);
+}
+
+.v2-rivet {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #5b6b80, #263243 70%);
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.4);
+}
+
+/* Focus */
+.wh-v2 a:focus-visible,
+.wh-v2 button:focus-visible,
+.wh-v2 input:focus-visible,
+.wh-v2 select:focus-visible,
+.wh-v2 textarea:focus-visible,
+.wh-v2 [tabindex]:focus-visible {
+  outline: 2px solid var(--v2-signal);
+  outline-offset: 3px;
+}
+
+/* Inputs on public pages */
+.wh-v2 .wh-input {
+  border-radius: 0;
+  background: var(--v2-hull);
+  border-color: var(--v2-line-strong);
+  font-family: inherit;
+  font-size: 15px;
+}
+
+.wh-v2 .wh-input:focus,
+.wh-v2 .wh-input:focus-visible {
+  border-color: var(--v2-signal);
+  box-shadow: 0 0 0 3px rgb(241 133 34 / 0.18);
+  outline: none;
+}
+
+/* Scroll-linked deploy drawing */
+.v2-draw-line {
+  fill: none;
+  stroke: var(--v2-snow);
+  stroke-width: 1.25;
+  vector-effect: non-scaling-stroke;
+}
+
+.v2-draw-dim {
+  fill: none;
+  stroke: var(--v2-signal);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Deployment map */
+.v2-map-dots {
+  fill: none;
+  stroke: #33455c;
+  stroke-linecap: round;
+  stroke-width: 2.4;
+}
+
+.v2-pin {
+  cursor: pointer;
+  transition: opacity 0.25s ease;
+}
+
+.v2-pin-core {
+  transition: r 0.2s ease;
+}
+
+.v2-pin:focus-visible {
+  outline: none;
+}
+
+.v2-pin:focus-visible .v2-pin-ring,
+.v2-pin[data-active="true"] .v2-pin-ring {
+  opacity: 1;
+}
+
+@keyframes v2-sonar {
+  from {
+    r: 3;
+    opacity: 0.9;
+  }
+  to {
+    r: 16;
+    opacity: 0;
+  }
+}
+
+.v2-pin-sonar {
+  animation: v2-sonar 2.4s cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
+}
+
+/* Hero entrance — the one orchestrated page-load moment */
+@keyframes v2-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.v2-rise {
+  animation: v2-rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.v2-rise-2 {
+  animation-delay: 0.12s;
+}
+
+.v2-rise-3 {
+  animation-delay: 0.24s;
+}
+
+.v2-rise-4 {
+  animation-delay: 0.36s;
+}
+
+/* Horizontal timeline rail */
+.v2-rail {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(148 170 196 / 0.35) transparent;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+}
+
+.v2-rail > * {
+  scroll-snap-align: start;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v2-rise,
+  .v2-pin-sonar {
+    animation: none !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .wh-v2 main {
+    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+  }
 }

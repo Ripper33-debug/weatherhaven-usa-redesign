@@ -33,3 +33,15 @@ export function isMarketingPage(pathname: string): boolean {
 export function isProductCatalogPath(pathname: string): boolean {
   return pathname === "/configurable-solutions" || pathname.startsWith("/configurable-solutions/");
 }
+
+const PUBLIC_EXTRA_PATHS = ["/privacy", "/terms"] as const;
+
+/**
+ * Public website pages that use the v2 design language (global nav + footer).
+ * Excludes the SOF microsite, which keeps its own immersive chrome.
+ */
+export function isPublicSitePage(pathname: string): boolean {
+  if (pathname === "/sof-solutions" || pathname.startsWith("/sof-solutions/")) return false;
+  if (PUBLIC_EXTRA_PATHS.some((p) => pathname === p)) return true;
+  return isMarketingPage(pathname);
+}

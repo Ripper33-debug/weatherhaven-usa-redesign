@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
-import { Playfair_Display } from "next/font/google";
+import { Archivo, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { AnalyticsProvider } from "@/components/AnalyticsProvider";
 import { Navbar } from "@/components/Navbar";
@@ -19,6 +19,14 @@ const geistMono = GeistMono;
 const playfair = Playfair_Display({
   subsets: ["latin"],
   variable: "--font-serif",
+  display: "swap",
+});
+
+/** Marketing typeface — one variable family; headlines use its expanded widths. */
+const archivo = Archivo({
+  subsets: ["latin"],
+  axes: ["wdth"],
+  variable: "--font-archivo",
   display: "swap",
 });
 
@@ -54,7 +62,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#080a0c",
+  themeColor: "#0a0f17",
   colorScheme: "dark",
 };
 
@@ -66,7 +74,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} h-full overflow-x-hidden`}
+      className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${archivo.variable} h-full overflow-x-hidden`}
     >
       <body className="flex min-h-full min-w-0 flex-col overflow-x-hidden font-sans text-zinc-100 antialiased">
         <AuthHashRedirect />

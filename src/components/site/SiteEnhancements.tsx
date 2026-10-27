@@ -10,12 +10,13 @@ import { MarketingPageFlags } from "@/components/marketing/MarketingPageFlags";
 import { PlatformPageFlags } from "@/components/platform/PlatformPageFlags";
 import { CsrfBootstrap } from "@/components/site/CsrfBootstrap";
 import { InitialLoadScreen } from "@/components/effects/InitialLoadScreen";
-import { isMarketingPage } from "@/lib/marketing-pages";
+import { isMarketingPage, isPublicSitePage } from "@/lib/marketing-pages";
 import { isLightPortalPath } from "@/lib/route-context";
 
 export function SiteEnhancements({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const marketing = isMarketingPage(pathname);
+  const publicSite = isPublicSitePage(pathname);
   const lightPortal = isLightPortalPath(pathname);
   const isMap =
     pathname === "/tactical-map" ||
@@ -24,7 +25,7 @@ export function SiteEnhancements({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      <InitialLoadScreen />
+      {publicSite ? null : <InitialLoadScreen />}
       <CsrfBootstrap />
       <MarketingPageFlags />
       <PlatformPageFlags />

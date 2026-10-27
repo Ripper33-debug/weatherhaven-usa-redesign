@@ -1,6 +1,6 @@
 import type { CatalogProductRow } from "@/lib/catalog-products";
 import { rowToProduct } from "@/lib/catalog-products";
-import type { Product } from "@/lib/products";
+import { upgradeLegacyProductContent, type Product } from "@/lib/products";
 import { withProductInfoSheets } from "@/lib/product-info-sheets";
 import { LEGACY_PRODUCT_SLUG_REDIRECTS } from "@/lib/weatherhaven-product-lines";
 
@@ -22,7 +22,7 @@ export function publishedProductsFromRows(rows: CatalogProductRow[]): Product[] 
   return rows
     .filter((row) => row.status === "published" && !isStaticCatalogRowId(row.id))
     .sort((a, b) => a.sort_order - b.sort_order || a.slug.localeCompare(b.slug))
-    .map((row) => withProductInfoSheets(rowToProduct(row)));
+    .map((row) => withProductInfoSheets(upgradeLegacyProductContent(rowToProduct(row))));
 }
 
 /**
@@ -37,7 +37,7 @@ export function resolvePublishedProductBySlug(
 
   if (row && !isStaticCatalogRowId(row.id) && row.slug === canonical) {
     if (row.status === "published") {
-      return withProductInfoSheets(rowToProduct(row));
+      return withProductInfoSheets(upgradeLegacyProductContent(rowToProduct(row)));
     }
     return undefined;
   }
