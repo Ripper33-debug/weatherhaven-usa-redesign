@@ -20,7 +20,11 @@ fi
 
 echo "Copying media from $ORIGINAL/public (the original is only read)..."
 mkdir -p "$HERE/public"
-rsync -a --ignore-existing "$ORIGINAL/public/" "$HERE/public/"
+if command -v rsync >/dev/null 2>&1; then
+  rsync -a --ignore-existing "$ORIGINAL/public/" "$HERE/public/"
+else
+  cp -Rn "$ORIGINAL/public/." "$HERE/public/"
+fi
 
 echo "Installing dependencies..."
 cd "$HERE"
