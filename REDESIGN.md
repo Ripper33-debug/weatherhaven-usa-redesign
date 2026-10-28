@@ -39,15 +39,16 @@ To share it, deploy it as a **new** Vercel project (`npx vercel`), not the produ
 
 ## How it was checked
 
-- `npm run lint` is clean and all 161 tests pass. `npm run build` succeeds, including every SOF and admin route.
-- The SOF portal pages (`/sof-solutions` and `/sof-solutions/request-access`) were screenshotted next to the untouched original at desktop and phone widths, and they are pixel-identical.
+- `npm run lint` has no errors and all 161 tests pass. `npm run build` succeeds, including every SOF and admin route.
+- The SOF portal (`/sof-solutions`, `/sof-solutions/request-access`, `/sof-solutions/secure`) and `/login` were screenshotted next to the untouched original at desktop and phone widths, and they are pixel-identical.
 - Lighthouse on a local production build:
-  - Desktop homepage: 96 performance, 100 accessibility, 96 best practices, 100 SEO.
-  - Desktop MECC page: 98 / 100 / 96 / 100.
-  - Simulated mid-range phone homepage: 65–70 performance, mostly held back by the Sentry monitoring bundle. The hero film now waits for page load before it downloads.
-- At 390 px, no public page scrolls sideways.
+  - Desktop homepage: 98 performance, 100 accessibility, 96 best practices, 100 SEO. Desktop TRECC page: 98 / 100 / 96 / 100.
+  - Simulated mid-range phone on slow 4G: homepage 69–77 (it was 65–70), TRECC page 70–82, contact 78, capabilities 88. Layout shift is 0 on every public page.
+  - The 4 best-practices points are console errors that only happen locally (the Vercel analytics script and Supabase without keys).
+- What made phones faster: the hero headline paints on the first frame, headings no longer reflow when the page script runs, the world map's land dots and the 3D models load only as you scroll toward them, Sentry and the Supabase client load only when needed, and the factory film's still image loads lazily.
+- At 390 px, no public page scrolls sideways. Checked in Chrome, Safari (WebKit, desktop and iPhone) and Firefox, including the 3D scene, the 3D viewer and the page transitions.
 - Every internal link, image and external news link returns 200.
-- An independent review covered bugs, accessibility, content accuracy and SOF/admin regressions. Its findings were fixed or are listed below.
+- Two independent reviews covered bugs, accessibility, performance, content accuracy and SOF/admin regressions. Their findings were fixed or are listed below.
 
 ## The 3D model
 
@@ -88,3 +89,5 @@ Then copy the new media from this folder's `public/` into the repo and commit it
 8. **3D model accuracy.** Have someone who knows the TRECC look over the 3D model and the scroll sequence. It is built from Weatherhaven's own CAD exports, simplified for the web.
 9. **Mission builder.** The camp planner logic was left as it was, and it still puts Endurance in the "Power yard" and labels ATEPS "Camp power and infrastructure". It is shared with the SOF planner, so it needs a deliberate fix.
 10. **Shared product data.** Corrected mission types and transport modes in `weatherhaven-product-lines.ts` also feed the SOF planner's recommendations.
+11. **Fonts for the SOF portal and admin.** Geist and Playfair (about 180 KB) are preloaded on every page, including the public site that doesn't use them. Loading them only in the SOF and admin sections would speed up phones further, but it changes how those sections load, so it was left alone.
+12. **Supabase on public pages.** Public pages no longer load the Supabase client for anonymous visitors, except that Next.js prefetches the SOF portal link in the menu, and the SOF navigation loads it. That happens after the page has loaded, so it doesn't slow the first screen.
