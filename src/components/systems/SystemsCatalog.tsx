@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import {
   FILTER_ENVIRONMENT_OPTIONS,
   FILTER_MISSION_OPTIONS,
@@ -51,13 +51,14 @@ function Select<T extends string>({
 
 export function SystemsCatalog({ products }: { products: Product[] }) {
   const params = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
-  // The family filter lives in the URL, so menu links and the back button always agree with the list.
+  // A ?family= link (homepage, menu) sets the starting filter; chip clicks are local state, so they
+  // don't trigger a route update (and its page cross-fade). A new ?family= from a link wins again.
   const familyParam = params.get("family");
-  const family: FamilyFilter = PRODUCT_FAMILIES.some((f) => f.id === familyParam)
+  const urlFamily: FamilyFilter = PRODUCT_FAMILIES.some((f) => f.id === familyParam)
     ? (familyParam as ProductFamily)
     : "all";
+  const [picked, setPicked] = useState<{ value: FamilyFilter; forUrl: FamilyFilter } | null>(null);
+  const family: FamilyFilter = picked && picked.forUrl === urlFamily ? picked.value : urlFamily;
   const [mission, setMission] = useState<ProductFilterMission>("all");
   const [environment, setEnvironment] = useState<ProductFilterEnvironment>("all");
   const [mobility, setMobility] = useState<ProductFilterMobility>("all");
@@ -73,12 +74,7 @@ export function SystemsCatalog({ products }: { products: Product[] }) {
 
   const anyFilter = family !== "all" || mission !== "all" || environment !== "all" || mobility !== "all" || search.trim() !== "";
 
-  const chooseFamily = (f: FamilyFilter) => {
-    const q = new URLSearchParams(params.toString());
-    if (f === "all") q.delete("family");
-    else q.set("family", f);
-    router.replace(q.toString() ? `${pathname}?${q}` : pathname, { scroll: false });
-  };
+  const chooseFamily = (f: FamilyFilter) => setPicked({ value: f, forUrl: urlFamily });
 
   const reset = () => {
     chooseFamily("all");

@@ -49,6 +49,8 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     optimizePackageImports: ["@tabler/icons-react", "@supabase/supabase-js", "@supabase/ssr"],
+    /** React <ViewTransition> on route changes (public pages use it for card → product morphs). */
+    viewTransition: true,
   },
   async headers() {
     return [

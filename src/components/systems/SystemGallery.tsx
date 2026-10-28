@@ -1,10 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, ViewTransition } from "react";
 
 /** Product gallery: large frame, thumbnail strip, full-screen view on demand. */
-export function SystemGallery({ images, name }: { images: string[]; name: string }) {
+export function SystemGallery({ images, name, transitionName }: { images: string[]; name: string; transitionName?: string }) {
   const [index, setIndex] = useState(0);
   const [full, setFull] = useState(false);
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -33,37 +33,39 @@ export function SystemGallery({ images, name }: { images: string[]; name: string
 
   return (
     <div className="min-w-0">
-      <div className="relative aspect-[4/3] overflow-hidden bg-hull">
-        <Image
-          key={current}
-          src={current}
-          alt={`${name}, photo ${index + 1} of ${count}`}
-          fill
-          priority={index === 0}
-          sizes="(max-width: 1024px) 100vw, 60vw"
-          className="object-cover"
-        />
-        <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-gradient-to-t from-ink/80 to-transparent px-4 pb-3 pt-10">
-          <span className="v2-tnum text-[0.85rem] text-snow/85">
-            {index + 1} / {count}
-          </span>
-          <div className="flex gap-2">
-            {count > 1 ? (
-              <>
-                <button type="button" onClick={() => go(-1)} aria-label="Previous photo" className="flex h-10 w-10 items-center justify-center bg-ink/70 text-snow hover:text-signal">
-                  <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden><path d="M13 8H4M7.5 4.5 4 8l3.5 3.5" fill="none" stroke="currentColor" strokeWidth="1.5" /></svg>
-                </button>
-                <button type="button" onClick={() => go(1)} aria-label="Next photo" className="flex h-10 w-10 items-center justify-center bg-ink/70 text-snow hover:text-signal">
-                  <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden><path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5" fill="none" stroke="currentColor" strokeWidth="1.5" /></svg>
-                </button>
-              </>
-            ) : null}
-            <button type="button" onClick={() => setFull(true)} className="flex h-10 items-center bg-ink/70 px-3 text-[0.85rem] text-snow hover:text-signal">
-              View full screen
-            </button>
+      <ViewTransition name={transitionName} share="v2-morph">
+        <div className="relative aspect-[4/3] overflow-hidden bg-hull">
+          <Image
+            key={current}
+            src={current}
+            alt={`${name}, photo ${index + 1} of ${count}`}
+            fill
+            priority={index === 0}
+            sizes="(max-width: 1024px) 100vw, 60vw"
+            className="object-cover"
+          />
+          <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-gradient-to-t from-ink/80 to-transparent px-4 pb-3 pt-10">
+            <span className="v2-tnum text-[0.85rem] text-snow/85">
+              {index + 1} / {count}
+            </span>
+            <div className="flex gap-2">
+              {count > 1 ? (
+                <>
+                  <button type="button" onClick={() => go(-1)} aria-label="Previous photo" className="flex h-10 w-10 items-center justify-center bg-ink/70 text-snow hover:text-signal">
+                    <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden><path d="M13 8H4M7.5 4.5 4 8l3.5 3.5" fill="none" stroke="currentColor" strokeWidth="1.5" /></svg>
+                  </button>
+                  <button type="button" onClick={() => go(1)} aria-label="Next photo" className="flex h-10 w-10 items-center justify-center bg-ink/70 text-snow hover:text-signal">
+                    <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden><path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5" fill="none" stroke="currentColor" strokeWidth="1.5" /></svg>
+                  </button>
+                </>
+              ) : null}
+              <button type="button" onClick={() => setFull(true)} className="flex h-10 items-center bg-ink/70 px-3 text-[0.85rem] text-snow hover:text-signal">
+                View full screen
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      </ViewTransition>
       {count > 1 ? (
         <ul className="mt-3 flex gap-2 overflow-x-auto pb-1" aria-label="Photos">
           {images.map((src, i) => (

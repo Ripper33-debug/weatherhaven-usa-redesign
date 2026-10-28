@@ -180,6 +180,7 @@ export function Navbar() {
     <>
       <header
         data-global-nav
+        style={publicSite ? { viewTransitionName: "site-header" } : undefined}
         className={`${publicSite ? "fixed inset-x-0" : "sticky"} top-0 z-50 transition-[background-color,box-shadow] duration-300 ${
           solid ? "bg-ink/92 shadow-[0_1px_0_rgb(148_170_196/0.16)] backdrop-blur-xl" : "bg-transparent"
         }`}

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { ViewTransition } from "react";
 import Link from "next/link";
 import type { Product } from "@/lib/products";
 import { getProductContent } from "@/lib/product-content";
@@ -10,15 +11,18 @@ export function SystemCard({ product, sizes = "(max-width: 640px) 100vw, (max-wi
   const specs = product.specs.slice(0, 3);
   return (
     <article className="group relative flex h-full flex-col bg-ink">
-      <div className="relative aspect-[4/3] overflow-hidden bg-hull">
-        <Image
-          src={productCover(product.slug, product.coverImageUrl)}
-          alt={`Weatherhaven ${product.name}`}
-          fill
-          sizes={sizes}
-          className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-        />
-      </div>
+      {/* Shares a name with the product page's main photo, so the card morphs into it on navigation. */}
+      <ViewTransition name={`system-photo-${product.slug}`} share="v2-morph">
+        <div className="relative aspect-[4/3] overflow-hidden bg-hull">
+          <Image
+            src={productCover(product.slug, product.coverImageUrl)}
+            alt={`Weatherhaven ${product.name}`}
+            fill
+            sizes={sizes}
+            className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+          />
+        </div>
+      </ViewTransition>
       <div className="flex flex-1 flex-col pt-5">
         <h3 className="v2-h3 text-snow">
           <Link href={`/configurable-solutions/${product.slug}`} className="no-underline after:absolute after:inset-0 group-hover:text-signal">
