@@ -110,7 +110,7 @@ export function HomeHero() {
         type="button"
         onClick={togglePlayback}
         className="absolute right-3 top-20 flex h-10 items-center gap-2 bg-ink/40 px-3 text-[0.8rem] font-medium text-snow/80 transition-colors hover:text-snow sm:bottom-5 sm:right-5 sm:top-auto sm:bg-transparent"
-        aria-label={paused ? "Play background video" : "Pause background video"}
+        aria-label={paused ? "Play film: background video" : "Pause film: background video"}
       >
         <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden>
           {paused ? (

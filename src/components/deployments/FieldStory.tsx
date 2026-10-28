@@ -30,7 +30,7 @@ function Sources({ story }: { story: DeploymentStory }) {
             target="_blank"
             rel="noopener noreferrer"
             title={s.label}
-            aria-label={`${s.label} (opens in a new tab)`}
+            aria-label={`${sourceHost(s.href)}: ${s.label} (opens in a new tab)`}
             className="text-muted underline decoration-line-strong underline-offset-2 hover:text-snow"
           >
             {sourceHost(s.href)}

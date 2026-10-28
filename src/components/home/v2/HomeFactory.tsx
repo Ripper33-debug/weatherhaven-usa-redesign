@@ -82,7 +82,7 @@ export function HomeFactory() {
               setPaused(true);
             }
           }}
-          aria-label={paused ? "Play factory video" : "Pause factory video"}
+          aria-label={paused ? "Play film: factory video" : "Pause film: factory video"}
           className="absolute right-3 top-3 flex h-10 items-center gap-2 bg-ink/40 px-3 text-[0.8rem] font-medium text-snow/80 transition-colors hover:text-snow sm:right-5 sm:top-5"
         >
           <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden>

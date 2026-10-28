@@ -61,6 +61,14 @@ function Person({ x, ground }: { x: number; ground: number }) {
   );
 }
 
+/** Grid lines every `step` inches across the scene, skipping multiples of `skip`. */
+function gridPath(w: number, h: number, step: number, skip?: number): string {
+  let d = "";
+  for (let x = step; x < w; x += step) if (!skip || x % skip) d += `M${x} 0V${h}`;
+  for (let y = step; y < h; y += step) if (!skip || y % skip) d += `M0 ${y}H${w}`;
+  return d;
+}
+
 const ratioLabel = (r: number) => `${r >= 10 ? Math.round(r) : r.toFixed(1)}×`;
 
 function dimsLabel(d: Dims | undefined): string {
@@ -194,16 +202,9 @@ export function SizeCompare({ sizes, heading }: { sizes: SystemSize[]; heading?:
             <title id={`${id}-plan`}>
               {`Floor plan to scale: ${size.name} ${state === "packed" && P ? `packed, ${dimsLabel(P)}` : `deployed, ${dimsLabel(D)}`}, beside a 20-ft ISO container.`}
             </title>
-            <defs>
-              <pattern id={`${id}-grid`} width="12" height="12" patternUnits="userSpaceOnUse">
-                <path d="M12 0H0V12" fill="none" stroke="rgb(148 170 196 / 0.09)" strokeWidth="1" vectorEffect="non-scaling-stroke" />
-              </pattern>
-              <pattern id={`${id}-grid5`} width="60" height="60" patternUnits="userSpaceOnUse">
-                <rect width="60" height="60" fill={`url(#${id}-grid)`} />
-                <path d="M60 0H0V60" fill="none" stroke="rgb(148 170 196 / 0.2)" strokeWidth="1" vectorEffect="non-scaling-stroke" />
-              </pattern>
-            </defs>
-            <rect width={sceneW} height={sceneH} fill={`url(#${id}-grid5)`} />
+            {/* Grid as plain lines (SVG patterns render unreliably in Safari): 1 ft, heavier every 5 ft */}
+            <path d={gridPath(sceneW, sceneH, 12, 60)} fill="none" stroke="rgb(148 170 196 / 0.09)" strokeWidth="1" vectorEffect="non-scaling-stroke" />
+            <path d={gridPath(sceneW, sceneH, 60)} fill="none" stroke="rgb(148 170 196 / 0.2)" strokeWidth="1" vectorEffect="non-scaling-stroke" />
             {/* Deployed outline stays visible as the target */}
             <PlanShape
               size={size}
