@@ -49,6 +49,7 @@ describe("mission guide", () => {
               const a = { mission, climate, people, transport, duration } as Required<GuideAnswers>;
               const recs = recommend(a);
               expect(recs.length).toBeGreaterThanOrEqual(2);
+              expect(recs[0].fit).toBeGreaterThan(40);
               for (const r of recs.slice(0, 3)) {
                 expect(PRODUCT_CONTENT[r.slug]).toBeDefined();
                 expect(r.reasons.length).toBeGreaterThan(0);

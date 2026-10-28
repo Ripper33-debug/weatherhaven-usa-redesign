@@ -126,7 +126,7 @@ const PROFILES: Profile[] = [
       climate: "Rated from −40°F to +120°F, with 55 mph sustained winds.",
       people: "TRECC-T is sized for 6–8 people; TRECC-M, on a JLTV trailer, for 8–12.",
       "transport:air": "TRECC-P travels on a single 463L pallet.",
-      "transport:helo": "Under 60 in packed height for internal CH-47 carry.",
+      "transport:helo": "Under 60 in stowed height, so it is CH-47 airlift compatible.",
       "transport:road": "Rides a light tactical trailer or an M1289 JLTV trailer.",
       duration: "Two people expand it in under three minutes with 24VDC actuators.",
     },
@@ -141,13 +141,12 @@ const PROFILES: Profile[] = [
     duration: { rapid: 2, months: 3, years: 3 },
     facts: {
       mission: "Fits out as a command post, clinic, workshop, office or accommodation module.",
-      "mission:living": "The US Army's Containerized Kitchen program buys MECC wing walls from Weatherhaven.",
+      "mission:living": "The US Army's Containerized Kitchen program orders Weatherhaven parts, including MECC wing walls.",
       people: "Folds out from a 20-ft ISO container to 420 ft² of insulated floor.",
       "transport:sea": "Ships and stacks like any 20-ft ISO container: ISO and CSC certified, nine high.",
       "transport:road": "Moves by forklift, crane, helicopter or PLS truck.",
       "transport:helo": "Moves by forklift, crane, helicopter or PLS truck.",
       "duration:years": "Built for a 15 to 20 year field life.",
-      "duration:months": "Built for a 15 to 20 year field life.",
       "duration:rapid": "Two people deploy it in 10–15 minutes, no special skills.",
     },
   },
@@ -160,7 +159,7 @@ const PROFILES: Profile[] = [
     transport: { air: 3, helo: 2, road: 3, sea: 3 },
     duration: { rapid: 2, months: 3, years: 2 },
     facts: {
-      mission: "Room for a full headquarters: 420 ft² with a 12-ft interior height.",
+      mission: "Suits headquarters and large command posts: 420 ft² with a 12-ft interior height.",
       "transport:air": "Flies on C-130, C-17, C-5 and A400M.",
       "transport:helo": "Can be underslung by helicopter.",
       "transport:road": "Deploys in under 10 minutes, even while still on the truck.",
@@ -239,8 +238,8 @@ const PROFILES: Profile[] = [
     duration: { rapid: 3, months: 3, years: 2 },
     facts: {
       "mission:command": "The shelter behind Canada's Headquarters Shelter System: 1,435 shelters for the Canadian Armed Forces.",
-      "mission:medical": "Canada's 100-bed COVID-19 mobile health units were built from HQSS-derived shelters.",
-      "mission:response": "Canada's 100-bed COVID-19 mobile health units were built from HQSS-derived shelters.",
+      "mission:medical": "Weatherhaven's 100-bed COVID-19 mobile health units for Canada were built from HQSS-derived shelters.",
+      "mission:response": "Weatherhaven's 100-bed COVID-19 mobile health units for Canada were built from HQSS-derived shelters.",
       mission: "Scales from a 245 ft² module to a 995 ft² four-module building.",
       climate: "Rated from −51°C to +49°C, with a 20 lb/ft² snow load.",
       "transport:air": "A 995 ft² four-module building packs into 12 bags, 2,156 lb in all.",
@@ -317,11 +316,12 @@ const PROFILES: Profile[] = [
     transport: { air: 2, helo: 2, road: 1, sea: 1, remote: 2 },
     duration: { rapid: 1, months: 3, years: 3 },
     facts: {
-      "mission:research": "Housed the NASA-funded ENDURANCE under-ice robot on Lake Bonney, Antarctica.",
+      "mission:research": "Housed the NASA-funded ENDURANCE under-ice robot on West Lake Bonney, Antarctica.",
       mission: "Long-term polar base camps, in widths from 8 to 20 ft at any length.",
       climate: "In Antarctica since Weatherhaven's first camp there in 1988.",
       transport: "Light: about 1.75 lb per ft² of floor.",
-      duration: "Translucent insulation for solar gain, or foil bubble for warmth.",
+      "duration:rapid": "About 30 minutes to set up a 12 × 16 ft unit.",
+      duration: "Built for long-term polar base camps.",
     },
   },
   {
@@ -375,7 +375,7 @@ export function isComplete(a: GuideAnswers): a is Required<GuideAnswers> {
   return QUESTIONS.every((q) => !!a[q.key]);
 }
 
-/** Systems ranked for the answers. A system that scores 0 on mission, people or climate is left out. */
+/** Systems ranked for the answers. A system that scores 0 on any answer is left out. */
 export function recommend(a: Required<GuideAnswers>): Recommendation[] {
   const max = Object.values(WEIGHTS).reduce((s, w) => s + w * 3, 0);
   const ranked: Recommendation[] = [];
@@ -387,7 +387,9 @@ export function recommend(a: Required<GuideAnswers>): Recommendation[] {
       transport: p.transport[a.transport] ?? 0,
       duration: p.duration[a.duration] ?? 0,
     };
-    if (s.mission === 0 || s.people === 0 || s.climate === 0) continue;
+    // A system that can't meet any one answer (can't be moved that way, isn't rated for the climate,
+    // isn't meant to stand that long) is left out rather than ranked low.
+    if (Object.values(s).some((v) => v === 0)) continue;
     const score = (Object.keys(s) as QuestionKey[]).reduce((sum, k) => sum + WEIGHTS[k] * s[k], 0);
     // Reasons: the mission fact first, then the strongest matches, without repeats.
     const order = (Object.keys(s) as QuestionKey[])

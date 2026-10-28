@@ -19,7 +19,7 @@ export const SOF_PROGRAM_RESOURCES = [
   {
     title: "Mission Solution Builder",
     description: "Scope requirements and submit a configuration brief.",
-    href: "/mission-solution-builder",
+    href: "/mission-solution-builder?form=full",
   },
   {
     title: "Engineering contact",

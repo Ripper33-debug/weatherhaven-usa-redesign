@@ -30,12 +30,12 @@ export const DEPLOYMENT_STORIES: DeploymentStory[] = [
     when: "2021–2025",
     title: "Drilling for million-year-old ice at 3,200 m",
     body: [
-      "Beyond EPICA – Oldest Ice is a European project of twelve scientific institutions from ten nations. At Little Dome C, 3,200 m above sea level, where the average summer temperature is −35°C, the team drilled 2,800 m down to bedrock through ice more than 1.2 million years old.",
-      "The drill runs inside a Series 4 shelter built on Weatherhaven's 30-ft-wide truss frame, with a slot in the roof for the drill mast. The crew lives in 20-ft-wide Series 4 insulated shelters, which the project's field reports call its Weatherhaven mobile shelters.",
+      "Beyond EPICA – Oldest Ice is a European project of twelve scientific institutions from ten nations. At Little Dome C, 3,200 m above sea level, where the average summer temperature is −35°C, the team drilled 2,800 m down to bedrock, recovering a climate record that goes back 1.2 million years.",
+      "The drill runs inside a Series 4 shelter built on Weatherhaven's 30-ft-wide truss frame, with a slot in the roof for the drill mast, and Weatherhaven supplied 20-ft-wide Series 4 insulated shelters as crew quarters. The project's own field reports mention its Weatherhaven shelters.",
     ],
     figures: [
       { value: "2,800 m", label: "Ice core drilled to bedrock" },
-      { value: "1.2M yrs", label: "Age of the oldest ice reached" },
+      { value: "1.2M yrs", label: "Climate record in the core" },
       { value: "−35°C", label: "Average summer temperature on site" },
     ],
     systems: [{ slug: "series-4", name: "Series 4" }],
@@ -64,15 +64,15 @@ export const DEPLOYMENT_STORIES: DeploymentStory[] = [
     id: "hqss",
     sector: "defense",
     place: "Canada",
-    when: "Awarded 2017, fully operational 2021",
+    when: "Awarded 2017, deliveries from 2019",
     title: "Headquarters shelters for the Canadian Armed Forces",
     body: [
-      "In February 2017 the Government of Canada awarded Weatherhaven the Headquarters Shelter System: 1,435 shelter systems with options for 338 more, replacing up to 80% of National Defence's Tent Expandable Modular System structures. The contracts also cover up to 467 connector hubs, 442 vehicle boots, 8,500 tactical lighting kits and 100,000 m² of semi-rigid flooring.",
-      "Deliveries began in 2019 and the system reached full operational capability in 2021, with in-service support options running to 2042. Each set gives a command post its operations area, planning area, offices and utility space, and the shelters are built on Weatherhaven's RDMSS.",
+      "Canada awarded Weatherhaven the Headquarters Shelter System in January 2017, announcing it that February: 1,435 shelter systems with options for 338 more, replacing up to 80% of National Defence's Tent Expandable Modular System structures. The project also includes up to 467 connector hubs, 442 vehicle boots, 8,500 tactical lighting kits and 100,000 m² of semi-rigid flooring.",
+      "Deliveries began in 2019. Weatherhaven reports the program delivered and now in its in-service support phase, with support options running to 2042. Each set gives a command post its operations area, planning area, offices and utility space, and the shelters are built on Weatherhaven's RDMSS.",
     ],
     figures: [
       { value: "1,435", label: "Shelter systems, with options for 338 more" },
-      { value: "C$168M", label: "Both contracts, taxes in; up to C$350M with options" },
+      { value: "C$168M", label: "Both contracts, approximately, taxes in; up to C$350M (taxes excluded) with all options" },
       { value: "2042", label: "Support options run to" },
     ],
     systems: [{ slug: "rdmss", name: "RDMSS" }],
@@ -95,13 +95,13 @@ export const DEPLOYMENT_STORIES: DeploymentStory[] = [
     when: "Army parts agreement since 2021",
     title: "Expanding walls for the US Army's Containerized Kitchen",
     body: [
-      "The Army's Containerized Kitchen is a field kitchen in an expanding ISO container that can feed as many as 800 Soldiers three times a day.",
-      "Since November 2021 the Army has bought Weatherhaven parts for the Force Sustainment Containerized Kitchen program at Letterkenny Army Depot under a blanket purchase agreement, with orders on the public contract record such as “CK MECC wing wall.” Weatherhaven dates the relationship to 1994, when it delivered its first MECC units to the Army's Natick labs.",
+      "The Army's Containerized Kitchen is a portable, self-contained field kitchen that can feed as many as 800 Soldiers three times a day.",
+      "Since November 2021 the Army has bought Weatherhaven parts for the Force Sustainment Containerized Kitchen program at Letterkenny Army Depot under a blanket purchase agreement, with orders on the public contract record such as “CK MECC wing wall.” Weatherhaven's company history records its first MECC units going to US Natick Labs in 1994.",
     ],
     figures: [
       { value: "800", label: "Soldiers one kitchen can feed, three times a day" },
       { value: "2021", label: "Army purchase agreement for kitchen parts" },
-      { value: "1994", label: "First MECC units to US Army Natick labs (Weatherhaven)" },
+      { value: "1994", label: "First MECC units to US Natick Labs (Weatherhaven history)" },
     ],
     systems: [{ slug: "mecc", name: "MECC" }],
     photo: {
@@ -127,7 +127,7 @@ export const DEPLOYMENT_STORIES: DeploymentStory[] = [
     title: "TRECC, built with the US Army",
     body: [
       "TRECC was co-developed with the US Army through an Other Transaction Agreement and a Cooperative Research and Development Agreement with DEVCOM. It completed MIL-STD-810G and safety testing at Aberdeen Test Center, and TRECC-T is at technology readiness level 9.",
-      "Weatherhaven counts 43 field trials, including the Army Expeditionary Warrior Experiments in 2022 and 2025 and Operation Lethal Eagle with the 101st Airborne Division. It has since delivered two TRECC-M sanitation units on JLTV trailers to a US customer.",
+      "Weatherhaven lists 43 completed field trials, along with the Army Expeditionary Warrior Experiments in 2022 and 2025, Project Convergence 2024 and Operation Lethal Eagle with the 101st Airborne Division. It has also built two TRECC sanitation systems for a US customer, designed to integrate with JLTV platforms.",
     ],
     figures: [
       { value: "43", label: "Field trials completed" },
@@ -138,7 +138,7 @@ export const DEPLOYMENT_STORIES: DeploymentStory[] = [
     photo: {
       src: "/products/trecc/gallery/09-Trecc-Woods.jpg",
       alt: "Two TRECC shelters on trailers in a forest clearing, one expanded with its steps down",
-      caption: "TRECC on light tactical trailers. Weatherhaven photo.",
+      caption: "TRECC on light tactical trailers. Representative photo.",
     },
     attribution: "Program details as published in Weatherhaven's 2026 capabilities statement.",
     sources: [
@@ -160,12 +160,12 @@ export const DEPLOYMENT_STORIES: DeploymentStory[] = [
     title: "100-bed field hospitals for COVID-19",
     body: [
       "In April 2020 Public Services and Procurement Canada contracted Weatherhaven and SNC-Lavalin PAE to design, manage and deploy federal Mobile Health Units, each able to hold 100 hospital beds.",
-      "In January 2021 Canada sent two to Ontario after a test deployment in Brockville. The first was handed over to Sunnybrook Health Sciences Centre in Toronto on April 5, 2021, and the second went to Hamilton Health Sciences. Weatherhaven describes each unit as two 10-bed intensive care units and eight 10-bed wards with two 600-litre-per-minute oxygen plants, in shelters derived from the Headquarters Shelter System.",
+      "In January 2021 Canada committed two to Ontario, after a pre-deployment exercise in Brockville in December 2020. The first was handed over to Sunnybrook Health Sciences Centre in Toronto on April 5, 2021, and the second went to Hamilton Health Sciences. Weatherhaven describes each unit as two 10-bed intensive care units and eight 10-bed wards with two 600-litre-per-minute oxygen plants, in shelters derived from the Headquarters Shelter System.",
     ],
     figures: [
       { value: "100", label: "Hospital beds per unit" },
-      { value: "2", label: "Units sent to Ontario in 2021" },
-      { value: "1,200", label: "Litres of oxygen per minute, per unit (Weatherhaven)" },
+      { value: "2", label: "Units committed to Ontario in 2021" },
+      { value: "1,200", label: "Up to this many litres of oxygen per minute, per unit (Weatherhaven)" },
     ],
     systems: [{ slug: "rdmss", name: "RDMSS (HQSS-derived)" }],
     sources: [
@@ -186,11 +186,11 @@ export const DEPLOYMENT_STORIES: DeploymentStory[] = [
   {
     id: "nasa-endurance",
     sector: "research",
-    place: "Lake Bonney, Antarctica",
+    place: "West Lake Bonney, Antarctica",
     when: "2008–2009",
     title: "A bot house on the ice for NASA-funded robotics",
     body: [
-      "ENDURANCE, part of NASA's ASTEP program and run with Stone Aerospace, sent an autonomous underwater vehicle beneath the 12-to-15-ft ice cover of Lake Bonney, in the McMurdo Dry Valleys, to explore the 130-ft-deep lake.",
+      "ENDURANCE, part of NASA's ASTEP program, was led by the University of Illinois at Chicago in collaboration with Stone Aerospace. It sent an autonomous underwater vehicle beneath the 12-to-15-ft ice cover of West Lake Bonney, in the McMurdo Dry Valleys, to explore the 130-ft-deep lake.",
       "On the ice the team built its “Bot House” from a Polarhaven: a 16-ft-tall frame of 17 arches raised around the vehicle, which a helicopter lowered onto the platform. Weatherhaven describes the shelter as the mission's operations hub.",
     ],
     figures: [
@@ -222,9 +222,9 @@ export const DEPLOYMENT_STORIES: DeploymentStory[] = [
     sector: "defense",
     place: "Stratton Air National Guard Base, New York",
     when: "2020",
-    title: "Polar shelters for the Guard's ski-equipped LC-130s",
+    title: "Polar shelters for the Guard's LC-130 “Skibird” wing",
     body: [
-      "The New York Air National Guard's 109th Airlift Wing flies LC-130 “Skibirds,” the largest ski-equipped aircraft in the world, supporting National Science Foundation research in Antarctica and Greenland.",
+      "The New York Air National Guard's 109th Airlift Wing flies LC-130 “Skibirds,” the largest ski-equipped aircraft in the world, supporting American science in Antarctica and the National Science Foundation in Greenland.",
       "In August 2020 the wing ordered a 14 × 28 ft Polarhaven with an arctic foam floor and eight Polar Chief shelters from Weatherhaven, shipped to Stratton Air National Guard Base.",
     ],
     figures: [
@@ -254,14 +254,14 @@ export const DEPLOYMENT_STORIES: DeploymentStory[] = [
     sector: "defense",
     place: "NATO",
     when: "Deployable headquarters",
-    title: "A NATO headquarters, working within an hour",
+    title: "A NATO headquarters built to work within an hour",
     body: [
-      "For a NATO command, Weatherhaven combined EHMECC, MECC and TRECC systems into a deployable headquarters that had to ship overseas at 24 hours' notice and be operational within an hour of arriving.",
+      "For a NATO command, Weatherhaven combined EHMECC, MECC and TRECC systems into a deployable headquarters required to ship overseas at 24 hours' notice and to be operational within an hour of arriving.",
       "Inside, sixteen workstations were networked through floor boxes carrying fibre and ethernet.",
     ],
     figures: [
-      { value: "24 h", label: "Notice to deploy overseas" },
-      { value: "< 1 h", label: "From arrival to operational" },
+      { value: "24 h", label: "Required notice to deploy overseas" },
+      { value: "< 1 h", label: "Required time from arrival to operational" },
       { value: "16", label: "Networked workstations" },
     ],
     systems: [

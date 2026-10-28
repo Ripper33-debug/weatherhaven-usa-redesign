@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   answersFromParams,
   ANSWER_PARAMS,
@@ -42,6 +42,16 @@ type Step = number | "results";
 function firstOpen(a: GuideAnswers): Step {
   const i = QUESTIONS.findIndex((q) => !a[q.key]);
   return i === -1 ? "results" : i;
+}
+
+/** A link to this page with the answers in it, built from the answers rather than the address bar. */
+function shareUrl(a: GuideAnswers): string {
+  const url = new URL("/mission-solution-builder", window.location.origin);
+  for (const q of QUESTIONS) {
+    const v = a[q.key];
+    if (v) url.searchParams.set(ANSWER_PARAMS[q.key], v);
+  }
+  return url.toString();
 }
 
 function writeUrl(a: GuideAnswers, extra?: Record<string, string | null>) {
@@ -115,12 +125,14 @@ function Results({
   products,
   onEdit,
   onRestart,
+  headingRef,
 }: {
   answers: Required<GuideAnswers>;
   recs: Recommendation[];
   products: Record<string, GuideProduct>;
   onEdit: (i: number) => void;
   onRestart: () => void;
+  headingRef: React.RefObject<HTMLHeadingElement | null>;
 }) {
   const router = useRouter();
   const [copied, setCopied] = useState(false);
@@ -142,7 +154,7 @@ function Results({
 
   const copyLink = async () => {
     try {
-      await navigator.clipboard.writeText(window.location.href);
+      await navigator.clipboard.writeText(shareUrl(answers));
       setCopied(true);
       window.setTimeout(() => setCopied(false), 2500);
     } catch {
@@ -154,7 +166,9 @@ function Results({
     <div className="v2-step-in">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <h2 className="v2-h2 text-snow">Your recommended setup</h2>
+          <h2 ref={headingRef} tabIndex={-1} className="v2-h2 text-snow outline-none">
+            Your recommended setup
+          </h2>
           <p className="mt-3 max-w-[60ch] text-[1rem] leading-relaxed text-muted">
             For {labelFor("mission", answers.mission).toLowerCase()}, {labelFor("people", answers.people)} people,{" "}
             {labelFor("climate", answers.climate).toLowerCase()}, moved by {labelFor("transport", answers.transport).toLowerCase()},
@@ -300,14 +314,34 @@ function Results({
   );
 }
 
-function GuideBody({ products, initial, detailed }: { products: Record<string, GuideProduct>; initial: GuideAnswers; detailed: boolean }) {
-  const [answers, setAnswers] = useState<GuideAnswers>(initial);
-  const [step, setStep] = useState<Step>(() => firstOpen(initial));
-  const [full, setFull] = useState(detailed);
+/**
+ * The URL holds the answers (so a plan can be shared and the browser stays in step with the
+ * screen); this component only tracks which question is showing.
+ */
+function GuideBody({ products, answers, detailed }: { products: Record<string, GuideProduct>; answers: GuideAnswers; detailed: boolean }) {
+  const [step, setStep] = useState<Step>(() => firstOpen(answers));
   const topRef = useRef<HTMLDivElement>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const optionRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const advanceTimer = useRef(0);
+  const moveFocus = useRef(false);
+
+  // Never show a question past the first unanswered one, or results for an unfinished plan
+  // (the URL can change underneath, e.g. following the header link back to a blank builder).
+  const open = firstOpenIndex(answers);
+  const shown: Step = step === "results" ? (isComplete(answers) ? "results" : open) : Math.min(step, open);
 
   const recs = useMemo(() => (isComplete(answers) ? recommend(answers) : []), [answers]);
+
+  // After the visitor moves between questions, put focus on the new heading so keyboard and
+  // screen-reader users land on it (not on the first visit).
+  useEffect(() => {
+    if (!moveFocus.current) return;
+    moveFocus.current = false;
+    headingRef.current?.focus({ preventScroll: true });
+  }, [shown]);
+
+  useEffect(() => () => window.clearTimeout(advanceTimer.current), []);
 
   const scrollToTop = () => {
     const el = topRef.current;
@@ -318,41 +352,40 @@ function GuideBody({ products, initial, detailed }: { products: Record<string, G
 
   const goTo = (s: Step) => {
     window.clearTimeout(advanceTimer.current);
+    moveFocus.current = true;
     setStep(s);
     scrollToTop();
   };
 
   const choose = (key: keyof GuideAnswers, id: string, index: number) => {
     const next = { ...answers, [key]: id } as GuideAnswers;
-    setAnswers(next);
     writeUrl(next);
     // A short pause so the choice registers before the next question slides in.
     window.clearTimeout(advanceTimer.current);
     advanceTimer.current = window.setTimeout(() => {
       const after = index + 1 < QUESTIONS.length ? index + 1 : "results";
+      moveFocus.current = true;
       setStep(after === "results" && !isComplete(next) ? firstOpen(next) : after);
       scrollToTop();
     }, 220);
   };
 
   const restart = () => {
-    setAnswers({});
     writeUrl({});
     goTo(0);
   };
 
   const showFull = (on: boolean) => {
-    setFull(on);
     writeUrl(answers, { form: on ? "full" : null });
     scrollToTop();
   };
 
-  if (full) {
+  if (detailed) {
     return (
       <div ref={topRef}>
         <div className="v2-wrap pt-10">
           <button type="button" onClick={() => showFull(false)} className="v2-link text-[0.95rem]">
-            Back to the five-question builder
+            Use the five-question builder instead
           </button>
         </div>
         <MissionSolutionBuilder />
@@ -360,25 +393,42 @@ function GuideBody({ products, initial, detailed }: { products: Record<string, G
     );
   }
 
-  const q = typeof step === "number" ? QUESTIONS[step] : null;
+  const q = typeof shown === "number" ? QUESTIONS[shown] : null;
+
+  const onOptionKey = (e: React.KeyboardEvent<HTMLButtonElement>, i: number, count: number) => {
+    const delta = e.key === "ArrowRight" || e.key === "ArrowDown" ? 1 : e.key === "ArrowLeft" || e.key === "ArrowUp" ? -1 : 0;
+    const to = e.key === "Home" ? 0 : e.key === "End" ? count - 1 : delta ? (i + delta + count) % count : -1;
+    if (to < 0) return;
+    e.preventDefault();
+    optionRefs.current[to]?.focus();
+  };
 
   return (
     <div ref={topRef} className="v2-wrap scroll-mt-24 pt-10 sm:pt-14">
-      <ProgressRail answers={answers} step={step} onJump={(i) => goTo(i)} />
+      <ProgressRail answers={answers} step={shown} onJump={(i) => goTo(i)} />
 
       <div className="pt-10 sm:pt-12">
-        {q && typeof step === "number" ? (
-          <fieldset key={q.key} className="v2-step-in">
-            <legend className="v2-h2 max-w-[22ch] text-snow">{q.title}</legend>
-            <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {q.options.map((o) => {
+        {q && typeof shown === "number" ? (
+          <div key={q.key} className="v2-step-in">
+            <h2 id={`q-${q.key}`} ref={headingRef} tabIndex={-1} className="v2-h2 max-w-[22ch] text-snow outline-none">
+              {q.title}
+            </h2>
+            <div role="radiogroup" aria-labelledby={`q-${q.key}`} className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {q.options.map((o, i) => {
                 const on = answers[q.key] === o.id;
+                const selected = q.options.findIndex((x) => x.id === answers[q.key]);
                 return (
                   <button
                     key={o.id}
+                    ref={(el) => {
+                      optionRefs.current[i] = el;
+                    }}
                     type="button"
-                    aria-pressed={on}
-                    onClick={() => choose(q.key, o.id, step)}
+                    role="radio"
+                    aria-checked={on}
+                    tabIndex={(selected === -1 ? i === 0 : on) ? 0 : -1}
+                    onKeyDown={(e) => onOptionKey(e, i, q.options.length)}
+                    onClick={() => choose(q.key, o.id, shown)}
                     className={`group flex min-h-[6rem] flex-col justify-between gap-3 border p-5 text-left transition-colors ${
                       on ? "border-signal bg-signal/[0.1]" : "border-line-strong bg-hull/60 hover:border-snow/50 hover:bg-hull"
                     }`}
@@ -396,30 +446,30 @@ function GuideBody({ products, initial, detailed }: { products: Record<string, G
               })}
             </div>
             <div className="mt-10 flex flex-wrap items-center justify-between gap-4">
-              <div className="flex gap-3">
-                {step > 0 ? (
-                  <button type="button" onClick={() => goTo(step - 1)} className="v2-btn v2-btn-ghost">
+              <div className="flex flex-wrap gap-3">
+                {shown > 0 ? (
+                  <button type="button" onClick={() => goTo(shown - 1)} className="v2-btn v2-btn-ghost">
                     Back
                   </button>
                 ) : null}
-                {answers[q.key] && step < QUESTIONS.length - 1 ? (
-                  <button type="button" onClick={() => goTo(step + 1)} className="v2-btn v2-btn-ghost">
+                {answers[q.key] && shown < QUESTIONS.length - 1 ? (
+                  <button type="button" onClick={() => goTo(shown + 1)} className="v2-btn v2-btn-ghost">
                     Next
                   </button>
                 ) : null}
-                {isComplete(answers) && step === QUESTIONS.length - 1 ? (
+                {isComplete(answers) ? (
                   <button type="button" onClick={() => goTo("results")} className="v2-btn">
                     See the recommendation
                   </button>
                 ) : null}
               </div>
               <p className="v2-tnum text-[0.9rem] text-muted">
-                Question {step + 1} of {QUESTIONS.length}
+                Question {shown + 1} of {QUESTIONS.length}
               </p>
             </div>
-          </fieldset>
+          </div>
         ) : isComplete(answers) ? (
-          <Results answers={answers} recs={recs} products={products} onEdit={(i) => goTo(i)} onRestart={restart} />
+          <Results answers={answers} recs={recs} products={products} onEdit={(i) => goTo(i)} onRestart={restart} headingRef={headingRef} />
         ) : null}
       </div>
 
@@ -434,14 +484,20 @@ function GuideBody({ products, initial, detailed }: { products: Record<string, G
   );
 }
 
-/** Reads saved answers from the URL, so a finished plan can be shared as a link. */
+/** Reads the answers from the URL, so a finished plan can be shared as a link. */
 export function MissionGuide({ products }: { products: Record<string, GuideProduct> }) {
   const params = useSearchParams();
-  const initial = answersFromParams((k) => params.get(k));
-  return <GuideBody products={products} initial={initial} detailed={params.get("form") === "full"} />;
+  const answers = answersFromParams((k) => params.get(k));
+  return <GuideBody products={products} answers={answers} detailed={params.get("form") === "full"} />;
 }
 
-/** Server-rendered first question, shown until the URL has been read. */
+/** Server-rendered first question, shown only if the URL can't be read on the server. */
 export function MissionGuideFallback({ products }: { products: Record<string, GuideProduct> }) {
-  return <GuideBody products={products} initial={{}} detailed={false} />;
+  return <GuideBody products={products} answers={{}} detailed={false} />;
+}
+
+/** Page title and lead, which change when the detailed form is open. */
+export function MissionBuilderIntro({ detailedTitle, guideTitle }: { detailedTitle: React.ReactNode; guideTitle: React.ReactNode }) {
+  const params = useSearchParams();
+  return <>{params.get("form") === "full" ? detailedTitle : guideTitle}</>;
 }

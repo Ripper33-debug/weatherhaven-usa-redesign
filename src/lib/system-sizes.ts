@@ -1,10 +1,11 @@
 /**
  * Packed and deployed outside dimensions for the to-scale size drawings, in inches.
  *
- * Every number is a published Weatherhaven figure from product-content.ts (see its sources).
- * Where a dimension isn't published it is left out, and the drawing leaves that part out too,
- * rather than guessing. `l` is drawn left to right (the axis that grows the most), `w` top to
- * bottom in plan view, `h` is height.
+ * Numbers are Weatherhaven's published figures from product-content.ts (see its sources), with
+ * one stated drawing assumption: the expanding containers (MECC, EHMECC, BMECC) publish only
+ * their deployed width, so they are drawn at their container length, which the side wings
+ * don't change. Where anything else isn't published it is left out of the drawing rather than
+ * guessed. `l` is drawn left to right, `w` top to bottom in plan view, `h` is height.
  */
 export type Dims = { l: number; w: number; h?: number };
 
@@ -43,7 +44,7 @@ export const SYSTEM_SIZES: SystemSize[] = [
     profile: "box",
     areaPublished: 420,
     packedNote: "20-ft ISO container, 20 × 8 × 8 ft",
-    deployedNote: "20 ft × 243 in wide",
+    deployedNote: "243 in wide; drawn at the container's 20-ft length",
     packedShort: "Ships as a 20-ft container",
   },
   {
@@ -55,7 +56,7 @@ export const SYSTEM_SIZES: SystemSize[] = [
     profile: "box",
     areaPublished: 420,
     packedNote: "20-ft ISO container, 240 × 96 × 96 in",
-    deployedNote: "240 × 240 in, 12-ft interior height",
+    deployedNote: "240 in wide, 12-ft interior height; drawn at the container's 20-ft length",
     packedShort: "Ships as a 20-ft container",
   },
   {
@@ -67,7 +68,7 @@ export const SYSTEM_SIZES: SystemSize[] = [
     profile: "box",
     areaPublished: 210,
     packedNote: "10-ft ISO container, 120 × 96 × 96 in",
-    deployedNote: "120 × 243 in",
+    deployedNote: "243 in wide; drawn at the container's 10-ft length",
     packedShort: "Ships as a 10-ft container",
   },
   {
@@ -77,7 +78,6 @@ export const SYSTEM_SIZES: SystemSize[] = [
     packed: { l: 114, w: 94.5, h: 57 },
     deployed: { l: 181, w: 97, h: 82 },
     profile: "box",
-    areaPublished: 86,
     packedNote: "114 × 94.5 × 57 in, stowed",
     deployedNote: "181 × 97 × 82 in",
     packedShort: "Stows to 114 × 94.5 in",
@@ -89,7 +89,6 @@ export const SYSTEM_SIZES: SystemSize[] = [
     packed: { l: 89, w: 84, h: 57 },
     deployed: { l: 171, w: 72, h: 78 },
     profile: "box",
-    areaPublished: 121.6,
     packedNote: "89 × 84 × 57 in, stowed",
     deployedNote: "171 × 72 × 78 in",
     packedShort: "Stows to 89 × 84 in",
@@ -98,7 +97,7 @@ export const SYSTEM_SIZES: SystemSize[] = [
     id: "ateps",
     slug: "ateps",
     name: "ATEPS",
-    packed: { l: 84, w: 104, h: 91 },
+    packed: { l: 84, w: 104 },
     deployed: { l: 244, w: 104, h: 91 },
     profile: "box",
     packedNote: "One 463L pallet, 84 × 104 in",

@@ -15,7 +15,7 @@ import { startWhenNear } from "@/lib/start-when-near";
 const STEPS = [
   {
     title: "Rides stowed",
-    body: "On a light tactical trailer, an M1289 JLTV trailer or a single 463L pallet. Under 60 in packed height for internal CH-47 carry.",
+    body: "On a light tactical trailer, an M1289 JLTV trailer or a single 463L pallet. Under 60 in stowed height, so it is CH-47 airlift compatible.",
   },
   {
     title: "Two people, under three minutes",

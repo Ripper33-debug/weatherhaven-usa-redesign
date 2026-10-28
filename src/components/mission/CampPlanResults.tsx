@@ -61,7 +61,7 @@ export function CampPlanResults({ products }: { products: Product[] }) {
   useEffect(() => {
     const parsed = readMissionFromStorage();
     if (!parsed) {
-      router.replace("/mission-solution-builder");
+      router.replace("/mission-solution-builder?form=full");
       return;
     }
     startTransition(() => {
@@ -194,7 +194,7 @@ export function CampPlanResults({ products }: { products: Product[] }) {
               <button type="button" onClick={downloadTextExport} className={btnMarketingLink}>
                 Download summary (.txt)
               </button>
-              <Link href="/mission-solution-builder" className={btnMarketingLink}>
+              <Link href="/mission-solution-builder?form=full" className={btnMarketingLink}>
                 ← Edit mission inputs
               </Link>
             </div>

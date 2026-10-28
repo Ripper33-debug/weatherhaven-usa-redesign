@@ -115,7 +115,7 @@ export const PRODUCT_CONTENT: Record<string, ProductContent> = {
     name: "EHMECC",
     fullName: "Extended Height Mobile Expandable Container Configuration",
     description:
-      "A 20-ft ISO container that unfolds to nearly triple its floor space and raises its roof to a 12-ft interior: room for a full headquarters.",
+      "A 20-ft ISO container that unfolds to nearly triple its floor space and raises its roof to a 12-ft interior, with room for headquarters and large command posts.",
     keySpec: "420 ft² with 12-ft interior height",
     overview: [
       "The EHMECC takes the MECC's expanding design and lifts the roof, giving 144 inches of interior height across 420 ft² of floor. The extra volume suits headquarters, large command posts and equipment that won't fit under a standard ceiling.",
@@ -193,7 +193,7 @@ export const PRODUCT_CONTENT: Record<string, ProductContent> = {
       { label: "TRECC-T (light tactical trailer)", value: "86 ft² (6–8 pers.); 1,620 lb" },
       { label: "TRECC-M (M1289 JLTV trailer)", value: "121.6 ft² (8–12 pers.); 2,200 lb" },
       { label: "TRECC-P (one 463L pallet)", value: "132 ft²; 2,205 lb tare" },
-      { label: "Helicopter", value: "Under 60 in packed height for internal CH-47 carry" },
+      { label: "Helicopter", value: "Under 60 in stowed height; CH-47 airlift compatible" },
       { label: "Testing", value: "MIL-STD-810G; Aberdeen Test Center; TRL 9 (TRECC-T)" },
     ],
     configurations: [

@@ -22,7 +22,7 @@ function PlanShape({ size, dims, cx, cy, ...rest }: { size: SystemSize; dims: Di
     const r = dims.w / 2 / Math.cos(Math.PI / 8);
     const pts = Array.from({ length: 8 }, (_, i) => {
       const a = Math.PI / 8 + (i * Math.PI) / 4;
-      return `${cx + r * Math.cos(a)},${cy + r * Math.sin(a)}`;
+      return `${(cx + r * Math.cos(a)).toFixed(2)},${(cy + r * Math.sin(a)).toFixed(2)}`;
     }).join(" ");
     return <path d={`M${pts}Z`} {...rest} />;
   }
@@ -137,7 +137,7 @@ export function SizeCompare({ sizes, heading }: { sizes: SystemSize[]; heading?:
   const sideW = personX + 20 + sPad;
 
   const area = size.areaPublished ?? footprintFt2(D, size.profile);
-  const areaLabel = size.areaPublished ? `${formatFt2(area)} ft²` : `≈ ${formatFt2(area)} ft²`;
+  const areaLabel = size.areaPublished ? `${formatFt2(area)} ft²` : `≈ ${formatFt2(area)} ft² outside`;
 
   return (
     <div ref={ref} className="grid gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:gap-x-12 lg:gap-y-0">
@@ -321,7 +321,7 @@ export function SizeCompare({ sizes, heading }: { sizes: SystemSize[]; heading?:
             <dd className="v2-tnum text-[0.95rem] text-snow">{size.deployedNote}</dd>
           </div>
           <div className="grid grid-cols-[6.5rem_1fr] gap-3 border-b border-line py-3.5">
-            <dt className="text-[0.9rem] text-muted">Floor</dt>
+            <dt className="text-[0.9rem] text-muted">{size.areaPublished ? "Floor" : "Footprint"}</dt>
             <dd className="v2-tnum text-[0.95rem] text-snow">
               {areaLabel}
               {P ? (
@@ -334,7 +334,7 @@ export function SizeCompare({ sizes, heading }: { sizes: SystemSize[]; heading?:
         </dl>
         <p className="mt-4 text-[0.8rem] leading-relaxed text-muted">
           Drawn to scale from Weatherhaven&apos;s published outside dimensions.
-          {size.areaPublished ? " Floor area is the published figure." : " Floor area is worked out from those dimensions."}{" "}
+          {size.areaPublished ? " Floor area is the published figure." : " Footprint is worked out from those dimensions."}{" "}
           Outlines show overall size, not how the system unfolds.
         </p>
       </div>

@@ -249,8 +249,8 @@ function ContactEngineeringFormInner({
     <form onSubmit={handleSubmit} className="space-y-6 border border-line bg-hull p-6 sm:p-8">
       {product && (
         <div className="border border-signal/30 bg-signal/[0.06] px-4 py-3 text-sm text-muted">
-          <span className="text-white">Inquiry about {product.name}</span> — we&apos;ve prefilled context from
-          the system page.{" "}
+          <span className="text-white">Inquiry about {product.name}.</span> We&apos;ve filled in what we know; edit
+          anything before you send it.{" "}
           <Link href={`/configurable-solutions/${product.slug}`} className="text-signal hover:underline">
             View system
           </Link>

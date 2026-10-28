@@ -542,7 +542,7 @@ export default function TacticalMapClient() {
       </div>
 
       <div className="space-y-2 border-t border-white/[0.08] pt-4">
-        <Link href="/mission-solution-builder" className={`block w-full text-center ${platformBtnOutline}`}>
+        <Link href="/mission-solution-builder?form=full" className={`block w-full text-center ${platformBtnOutline}`}>
           Mission builder
         </Link>
         <Link href="/sof-solutions/secure" className={`block w-full text-center text-sm text-[#8a9099] hover:text-white`}>
