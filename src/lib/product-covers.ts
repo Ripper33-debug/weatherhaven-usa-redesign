@@ -11,7 +11,7 @@ export const PRODUCT_COVERS: Record<string, { src: string; representative?: bool
   bmecc: { src: "/products/bmecc.jpg" },
   ateps: { src: "/products/ateps.jpg" },
   hercon: { src: "/products/hercon.jpg" },
-  "non-expandable-iso-containers": { src: "/products/non-expandable-iso-containers.jpg" },
+  "non-expandable-iso-containers": { src: "/products/non-expandable-iso-containers/gallery/05-Quad-con-packup.jpg" },
   rdmss: { src: "/products/softwall-command.jpg", representative: true },
   "series-4": { src: "/products/series-4/gallery/20-Series-4-Truss.jpg" },
   mts: { src: "/products/mts.jpg" },

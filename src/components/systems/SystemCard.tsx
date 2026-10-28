@@ -6,7 +6,16 @@ import { getProductContent } from "@/lib/product-content";
 import { productCover } from "@/lib/product-covers";
 
 /** Photo-led system card with the most useful published figures. */
-export function SystemCard({ product, sizes = "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" }: { product: Product; sizes?: string }) {
+export function SystemCard({
+  product,
+  sizes = "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw",
+  blurDataURL,
+}: {
+  product: Product;
+  sizes?: string;
+  /** Tiny preview from src/data/image-blur.json, passed down by a server component. */
+  blurDataURL?: string;
+}) {
   const content = getProductContent(product.slug);
   const specs = product.specs.slice(0, 3);
   return (
@@ -19,6 +28,7 @@ export function SystemCard({ product, sizes = "(max-width: 640px) 100vw, (max-wi
             alt={`Weatherhaven ${product.name}`}
             fill
             sizes={sizes}
+            {...(blurDataURL ? { placeholder: "blur" as const, blurDataURL } : {})}
             className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
           />
         </div>

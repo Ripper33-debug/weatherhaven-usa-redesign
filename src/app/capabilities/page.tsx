@@ -6,6 +6,7 @@ import { CAPABILITY_CATEGORIES } from "@/lib/capabilitiesExplorer";
 import { pageMeta } from "@/lib/page-meta";
 import { PRODUCT_CONTENT } from "@/lib/product-content";
 import { productCover } from "@/lib/product-covers";
+import { blurProps } from "@/lib/image-blur";
 
 export const metadata: Metadata = pageMeta({
   title: "Capabilities",
@@ -75,7 +76,7 @@ export default function CapabilitiesPage() {
                         <li key={slug}>
                           <Link href={`/configurable-solutions/${slug}`} className="group flex items-center gap-3 no-underline">
                             <span className="relative h-14 w-20 shrink-0 overflow-hidden bg-hull">
-                              <Image src={productCover(slug)} alt="" fill sizes="80px" className="object-cover" />
+                              <Image src={productCover(slug)} alt="" fill sizes="80px" {...blurProps(productCover(slug))} className="object-cover" />
                             </span>
                             <span>
                               <span className="block font-semibold text-snow group-hover:text-signal">{PRODUCT_CONTENT[slug].name}</span>

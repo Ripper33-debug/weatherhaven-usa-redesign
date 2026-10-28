@@ -4,6 +4,8 @@ import { getProductContent, PRODUCT_FAMILIES } from "@/lib/product-content";
 import { contactUrl } from "@/lib/contact-url";
 import { SystemGallery } from "@/components/systems/SystemGallery";
 import { SystemCard } from "@/components/systems/SystemCard";
+import { blurProps } from "@/lib/image-blur";
+import { productCover } from "@/lib/product-covers";
 import { TreccViewer } from "@/components/systems/TreccViewer";
 import { HomeDeploySequence } from "@/components/home/v2/HomeDeploySequence";
 import { COMPANY_CONTACT, companyPhoneHref } from "@/lib/company-facts";
@@ -53,7 +55,12 @@ export function SystemDetail({
           </nav>
 
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] lg:gap-14">
-            <SystemGallery images={images} name={`Weatherhaven ${product.name}`} transitionName={`system-photo-${product.slug}`} />
+            <SystemGallery
+              images={images}
+              name={`Weatherhaven ${product.name}`}
+              transitionName={`system-photo-${product.slug}`}
+              blurs={Object.fromEntries(images.flatMap((src) => (blurProps(src).blurDataURL ? [[src, blurProps(src).blurDataURL as string]] : [])))}
+            />
             <div className="flex flex-col">
               <h1 className="v2-h1 text-snow">{product.name}</h1>
               <p className="mt-3 text-[1rem] font-medium text-signal">{product.subtitle}</p>
@@ -198,7 +205,7 @@ export function SystemDetail({
             </h2>
             <div className="mt-10 grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
               {related.map((p) => (
-                <SystemCard key={p.slug} product={p} />
+                <SystemCard key={p.slug} product={p} blurDataURL={blurProps(productCover(p.slug, p.coverImageUrl)).blurDataURL} />
               ))}
             </div>
           </div>

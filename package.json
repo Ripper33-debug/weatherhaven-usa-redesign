@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "npm run generate:gallery-manifest && next build",
     "generate:gallery-manifest": "node scripts/generate-product-gallery-manifest.mjs",
+    "generate:blur": "node scripts/generate-blur-placeholders.mjs",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",

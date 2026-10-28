@@ -4,7 +4,18 @@ import Image from "next/image";
 import { useCallback, useEffect, useRef, useState, ViewTransition } from "react";
 
 /** Product gallery: large frame, thumbnail strip, full-screen view on demand. */
-export function SystemGallery({ images, name, transitionName }: { images: string[]; name: string; transitionName?: string }) {
+export function SystemGallery({
+  images,
+  name,
+  transitionName,
+  blurs = {},
+}: {
+  images: string[];
+  name: string;
+  transitionName?: string;
+  /** src → tiny preview, passed from the server so photos fade in instead of popping. */
+  blurs?: Record<string, string>;
+}) {
   const [index, setIndex] = useState(0);
   const [full, setFull] = useState(false);
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -42,6 +53,7 @@ export function SystemGallery({ images, name, transitionName }: { images: string
             fill
             priority={index === 0}
             sizes="(max-width: 1024px) 100vw, 60vw"
+            {...(blurs[current] ? { placeholder: "blur" as const, blurDataURL: blurs[current] } : {})}
             className="object-cover"
           />
           <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-gradient-to-t from-ink/80 to-transparent px-4 pb-3 pt-10">
@@ -79,7 +91,14 @@ export function SystemGallery({ images, name, transitionName }: { images: string
                   i === index ? "opacity-100 outline outline-2 -outline-offset-2 outline-signal" : "opacity-60 hover:opacity-100"
                 }`}
               >
-                <Image src={src} alt="" fill sizes="96px" className="object-cover" />
+                <Image
+                  src={src}
+                  alt=""
+                  fill
+                  sizes="96px"
+                  {...(blurs[src] ? { placeholder: "blur" as const, blurDataURL: blurs[src] } : {})}
+                  className="object-cover"
+                />
               </button>
             </li>
           ))}

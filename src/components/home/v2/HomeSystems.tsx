@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { SYSTEMS_BY_FAMILY, type NavSystem } from "@/lib/site-nav";
+import { blurProps } from "@/lib/image-blur";
 
 function SystemList({ systems, columns = 1 }: { systems: NavSystem[]; columns?: 1 | 2 }) {
   return (
@@ -49,6 +50,7 @@ export function HomeSystems() {
             <Image
               src={lead.cover}
               alt="Weatherhaven expandable container command post lit at dusk"
+              {...blurProps(lead.cover)}
               fill
               sizes="(max-width: 1024px) 100vw, 55vw"
               className="object-cover transition-transform duration-700 group-hover:scale-[1.02]"
@@ -74,6 +76,7 @@ export function HomeSystems() {
                 <Image
                   src={family.cover}
                   alt={`Weatherhaven ${family.name.toLowerCase()}`}
+                  {...blurProps(family.cover)}
                   fill
                   sizes="(max-width: 768px) 100vw, 33vw"
                   className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"

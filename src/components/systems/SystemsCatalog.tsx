@@ -49,14 +49,25 @@ function Select<T extends string>({
   );
 }
 
-export function SystemsCatalog({ products }: { products: Product[] }) {
-  const params = useSearchParams();
-  // A ?family= link (homepage, menu) sets the starting filter; chip clicks are local state, so they
-  // don't trigger a route update (and its page cross-fade). A new ?family= from a link wins again.
-  const familyParam = params.get("family");
+type CatalogProps = { products: Product[]; blurs?: Record<string, string> };
+
+/** Reads ?family= from the URL (needs a Suspense boundary; see SystemsCatalogFallback). */
+export function SystemsCatalog(props: CatalogProps) {
+  const familyParam = useSearchParams().get("family");
   const urlFamily: FamilyFilter = PRODUCT_FAMILIES.some((f) => f.id === familyParam)
     ? (familyParam as ProductFamily)
     : "all";
+  return <CatalogBody {...props} urlFamily={urlFamily} />;
+}
+
+/** Server-rendered catalog (all systems) shown until the URL is read, so the grid is in the HTML. */
+export function SystemsCatalogFallback(props: CatalogProps) {
+  return <CatalogBody {...props} urlFamily="all" />;
+}
+
+function CatalogBody({ products, blurs = {}, urlFamily }: CatalogProps & { urlFamily: FamilyFilter }) {
+  // A ?family= link (homepage, menu) sets the starting filter; chip clicks are local state, so they
+  // don't trigger a route update (and its page cross-fade). A new ?family= from a link wins again.
   const [picked, setPicked] = useState<{ value: FamilyFilter; forUrl: FamilyFilter } | null>(null);
   const family: FamilyFilter = picked && picked.forUrl === urlFamily ? picked.value : urlFamily;
   const [mission, setMission] = useState<ProductFilterMission>("all");
@@ -168,7 +179,7 @@ export function SystemsCatalog({ products }: { products: Product[] }) {
             </div>
             <div className="mt-8 grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
               {g.items.map((p) => (
-                <SystemCard key={p.slug} product={p} />
+                <SystemCard key={p.slug} product={p} blurDataURL={blurs[p.slug]} />
               ))}
             </div>
           </section>
@@ -178,7 +189,7 @@ export function SystemsCatalog({ products }: { products: Product[] }) {
             <h2 className="v2-h2 border-b border-line pb-5 text-snow">More systems</h2>
             <div className="mt-8 grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
               {ungrouped.map((p) => (
-                <SystemCard key={p.slug} product={p} />
+                <SystemCard key={p.slug} product={p} blurDataURL={blurs[p.slug]} />
               ))}
             </div>
           </section>

@@ -3,7 +3,9 @@ import { pageMeta } from "@/lib/page-meta";
 import Link from "next/link";
 import { Suspense } from "react";
 import { listPublishedProducts } from "@/app/api/_lib/catalog-products";
-import { SystemsCatalog } from "@/components/systems/SystemsCatalog";
+import { SystemsCatalog, SystemsCatalogFallback } from "@/components/systems/SystemsCatalog";
+import { blurProps } from "@/lib/image-blur";
+import { productCover } from "@/lib/product-covers";
 import { V2PageHeader } from "@/components/site/V2PageHeader";
 
 export const metadata: Metadata = pageMeta({
@@ -19,6 +21,12 @@ export const revalidate = 60;
 
 export default async function SystemsPage() {
   const products = await listPublishedProducts();
+  const blurs = Object.fromEntries(
+    products.flatMap((p) => {
+      const data = blurProps(productCover(p.slug, p.coverImageUrl)).blurDataURL;
+      return data ? [[p.slug, data]] : [];
+    }),
+  );
   return (
     <>
       <V2PageHeader
@@ -26,8 +34,8 @@ export default async function SystemsPage() {
         title="Every system, with the numbers."
         lead="Published specifications for Weatherhaven expandable containers, soft-wall, inflatable and polar shelters. Filter by family or mission, then open a system for its full spec sheet."
       />
-      <Suspense>
-        <SystemsCatalog products={products} />
+      <Suspense fallback={<SystemsCatalogFallback products={products} blurs={blurs} />}>
+        <SystemsCatalog products={products} blurs={blurs} />
       </Suspense>
       <section className="border-t border-line bg-hull py-20 sm:py-24">
         <div className="v2-wrap grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
