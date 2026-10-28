@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useClientMediaQuery } from "@/hooks/useClientMediaQuery";
@@ -15,7 +16,18 @@ type LoadState = "idle" | "loading" | "ready" | "fallback";
  * accessible way to use the builder; the scene is an illustration with a text description, and
  * its labels repeat links that are also in the results.
  */
-export function CampScene({ answers, focus, results }: { answers: GuideAnswers; focus: CampFocus; results: boolean }) {
+export function CampScene({
+  answers,
+  focus,
+  results,
+  photos,
+}: {
+  answers: GuideAnswers;
+  focus: CampFocus;
+  results: boolean;
+  /** Product photos by slug, shown instead of the 3D camp where WebGL is off. */
+  photos?: Record<string, { src: string; blur?: string; representative?: boolean }>;
+}) {
   const router = useRouter();
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -39,13 +51,22 @@ export function CampScene({ answers, focus, results }: { answers: GuideAnswers; 
     if (!el) return;
     let cancelled = false;
     const start = async () => {
-      const mod = await import("@/lib/three/camp/campStage");
+      // Let the page settle first: loading three.js and compiling shaders is heavy.
+      await new Promise<void>((resolve) => {
+        const ric = (window as unknown as { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number }).requestIdleCallback;
+        if (ric) ric(() => resolve(), { timeout: 1200 });
+        else window.setTimeout(resolve, 250);
+      });
       if (cancelled) return;
-      if (!mod.canUseWebGL() || !canvasRef.current) {
+      const { canUseWebGL } = await import("@/lib/three/camp/webgl-check");
+      if (cancelled) return;
+      if (!canUseWebGL() || !canvasRef.current) {
         setLoad("fallback");
         return;
       }
       setLoad("loading");
+      const mod = await import("@/lib/three/camp/campStage");
+      if (cancelled) return;
       try {
         const mobile = window.matchMedia("(max-width: 1023px)").matches;
         const stage = await mod.createCampStage(canvasRef.current, {
@@ -53,10 +74,28 @@ export function CampScene({ answers, focus, results }: { answers: GuideAnswers; 
           reduced: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
           maxDpr: mobile ? 1.5 : 1.6,
           onTags: (tags: TagPos[]) => {
+            // Labels that would overlap stack upward, with a longer leader line down to the roof.
+            const placed: { l: number; r: number; t: number; b: number }[] = [];
             for (const t of tags) {
               const node = tagRefs.current.get(t.unitId);
               if (!node) continue;
+              const chip = node.firstElementChild as HTMLElement | null;
+              const w = chip?.offsetWidth ?? 90;
+              const h = 26;
+              let lift = 0;
+              if (t.visible) {
+                for (let guard = 0; guard < 6; guard++) {
+                  const box = { l: t.x - w / 2 - 4, r: t.x + w / 2 + 4, t: t.y - 24 - lift - h, b: t.y - 24 - lift };
+                  const hit = placed.find((p) => box.l < p.r && p.l < box.r && box.t < p.b && p.t < box.b);
+                  if (!hit) {
+                    placed.push(box);
+                    break;
+                  }
+                  lift += box.b - hit.t + 4;
+                }
+              }
               node.style.transform = `translate3d(${t.x}px, ${t.y}px, 0)`;
+              node.style.setProperty("--lead", `${20 + lift}px`);
               node.style.opacity = t.visible ? "1" : "0";
               node.style.visibility = t.visible ? "visible" : "hidden";
             }
@@ -96,7 +135,8 @@ export function CampScene({ answers, focus, results }: { answers: GuideAnswers; 
     if (load !== "ready" || !canvas || !stage) return;
     const ro = new ResizeObserver(() => stage.resize());
     ro.observe(canvas);
-    const io = new IntersectionObserver(([e]) => stage.setActive(e.isIntersecting));
+    // The newest entry wins (a fast scroll can queue an "out" and an "in" together).
+    const io = new IntersectionObserver((entries) => stage.setActive(entries[entries.length - 1].isIntersecting));
     io.observe(canvas);
     return () => {
       ro.disconnect();
@@ -108,6 +148,8 @@ export function CampScene({ answers, focus, results }: { answers: GuideAnswers; 
   const lead = plan.lead;
   const tags = plan.tags;
   const showTags = ready && (results ? tags : tags.slice(0, 1));
+  // Hovering any shelter lights up the label for its system.
+  const hoverName = hover ? plan.units.find((u) => u.id === hover)?.name : undefined;
 
   return (
     <div
@@ -115,10 +157,23 @@ export function CampScene({ answers, focus, results }: { answers: GuideAnswers; 
       className="relative h-full w-full overflow-hidden bg-[#0c121b]"
       onPointerDown={() => setTouched(true)}
     >
-      {/* Placeholder until the scene draws its first frame, and the stand-in without WebGL. */}
+      {/* Placeholder until the scene draws its first frame. */}
       <div aria-hidden className={`absolute inset-0 transition-opacity duration-700 ${ready ? "opacity-0" : "opacity-100"}`}>
         <div className="v2-camp-placeholder absolute inset-0" />
       </div>
+      {/* Without WebGL: a photo of the leading system once there is one. */}
+      {load === "fallback" ? (
+        lead && photos?.[lead.slug] ? (
+          <Image
+            src={photos[lead.slug].src}
+            alt={`Weatherhaven ${lead.name}`}
+            fill
+            sizes="(min-width: 1024px) 55vw, 100vw"
+            className="object-cover"
+            {...(photos[lead.slug].blur ? { placeholder: "blur" as const, blurDataURL: photos[lead.slug].blur } : {})}
+          />
+        ) : null
+      ) : null}
       <canvas
         ref={canvasRef}
         role={ready ? "img" : undefined}
@@ -131,7 +186,7 @@ export function CampScene({ answers, focus, results }: { answers: GuideAnswers; 
       {showTags
         ? showTags.map((t) => {
             const best = t.role === "best";
-            const on = hover === t.unitId;
+            const on = hoverName === t.name;
             const chip = (
               <>
                 <span
@@ -142,7 +197,7 @@ export function CampScene({ answers, focus, results }: { answers: GuideAnswers; 
                   {t.name}
                   {results && best ? <span className="ml-1.5 font-medium opacity-80">Best match</span> : null}
                 </span>
-                <span aria-hidden className={`mx-auto block h-5 w-px ${best ? "bg-signal" : "bg-snow/60"}`} />
+                <span aria-hidden className={`mx-auto block h-[var(--lead,20px)] w-px ${best ? "bg-signal" : "bg-snow/60"}`} />
                 <span aria-hidden className={`mx-auto -mt-0.5 block h-1.5 w-1.5 rounded-full ${best ? "bg-signal" : "bg-snow"}`} />
               </>
             );
@@ -165,13 +220,14 @@ export function CampScene({ answers, focus, results }: { answers: GuideAnswers; 
                 tabIndex={-1}
                 aria-hidden
                 style={style}
-                className="absolute left-0 top-0 z-10 no-underline transition-opacity duration-300"
+                className={`pointer-events-none absolute left-0 top-0 h-0 w-0 no-underline transition-opacity duration-300 ${best ? "z-20" : "z-10"}`}
               >
-                <span className="flex -translate-x-1/2 -translate-y-full flex-col">{chip}</span>
+                {/* The link box is a point at the anchor; only the label itself takes the pointer. */}
+                <span className="pointer-events-auto flex w-max -translate-x-1/2 -translate-y-full flex-col">{chip}</span>
               </a>
             ) : (
-              <div key={t.unitId} ref={ref} aria-hidden style={style} className="pointer-events-none absolute left-0 top-0 z-10 transition-opacity duration-300">
-                <span className="flex -translate-x-1/2 -translate-y-full flex-col">{chip}</span>
+              <div key={t.unitId} ref={ref} aria-hidden style={style} className="pointer-events-none absolute left-0 top-0 z-10 h-0 w-0 transition-opacity duration-300">
+                <span className="flex w-max -translate-x-1/2 -translate-y-full flex-col">{chip}</span>
               </div>
             );
           })
@@ -184,18 +240,20 @@ export function CampScene({ answers, focus, results }: { answers: GuideAnswers; 
             {results ? "Recommended camp" : "Leading match so far"}
             <span className="mt-0.5 block text-[1.15rem] font-semibold text-snow sm:text-[1.35rem] [font-variation-settings:'wdth'_110]">{lead.name}</span>
           </p>
-        ) : (
+        ) : load === "fallback" ? null : (
           <p className="max-w-[26ch] text-[0.95rem] leading-snug text-snow/85 sm:text-[1.05rem]">Your camp builds here as you answer.</p>
         )}
       </div>
 
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 bg-gradient-to-t from-ink/75 to-transparent px-4 pb-2.5 pt-8 sm:px-6 sm:pb-4">
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 flex h-[4.5rem] items-end justify-between gap-4 bg-gradient-to-t from-ink/75 to-transparent px-4 pb-2.5 sm:h-24 sm:px-6 sm:pb-4">
         <p className="max-w-[52ch] text-[0.72rem] leading-snug text-snow/70 sm:text-[0.78rem]">
           {load === "fallback"
-            ? "The 3D camp needs WebGL, which this browser has turned off. The questions and results work the same without it."
+            ? lead
+              ? `${photos?.[lead.slug]?.representative ? "Representative photo" : "Photo"} of the ${lead.name}. This browser can't show the 3D camp.`
+              : "This browser can't show the 3D camp (it needs hardware graphics). The questions and results work the same."
             : compact
-              ? "Illustration. Simplified models, illustrative quantities. Grid: 5 m."
-              : "Illustration. Simplified models drawn from published dimensions; quantities are illustrative. Grid squares are 5 m."}
+              ? "Illustration: simplified models, illustrative quantities. Major grid lines 5 m apart."
+              : "Illustration: simplified models drawn from published dimensions where they exist; quantities are illustrative. Major grid lines are 5 m apart."}
         </p>
         {ready && !touched ? (
           <p className="shrink-0 text-[0.72rem] text-snow/70 sm:text-[0.78rem]">

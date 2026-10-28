@@ -32,7 +32,7 @@ import {
   type Reveal,
 } from "@/lib/three/camp/kit";
 import { buildKind, scanFrame, treccStandIn, type KindModel } from "@/lib/three/camp/shelters";
-import { CLIMATES, createEnvironment, createProps, createWeather, type Avoid, type ClimateKey, type ClimatePreset, type Weather } from "@/lib/three/camp/environment";
+import { CLIMATES, createEnvironment, createProps, createWeather, mixPreset, type Avoid, type ClimateKey, type ClimatePreset, type Weather } from "@/lib/three/camp/environment";
 import { createArrival, type Arrival, type ArrivalMats } from "@/lib/three/camp/arrivals";
 import { figure } from "@/lib/three/camp/vehicles";
 import { buildSiteLayer, disposeGlowTexture, type SiteLayer } from "@/lib/three/camp/siteworks";
@@ -77,7 +77,7 @@ type Struct = {
   removed: boolean;
 };
 
-type Tween = { start: number; dur: number; update: (k: number) => void; done?: () => void };
+type Tween = { start: number; dur: number; update: (k: number) => void; done?: () => void; key?: string };
 
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 const TIERS: DurationId[] = ["rapid", "months", "years"];
@@ -116,14 +116,17 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
   const clock = () => (capture ? captureTime : performance.now());
   const tweens: Tween[] = [];
   let now = clock();
-  const tween = (delay: number, dur: number, update: (k: number) => void, done?: () => void) => {
+  /** Starts a tween; one with the same key replaces any still running (without finishing it). */
+  const tween = (delay: number, dur: number, update: (k: number) => void, done?: () => void, key?: string) => {
+    if (key) for (let i = tweens.length - 1; i >= 0; i--) if (tweens[i].key === key) tweens.splice(i, 1);
     if (opts.reduced) {
       update(1);
       done?.();
+      invalidate();
       return;
     }
-    tweens.push({ start: clock() + delay * 1000, dur: Math.max(1, dur * 1000), update, done });
-    kick();
+    tweens.push({ start: clock() + delay * 1000, dur: Math.max(1, dur * 1000), update, done, key });
+    invalidate();
   };
 
   // ---- shared materials -------------------------------------------------------------------
@@ -207,17 +210,6 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
   const structs = new Map<string, Struct>();
   let leadFigures: { id: string; group: THREE.Group } | null = null;
 
-  const applyFinish = (s: Struct, f: Finish, t = 1, from?: Finish) => {
-    const a = new THREE.Color(FINISH_COLORS[from ?? f].shell);
-    const b = new THREE.Color(FINISH_COLORS[f].shell);
-    s.mats.shell.color.copy(a.lerp(b, t));
-    if (!s.keepColors) {
-      const a2 = new THREE.Color(FINISH_COLORS[from ?? f].shell2);
-      const b2 = new THREE.Color(FINISH_COLORS[f].shell2);
-      s.mats.shell2.color.copy(a2.lerp(b2, t));
-    }
-  };
-
   const mount = (s: Struct, model: KindModel, delay: number) => {
     if (s.removed) return;
     s.model = model;
@@ -258,6 +250,7 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
           s.root.scale.set(1, 1, 1);
           settle();
         },
+        `s:${s.unit.id}`,
       );
       return;
     }
@@ -278,22 +271,29 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
       () => {
         settle();
         if (model.style === "expand" && s.moving.length) {
-          tween(0.05, 1.1, (k) => {
-            for (const m of s.moving) {
-              const n = m.path.length - 1;
-              const f = k * n;
-              const i = Math.min(n - 1, Math.floor(f));
-              const t = easeInOutCubic(f - i);
-              const a = m.path[i];
-              const b = m.path[i + 1];
-              m.obj.position.set(lerp(a[0], b[0], t), lerp(a[1], b[1], t), lerp(a[2], b[2], t));
-            }
-            renderer.shadowMap.needsUpdate = true;
-          });
+          tween(
+            0.05,
+            1.1,
+            (k) => {
+              for (const m of s.moving) {
+                const n = m.path.length - 1;
+                const f = k * n;
+                const i = Math.min(n - 1, Math.floor(f));
+                const t = easeInOutCubic(f - i);
+                const a = m.path[i];
+                const b = m.path[i + 1];
+                m.obj.position.set(lerp(a[0], b[0], t), lerp(a[1], b[1], t), lerp(a[2], b[2], t));
+              }
+              renderer.shadowMap.needsUpdate = true;
+            },
+            undefined,
+            `s:${s.unit.id}`,
+          );
         } else {
           for (const m of s.moving) m.obj.position.set(0, 0, 0);
         }
       },
+      `s:${s.unit.id}`,
     );
   };
 
@@ -315,7 +315,7 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
     if (m instanceof Promise) {
       void m.then((model) => {
         mount(s, model, 0);
-        kick();
+        invalidate();
       });
     } else mount(s, m, delay);
     return s;
@@ -327,10 +327,13 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
     const from = Math.min(s.y, (s.model?.h ?? 3) + 0.35);
     const finishRemoval = () => {
       camp.remove(s.root);
+      disposeOwned(s.root);
       Object.values(s.mats).forEach((m) => m.dispose());
       renderer.shadowMap.needsUpdate = true;
     };
     if (!s.model || from <= 0) {
+      // Cancel a build that hasn't shown anything yet.
+      tween(0, 0, () => undefined, undefined, `s:${s.unit.id}`);
       finishRemoval();
       return;
     }
@@ -345,17 +348,24 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
         renderer.shadowMap.needsUpdate = true;
       },
       finishRemoval,
+      `s:${s.unit.id}`,
     );
   };
 
   const moveStruct = (s: Struct, u: CampUnit) => {
     const from = s.root.position.clone();
     s.unit = u;
-    tween(0, 0.9, (k) => {
-      const e = easeInOutCubic(k);
-      s.root.position.set(lerp(from.x, u.x, e), 0, lerp(from.z, u.z, e));
-      renderer.shadowMap.needsUpdate = true;
-    });
+    tween(
+      0,
+      0.9,
+      (k) => {
+        const e = easeInOutCubic(k);
+        s.root.position.set(lerp(from.x, u.x, e), 0, lerp(from.z, u.z, e));
+        renderer.shadowMap.needsUpdate = true;
+      },
+      undefined,
+      `m:${u.id}`,
+    );
   };
 
   // ---- site works ------------------------------------------------------------------------------
@@ -425,33 +435,61 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
   const fading: Weather[] = [];
   let props: { group: THREE.Group; key: string } | null = null;
 
+  let climateFrom: ClimatePreset = CLIMATES.none;
+  let climateTo: ClimatePreset = CLIMATES.none;
+  let climateE = 1;
+
   const setClimate = (next: ClimateKey) => {
     if (next === climateKey) return;
-    const from = shownPreset;
+    // Start from what is on screen, even if the last change is still fading in.
+    const from = climateE >= 1 ? shownPreset : mixPreset(climateFrom, climateTo, climateE);
     const to = CLIMATES[next];
-    const fromFinish = finish;
+    climateFrom = from;
+    climateTo = to;
+    climateE = 0;
+    const shells = new Map([...structs.values()].map((s) => [s, { a: s.mats.shell.color.clone(), b: s.mats.shell2.color.clone() }]));
     climateKey = next;
     finish = to.finish;
     // Vehicles follow the finish too.
     vehicleMats.shell.color.setHex(FINISH_COLORS[finish === "white" ? "green" : finish].shell);
     vehicleMats.shell2.color.setHex(FINISH_COLORS[finish === "white" ? "green" : finish].shell2);
-    tween(0, 1.6, (k) => {
-      const e = easeInOutCubic(k);
-      env.blend(from, to, e);
-      renderer.setClearColor(env.fog.color);
-      for (const s of structs.values()) applyFinish(s, finish, e, fromFinish);
-    }, () => {
-      shownPreset = to;
-    });
+    const target = { a: new THREE.Color(FINISH_COLORS[finish].shell), b: new THREE.Color(FINISH_COLORS[finish].shell2) };
+    tween(
+      0,
+      1.6,
+      (k) => {
+        const e = easeInOutCubic(k);
+        climateE = k;
+        env.blend(from, to, e);
+        renderer.setClearColor(env.fog.color);
+        for (const [s, c] of shells) {
+          if (s.removed) continue;
+          s.mats.shell.color.copy(c.a).lerp(target.a, e);
+          if (!s.keepColors) s.mats.shell2.color.copy(c.b).lerp(target.b, e);
+        }
+      },
+      () => {
+        shownPreset = to;
+        climateE = 1;
+      },
+      "climate",
+    );
     // Weather: fade the old one out, the new one in.
     if (weather) {
       const old = weather;
       fading.push(old);
-      tween(0, 1.0, (k) => old.setOpacity(1 - k), () => {
-        scene.remove(old.points);
-        old.dispose();
-        fading.splice(fading.indexOf(old), 1);
-      });
+      const start = old.opacity();
+      tween(
+        0,
+        1.0,
+        (k) => old.setOpacity(start * (1 - k)),
+        () => {
+          scene.remove(old.points);
+          old.dispose();
+          fading.splice(fading.indexOf(old), 1);
+        },
+        `w:${old.id}`,
+      );
       weather = null;
     }
     if (to.weather !== "none") {
@@ -459,7 +497,7 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
       w.setOpacity(0);
       scene.add(w.points);
       weather = w;
-      tween(0.3, 1.4, (k) => w.setOpacity(k));
+      tween(0.3, 1.4, (k) => w.setOpacity(k), undefined, `w:${w.id}`);
     }
   };
 
@@ -470,8 +508,9 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
     const radius = Math.hypot(b.maxX - b.minX, b.maxZ - b.minZ) / 2;
     // Nothing tall between the usual camera positions (in front, +z) and the camp.
     const avoid: Avoid[] = [{ x0: center.x - radius - 70, x1: center.x + radius + 90, z0: center.y, z1: center.y + radius + 140 }];
-    if (arrival) {
-      const p = arrival.group.position;
+    if (arrival && plan.transportSite) {
+      // Where the arrival is going to be (it may still be sliding there).
+      const p = { x: plan.transportSite.x, z: plan.transportSite.z };
       const st = arrival.arrival.strip;
       if (st) avoid.push({ x0: st.minX + p.x - 4, x1: st.maxX + p.x + 4, z0: st.minZ + p.z - 6, z1: st.maxZ + p.z + 6 });
       avoid.push({ x: p.x + arrival.arrival.focus.x, z: p.z + arrival.arrival.focus.z, r: arrival.arrival.focus.r + 8 });
@@ -480,7 +519,7 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
       if (plan.transport === "remote") avoid.push({ x0: p.x - 10, x1: p.x + 90, z0: p.z - 10, z1: p.z + 130 });
       if (plan.transport === "sea") avoid.push({ x0: p.x - 2, x1: p.x + 20, z0: p.z - 10, z1: p.z + 140 });
     }
-    const key = `${set}|${Math.round(center.x)}|${Math.round(center.y)}|${Math.round(radius / 4)}|${plan.transport ?? ""}|${arrival ? Math.round(arrival.group.position.x) : ""}`;
+    const key = `${set}|${Math.round(center.x)}|${Math.round(center.y)}|${Math.round(radius / 4)}|${plan.transport ?? ""}|${plan.transportSite ? Math.round(plan.transportSite.x) : ""}`;
     if (props?.key === key) return;
     if (props) {
       const old = props.group;
@@ -567,6 +606,7 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
   const cam: Pose = { az: 32, el: 30, dist: 40, tx: 0, ty: 0.5, tz: 0 };
   let camTween: { from: Pose; to: Pose; start: number; dur: number } | null = null;
   let orbit = false;
+  let orbited = 0;
   let userMoved = false;
 
   const applyCamera = () => {
@@ -630,10 +670,10 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
     const camp: Box = { ...plan.bounds, h: tall };
     const lead = plan.units[0];
     const withArrival = (b: Box): Box => {
-      if (!arrival) return b;
+      if (!arrival || !plan.transportSite) return b;
       const f = arrival.arrival.focus;
-      const ax = arrival.group.position.x + f.x;
-      const az = arrival.group.position.z + f.z;
+      const ax = plan.transportSite.x + f.x;
+      const az = plan.transportSite.z + f.z;
       return union(b, { minX: ax - f.r, maxX: ax + f.r, minZ: az - f.r, maxZ: az + f.r, h: Math.max(b.h, plan.transport === "air" ? 12 : 6) });
     };
     const siteMargin = plan.duration === "years" ? 10 : plan.duration ? 4 : 2;
@@ -659,8 +699,13 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
       case "overview": {
         const box = withArrival(grow(camp, siteMargin));
         const pose = fitBox(28, 28, box);
-        // The results orbit all the way round, so fit the widest view.
-        if (focus === "results") for (let a = 0; a < 360; a += 30) pose.dist = Math.max(pose.dist, fitBox(a, 28, box).dist);
+        // The results orbit all the way round: allow for the widest view, though a corner may
+        // brush the edge for a moment rather than leave the camp small the whole time.
+        if (focus === "results") {
+          let widest = pose.dist;
+          for (let a = 0; a < 360; a += 30) widest = Math.max(widest, fitBox(a, 28, box).dist);
+          pose.dist = Math.max(pose.dist, widest * 0.9);
+        }
         return pose;
       }
     }
@@ -678,7 +723,7 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
     let d = to.az - from.az;
     d = ((((d + 180) % 360) + 360) % 360) - 180;
     camTween = { from, to: { ...to, az: from.az + d }, start: clock(), dur: 1700 };
-    kick();
+    invalidate();
   };
 
   // ---- interaction ------------------------------------------------------------------------------------
@@ -718,7 +763,7 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
         cam.az -= dx * 0.28;
         cam.el = Math.min(68, Math.max(4, cam.el + dy * 0.18));
         applyCamera();
-        kick();
+        invalidate();
       }
       return;
     }
@@ -748,13 +793,14 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
   canvas.addEventListener("pointermove", onMove);
   canvas.addEventListener("pointerup", onUp);
   canvas.addEventListener("pointercancel", onCancel);
-  canvas.addEventListener("pointerleave", () => {
+  const onLeave = () => {
     if (hoverId) {
       hoverId = null;
       opts.onHover?.(null);
     }
-  });
-  canvas.style.touchAction = "pan-y";
+  };
+  canvas.addEventListener("pointerleave", onLeave);
+  canvas.style.touchAction = "pan-y pinch-zoom";
   canvas.style.cursor = "grab";
 
   // ---- tags -------------------------------------------------------------------------------------------
@@ -782,6 +828,8 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
   let raf = 0;
   let active = true;
   let disposed = false;
+  // Something changed that must be drawn on the next frame (never skipped).
+  let dirty = true;
   let lastFrame = 0;
   let elapsed = 0;
   let skip = false;
@@ -799,10 +847,11 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
     const dt = lastFrame ? Math.min(0.1, (t - lastFrame) / 1000) : 1 / 60;
     lastFrame = t;
     const isBusy = busy();
-    // Phones: when only weather or the orbit is moving, draw every other frame.
-    skip = opts.mobile && !isBusy ? !skip : false;
+    // When only weather, the beacon or the orbit is moving, draw every other frame (30 fps).
+    skip = !isBusy && !dirty ? !skip : false;
+    const step = dt * (!isBusy && !dirty ? 2 : 1);
     if (!skip) {
-      elapsed += dt * (opts.mobile && !isBusy ? 2 : 1);
+      elapsed += step;
       for (let i = tweens.length - 1; i >= 0; i--) {
         const tw = tweens[i];
         if (t < tw.start) continue;
@@ -825,7 +874,10 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
         cam.tz = lerp(from.tz, to.tz, e);
         if (k >= 1) camTween = null;
       } else if (orbit && !userMoved) {
-        cam.az += dt * (opts.mobile ? 2 : 1) * 4;
+        cam.az += step * 4;
+        orbited += step * 4;
+        // One slow turn, then rest (no point drawing frames nobody asked for).
+        if (orbited >= 360) orbit = false;
       }
       applyCamera();
       if (arrival && arrival.start > 0) {
@@ -849,6 +901,7 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
       if (weather) weather.update(opts.reduced ? 3 : elapsed, target, px);
       for (const f of fading) f.update(elapsed, target, px);
       renderer.render(scene, camera);
+      dirty = false;
       emitTags();
     }
     if (active && (busy() || ambient())) kick();
@@ -858,6 +911,11 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
   function kick() {
     if (capture) return;
     if (!raf && active && !disposed) raf = requestAnimationFrame(frame);
+  }
+  /** Marks the view as changed and makes sure a frame is drawn. */
+  function invalidate() {
+    dirty = true;
+    kick();
   }
   if (capture) {
     w.__campFrame = (ms: number) => {
@@ -873,12 +931,21 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
-    if (plan && !userMoved) moveCamera(poseFor(plan, lastFocus), true);
+    // Refit the distance for the new shape, keeping the angle (and any move or orbit under way).
+    if (plan) {
+      const fresh = poseFor(plan, lastFocus);
+      if (camTween) camTween.to = { ...fresh, az: camTween.to.az, el: camTween.to.el };
+      else if (!userMoved) {
+        cam.dist = fresh.dist;
+        applyCamera();
+      }
+    }
     lastTags = "";
-    kick();
+    invalidate();
   };
 
   let lastFocus: CampFocus = "empty";
+  let lastOrbitFocus: CampFocus = "empty";
   let firstPlan = true;
 
   const setPlan = (next: CampPlan, focus: CampFocus, o?: { instant?: boolean }) => {
@@ -921,9 +988,10 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
       const s = structs.get(lead.id)!;
       const g = new THREE.Group();
       const sz = KIND_SIZE[lead.kind];
-      // By the door end, a little way out.
-      [[sz.l / 2 + 2.2, 0.9], [sz.l / 2 + 3.0, -0.3], [sz.l / 2 + 1.5, -1.1]].forEach(([x, z], i) => {
+      // In front, toward the door end, clear of the walkway and the next shelter along.
+      [[sz.l / 2 - 0.8, sz.w / 2 + 2.8], [sz.l / 2 + 0.2, sz.w / 2 + 3.4], [sz.l / 2 - 1.8, sz.w / 2 + 3.3]].forEach(([x, z], i) => {
         const f = figure(s.mats, shadows, i === 0);
+        f.traverse((o) => (o.userData.ownGeometry = true));
         f.position.set(x, 0, z);
         f.rotation.y = 1.2 + i * 0.9;
         g.add(f);
@@ -936,7 +1004,7 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
     const wantBeacon = next.units.length === 0 ? 1 : 0;
     if (wantBeacon !== beaconOn) {
       const from = beaconOn;
-      tween(0, 0.6, (k) => (beaconOn = lerp(from, wantBeacon, k)), () => (beaconOn = wantBeacon));
+      tween(0, 0.6, (k) => (beaconOn = lerp(from, wantBeacon, k)), () => (beaconOn = wantBeacon), "beacon");
       if (opts.reduced) beaconOn = wantBeacon;
     }
 
@@ -952,12 +1020,17 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
     setProps(next, arrival);
 
     // Camera: show what this answer changed; sweep around the finished camp.
-    orbit = focus === "results" && !opts.reduced;
-    if (focus === "results") userMoved = false;
+    const wasResults = orbit || lastOrbitFocus === "results";
+    orbit = focus === "results" && !opts.reduced && !(wasResults && orbited >= 360);
+    if (focus === "results" && !wasResults) {
+      userMoved = false;
+      orbited = 0;
+    }
+    lastOrbitFocus = focus;
     moveCamera(poseFor(next, focus), instant || firstPlan);
     firstPlan = false;
     lastTags = "";
-    kick();
+    invalidate();
   };
 
   const onVisibility = () => {
@@ -965,7 +1038,7 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
       if (raf) cancelAnimationFrame(raf);
       raf = 0;
       lastFrame = 0;
-    } else kick();
+    } else invalidate();
   };
   document.addEventListener("visibilitychange", onVisibility);
 
@@ -986,7 +1059,7 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
     setPlan,
     setActive: (on) => {
       active = on;
-      if (on) kick();
+      if (on) invalidate();
       else {
         if (raf) cancelAnimationFrame(raf);
         raf = 0;
@@ -1003,11 +1076,15 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
       canvas.removeEventListener("pointermove", onMove);
       canvas.removeEventListener("pointerup", onUp);
       canvas.removeEventListener("pointercancel", onCancel);
+      canvas.removeEventListener("pointerleave", onLeave);
       arrival?.arrival.dispose();
       weather?.dispose();
       fading.forEach((f) => f.dispose());
       (props?.group.userData.dispose as (() => void) | undefined)?.();
-      for (const s of structs.values()) Object.values(s.mats).forEach((m) => m.dispose());
+      for (const s of structs.values()) {
+        disposeOwned(s.root);
+        Object.values(s.mats).forEach((m) => m.dispose());
+      }
       for (const l of layers.values()) {
         Object.values(l.mats).forEach((m) => m.dispose());
         l.layer.group.traverse((o) => (o as THREE.Mesh).isMesh && (o as THREE.Mesh).geometry.dispose());
@@ -1028,6 +1105,13 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
       renderer.forceContextLoss();
     },
   };
+}
+
+/** Frees geometry made for one structure only (the scale figures); shared model geometry stays. */
+function disposeOwned(root: THREE.Object3D) {
+  root.traverse((o) => {
+    if (o.userData.ownGeometry && (o as THREE.Mesh).isMesh) (o as THREE.Mesh).geometry.dispose();
+  });
 }
 
 function disposeModel(m: KindModel) {
@@ -1053,16 +1137,4 @@ function toFloat(src: THREE.BufferGeometry): THREE.BufferGeometry {
   if (src.index) g.setIndex(src.index.clone());
   if (!g.getAttribute("normal")) g.computeVertexNormals();
   return g;
-}
-
-/** WebGL availability check without keeping a context around. */
-export function canUseWebGL(): boolean {
-  try {
-    const c = document.createElement("canvas");
-    const gl = c.getContext("webgl2") || c.getContext("webgl");
-    gl?.getExtension("WEBGL_lose_context")?.loseContext();
-    return !!gl;
-  } catch {
-    return false;
-  }
 }

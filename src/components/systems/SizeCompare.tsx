@@ -148,8 +148,8 @@ export function SizeCompare({ sizes, heading }: { sizes: SystemSize[]; heading?:
   const areaLabel = size.areaPublished ? `${formatFt2(area)} ft²` : `≈ ${formatFt2(area)} ft² outside`;
 
   return (
-    <div ref={ref} className="grid gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:gap-x-12 lg:gap-y-0">
-      <div className="flex flex-col lg:col-start-2 lg:row-start-1">
+    <div ref={ref} className="grid gap-6 @4xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] @4xl:grid-rows-[auto_1fr] @4xl:gap-x-12 @4xl:gap-y-0">
+      <div className="flex flex-col @4xl:col-start-2 @4xl:row-start-1">
         {heading ? <h3 className="v2-h3 text-snow">{heading}</h3> : null}
         {sizes.length > 1 ? (
           <div role="group" aria-label="Variant" className="flex flex-wrap gap-2">
@@ -191,7 +191,7 @@ export function SizeCompare({ sizes, heading }: { sizes: SystemSize[]; heading?:
         ) : null}
       </div>
 
-      <div className="space-y-4 lg:col-start-1 lg:row-span-2 lg:row-start-1">
+      <div className="space-y-4 @4xl:col-start-1 @4xl:row-span-2 @4xl:row-start-1">
         <figure className="v2-plate v2-chamfer overflow-hidden p-3 sm:p-5">
           <svg
             viewBox={`0 0 ${sceneW} ${sceneH}`}
@@ -311,8 +311,8 @@ export function SizeCompare({ sizes, heading }: { sizes: SystemSize[]; heading?:
         ) : null}
       </div>
 
-      <div className="flex flex-col lg:col-start-2 lg:row-start-2">
-        <dl className="border-t border-line lg:mt-6">
+      <div className="flex flex-col @4xl:col-start-2 @4xl:row-start-2">
+        <dl className="border-t border-line @4xl:mt-6">
           <div className="grid grid-cols-[6.5rem_1fr] gap-3 border-b border-line py-3.5">
             <dt className="text-[0.9rem] text-muted">Packed</dt>
             <dd className="v2-tnum text-[0.95rem] text-snow">{size.packedNote}</dd>

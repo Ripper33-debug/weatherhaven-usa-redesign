@@ -360,6 +360,7 @@ function GuideBody({ products, answers, detailed }: { products: Record<string, G
   // What the last action changed, so the camp's camera can show it.
   const [focus, setFocus] = useState<CampFocus>(() => (anyAnswer(answers) ? "overview" : "empty"));
   const topRef = useRef<HTMLDivElement>(null);
+  const headRef = useRef<HTMLElement>(null);
   const sceneRef = useRef<HTMLDivElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const optionRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -373,6 +374,10 @@ function GuideBody({ products, answers, detailed }: { products: Record<string, G
   const sceneFocus: CampFocus = shown === "results" ? "results" : anyAnswer(answers) ? (focus === "empty" ? "overview" : focus) : "empty";
 
   const recs = useMemo(() => (isComplete(answers) ? recommend(answers) : []), [answers]);
+  const photos = useMemo(
+    () => Object.fromEntries(Object.values(products).map((p) => [p.slug, { src: p.cover, blur: p.blur, representative: p.representative }])),
+    [products],
+  );
 
   // After the visitor moves between questions, put focus on the new heading so keyboard and
   // screen-reader users land on it (not on the first visit).
@@ -391,8 +396,10 @@ function GuideBody({ products, answers, detailed }: { products: Record<string, G
     const phone = window.matchMedia("(max-width: 1023px)").matches;
     const scene = sceneRef.current;
     let y: number;
-    if (phone && toScene && scene) {
-      y = scene.getBoundingClientRect().top + window.scrollY - 64;
+    if (phone && toScene && headRef.current) {
+      // The scene follows the page header; measure from there, since the scene itself may still
+      // be stuck to the top of the screen.
+      y = headRef.current.getBoundingClientRect().bottom + window.scrollY - 64;
     } else {
       // On phones the scene sticks under the header, so stop below it.
       const cover = phone && scene ? 64 + scene.offsetHeight + 12 : 96;
@@ -466,9 +473,11 @@ function GuideBody({ products, answers, detailed }: { products: Record<string, G
   return (
     <section
       aria-labelledby="builder-title"
-      className="relative lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]"
+      // No scroll anchoring: the scene changes height on phones when the results arrive, and the
+      // browser would otherwise shift the page under the scroll to the finished camp.
+      className="relative [overflow-anchor:none] lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]"
     >
-      <header className="v2-pad-l px-[var(--v2-gutter)] pb-8 pt-28 sm:pt-32 lg:col-start-1 lg:row-start-1 lg:pb-10 lg:pr-12 lg:pt-36">
+      <header ref={headRef} className="v2-pad-l px-[var(--v2-gutter)] pb-8 pt-28 sm:pt-32 lg:col-start-1 lg:row-start-1 lg:pb-10 lg:pr-12 lg:pt-36">
         <Breadcrumb />
         <h1 id="builder-title" className="v2-h1 v2-h1-compact mt-6 max-w-[15ch] text-snow">
           {GUIDE_TITLE}
@@ -485,11 +494,14 @@ function GuideBody({ products, answers, detailed }: { products: Record<string, G
             atResults ? "relative h-[56svh] min-h-[320px]" : "sticky top-16 z-20 h-[38svh] min-h-[250px]"
           } border-y border-line lg:sticky lg:top-[72px] lg:z-auto lg:h-[calc(100svh-72px)] lg:min-h-[520px] lg:border-y-0 lg:border-l`}
         >
-          <CampScene answers={answers} focus={sceneFocus} results={atResults} />
+          <CampScene answers={answers} focus={sceneFocus} results={atResults} photos={photos} />
         </div>
       </div>
 
-      <div ref={topRef} className="v2-pad-l @container px-[var(--v2-gutter)] pt-8 lg:col-start-1 lg:row-start-2 lg:pr-12 lg:pt-0">
+      <div
+        ref={topRef}
+        className={`v2-pad-l @container px-[var(--v2-gutter)] pt-8 lg:col-start-1 lg:row-start-2 lg:pr-12 lg:pt-0 ${atResults ? "" : "v2-under-scene"}`}
+      >
         <ProgressRail answers={answers} step={shown} onJump={(i) => goTo(i)} />
 
         <div className="pt-10 sm:pt-12">

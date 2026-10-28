@@ -61,7 +61,7 @@ export const CLIMATES: Record<ClimateKey, ClimatePreset> = {
   },
   polar: {
     zenith: 0x0a1424, horizon: 0x40536d, glow: 0xffa070, glowStrength: 0.9, sunAz: 235, sunEl: 7,
-    groundA: 0x8d9fb3, groundB: 0xb2c1d1, groundMix: 0.45, amp: 1.4, dune: 0.35,
+    groundA: 0x9aabbf, groundB: 0xb3c1d0, groundMix: 0.45, amp: 1.4, dune: 0.35,
     key: 0xffc49a, keyIntensity: 2.0, hemiSky: 0x7f9fc8, hemiGround: 0x43546a, hemiIntensity: 0.95,
     rim: 0x9cc0ff, rimIntensity: 0.7, envIntensity: 0.32, grid: 0x23344a, gridOpacity: 0.22,
     fogNear: 0.9, fogFar: 2.6, exposure: 0.82, weather: "blizzard", props: "flags", finish: "white", label: "Polar: blowing snow, −40° and below",
@@ -102,6 +102,19 @@ export const CLIMATES: Record<ClimateKey, ClimatePreset> = {
     fogNear: 1.3, fogFar: 3.1, exposure: 1.0, weather: "none", props: "none", finish: "tan", label: "Any climate",
   },
 };
+
+/** A preset part way between two (colours and numbers blended; weather and props from `b`). */
+export function mixPreset(a: ClimatePreset, b: ClimatePreset, t: number): ClimatePreset {
+  const out = { ...b } as Record<string, unknown>;
+  for (const k of Object.keys(a) as (keyof ClimatePreset)[]) {
+    const va = a[k];
+    const vb = b[k];
+    if (typeof va !== "number" || typeof vb !== "number") continue;
+    const colour = /zenith|horizon|glow$|^ground[AB]$|^key$|hemiSky|hemiGround|^rim$|^grid$/.test(k);
+    out[k] = colour ? new THREE.Color(va).lerp(new THREE.Color(vb), t).getHex() : va + (vb - va) * t;
+  }
+  return out as ClimatePreset;
+}
 
 // ---- shared GLSL noise -----------------------------------------------------------------
 
@@ -476,9 +489,11 @@ function polarGrid(rings: number, segments: number, radius: number): THREE.Buffe
 // ---- weather ----------------------------------------------------------------------------
 
 export type Weather = {
+  id: number;
   points: THREE.Points;
   kind: WeatherKind;
   setOpacity: (o: number) => void;
+  opacity: () => number;
   update: (time: number, center: THREE.Vector3, pixelRatio: number) => void;
   dispose: () => void;
 };
@@ -490,6 +505,8 @@ const WEATHER: Record<Exclude<WeatherKind, "none">, { vel: [number, number, numb
   storm: { vel: [3, -19, 1], box: [70, 30, 70], size: 0.2, color: 0xc7d6d0, alpha: 0.42, streak: 8, sway: 0, low: 0, count: 9000 },
   dust: { vel: [8, 0.2, 2.5], box: [90, 6, 90], size: 0.13, color: 0xd9a86c, alpha: 0.45, streak: 3, sway: 0.6, low: 1, count: 7000 },
 };
+
+let weatherIds = 0;
 
 export function createWeather(kind: Exclude<WeatherKind, "none">, mobile: boolean, seed = 7): Weather {
   const w = WEATHER[kind];
@@ -559,12 +576,16 @@ export function createWeather(kind: Exclude<WeatherKind, "none">, mobile: boolea
   const points = new THREE.Points(g, mat);
   points.frustumCulled = false;
   points.renderOrder = 5;
+  let opacity = 0;
   return {
+    id: ++weatherIds,
     points,
     kind,
     setOpacity: (o) => {
+      opacity = o;
       u.uAlpha.value = w.alpha * o;
     },
+    opacity: () => opacity,
     update: (time, center, pixelRatio) => {
       u.uTime.value = time;
       u.uCenter.value.copy(center);

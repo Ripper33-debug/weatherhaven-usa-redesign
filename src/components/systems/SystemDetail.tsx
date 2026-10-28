@@ -133,7 +133,7 @@ export function SystemDetail({
                 dimensions.
               </p>
             </div>
-            <div className="mt-10">
+            <div className="@container mt-10">
               <SizeCompare sizes={sizes} />
             </div>
           </div>

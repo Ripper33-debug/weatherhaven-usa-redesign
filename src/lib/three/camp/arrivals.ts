@@ -1,8 +1,7 @@
 /**
  * "How will it get there": a short arrival scene beside the camp for each transport answer.
  * Each scene is a group plus an update(t) that poses it t seconds after it starts; t = Infinity
- * (or anything past `duration`) is the settled final state, used for reduced motion and for
- * plans loaded from a link.
+ * (or anything past `duration`) is the settled final state, used for reduced motion.
  */
 import * as THREE from "three";
 import type { ClimateId } from "@/lib/mission-guide";
