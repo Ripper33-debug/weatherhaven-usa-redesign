@@ -1,16 +1,7 @@
-type BrowserClient = ReturnType<typeof import("@/lib/supabase/client")["createClient"]>;
+import { getBrowserClient as getClient, maybeSignedIn } from "@/lib/supabase/lazy-client";
 
-// Activity tracking only applies to signed-in users. The Supabase client is a large bundle, so it
-// loads on demand, and not at all for anonymous visitors (no Supabase auth cookie).
-let clientPromise: Promise<BrowserClient> | null = null;
-function getClient() {
-  clientPromise ??= import("@/lib/supabase/client").then((m) => m.createClient());
-  return clientPromise;
-}
-function maybeSignedIn() {
-  return typeof document !== "undefined" && document.cookie.includes("-auth-token");
-}
-
+// Activity tracking only applies to signed-in users, so the Supabase client loads on demand and
+// not at all for anonymous visitors.
 let sessionId: string | null = null;
 let sessionStartTime = Date.now();
 let currentPage = "";

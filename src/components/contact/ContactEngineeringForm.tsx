@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { getBrowserClient, maybeSignedIn } from "@/lib/supabase/lazy-client";
 import { trackEvent } from "@/lib/analytics";
 import { trackLead } from "@/lib/track-lead";
 import { fetchWithCsrf } from "@/lib/csrf-client";
@@ -128,19 +128,27 @@ function ContactEngineeringFormInner({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Signed-in visitors get their name and email filled in. Anonymous visitors skip the Supabase bundle.
   useEffect(() => {
-    const supabase = createClient();
-    void supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) return;
-      const meta = user.user_metadata as { full_name?: string } | undefined;
-      const fromMeta = meta?.full_name?.trim();
-      const fromEmail = user.email?.split("@")[0]?.replace(/[._]/g, " ") ?? "";
-      setForm((f) => ({
-        ...f,
-        email: user.email ?? f.email,
-        full_name: f.full_name || fromMeta || fromEmail,
-      }));
-    });
+    if (!maybeSignedIn()) return;
+    let cancelled = false;
+    void getBrowserClient()
+      .then((supabase) => supabase.auth.getUser())
+      .then(({ data: { user } }) => {
+        if (cancelled || !user) return;
+        const meta = user.user_metadata as { full_name?: string } | undefined;
+        const fromMeta = meta?.full_name?.trim();
+        const fromEmail = user.email?.split("@")[0]?.replace(/[._]/g, " ") ?? "";
+        setForm((f) => ({
+          ...f,
+          email: user.email ?? f.email,
+          full_name: f.full_name || fromMeta || fromEmail,
+        }));
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   function patch<K extends keyof FormState>(key: K, value: FormState[K]) {
@@ -410,7 +418,12 @@ function ContactEngineeringFormInner({
  * prefill, so the page is complete in the HTML and nothing below it moves when the real one mounts.
  */
 export function ContactEngineeringFormFallback() {
-  return <ContactEngineeringFormInner urlDefaults={urlFormDefaults("", undefined, "", null)} />;
+  // inert: it can't be focused or typed into, since the real form replaces it once scripts run.
+  return (
+    <div inert>
+      <ContactEngineeringFormInner urlDefaults={urlFormDefaults("", undefined, "", null)} />
+    </div>
+  );
 }
 
 export function ContactEngineeringForm() {
