@@ -46,13 +46,22 @@ export function HomeFactory() {
   return (
     <section aria-labelledby="factory-heading" className="border-t border-line bg-hull">
       <div className="relative h-[46svh] min-h-[320px] overflow-hidden">
+        {/* Still frame as a lazy image (a video poster would download with the first screen) */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/hero/built-poster.jpg"
+          alt=""
+          aria-hidden
+          loading="lazy"
+          decoding="async"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
         <video
           ref={videoRef}
           muted
           loop
           playsInline
           preload="none"
-          poster="/hero/built-poster.jpg"
           aria-hidden
           className="absolute inset-0 h-full w-full object-cover"
         />
