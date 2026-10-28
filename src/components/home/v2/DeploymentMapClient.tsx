@@ -51,13 +51,11 @@ const FULL = (w: number, h: number) => ({ x: 0, y: 0, w, h });
 export function DeploymentMapClient({
   pins,
   theaters,
-  dotPath,
   width,
   height,
 }: {
   pins: MapPin[];
   theaters: Theater[];
-  dotPath: string;
   width: number;
   height: number;
 }) {
@@ -71,6 +69,29 @@ export function DeploymentMapClient({
   const viewRef = useRef(view);
   const rafRef = useRef(0);
   const svgRef = useRef<SVGSVGElement>(null);
+  const [dotPath, setDotPath] = useState("");
+
+  // The land dots load as the map nears the screen instead of riding in the page HTML.
+  useEffect(() => {
+    const el = svgRef.current;
+    if (!el) return;
+    let cancelled = false;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        io.disconnect();
+        void import("@/components/home/v2/world-dot-path").then((m) => {
+          if (!cancelled) setDotPath(m.worldDotPath());
+        });
+      },
+      { rootMargin: "1000px 0px" },
+    );
+    io.observe(el);
+    return () => {
+      cancelled = true;
+      io.disconnect();
+    };
+  }, []);
 
   const visible = useMemo(
     () => pins.filter((p) => (kind === "all" || p.kind === kind) && (theater === "all" || p.theater === theater)),
@@ -226,7 +247,11 @@ export function DeploymentMapClient({
             role="group"
             aria-label={`World map with ${visible.length} Weatherhaven deployment sites. Use the arrow keys to move between sites.`}
           >
-            <path d={dotPath} className="v2-map-dots" style={{ strokeWidth: 2.4 * Math.max(scale, 0.8) }} />
+            <path
+              d={dotPath || "M0 0"}
+              className="v2-map-dots"
+              style={{ strokeWidth: 2.4 * Math.max(scale, 0.8), opacity: dotPath ? 1 : 0, transition: "opacity 600ms ease" }}
+            />
             {visible.map((p) => {
               const active = p.id === selected?.id;
               return (

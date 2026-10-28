@@ -92,10 +92,6 @@ export function HomeDeploymentMap() {
   const theaters = REGIONS.filter((r) => pins.some((p) => p.theater === r.id)).map((r) => ({ id: r.id, label: r.label }));
 
   // Build the dot path once on the server: one path, round caps, zero-length segments.
-  const dots = worldDots.dots as number[];
-  let d = "";
-  for (let i = 0; i < dots.length; i += 2) d += `M${dots[i]} ${dots[i + 1]}h0`;
-
   return (
     <section id="deployments" aria-labelledby="map-heading" className="scroll-mt-20 border-t border-line bg-ink py-20 sm:py-28">
       <div className="v2-wrap">
@@ -111,7 +107,6 @@ export function HomeDeploymentMap() {
         <DeploymentMapClient
           pins={pins}
           theaters={theaters}
-          dotPath={d}
           width={worldDots.width}
           height={worldDots.height}
         />

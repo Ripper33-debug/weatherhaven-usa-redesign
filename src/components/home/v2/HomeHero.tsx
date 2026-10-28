@@ -88,7 +88,7 @@ export function HomeHero() {
       />
 
       <div className="v2-wrap pb-28 pt-32 sm:pb-20 lg:pb-24">
-        <h1 className="v2-display v2-rise text-snow">
+        <h1 className="v2-display v2-rise-hero text-snow">
           <span className="lg:block">Ships in a container. </span>
           <span className="lg:block">Stands up in minutes.</span>
         </h1>

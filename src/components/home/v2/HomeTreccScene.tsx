@@ -6,6 +6,7 @@ import { useClientMediaQuery } from "@/hooks/useClientMediaQuery";
 import type { CameraPose, TreccStage } from "@/lib/three/treccStage";
 import type { TreccFinish } from "@/lib/three/treccFinishes";
 import { TreccFinishPicker } from "@/components/three/TreccFinishPicker";
+import { startWhenNear } from "@/lib/start-when-near";
 
 /**
  * Scroll-driven 3D TRECC: stowed → orange scan reveals the deployed shelter → orbit.
@@ -84,7 +85,6 @@ export function HomeTreccScene() {
     const el = sectionRef.current;
     if (!el) return;
     let cancelled = false;
-    let io: IntersectionObserver | null = null;
     const start = async () => {
       const { canUseWebGL, createTreccStage } = await import("@/lib/three/treccStage");
       if (cancelled) return;
@@ -105,30 +105,10 @@ export function HomeTreccScene() {
         if (!cancelled) setLoad("fallback");
       }
     };
-    const arm = () => {
-      window.removeEventListener("scroll", arm);
-      if (cancelled || io) return;
-      io = new IntersectionObserver(
-        ([entry]) => {
-          if (!entry.isIntersecting) return;
-          io?.disconnect();
-          void start();
-        },
-        { rootMargin: "100% 0px" },
-      );
-      io.observe(el);
-    };
-    const afterLoad = () => {
-      if (window.scrollY > 0 || el.getBoundingClientRect().top < window.innerHeight) arm();
-      else window.addEventListener("scroll", arm, { passive: true });
-    };
-    if (document.readyState === "complete") afterLoad();
-    else window.addEventListener("load", afterLoad, { once: true });
+    const stop = startWhenNear(el, () => void start(), "100% 0px");
     return () => {
       cancelled = true;
-      io?.disconnect();
-      window.removeEventListener("load", afterLoad);
-      window.removeEventListener("scroll", arm);
+      stop();
       stageRef.current?.dispose();
       stageRef.current = null;
     };

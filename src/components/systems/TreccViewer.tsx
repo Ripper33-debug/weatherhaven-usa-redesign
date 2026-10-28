@@ -5,6 +5,7 @@ import { useClientMediaQuery } from "@/hooks/useClientMediaQuery";
 import type { TreccStage } from "@/lib/three/treccStage";
 import type { TreccFinish } from "@/lib/three/treccFinishes";
 import { TreccFinishPicker } from "@/components/three/TreccFinishPicker";
+import { startWhenNear } from "@/lib/start-when-near";
 
 type LoadState = "idle" | "loading" | "ready" | "fallback";
 
@@ -58,36 +59,31 @@ export function TreccViewer() {
     });
     onScreen.observe(el);
 
-    const loader = new IntersectionObserver(
-      async ([entry]) => {
-        if (!entry.isIntersecting) return;
-        loader.disconnect();
-        const { canUseWebGL, createTreccStage } = await import("@/lib/three/treccStage");
-        if (cancelled) return;
-        if (!canUseWebGL() || !canvasRef.current) {
-          setLoad("fallback");
+    const start = async () => {
+      const { canUseWebGL, createTreccStage } = await import("@/lib/three/treccStage");
+      if (cancelled) return;
+      if (!canUseWebGL() || !canvasRef.current) {
+        setLoad("fallback");
+        return;
+      }
+      setLoad("loading");
+      try {
+        const stage = await createTreccStage(canvasRef.current, { maxDpr: 1.75 });
+        if (cancelled) {
+          stage.dispose();
           return;
         }
-        setLoad("loading");
-        try {
-          const stage = await createTreccStage(canvasRef.current, { maxDpr: 1.75 });
-          if (cancelled) {
-            stage.dispose();
-            return;
-          }
-          stage.setCamera({ az: 34, el: 15, dist: 10.6, ty: 1.0 });
-          stage.setDeploy(1);
-          stage.enableControls(kick);
-          stageRef.current = stage;
-          setLoad("ready");
-          kick();
-        } catch {
-          if (!cancelled) setLoad("fallback");
-        }
-      },
-      { rootMargin: "800px 0px" },
-    );
-    loader.observe(el);
+        stage.setCamera({ az: 34, el: 15, dist: 10.6, ty: 1.0 });
+        stage.setDeploy(1);
+        stage.enableControls(kick);
+        stageRef.current = stage;
+        setLoad("ready");
+        kick();
+      } catch {
+        if (!cancelled) setLoad("fallback");
+      }
+    };
+    const stopLoader = startWhenNear(el, () => void start(), "50% 0px");
 
     const onResize = () => {
       stageRef.current?.resize();
@@ -96,7 +92,7 @@ export function TreccViewer() {
     window.addEventListener("resize", onResize);
     return () => {
       cancelled = true;
-      loader.disconnect();
+      stopLoader();
       onScreen.disconnect();
       window.removeEventListener("resize", onResize);
       if (raf) cancelAnimationFrame(raf);

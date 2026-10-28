@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Suspense } from "react";
-import { ContactEngineeringForm } from "@/components/contact/ContactEngineeringForm";
+import { ContactEngineeringForm, ContactEngineeringFormFallback } from "@/components/contact/ContactEngineeringForm";
 import { COMPANY_CONTACT, companyPhoneHref } from "@/lib/company-facts";
 
 export function ContactPageSections() {
@@ -16,7 +16,7 @@ export function ContactPageSections() {
             specialist.
           </p>
           <div className="mt-8">
-            <Suspense fallback={<p className="text-[0.95rem] text-muted">Loading the form</p>}>
+            <Suspense fallback={<ContactEngineeringFormFallback />}>
               <ContactEngineeringForm />
             </Suspense>
           </div>

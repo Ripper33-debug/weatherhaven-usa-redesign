@@ -35,7 +35,7 @@ export type TreccStage = {
   setShift: (fraction: number) => void;
   /** Turns on drag-to-rotate (product viewer); onChange fires whenever the view moves. */
   enableControls: (onChange?: () => void) => void;
-  /** Turns the view by some degrees (positive = clockwise from above), eased by the controls. */
+  /** Turns the model by some degrees, eased by the controls; positive turns it the way a drag to the right does. */
   turn: (degrees: number) => void;
   render: () => void;
   resize: () => void;
@@ -337,7 +337,7 @@ export async function createTreccStage(
       controls.update();
     },
     turn: (degrees) => {
-      controls?.rotateLeft((-degrees * Math.PI) / 180);
+      controls?.rotateLeft((degrees * Math.PI) / 180);
       controls?.update();
     },
     setShift: (fraction) => {

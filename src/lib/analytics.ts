@@ -1,4 +1,15 @@
-import { createClient } from "@/lib/supabase/client";
+type BrowserClient = ReturnType<typeof import("@/lib/supabase/client")["createClient"]>;
+
+// Activity tracking only applies to signed-in users. The Supabase client is a large bundle, so it
+// loads on demand, and not at all for anonymous visitors (no Supabase auth cookie).
+let clientPromise: Promise<BrowserClient> | null = null;
+function getClient() {
+  clientPromise ??= import("@/lib/supabase/client").then((m) => m.createClient());
+  return clientPromise;
+}
+function maybeSignedIn() {
+  return typeof document !== "undefined" && document.cookie.includes("-auth-token");
+}
 
 let sessionId: string | null = null;
 let sessionStartTime = Date.now();
@@ -9,15 +20,16 @@ let clickTrackerTeardown: (() => void) | null = null;
 
 async function updateLastPageTime() {
   if (!lastPageViewId) return;
-  const supabase = createClient();
+  const supabase = await getClient();
   const timeOnPage = Math.floor((Date.now() - pageStartTime) / 1000);
   await supabase.from("page_views").update({ time_on_page_seconds: timeOnPage }).eq("id", lastPageViewId);
 }
 
 export async function startSession() {
   if (sessionId) return;
+  if (!maybeSignedIn()) return;
 
-  const supabase = createClient();
+  const supabase = await getClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -52,7 +64,7 @@ export async function endSession() {
 
   await updateLastPageTime();
 
-  const supabase = createClient();
+  const supabase = await getClient();
   const duration = Math.floor((Date.now() - sessionStartTime) / 1000);
   await supabase
     .from("user_sessions")
@@ -74,8 +86,9 @@ function teardownClickTracking() {
 
 export async function initClickTracking() {
   teardownClickTracking();
+  if (!sessionId) return;
 
-  const supabase = createClient();
+  const supabase = await getClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -138,7 +151,8 @@ export async function initClickTracking() {
 }
 
 export async function trackPageView(page: string, pageTitle: string) {
-  const supabase = createClient();
+  if (!sessionId) return;
+  const supabase = await getClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -170,7 +184,8 @@ export async function trackPageView(page: string, pageTitle: string) {
 }
 
 export async function trackEvent(eventType: string, eventLabel: string) {
-  const supabase = createClient();
+  if (!sessionId) return;
+  const supabase = await getClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

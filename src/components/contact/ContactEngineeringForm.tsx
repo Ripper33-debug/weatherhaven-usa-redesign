@@ -405,6 +405,14 @@ function ContactEngineeringFormInner({
   );
 }
 
+/**
+ * Server-rendered stand-in shown until the URL is read (Suspense fallback): the same form with no
+ * prefill, so the page is complete in the HTML and nothing below it moves when the real one mounts.
+ */
+export function ContactEngineeringFormFallback() {
+  return <ContactEngineeringFormInner urlDefaults={urlFormDefaults("", undefined, "", null)} />;
+}
+
 export function ContactEngineeringForm() {
   const searchParams = useSearchParams();
   const catalog = usePublishedCatalog();
