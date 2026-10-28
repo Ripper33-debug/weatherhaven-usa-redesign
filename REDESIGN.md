@@ -32,7 +32,7 @@ To share it, deploy it as a **new** Vercel project (`npx vercel`), not the produ
   - The TRECC page has an interactive 3D model: turn it by dragging or with the turn buttons, switch between stowed and deployed, and change the finish.
   - The MECC page carries the scroll-driven technical drawing of a MECC going from 160 ft² on the truck to 420 ft² on the ground.
   - Every system with published dimensions has a to-scale drawing, packed and deployed, beside a 20-ft ISO container and a 6-ft person. The catalog ends with all of them drawn at one scale.
-- **Mission builder** (`/mission-solution-builder`): five plain questions (mission, climate, people, transport, how long it stays up), then the best-matching systems with the published facts behind each match, the next best two, what a camp that size usually adds, and a to-scale drawing. "Send this plan to an expert" fills in the contact form. The answers live in the link, so a plan can be shared. The original detailed form is one click away at `?form=full`, and the SOF portal's links go straight to it. The scoring is in `src/lib/mission-guide.ts`; it doesn't touch the camp planner the SOF portal uses.
+- **Mission builder** (`/mission-solution-builder`): five plain questions (mission, climate, people, transport, how long it stays up), then the best-matching systems with the published facts behind each match, the next best two, what a camp that size usually adds, and a to-scale drawing. Beside the questions, a 3D camp builds itself as you answer (see "The 3D camp" below). "Send this plan to an expert" fills in the contact form. The answers live in the link, so a plan can be shared. The original detailed form is one click away at `?form=full`, and the SOF portal's links go straight to it. The scoring is in `src/lib/mission-guide.ts`; it doesn't touch the camp planner the SOF portal uses.
 - **Deployments** (`/deployments`): eight sourced stories (Beyond EPICA ice-core drilling in Antarctica, Canada's Headquarters Shelter System, the US Army's Containerized Kitchen, TRECC, Canada's COVID-19 mobile health units, the NASA-funded ENDURANCE project, the 109th Airlift Wing, a NATO headquarters), shorter field notes and the deployment map. Each story links to its sources, figures that only Weatherhaven publishes are labelled as such, and photos that show the system rather than that deployment say "Representative photo". The data is in `src/lib/field-stories.ts`.
 - **Moving between pages:** clicking a system in the catalog morphs its photo into the product page's main photo, and other public pages cross-fade (Chrome, Edge and Safari 18+; other browsers simply change page). The SOF portal and admin don't animate.
 - **Photos:** every product photo shows a blurred preview while the full image loads, so grids never flash empty boxes. After adding product photos, run `npm run generate:blur` to refresh the previews.
@@ -42,12 +42,12 @@ To share it, deploy it as a **new** Vercel project (`npx vercel`), not the produ
 
 ## How it was checked
 
-- `npm run lint` has no errors and all 169 tests pass (8 new ones cover the mission builder's scoring across all 2,700 answer combinations). `npm run build` succeeds, including every SOF and admin route.
+- `npm run lint` has no errors and all 176 tests pass. Tests cover the mission builder's scoring and the 3D camp's layout across all 2,700 answer combinations (no two shelters overlap, the camp is always built around the builder's own best match and pairings). `npm run build` succeeds, including every SOF and admin route.
 - The SOF portal (`/sof-solutions`, `/sof-solutions/request-access`, `/sof-solutions/secure`) and `/login` were screenshotted next to the untouched original at desktop and phone widths, and they are pixel-identical.
 - Lighthouse on a local production build:
   - Desktop homepage: 98 performance, 100 accessibility, 96 best practices, 100 SEO. Desktop TRECC page: 98 / 100 / 96 / 100.
-  - Desktop deployments page: 94; desktop mission builder: 99.
-  - Simulated mid-range phone on slow 4G (scores vary a few points run to run): homepage 67–77 (it was 65–70), TRECC page 70–82, catalog 75, deployments 70–73, mission builder 85, contact 78, capabilities 88. Layout shift is 0 on every public page.
+  - Desktop deployments page: 94; desktop mission builder (with the 3D camp): 99.
+  - Simulated mid-range phone on slow 4G (scores vary a few points run to run): homepage 67–77 (it was 65–70), TRECC page 70–82, catalog 75, deployments 70–73, mission builder 85–87, contact 78, capabilities 88. Layout shift is 0 on every public page.
   - The 4 best-practices points are console errors that only happen locally (the Vercel analytics script and Supabase without keys).
 - What made phones faster: the hero headline paints on the first frame, headings no longer reflow when the page script runs, the world map's land dots and the 3D models load only as you scroll toward them, Sentry and the Supabase client load only when needed, and the factory film's still image loads lazily.
 - At 390 px, no public page scrolls sideways. Checked in Chrome, Safari (WebKit, desktop and iPhone) and Firefox, including the 3D scene, the 3D viewer and the page transitions.
@@ -60,6 +60,22 @@ To share it, deploy it as a **new** Vercel project (`npx vercel`), not the produ
 - The models only download once a visitor starts scrolling toward them, after the page and hero film have loaded. Until then, and on devices without WebGL, a still image of the same view is shown.
 - The caption says "3D model for illustration. Configuration varies by program."
 - Code: `src/lib/three/treccStage.ts` (scene, scan reveal, finishes), `src/components/home/v2/HomeTreccScene.tsx` (homepage), `src/components/systems/TreccViewer.tsx` (TRECC page).
+
+## The 3D camp (mission builder)
+
+- **What it does:** the questions sit on the left and a three.js scene fills the right half (on phones it sticks under the header while you answer). Each answer changes the camp:
+  - **Mission:** the leading system scans in from the ground with the same orange scan as the homepage TRECC. Expanding containers then open their wings and inflatables puff up. The label reads "Leading match so far" and can change as later answers come in.
+  - **Climate:** sky, terrain, light and weather cross-fade: blowing snow and route flags for polar, snow and conifers for cold, rain and trees for temperate, dunes and blowing sand for desert, heavy rain and dense trees for tropical. Shelters take the matching finish (white, green or tan).
+  - **People:** more of the leading system, plus the builder's own "a camp this size usually adds" systems (accommodation rows, TRECC sanitation, fitted ISO containers).
+  - **Transport:** a short arrival at real scale: a C-130-class airlifter lands and drops its ramp, a CH-47-class helicopter sets down a sling load, a truck convoy drives in, containers are stacked, or a snowmobile and sleds (or a utility vehicle and a team on foot) come in.
+  - **Duration:** site works: generators for days, walkways, fuel and lights for months, gravel pads, a fenced perimeter, light masts and water tanks for years.
+  - **Results:** the camera makes one slow turn around the finished camp. Each system is labelled; clicking a label or a shelter opens its product page. Drag to turn the camp at any time.
+- **Honesty about the models:** only the TRECC is a real CAD model (`public/models/trecc-camp.glb`, a 22,000-triangle cut of the CAD export, 280 KB). Every other system is a simplified model drawn to Weatherhaven's published dimensions. Where a size isn't published, it is estimated and says so in the code (`KIND_SIZE` in `src/lib/camp-scene-plan.ts`): MTS and HERCon sizes, RDMSS and MEX-26 heights, and the lengths chosen for Series 4 and Airmax HP. Quantities are illustrative. The caption under the scene says both.
+- **The camp matches the results:** the scene is built from the same scoring as the recommendation (`rankPartial` in `src/lib/mission-guide.ts` equals `recommend` once all five answers are in), so the 3D best match is always the results' best match.
+- **Performance:** Lighthouse runs Chrome without a graphics chip, so it gets the photo fallback and its mission-builder scores don't include the 3D. On real devices, three.js loads only after the page has loaded and gone idle, and the scene draws frames only while something moves (weather and the final turn run at 30 fps, and nothing draws when the scene is off screen or the tab is hidden). Browsers without hardware graphics (WebGL off, or software rendering such as SwiftShader or Windows' Basic Render Driver) skip the 3D entirely and show a photo of the leading system; the questions and results work the same. Reduced-motion settings show each step finished, without animation.
+- **Checked:** every system's model, every climate and every arrival were screenshotted; the flow was clicked through in Chrome and Safari (WebKit) on desktop and iPhone sizes; Firefox's test browser here has no WebGL, so in Firefox only the photo fallback was seen (not the 3D); layout has no sideways scroll at 390 px; labels and shelters link to the right product pages; an independent code review's findings were fixed.
+- **Code:** `src/lib/camp-scene-plan.ts` (what goes where, tested), `src/lib/three/camp/` (`campStage.ts` runs the scene; `shelters.ts`, `vehicles.ts`, `environment.ts`, `arrivals.ts`, `siteworks.ts` build it), `src/components/mission/CampScene.tsx` (labels, captions, fallback).
+- **More real models:** any system with a CAD export (MECC, EHMECC, RDMSS, Series 4…) can replace its simplified model the way the TRECC did, at about an hour each.
 
 ## Bringing it into the real repo
 
@@ -76,7 +92,7 @@ Then copy the new media from this folder's `public/` into the repo and commit it
 - `public/og-image.jpg` (the 1200×630 card shown when a link is shared)
 - `public/hero/hero-v2-poster.jpg`, `hero-v2-1080.mp4` and `hero-v2-720.mp4` (homepage film)
 - `public/hero/built-poster.jpg` and `built-720.mp4` (factory film)
-- everything in `public/models/` (the two TRECC models and their still images)
+- everything in `public/models/` (the TRECC models, including `trecc-camp.glb` for the 3D camp, and their still images)
 
 ## Things to check before this goes live
 
@@ -97,3 +113,4 @@ Then copy the new media from this folder's `public/` into the repo and commit it
 12. **Company-sourced claims.** Some facts appear only in Weatherhaven's own material: the TRECC program details (DEVCOM agreements, Aberdeen testing, TRL 9, 43 field trials), the NATO headquarters, the 1994 Natick delivery, the EHMECC setup time ("under 10 minutes" on one page, "less than 20 minutes" on the next) and the 95+ vs 90+ countries. They're labelled on the page; having the contract or test references to hand would let buyers check them.
 13. **Fonts for the SOF portal and admin.** Geist and Playfair (about 180 KB) are preloaded on every page, including the public site that doesn't use them. Loading them only in the SOF and admin sections would speed up phones further, but it changes how those sections load, so it was left alone.
 14. **Supabase on public pages.** Public pages no longer load the Supabase client for anonymous visitors, except that Next.js prefetches the SOF portal link in the menu, and the SOF navigation loads it. That happens after the page has loaded, so it doesn't slow the first screen.
+15. **3D camp estimates.** The 3D camp draws MTS and HERCon at estimated sizes, RDMSS and MEX-26 at estimated heights, and Series 4 and Airmax HP at chosen lengths, because those aren't published. Someone who knows the products should look the models over; CAD files for any of them would replace the estimates.

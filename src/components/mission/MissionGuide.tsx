@@ -475,7 +475,7 @@ function GuideBody({ products, answers, detailed }: { products: Record<string, G
       aria-labelledby="builder-title"
       // No scroll anchoring: the scene changes height on phones when the results arrive, and the
       // browser would otherwise shift the page under the scroll to the finished camp.
-      className="relative [overflow-anchor:none] lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]"
+      className="relative [overflow-anchor:none] lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] 2xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]"
     >
       <header ref={headRef} className="v2-pad-l px-[var(--v2-gutter)] pb-8 pt-28 sm:pt-32 lg:col-start-1 lg:row-start-1 lg:pb-10 lg:pr-12 lg:pt-36">
         <Breadcrumb />
