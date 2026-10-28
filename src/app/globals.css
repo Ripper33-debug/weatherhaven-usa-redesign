@@ -1512,3 +1512,22 @@ body .wh-v2 .wh-marketing-display {
     animation: none !important;
   }
 }
+
+/* Mission builder: stand-in for the 3D camp while it loads (matches the empty site's first frame). */
+.v2-camp-placeholder {
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 60%, rgb(241 133 34 / 0.07), transparent 70%),
+    linear-gradient(180deg, #080c13 0%, #0b111a 52%, #0d131c 100%);
+}
+
+/* Mission builder: the page title sits in a column beside the 3D camp, so it runs smaller. */
+.v2-h1.v2-h1-compact {
+  font-size: clamp(2.1rem, 3.4vw, 3.35rem);
+}
+
+/* Mission builder: left column aligned with the site grid, beside a full-bleed scene. */
+@media (min-width: 1024px) {
+  .v2-pad-l {
+    padding-left: max(var(--v2-gutter), calc((100vw - var(--v2-max)) / 2 + var(--v2-gutter)));
+  }
+}

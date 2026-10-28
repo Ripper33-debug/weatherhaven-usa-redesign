@@ -21,6 +21,9 @@ import { storeContactPrefill } from "@/lib/contact-prefill";
 import { trackLead } from "@/lib/track-lead";
 import { sizesForSlug } from "@/lib/system-sizes";
 import { SizeCompare } from "@/components/systems/SizeCompare";
+import { V2PageHeader } from "@/components/site/V2PageHeader";
+import { CampScene } from "@/components/mission/CampScene";
+import type { CampFocus } from "@/lib/three/camp/campStage";
 
 const MissionSolutionBuilder = dynamic(
   () => import("@/components/mission/MissionSolutionBuilder").then((m) => m.MissionSolutionBuilder),
@@ -164,7 +167,7 @@ function Results({
 
   return (
     <div className="v2-step-in">
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+      <div className="flex flex-col gap-6">
         <div>
           <h2 ref={headingRef} tabIndex={-1} className="v2-h2 text-snow outline-none">
             Your recommended setup
@@ -186,13 +189,13 @@ function Results({
       </div>
 
       {/* Best match */}
-      <section aria-labelledby="best-heading" className="mt-10 grid gap-0 border border-line bg-hull lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
-        <div className="relative aspect-[4/3] lg:aspect-auto lg:min-h-[26rem]">
+      <section aria-labelledby="best-heading" className="mt-10 grid gap-0 border border-line bg-hull @3xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
+        <div className="relative aspect-[16/10] @3xl:aspect-auto @3xl:min-h-[26rem]">
           <Image
             src={bestProduct?.cover ?? "/products/ehmecc.jpg"}
             alt={`Weatherhaven ${best.name}${bestProduct?.representative ? " (representative photo)" : ""}`}
             fill
-            sizes="(min-width: 1024px) 55vw, 100vw"
+            sizes="(min-width: 1024px) 40vw, 100vw"
             className="object-cover"
             {...(bestProduct?.blur ? { placeholder: "blur" as const, blurDataURL: bestProduct.blur } : {})}
           />
@@ -231,7 +234,7 @@ function Results({
           <h3 id="alt-heading" className="v2-h3 text-snow">
             Also fits
           </h3>
-          <div className="mt-6 grid gap-6 md:grid-cols-2">
+          <div className="mt-6 grid gap-6 @xl:grid-cols-2">
             {alternates.map((r) => {
               const p = products[r.slug];
               return (
@@ -283,7 +286,7 @@ function Results({
           <h3 id="pair-heading" className="v2-h3 text-snow">
             A camp this size usually adds
           </h3>
-          <ul className="mt-6 grid gap-4 md:grid-cols-2">
+          <ul className="mt-6 grid gap-4 @xl:grid-cols-2">
             {pairs.map((p) => (
               <li key={p.name} className="border-l-2 border-signal pl-4">
                 <Link href={`/configurable-solutions/${p.slug}`} className="text-[1.05rem] font-semibold text-snow no-underline hover:text-signal">
@@ -296,7 +299,7 @@ function Results({
         </section>
       ) : null}
 
-      <div className="mt-16 flex flex-col gap-6 border-t border-line pt-10 lg:flex-row lg:items-center lg:justify-between">
+      <div className="mt-16 flex flex-col gap-6 border-t border-line pt-10">
         <p className="max-w-[62ch] text-[0.9rem] leading-relaxed text-muted">
           Matches are based on Weatherhaven&apos;s published specifications. A Weatherhaven expert confirms the
           configuration, quantities and price for your program, usually within 48 hours.
@@ -314,13 +317,50 @@ function Results({
   );
 }
 
+export const GUIDE_TITLE = "Plan a deployment in five questions.";
+const GUIDE_LEAD =
+  "Answer five questions and watch the camp take shape. You'll see the Weatherhaven systems that fit, with the published specs behind each match, and you can send the plan to an expert.";
+const DETAILED_TITLE = "Describe the full mission requirement.";
+const DETAILED_LEAD =
+  "Environment, function, mobility, timeline and power in one form. It builds an indicative camp layout and parts list you can send to a Weatherhaven expert. A planning tool, not a quote.";
+
+const CRUMBS = [{ href: "/", label: "Home" }, { label: "Mission builder" }];
+
+function Breadcrumb() {
+  return (
+    <nav aria-label="Breadcrumb">
+      <ol className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[0.875rem] text-muted">
+        <li>
+          <Link href="/" className="text-muted no-underline hover:text-snow">
+            Home
+          </Link>
+        </li>
+        <li className="flex items-center gap-2">
+          <span aria-hidden className="text-line-strong">
+            /
+          </span>
+          <span aria-current="page" className="text-snow">
+            Mission builder
+          </span>
+        </li>
+      </ol>
+    </nav>
+  );
+}
+
+const anyAnswer = (a: GuideAnswers) => QUESTIONS.some((q) => !!a[q.key]);
+
 /**
  * The URL holds the answers (so a plan can be shared and the browser stays in step with the
- * screen); this component only tracks which question is showing.
+ * screen); this component only tracks which question is showing and what the 3D camp should
+ * point its camera at.
  */
 function GuideBody({ products, answers, detailed }: { products: Record<string, GuideProduct>; answers: GuideAnswers; detailed: boolean }) {
   const [step, setStep] = useState<Step>(() => firstOpen(answers));
+  // What the last action changed, so the camp's camera can show it.
+  const [focus, setFocus] = useState<CampFocus>(() => (anyAnswer(answers) ? "overview" : "empty"));
   const topRef = useRef<HTMLDivElement>(null);
+  const sceneRef = useRef<HTMLDivElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const optionRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const advanceTimer = useRef(0);
@@ -330,6 +370,7 @@ function GuideBody({ products, answers, detailed }: { products: Record<string, G
   // (the URL can change underneath, e.g. following the header link back to a blank builder).
   const open = firstOpenIndex(answers);
   const shown: Step = step === "results" ? (isComplete(answers) ? "results" : open) : Math.min(step, open);
+  const sceneFocus: CampFocus = shown === "results" ? "results" : anyAnswer(answers) ? (focus === "empty" ? "overview" : focus) : "empty";
 
   const recs = useMemo(() => (isComplete(answers) ? recommend(answers) : []), [answers]);
 
@@ -343,10 +384,20 @@ function GuideBody({ products, answers, detailed }: { products: Record<string, G
 
   useEffect(() => () => window.clearTimeout(advanceTimer.current), []);
 
-  const scrollToTop = () => {
+  /** Brings the next question (or, on phones, the finished camp) into view under the header. */
+  const scrollToTop = (toScene = false) => {
     const el = topRef.current;
     if (!el) return;
-    const y = el.getBoundingClientRect().top + window.scrollY - 96;
+    const phone = window.matchMedia("(max-width: 1023px)").matches;
+    const scene = sceneRef.current;
+    let y: number;
+    if (phone && toScene && scene) {
+      y = scene.getBoundingClientRect().top + window.scrollY - 64;
+    } else {
+      // On phones the scene sticks under the header, so stop below it.
+      const cover = phone && scene ? 64 + scene.offsetHeight + 12 : 96;
+      y = el.getBoundingClientRect().top + window.scrollY - cover;
+    }
     if (window.scrollY > y + 40) window.scrollTo({ top: y, behavior: "smooth" });
   };
 
@@ -354,46 +405,55 @@ function GuideBody({ products, answers, detailed }: { products: Record<string, G
     window.clearTimeout(advanceTimer.current);
     moveFocus.current = true;
     setStep(s);
-    scrollToTop();
+    if (s === "results") setFocus("results");
+    else if (answers[QUESTIONS[s].key]) setFocus(QUESTIONS[s].key);
+    scrollToTop(s === "results");
   };
 
   const choose = (key: keyof GuideAnswers, id: string, index: number) => {
     const next = { ...answers, [key]: id } as GuideAnswers;
     writeUrl(next);
+    setFocus(key);
     // A short pause so the choice registers before the next question slides in.
     window.clearTimeout(advanceTimer.current);
     advanceTimer.current = window.setTimeout(() => {
       const after = index + 1 < QUESTIONS.length ? index + 1 : "results";
       moveFocus.current = true;
-      setStep(after === "results" && !isComplete(next) ? firstOpen(next) : after);
-      scrollToTop();
+      const to = after === "results" && !isComplete(next) ? firstOpen(next) : after;
+      setStep(to);
+      scrollToTop(to === "results");
     }, 220);
   };
 
   const restart = () => {
     writeUrl({});
+    setFocus("empty");
     goTo(0);
   };
 
   const showFull = (on: boolean) => {
     writeUrl(answers, { form: on ? "full" : null });
-    scrollToTop();
+    window.scrollTo({ top: 0 });
   };
 
   if (detailed) {
     return (
-      <div ref={topRef}>
-        <div className="v2-wrap pt-10">
-          <button type="button" onClick={() => showFull(false)} className="v2-link text-[0.95rem]">
-            Use the five-question builder instead
-          </button>
+      <>
+        <V2PageHeader crumbs={CRUMBS} title={DETAILED_TITLE} lead={DETAILED_LEAD} />
+        <div ref={topRef}>
+          <div className="v2-wrap pt-10">
+            <button type="button" onClick={() => showFull(false)} className="v2-link text-[0.95rem]">
+              Use the five-question builder instead
+            </button>
+          </div>
+          <MissionSolutionBuilder />
         </div>
-        <MissionSolutionBuilder />
-      </div>
+      </>
     );
   }
 
   const q = typeof shown === "number" ? QUESTIONS[shown] : null;
+  const atResults = shown === "results";
 
   const onOptionKey = (e: React.KeyboardEvent<HTMLButtonElement>, i: number, count: number) => {
     const delta = e.key === "ArrowRight" || e.key === "ArrowDown" ? 1 : e.key === "ArrowLeft" || e.key === "ArrowUp" ? -1 : 0;
@@ -404,83 +464,109 @@ function GuideBody({ products, answers, detailed }: { products: Record<string, G
   };
 
   return (
-    <div ref={topRef} className="v2-wrap scroll-mt-24 pt-10 sm:pt-14">
-      <ProgressRail answers={answers} step={shown} onJump={(i) => goTo(i)} />
+    <section
+      aria-labelledby="builder-title"
+      className="relative lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]"
+    >
+      <header className="v2-pad-l px-[var(--v2-gutter)] pb-8 pt-28 sm:pt-32 lg:col-start-1 lg:row-start-1 lg:pb-10 lg:pr-12 lg:pt-36">
+        <Breadcrumb />
+        <h1 id="builder-title" className="v2-h1 v2-h1-compact mt-6 max-w-[15ch] text-snow">
+          {GUIDE_TITLE}
+        </h1>
+        <p className="v2-lead mt-5 max-w-[46ch]">{GUIDE_LEAD}</p>
+      </header>
 
-      <div className="pt-10 sm:pt-12">
-        {q && typeof shown === "number" ? (
-          <div key={q.key} className="v2-step-in">
-            <h2 id={`q-${q.key}`} ref={headingRef} tabIndex={-1} className="v2-h2 max-w-[22ch] text-snow outline-none">
-              {q.title}
-            </h2>
-            <div role="radiogroup" aria-labelledby={`q-${q.key}`} className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {q.options.map((o, i) => {
-                const on = answers[q.key] === o.id;
-                const selected = q.options.findIndex((x) => x.id === answers[q.key]);
-                return (
-                  <button
-                    key={o.id}
-                    ref={(el) => {
-                      optionRefs.current[i] = el;
-                    }}
-                    type="button"
-                    role="radio"
-                    aria-checked={on}
-                    tabIndex={(selected === -1 ? i === 0 : on) ? 0 : -1}
-                    onKeyDown={(e) => onOptionKey(e, i, q.options.length)}
-                    onClick={() => choose(q.key, o.id, shown)}
-                    className={`group flex min-h-[6rem] flex-col justify-between gap-3 border p-5 text-left transition-colors ${
-                      on ? "border-signal bg-signal/[0.1]" : "border-line-strong bg-hull/60 hover:border-snow/50 hover:bg-hull"
-                    }`}
-                  >
-                    <span className="text-[1.1rem] font-semibold leading-snug text-snow">{o.label}</span>
-                    <span className="flex items-end justify-between gap-3">
-                      <span className="text-[0.9rem] leading-snug text-muted">{o.hint}</span>
-                      <span
-                        aria-hidden
-                        className={`h-4 w-4 shrink-0 rounded-full border transition-colors ${on ? "border-signal bg-signal" : "border-line-strong group-hover:border-snow/60"}`}
-                      />
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-            <div className="mt-10 flex flex-wrap items-center justify-between gap-4">
-              <div className="flex flex-wrap gap-3">
-                {shown > 0 ? (
-                  <button type="button" onClick={() => goTo(shown - 1)} className="v2-btn v2-btn-ghost">
-                    Back
-                  </button>
-                ) : null}
-                {answers[q.key] && shown < QUESTIONS.length - 1 ? (
-                  <button type="button" onClick={() => goTo(shown + 1)} className="v2-btn v2-btn-ghost">
-                    Next
-                  </button>
-                ) : null}
-                {isComplete(answers) ? (
-                  <button type="button" onClick={() => goTo("results")} className="v2-btn">
-                    See the recommendation
-                  </button>
-                ) : null}
-              </div>
-              <p className="v2-tnum text-[0.9rem] text-muted">
-                Question {shown + 1} of {QUESTIONS.length}
-              </p>
-            </div>
-          </div>
-        ) : isComplete(answers) ? (
-          <Results answers={answers} recs={recs} products={products} onEdit={(i) => goTo(i)} onRestart={restart} headingRef={headingRef} />
-        ) : null}
+      {/* The 3D camp: sticks under the header on phones while answering, fills the right half on
+          larger screens. */}
+      <div className="contents lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:block lg:pt-[72px]">
+        <div
+          ref={sceneRef}
+          className={`${
+            atResults ? "relative h-[56svh] min-h-[320px]" : "sticky top-16 z-20 h-[38svh] min-h-[250px]"
+          } border-y border-line lg:sticky lg:top-[72px] lg:z-auto lg:h-[calc(100svh-72px)] lg:min-h-[520px] lg:border-y-0 lg:border-l`}
+        >
+          <CampScene answers={answers} focus={sceneFocus} results={atResults} />
+        </div>
       </div>
 
-      <p className="mt-16 border-t border-line pt-8 text-[0.95rem] text-muted">
-        Already have a detailed requirement?{" "}
-        <button type="button" onClick={() => showFull(true)} className="v2-link">
-          Use the full requirements form
-        </button>
-        .
-      </p>
-    </div>
+      <div ref={topRef} className="v2-pad-l @container px-[var(--v2-gutter)] pt-8 lg:col-start-1 lg:row-start-2 lg:pr-12 lg:pt-0">
+        <ProgressRail answers={answers} step={shown} onJump={(i) => goTo(i)} />
+
+        <div className="pt-10 sm:pt-12">
+          {q && typeof shown === "number" ? (
+            <div key={q.key} className="v2-step-in">
+              <h2 id={`q-${q.key}`} ref={headingRef} tabIndex={-1} className="v2-h2 max-w-[22ch] text-snow outline-none">
+                {q.title}
+              </h2>
+              <div role="radiogroup" aria-labelledby={`q-${q.key}`} className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+                {q.options.map((o, i) => {
+                  const on = answers[q.key] === o.id;
+                  const selected = q.options.findIndex((x) => x.id === answers[q.key]);
+                  return (
+                    <button
+                      key={o.id}
+                      ref={(el) => {
+                        optionRefs.current[i] = el;
+                      }}
+                      type="button"
+                      role="radio"
+                      aria-checked={on}
+                      tabIndex={(selected === -1 ? i === 0 : on) ? 0 : -1}
+                      onKeyDown={(e) => onOptionKey(e, i, q.options.length)}
+                      onClick={() => choose(q.key, o.id, shown)}
+                      className={`group flex min-h-[4.75rem] flex-col justify-between gap-2 border p-4 text-left transition-colors sm:min-h-[6rem] sm:gap-3 sm:p-5 ${
+                        on ? "border-signal bg-signal/[0.1]" : "border-line-strong bg-hull/60 hover:border-snow/50 hover:bg-hull"
+                      }`}
+                    >
+                      <span className="text-[1.05rem] font-semibold leading-snug text-snow sm:text-[1.1rem]">{o.label}</span>
+                      <span className="flex items-end justify-between gap-3">
+                        <span className="text-[0.9rem] leading-snug text-muted">{o.hint}</span>
+                        <span
+                          aria-hidden
+                          className={`h-4 w-4 shrink-0 rounded-full border transition-colors ${on ? "border-signal bg-signal" : "border-line-strong group-hover:border-snow/60"}`}
+                        />
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="mt-10 flex flex-wrap items-center justify-between gap-4">
+                <div className="flex flex-wrap gap-3">
+                  {shown > 0 ? (
+                    <button type="button" onClick={() => goTo(shown - 1)} className="v2-btn v2-btn-ghost">
+                      Back
+                    </button>
+                  ) : null}
+                  {answers[q.key] && shown < QUESTIONS.length - 1 ? (
+                    <button type="button" onClick={() => goTo(shown + 1)} className="v2-btn v2-btn-ghost">
+                      Next
+                    </button>
+                  ) : null}
+                  {isComplete(answers) ? (
+                    <button type="button" onClick={() => goTo("results")} className="v2-btn">
+                      See the recommendation
+                    </button>
+                  ) : null}
+                </div>
+                <p className="v2-tnum text-[0.9rem] text-muted">
+                  Question {shown + 1} of {QUESTIONS.length}
+                </p>
+              </div>
+            </div>
+          ) : isComplete(answers) ? (
+            <Results answers={answers} recs={recs} products={products} onEdit={(i) => goTo(i)} onRestart={restart} headingRef={headingRef} />
+          ) : null}
+        </div>
+
+        <p className="mt-16 border-t border-line pt-8 text-[0.95rem] text-muted">
+          Already have a detailed requirement?{" "}
+          <button type="button" onClick={() => showFull(true)} className="v2-link">
+            Use the full requirements form
+          </button>
+          .
+        </p>
+      </div>
+    </section>
   );
 }
 
@@ -494,10 +580,4 @@ export function MissionGuide({ products }: { products: Record<string, GuideProdu
 /** Server-rendered first question, shown only if the URL can't be read on the server. */
 export function MissionGuideFallback({ products }: { products: Record<string, GuideProduct> }) {
   return <GuideBody products={products} answers={{}} detailed={false} />;
-}
-
-/** Page title and lead, which change when the detailed form is open. */
-export function MissionBuilderIntro({ detailedTitle, guideTitle }: { detailedTitle: React.ReactNode; guideTitle: React.ReactNode }) {
-  const params = useSearchParams();
-  return <>{params.get("form") === "full" ? detailedTitle : guideTitle}</>;
 }

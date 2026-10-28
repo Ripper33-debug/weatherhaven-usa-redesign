@@ -406,10 +406,43 @@ export function recommend(a: Required<GuideAnswers>): Recommendation[] {
   return ranked.sort((x, y) => y.score - x.score || x.name.localeCompare(y.name));
 }
 
+/**
+ * Ranking for a plan that is still being answered, used by the 3D camp to show the leading match
+ * as each answer comes in. Answered questions score exactly as in recommend() (and rule a system
+ * out at 0); each open question adds the system's average score across its options, so a system
+ * that fits most answers ranks ahead of one that fits few. With every question answered the
+ * open-question term is empty and the order matches recommend().
+ */
+export function rankPartial(a: GuideAnswers): { slug: string; name: string; score: number }[] {
+  const ranked: { slug: string; name: string; score: number }[] = [];
+  for (const p of PROFILES) {
+    let score = 0;
+    let out = false;
+    for (const q of QUESTIONS) {
+      const factor = p[q.key] as Partial<Record<string, Score>>;
+      const v = a[q.key];
+      if (v) {
+        const s = factor[v] ?? 0;
+        if (s === 0) {
+          out = true;
+          break;
+        }
+        score += WEIGHTS[q.key] * s;
+      } else {
+        const mean = q.options.reduce((sum, o) => sum + (factor[o.id] ?? 0), 0) / q.options.length;
+        score += WEIGHTS[q.key] * mean;
+      }
+    }
+    if (!out) ranked.push({ slug: p.slug, name: p.name, score });
+  }
+  return ranked.sort((x, y) => y.score - x.score || x.name.localeCompare(y.name));
+}
+
 export type Pairing = { slug: string; name: string; why: string };
 
-/** Systems that usually sit alongside the top picks for this kind of camp. */
-export function pairings(a: Required<GuideAnswers>, picked: string[]): Pairing[] {
+/** Systems that usually sit alongside the top picks for this kind of camp (also called with a
+ * plan that is still being answered; open answers add nothing). */
+export function pairings(a: GuideAnswers, picked: string[]): Pairing[] {
   const big = a.people === "26-100" || a.people === "101-500" || a.people === "500+";
   const out: Pairing[] = [];
   // The TRECC sanitation unit is a different job from a TRECC command post, so it can be added
