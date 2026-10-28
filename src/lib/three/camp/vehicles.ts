@@ -272,10 +272,10 @@ export function utilityVehicle(mats: MatSet, shadows: boolean): THREE.Group {
 export function figure(mats: MatSet, shadows: boolean, vest = false): THREE.Group {
   const b = new GeoBag();
   // Legs, torso, head: a slim silhouette that still reads as a person at camp scale.
-  b.add("frame", new THREE.CapsuleGeometry(0.075, 0.7, 3, 6), 0, 0.43, -0.075);
-  b.add("frame", new THREE.CapsuleGeometry(0.075, 0.7, 3, 6), 0, 0.43, 0.075);
-  b.add("frame", new THREE.CapsuleGeometry(0.17, 0.4, 3, 8), 0, 1.17, 0, 0, 0, 0, 0.75, 1, 1);
-  b.add("frame", new THREE.SphereGeometry(0.105, 10, 8), 0, 1.68, 0);
+  b.add("dark", new THREE.CapsuleGeometry(0.075, 0.7, 3, 6), 0, 0.43, -0.075);
+  b.add("dark", new THREE.CapsuleGeometry(0.075, 0.7, 3, 6), 0, 0.43, 0.075);
+  b.add("dark", new THREE.CapsuleGeometry(0.17, 0.4, 3, 8), 0, 1.17, 0, 0, 0, 0, 0.75, 1, 1);
+  b.add("dark", new THREE.SphereGeometry(0.105, 10, 8), 0, 1.68, 0);
   if (vest) b.add("accent", new THREE.CylinderGeometry(0.175, 0.175, 0.3, 10), 0, 1.2, 0, 0, 0, 0, 0.76, 1, 1);
   return meshesFor(b.build(), mats, shadows);
 }
