@@ -937,13 +937,13 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
 
   // ---- automatic quality -----------------------------------------------------------------------
   // Frame times are sampled while something animates. If a device can't keep up (median frame
-  // slower than about 30 fps), step down: first a sharper-to-softer pixel ratio and half the
+  // slower than 25 fps), step down: first a lower pixel ratio and half the
   // weather, then no shadows and no weather. Screenshot and video runs opt out.
   const testRun = () => capture || still();
   let quality = 2;
   let weatherScale = 1;
   let samples: number[] = [];
-  let settleFrames = 20;
+  let settleFrames = 8;
   const watchQuality = (dtMs: number) => {
     if (quality === 0 || testRun()) return;
     if (settleFrames > 0) {
@@ -951,12 +951,13 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
       return;
     }
     samples.push(dtMs);
-    if (samples.length < 45) return;
+    if (samples.length < 24) return;
     const median = [...samples].sort((a, b) => a - b)[samples.length >> 1];
     samples = [];
-    if (median <= 34) return;
+    // 25 fps or better is fine (phones in low-power mode run at 30).
+    if (median <= 40) return;
     quality--;
-    settleFrames = 30;
+    settleFrames = 12;
     if (quality === 1) {
       renderer.setPixelRatio(1);
       resize();
@@ -987,7 +988,7 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
     skip = !isBusy && !dirty ? !skip : false;
     const step = dt * (!isBusy && !dirty ? 2 : 1);
     // Real frame intervals (a slow device can take far longer than the 0.1 s the animation clock allows).
-    if (isBusy && interval > 0 && interval < 2000) watchQuality(interval);
+    if ((isBusy || ambient()) && interval > 0 && interval < 2000) watchQuality(interval);
     if (!skip) {
       elapsed += step;
       for (let i = tweens.length - 1; i >= 0; i--) {
