@@ -17,12 +17,12 @@ import {
   type GuideAnswers,
   type Recommendation,
 } from "@/lib/mission-guide";
-import { storeContactPrefill } from "@/lib/contact-prefill";
+import { storeCampSnapshot, storeContactPrefill } from "@/lib/contact-prefill";
 import { trackLead } from "@/lib/track-lead";
 import { sizesForSlug } from "@/lib/system-sizes";
 import { SizeCompare } from "@/components/systems/SizeCompare";
 import { V2PageHeader } from "@/components/site/V2PageHeader";
-import { CampScene } from "@/components/mission/CampScene";
+import { CampScene, type CampSceneApi } from "@/components/mission/CampScene";
 import type { CampFocus } from "@/lib/three/camp/campStage";
 
 const MissionSolutionBuilder = dynamic(
@@ -129,6 +129,7 @@ function Results({
   onEdit,
   onRestart,
   headingRef,
+  sceneApi,
 }: {
   answers: Required<GuideAnswers>;
   recs: Recommendation[];
@@ -136,6 +137,7 @@ function Results({
   onEdit: (i: number) => void;
   onRestart: () => void;
   headingRef: React.RefObject<HTMLHeadingElement | null>;
+  sceneApi: React.RefObject<CampSceneApi | null>;
 }) {
   const router = useRouter();
   const [copied, setCopied] = useState(false);
@@ -146,7 +148,12 @@ function Results({
   const sizes = sizesForSlug(best.slug);
 
   const sendToExpert = () => {
-    storeContactPrefill(guideContactPrefill(answers, recs));
+    const prefill = guideContactPrefill(answers, recs);
+    // The expert gets a link to this exact plan, so they can open the same camp in 3D.
+    const link = shareUrl(answers);
+    storeContactPrefill({ ...prefill, message: `${prefill.message}\nPlan in 3D: ${link}` });
+    const image = sceneApi.current?.snapshot();
+    if (image) storeCampSnapshot({ image, link });
     trackLead("mission_builder", `Mission builder: ${labelFor("mission", answers.mission)}`, {
       systems: recs.slice(0, 3).map((r) => r.slug),
       people: answers.people,
@@ -361,6 +368,7 @@ function GuideBody({ products, answers, detailed }: { products: Record<string, G
   const [focus, setFocus] = useState<CampFocus>(() => (anyAnswer(answers) ? "overview" : "empty"));
   const topRef = useRef<HTMLDivElement>(null);
   const headRef = useRef<HTMLElement>(null);
+  const sceneApi = useRef<CampSceneApi | null>(null);
   const sceneRef = useRef<HTMLDivElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const optionRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -494,7 +502,7 @@ function GuideBody({ products, answers, detailed }: { products: Record<string, G
             atResults ? "relative h-[56svh] min-h-[320px]" : "sticky top-16 z-20 h-[38svh] min-h-[250px]"
           } border-y border-line lg:sticky lg:top-[72px] lg:z-auto lg:h-[calc(100svh-72px)] lg:min-h-[520px] lg:border-y-0 lg:border-l`}
         >
-          <CampScene answers={answers} focus={sceneFocus} results={atResults} photos={photos} />
+          <CampScene answers={answers} focus={sceneFocus} results={atResults} photos={photos} apiRef={sceneApi} />
         </div>
       </div>
 
@@ -566,7 +574,7 @@ function GuideBody({ products, answers, detailed }: { products: Record<string, G
               </div>
             </div>
           ) : isComplete(answers) ? (
-            <Results answers={answers} recs={recs} products={products} onEdit={(i) => goTo(i)} onRestart={restart} headingRef={headingRef} />
+            <Results answers={answers} recs={recs} products={products} onEdit={(i) => goTo(i)} onRestart={restart} headingRef={headingRef} sceneApi={sceneApi} />
           ) : null}
         </div>
 

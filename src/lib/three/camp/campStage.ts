@@ -33,11 +33,13 @@ import {
 } from "@/lib/three/camp/kit";
 import { buildKind, scanFrame, treccStandIn, type KindModel } from "@/lib/three/camp/shelters";
 import { CLIMATES, createEnvironment, createProps, createWeather, mixPreset, type Avoid, type ClimateKey, type ClimatePreset, type Weather } from "@/lib/three/camp/environment";
-import { createArrival, type Arrival, type ArrivalMats } from "@/lib/three/camp/arrivals";
-import { figure } from "@/lib/three/camp/vehicles";
+import { createArrival, type Arrival, type ArrivalMats, type Cargo } from "@/lib/three/camp/arrivals";
+import { bagsLoad, container, figure, palletShelter } from "@/lib/three/camp/vehicles";
 import { buildSiteLayer, disposeGlowTexture, type SiteLayer } from "@/lib/three/camp/siteworks";
+import { buildInterior } from "@/lib/three/camp/interiors";
 
 export const TRECC_CAMP_MODEL = "/models/trecc-camp.glb";
+export const TRECC_STOWED_MODEL = "/models/trecc-stowed-camp.glb";
 
 export type CampFocus = "empty" | "mission" | "climate" | "people" | "transport" | "duration" | "results" | "overview";
 
@@ -61,6 +63,10 @@ export type CampStage = {
   dispose: () => void;
   /** For tests: true while anything is still animating. */
   isBusy: () => boolean;
+  /** Cuts the roof off the best match and shows an example fit-out (results only). */
+  setInside: (on: boolean) => void;
+  /** A JPEG of the current view, at most `width` pixels wide. */
+  snapshot: (width: number) => string | null;
 };
 
 type Struct = {
@@ -76,6 +82,8 @@ type Struct = {
   y: number;
   removed: boolean;
 };
+
+type ArrivalState = { group: THREE.Group; arrival: Arrival; kind: string; start: number; climate: string; lead: string };
 
 type Tween = { start: number; dur: number; update: (k: number) => void; done?: () => void; key?: string };
 
@@ -149,7 +157,10 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
     return m;
   });
   const arrivalMats: ArrivalMats = { vehicle: vehicleMats, aircraft: aircraftMats, ground: groundMats, containers: containerMats };
-  const sharedSets = [vehicleMats, aircraftMats, groundMats, ...containerMats];
+  // The leading system in transit: one set in the camp's finish, one for the stowed TRECC.
+  const loadMats = makeMats(staticReveal, finish, { shadows });
+  const treccLoadMats = makeMats(staticReveal, finish, { shadows });
+  const sharedSets = [vehicleMats, aircraftMats, groundMats, loadMats, treccLoadMats, ...containerMats];
   const frameMat = new THREE.LineBasicMaterial({ color: 0xf18522, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false });
 
   // ---- models ------------------------------------------------------------------------------
@@ -184,6 +195,90 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
         return treccStandIn();
       });
     return treccPromise;
+  };
+
+  /** The TRECC folded for travel, loaded only when a TRECC leads the camp. */
+  let stowed: PartGeo | null = null;
+  let stowedPromise: Promise<void> | null = null;
+  const stowedSlots: THREE.Group[] = [];
+  const loadStowed = () => {
+    stowedPromise ??= new GLTFLoader()
+      .setMeshoptDecoder(MeshoptDecoder)
+      .loadAsync(TRECC_STOWED_MODEL)
+      .then((gltf) => {
+        const map: Record<string, MatKey> = { shell: "shell", panel: "shell2", metal: "trim", part: "frame", dark: "dark" };
+        const body: PartGeo = {};
+        gltf.scene.updateMatrixWorld(true);
+        gltf.scene.traverse((o) => {
+          const mesh = o as THREE.Mesh;
+          if (!mesh.isMesh) return;
+          const mat = mesh.material as THREE.MeshStandardMaterial;
+          const key = map[mat.name] ?? "frame";
+          const geo = toFloat(mesh.geometry);
+          geo.applyMatrix4(mesh.matrixWorld);
+          body[key] = geo;
+          if (key !== "shell") treccLoadMats[key].color.copy(mat.color);
+        });
+        stowed = body;
+        // Swap the stand-ins already on trailers, pallets or slings for the model.
+        for (const slot of stowedSlots) fillStowed(slot);
+        stowedSlots.length = 0;
+        invalidate();
+      })
+      .catch(() => undefined);
+    return stowedPromise;
+  };
+  const fillStowed = (slot: THREE.Group) => {
+    slot.traverse((o) => {
+      if ((o as THREE.Mesh).isMesh && !o.userData.shared) (o as THREE.Mesh).geometry.dispose();
+    });
+    slot.clear();
+    if (stowed) {
+      const m = meshesFor(stowed, treccLoadMats, shadows);
+      m.traverse((o) => (o.userData.shared = true));
+      slot.add(m);
+    } else {
+      // Stand-in at the published stowed size (114 × 94.5 × 57 in) until the model arrives.
+      slot.add(palletBox(2.9, 1.45, 2.4));
+    }
+  };
+  const palletBox = (l: number, h: number, w: number) => {
+    const g = new THREE.Mesh(new THREE.BoxGeometry(l, h, w), treccLoadMats.shell);
+    g.position.y = h / 2;
+    g.castShadow = shadows;
+    return g;
+  };
+
+  /** The leading system in the form it travels in. */
+  const cargoFor = (plan: CampPlan): Cargo => {
+    const kind = plan.units[0]?.kind;
+    switch (kind) {
+      case "trecc":
+        void loadStowed();
+        return {
+          kind: "trecc",
+          l: 2.9,
+          h: 1.45,
+          make: () => {
+            const slot = new THREE.Group();
+            fillStowed(slot);
+            if (!stowed) stowedSlots.push(slot);
+            return slot;
+          },
+        };
+      case "mecc":
+      case "ehmecc":
+      case "iso":
+        return { kind: "container", l: 6.058, h: 2.438, make: () => container(loadMats, shadows, 6.058, 2.438) };
+      case "bmecc":
+        return { kind: "container", l: 3.048, h: 2.438, make: () => container(loadMats, shadows, 3.048, 2.438) };
+      case "hercon":
+        return { kind: "container", l: 2.438, h: 2.438, make: () => container(loadMats, shadows, 2.438, 2.438) };
+      case "ateps":
+        return { kind: "pallet", l: 2.235, h: 2.4, make: () => palletShelter(loadMats, shadows) };
+      default:
+        return { kind: "bags", l: 2.74, h: 1.3, make: () => bagsLoad(loadMats, shadows) };
+    }
   };
 
   const modelFor = (kind: ModelKind): KindModel | Promise<KindModel> => {
@@ -452,6 +547,9 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
     finish = to.finish;
     // Vehicles follow the finish too.
     vehicleMats.shell.color.setHex(FINISH_COLORS[finish === "white" ? "green" : finish].shell);
+    loadMats.shell.color.setHex(FINISH_COLORS[finish].shell);
+    loadMats.shell2.color.setHex(FINISH_COLORS[finish].shell2);
+    treccLoadMats.shell.color.setHex(FINISH_COLORS[finish].shell);
     vehicleMats.shell2.color.setHex(FINISH_COLORS[finish === "white" ? "green" : finish].shell2);
     const target = { a: new THREE.Color(FINISH_COLORS[finish].shell), b: new THREE.Color(FINISH_COLORS[finish].shell2) };
     tween(
@@ -495,6 +593,7 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
     if (to.weather !== "none") {
       const w = createWeather(to.weather, opts.mobile);
       w.setOpacity(0);
+      w.setDensity(weatherScale);
       scene.add(w.points);
       weather = w;
       tween(0.3, 1.4, (k) => w.setOpacity(k), undefined, `w:${w.id}`);
@@ -538,7 +637,7 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
   };
 
   // ---- arrival --------------------------------------------------------------------------------
-  let arrival: { group: THREE.Group; arrival: Arrival; kind: string; start: number; climate: string; lead: string } | null = null;
+  let arrival: ArrivalState | null = null;
 
   const setArrival = (plan: CampPlan, animate: boolean) => {
     const site = plan.transportSite;
@@ -568,7 +667,7 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
         });
       }
     } else {
-      const made = createArrival(site.kind, plan, arrivalMats, shadows);
+      const made = createArrival(site.kind, plan, arrivalMats, shadows, cargoFor(plan));
       const group = new THREE.Group();
       group.add(made.group);
       group.position.set(site.x, 0, site.z);
@@ -605,6 +704,8 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
   type Pose = { az: number; el: number; dist: number; tx: number; ty: number; tz: number };
   const cam: Pose = { az: 32, el: 30, dist: 40, tx: 0, ty: 0.5, tz: 0 };
   let camTween: { from: Pose; to: Pose; start: number; dur: number } | null = null;
+  // While an arrival plays, the camera follows its vehicle, then pulls back to frame it all.
+  let follow: { a: ArrivalState; from: Pose; t0: number; final: Pose } | null = null;
   let orbit = false;
   let orbited = 0;
   let userMoved = false;
@@ -834,22 +935,59 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
   let elapsed = 0;
   let skip = false;
 
+  // ---- automatic quality -----------------------------------------------------------------------
+  // Frame times are sampled while something animates. If a device can't keep up (median frame
+  // slower than about 30 fps), step down: first a sharper-to-softer pixel ratio and half the
+  // weather, then no shadows and no weather. Screenshot and video runs opt out.
+  const testRun = () => capture || still();
+  let quality = 2;
+  let weatherScale = 1;
+  let samples: number[] = [];
+  let settleFrames = 20;
+  const watchQuality = (dtMs: number) => {
+    if (quality === 0 || testRun()) return;
+    if (settleFrames > 0) {
+      settleFrames--;
+      return;
+    }
+    samples.push(dtMs);
+    if (samples.length < 45) return;
+    const median = [...samples].sort((a, b) => a - b)[samples.length >> 1];
+    samples = [];
+    if (median <= 34) return;
+    quality--;
+    settleFrames = 30;
+    if (quality === 1) {
+      renderer.setPixelRatio(1);
+      resize();
+      weatherScale = 0.5;
+    } else {
+      env.key.castShadow = false;
+      renderer.shadowMap.needsUpdate = true;
+      weatherScale = 0;
+    }
+    if (weather) weather.setDensity(weatherScale);
+  };
+
   // Headless test runs can set window.__CAMP_STILL__ so the scene stops drawing once built.
   const still = () => !!(window as unknown as { __CAMP_STILL__?: boolean }).__CAMP_STILL__;
   const ambient = () => !opts.reduced && !still() && (!!weather || fading.length > 0 || beaconOn > 0.01 || orbit);
   const busy = () =>
-    tweens.length > 0 || !!camTween || (arrival && !opts.reduced && arrival.arrival.busy((now - arrival.start) / 1000)) || false;
+    tweens.length > 0 || !!camTween || !!follow || (arrival && !opts.reduced && arrival.arrival.busy((now - arrival.start) / 1000)) || false;
 
   function frame(t: number) {
     raf = 0;
     if (disposed) return;
     now = t;
-    const dt = lastFrame ? Math.min(0.1, (t - lastFrame) / 1000) : 1 / 60;
+    const interval = lastFrame ? t - lastFrame : 0;
+    const dt = lastFrame ? Math.min(0.1, interval / 1000) : 1 / 60;
     lastFrame = t;
     const isBusy = busy();
     // When only weather, the beacon or the orbit is moving, draw every other frame (30 fps).
     skip = !isBusy && !dirty ? !skip : false;
     const step = dt * (!isBusy && !dirty ? 2 : 1);
+    // Real frame intervals (a slow device can take far longer than the 0.1 s the animation clock allows).
+    if (isBusy && interval > 0 && interval < 2000) watchQuality(interval);
     if (!skip) {
       elapsed += step;
       for (let i = tweens.length - 1; i >= 0; i--) {
@@ -862,7 +1000,24 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
           tw.done?.();
         }
       }
-      if (camTween) {
+      if (follow && (follow.a !== arrival || userMoved)) follow = null;
+      if (follow) {
+        const a = follow.a;
+        const at = (t - a.start) / 1000;
+        const f = a.arrival.follow;
+        const sub = a.arrival.subject().add(a.group.position);
+        const tall = camera.aspect < 1 ? 1 / camera.aspect : 1;
+        const fp: Pose = { az: follow.final.az + 8, el: f.el, dist: f.dist * tall, tx: sub.x, ty: sub.y, tz: sub.z };
+        let pose: Pose;
+        if (at < f.until) {
+          pose = blendPose(follow.from, fp, easeInOutCubic(clamp01((t - follow.t0) / 1300)));
+        } else {
+          const u = easeInOutCubic(clamp01((at - f.until) / 2.2));
+          pose = blendPose(fp, follow.final, u);
+          if (u >= 1) follow = null;
+        }
+        Object.assign(cam, pose);
+      } else if (camTween) {
         const k = clamp01((t - camTween.start) / camTween.dur);
         const e = easeInOutCubic(k);
         const { from, to } = camTween;
@@ -945,11 +1100,14 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
   };
 
   let lastFocus: CampFocus = "empty";
+  let lastFollowed: ArrivalState | null = null;
   let lastOrbitFocus: CampFocus = "empty";
   let firstPlan = true;
 
   const setPlan = (next: CampPlan, focus: CampFocus, o?: { instant?: boolean }) => {
     const instant = !!o?.instant;
+    // Any change of plan or step closes the look-inside view.
+    if (inside) closeInside(focus === "results" && next.units[0]?.id === inside.s.unit.id);
     plan = next;
     lastFocus = focus;
     resultsMode = focus === "results";
@@ -1008,6 +1166,7 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
       if (opts.reduced) beaconOn = wantBeacon;
     }
 
+    if (next.units[0]?.kind === "trecc") void loadStowed();
     setArrival(next, !instant);
 
     // Site works by tier.
@@ -1028,6 +1187,13 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
     }
     lastOrbitFocus = focus;
     moveCamera(poseFor(next, focus), instant || firstPlan);
+    // A new arrival on the transport question: follow it in.
+    follow = null;
+    if (focus === "transport" && arrival && arrival.start > 0 && arrival !== lastFollowed && !opts.reduced && !instant && !firstPlan) {
+      follow = { a: arrival, from: { ...cam }, t0: clock(), final: poseFor(next, focus) };
+      lastFollowed = arrival;
+      camTween = null;
+    }
     firstPlan = false;
     lastTags = "";
     invalidate();
@@ -1042,6 +1208,91 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
   };
   document.addEventListener("visibilitychange", onVisibility);
 
+  // ---- look inside ----------------------------------------------------------------------------
+  let inside: { s: Struct; group: THREE.Group; cut: number } | null = null;
+
+  const closeInside = (keepCamera: boolean) => {
+    if (!inside) return;
+    const { s, group, cut } = inside;
+    inside = null;
+    if (leadFigures?.id === s.unit.id) leadFigures.group.visible = true;
+    if (s.removed || !s.model) {
+      disposeOwned(group);
+      return;
+    }
+    const top = s.model.h + 0.4;
+    tween(
+      0,
+      0.9,
+      (k) => {
+        s.reveal.set(lerp(cut, top, easeInOutCubic(k)), 1);
+        renderer.shadowMap.needsUpdate = true;
+      },
+      () => {
+        s.reveal.set(1e4, 0);
+        group.removeFromParent();
+        disposeOwned(group);
+        renderer.shadowMap.needsUpdate = true;
+      },
+      `s:${s.unit.id}`,
+    );
+    if (keepCamera && plan) moveCamera(poseFor(plan, "results"), false);
+  };
+
+  const setInside = (on: boolean) => {
+    if (!plan || !resultsMode) return;
+    if (!on) {
+      closeInside(true);
+      return;
+    }
+    if (inside) return;
+    const lead = plan.units[0];
+    const s = lead ? structs.get(lead.id) : undefined;
+    if (!s || !s.model) return;
+    const model = s.model;
+    const group = buildInterior(plan.mission, { l: model.l, w: model.w, round: lead.kind === "polar-chief" }, s.mats, vehicleMats, shadows);
+    group.traverse((o) => (o.userData.ownGeometry = true));
+    s.root.add(group);
+    // Cut just above the tallest furniture for the mission, and always below the roof.
+    const furniture: Record<string, number> = { command: 1.25, medical: 1.45, maintenance: 1.3, living: 1.75, research: 1.25, response: 0.8 };
+    const top = furniture[plan.mission ?? "response"] ?? 1.3;
+    const cut = Math.min(model.h - 0.25, Math.min(2.8, Math.max(top + 0.15, model.h * 0.5)));
+    inside = { s, group, cut };
+    // The people outside would be cut in half; they step out of the drawing for this view.
+    if (leadFigures?.id === lead.id) leadFigures.group.visible = false;
+    orbit = false;
+    tween(
+      0,
+      1.2,
+      (k) => {
+        s.reveal.set(lerp(model.h + 0.4, cut, easeInOutCubic(k)), 1);
+        renderer.shadowMap.needsUpdate = true;
+      },
+      // Leave a faint orange edge along the cut, like a drawing's section line.
+      () => s.reveal.set(cut, 0.5),
+      `s:${s.unit.id}`,
+    );
+    const m = 1.2;
+    const box = { minX: lead.x - model.l / 2 - m, maxX: lead.x + model.l / 2 + m, minZ: lead.z - model.w / 2 - m, maxZ: lead.z + model.w / 2 + m, h: cut };
+    moveCamera(fitBox(cam.az, 54, box), false);
+  };
+
+  const snapshot = (width: number): string | null => {
+    try {
+      // Draw and read back in the same task, so the buffer is still there.
+      renderer.render(scene, camera);
+      const src = renderer.domElement;
+      const scale = Math.min(1, width / src.width);
+      const out = document.createElement("canvas");
+      out.width = Math.round(src.width * scale);
+      out.height = Math.round(src.height * scale);
+      out.getContext("2d")?.drawImage(src, 0, 0, out.width, out.height);
+      return out.toDataURL("image/jpeg", 0.82);
+    } catch {
+      return null;
+    }
+  };
+
   resize();
   applyCamera();
   kick();
@@ -1052,6 +1303,7 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
       geometries: renderer.info.memory.geometries,
       programs: renderer.info.programs?.length,
       structs: structs.size,
+      quality,
     });
   }
 
@@ -1067,6 +1319,8 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
       }
     },
     resize,
+    setInside,
+    snapshot,
     isBusy: () => busy() || ambient(),
     dispose: () => {
       disposed = true;
@@ -1090,6 +1344,7 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
         l.layer.group.traverse((o) => (o as THREE.Mesh).isMesh && (o as THREE.Mesh).geometry.dispose());
       }
       for (const k of kinds.values()) disposeModel(k);
+      if (stowed) Object.values(stowed).forEach((g) => g?.dispose());
       void treccPromise?.then(disposeModel);
       frames.forEach((f) => f.dispose());
       sharedSets.forEach((set) => Object.values(set).forEach((m) => m.dispose()));
@@ -1108,6 +1363,19 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
 }
 
 /** Frees geometry made for one structure only (the scale figures); shared model geometry stays. */
+function blendPose(a: { az: number; el: number; dist: number; tx: number; ty: number; tz: number }, b: typeof a, t: number): typeof a {
+  let d = b.az - a.az;
+  d = ((((d + 180) % 360) + 360) % 360) - 180;
+  return {
+    az: a.az + d * t,
+    el: a.el + (b.el - a.el) * t,
+    dist: a.dist + (b.dist - a.dist) * t,
+    tx: a.tx + (b.tx - a.tx) * t,
+    ty: a.ty + (b.ty - a.ty) * t,
+    tz: a.tz + (b.tz - a.tz) * t,
+  };
+}
+
 function disposeOwned(root: THREE.Object3D) {
   root.traverse((o) => {
     if (o.userData.ownGeometry && (o as THREE.Mesh).isMesh) (o as THREE.Mesh).geometry.dispose();

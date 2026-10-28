@@ -494,6 +494,8 @@ export type Weather = {
   kind: WeatherKind;
   setOpacity: (o: number) => void;
   opacity: () => number;
+  /** Draws only a share of the particles (0 hides them). */
+  setDensity: (share: number) => void;
   update: (time: number, center: THREE.Vector3, pixelRatio: number) => void;
   dispose: () => void;
 };
@@ -586,6 +588,10 @@ export function createWeather(kind: Exclude<WeatherKind, "none">, mobile: boolea
       u.uAlpha.value = w.alpha * o;
     },
     opacity: () => opacity,
+    setDensity: (share) => {
+      g.setDrawRange(0, Math.round(n * share));
+      points.visible = share > 0;
+    },
     update: (time, center, pixelRatio) => {
       u.uTime.value = time;
       u.uCenter.value.copy(center);

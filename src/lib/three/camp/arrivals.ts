@@ -7,7 +7,7 @@ import * as THREE from "three";
 import type { ClimateId } from "@/lib/mission-guide";
 import type { CampPlan, TransportSite } from "@/lib/camp-scene-plan";
 import { clamp01, easeInOutCubic, easeOutCubic, GeoBag, meshesFor, rng, type MatSet } from "@/lib/three/camp/kit";
-import { airlifter, container, figure, helicopter, palletLoad, sled, snowmobile, trailer, truck, utilityVehicle, type Vehicle } from "@/lib/three/camp/vehicles";
+import { airlifter, container, figure, helicopter, sled, snowmobile, trailer, truck, utilityVehicle, type Vehicle } from "@/lib/three/camp/vehicles";
 
 export type Arrival = {
   group: THREE.Group;
@@ -20,10 +20,23 @@ export type Arrival = {
   strip?: { minX: number; maxX: number; minZ: number; maxZ: number };
   /** Where the camera should look to include the arrival, and how big it is. */
   focus: { x: number; z: number; r: number };
+  /** What the camera follows while the arrival plays (local position), and for how long. */
+  subject: () => THREE.Vector3;
+  follow: { until: number; dist: number; el: number };
   dispose: () => void;
 };
 
 export type ArrivalMats = { vehicle: MatSet; aircraft: MatSet; ground: MatSet; containers: MatSet[] };
+
+/** The leading system in the form it travels in, built by the stage (y = 0 at its base, long
+ * side along x). */
+export type Cargo = {
+  kind: "trecc" | "container" | "pallet" | "bags";
+  /** Length along x, for spacing. */
+  l: number;
+  h: number;
+  make: () => THREE.Object3D;
+};
 
 const snowy = (c: ClimateId | null) => c === "polar" || c === "cold";
 
@@ -54,7 +67,9 @@ function surfaceMats(base: MatSet, climate: ClimateId | null): MatSet {
 
 // ---- fixed-wing airlift ------------------------------------------------------------------------
 
-function airArrival(site: TransportSite, plan: CampPlan, m: ArrivalMats, shadows: boolean): Arrival {
+const lerpN = (a: number, b: number, t: number) => a + (b - a) * t;
+
+function airArrival(site: TransportSite, plan: CampPlan, m: ArrivalMats, shadows: boolean, cargo: Cargo): Arrival {
   const g = new THREE.Group();
   const surf = surfaceMats(m.ground, plan.climate);
   const runwayL = 520;
@@ -82,26 +97,29 @@ function airArrival(site: TransportSite, plan: CampPlan, m: ArrivalMats, shadows
   plane.group.rotation.y = Math.PI;
   g.add(plane.group);
   const parkX = site.x - 4;
-  const pallets = new THREE.Group();
-  for (let i = 0; i < 2; i++) {
-    const p = palletLoad(m.vehicle, shadows);
-    p.position.set(parkX + 19 + i * 3.6, 0, site.z + (i ? 2.4 : -1.2));
-    pallets.add(p);
-  }
+  // The system itself rolls out of the hold and down the ramp.
+  const loads = [0, 1].map((i) => {
+    const o = cargo.make();
+    o.userData.to = parkX + 15 + cargo.l / 2 + i * (cargo.l + 1.6);
+    o.userData.z = site.z + (i ? 1.4 : -1.4) * (cargo.l > 4 ? 0 : 1);
+    g.add(o);
+    return o;
+  });
   // Ground crew by the ramp.
+  const crew = new THREE.Group();
   for (let i = 0; i < 3; i++) {
     const f = figure(m.vehicle, shadows, i === 0);
-    f.position.set(parkX + 17 + i * 1.3, 0, site.z - 3.5 - (i % 2));
-    pallets.add(f);
+    f.position.set(parkX + 14 + i * 1.3, 0, site.z - 3.6 - (i % 2));
+    crew.add(f);
   }
-  g.add(pallets);
+  g.add(crew);
 
   const D = 7.6;
   let lastT = 0;
   const update = (t: number) => {
     const dt = Math.max(0, Math.min(0.1, t - lastT));
     lastT = t;
-    const T = Math.min(t, D + 3);
+    const T = Math.min(t, D + 4);
     // Approach and flare (0–3.2 s), roll-out (3.2–5.6 s), ramp down (5.6–6.6 s).
     let x: number;
     let y: number;
@@ -124,16 +142,30 @@ function airArrival(site: TransportSite, plan: CampPlan, m: ArrivalMats, shadows
     const rk = easeInOutCubic(clamp01((T - 5.6) / 1.0));
     plane.parts.ramp.rotation.z = -0.3 + rk * 0.6;
     plane.parts.opening.visible = rk > 0.05;
-    const pk = clamp01((T - 6.4) / 0.8);
-    pallets.visible = pk > 0;
-    pallets.scale.set(1, Math.max(0.001, easeOutCubic(pk)), 1);
+    // Unload: from the hold (floor about 1 m up) down the ramp, then out to its spot.
+    loads.forEach((o, i) => {
+      const k = clamp01((T - 6.5 - i * 0.9) / 1.6);
+      o.visible = k > 0;
+      const inside = parkX + 6;
+      const rampEnd = parkX + 12.2;
+      if (k < 0.45) {
+        const a = easeInOutCubic(k / 0.45);
+        o.position.set(lerpN(inside, rampEnd, a), lerpN(1.0, 0, a), o.userData.z);
+      } else {
+        const a = easeOutCubic((k - 0.45) / 0.55);
+        o.position.set(lerpN(rampEnd, o.userData.to, a), 0, o.userData.z);
+      }
+    });
+    crew.visible = T > 6.2;
   };
   update(0);
   return {
     group: g,
-    duration: D,
+    duration: D + 1.6,
     update,
-    busy: (t) => t < D + 2.2,
+    subject: () => plane.group.position.clone().setY(plane.group.position.y + 3),
+    follow: { until: 6.4, dist: 64, el: 11 },
+    busy: (t) => t < D + 2.4,
     strip: { minX: site.x - runwayL / 2, maxX: site.x + runwayL / 2, minZ: site.z - runwayW / 2 - 6, maxZ: site.z + runwayW / 2 + 6 },
     focus: { x: site.x + 4, z: site.z, r: 26 },
     dispose: () => disposeTree(g),
@@ -142,7 +174,7 @@ function airArrival(site: TransportSite, plan: CampPlan, m: ArrivalMats, shadows
 
 // ---- helicopter ---------------------------------------------------------------------------------
 
-function heloArrival(site: TransportSite, plan: CampPlan, m: ArrivalMats, shadows: boolean): Arrival {
+function heloArrival(site: TransportSite, plan: CampPlan, m: ArrivalMats, shadows: boolean, cargo: Cargo): Arrival {
   const g = new THREE.Group();
   // Landing zone: a flat pad with an H and edge lights.
   const pad = new GeoBag();
@@ -159,7 +191,8 @@ function heloArrival(site: TransportSite, plan: CampPlan, m: ArrivalMats, shadow
 
   const helo = helicopter(m.vehicle, shadows);
   g.add(helo.group);
-  const load = palletLoad(m.vehicle, shadows);
+  // The system itself, slung underneath.
+  const load = cargo.make();
   g.add(load);
   const cable = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 1, 5), m.vehicle.dark);
   g.add(cable);
@@ -200,9 +233,11 @@ function heloArrival(site: TransportSite, plan: CampPlan, m: ArrivalMats, shadow
     helo.group.rotation.z = T < 3.6 ? -0.08 * (1 - T / 3.6) : 0;
     if (!loadOnGround) {
       load.position.set(hx, hy - hang, hz);
+      const belly = hy + 0.8;
+      const top = hy - hang + cargo.h;
       cable.visible = true;
-      cable.position.set(hx, hy - hang / 2 + 0.8, hz);
-      cable.scale.set(1, hang - 1.6, 1);
+      cable.position.set(hx, (belly + top) / 2, hz);
+      cable.scale.set(1, Math.max(0.1, belly - top), 1);
     } else {
       load.position.copy(drop);
       cable.visible = false;
@@ -221,34 +256,52 @@ function heloArrival(site: TransportSite, plan: CampPlan, m: ArrivalMats, shadow
     update,
     busy: (t) => t < D + 3.4,
     focus: { x: site.x - 2, z: site.z, r: 20 },
+    subject: () => helo.group.position.clone().setY(helo.group.position.y - (helo.group.position.y > 4 ? hang * 0.45 : -1)),
+    follow: { until: 6.2, dist: 44, el: 13 },
     dispose: () => disposeTree(g),
   };
 }
 
 // ---- road ---------------------------------------------------------------------------------------
 
-function roadArrival(site: TransportSite, plan: CampPlan, m: ArrivalMats, shadows: boolean): Arrival {
+function roadArrival(site: TransportSite, plan: CampPlan, m: ArrivalMats, shadows: boolean, cargo: Cargo): Arrival {
   const g = new THREE.Group();
   const surf = surfaceMats(m.ground, plan.climate);
   const len = 340;
   const end = site.x + 26;
   g.add(strip(surf, "dark", len, 7, end - len / 2, site.z));
-  const convoy: { v: Vehicle; tr: THREE.Group; to: number }[] = [];
-  const stops = [site.x + 12, site.x, site.x - 12];
+  const convoy: { v: Vehicle; tr: THREE.Group | null; to: number }[] = [];
+  const onBed = cargo.kind === "container" || cargo.kind === "pallet";
+  const gap = onBed ? Math.max(12, cargo.l + 7) : 12;
+  const stops = [site.x + gap, site.x, site.x - gap];
   stops.forEach((to, i) => {
-    const v = truck(m.vehicle, shadows, i === 1 ? "pallet" : "cover");
-    const tr = trailer(m.vehicle, shadows);
-    g.add(v.group, tr);
+    // Containers and pallets ride the truck bed; a TRECC rides its trailer; bags go under canvas.
+    const v = truck(m.vehicle, shadows, onBed ? "container" : i === 1 ? "pallet" : "cover");
+    let tr: THREE.Group | null = null;
+    if (onBed) {
+      const o = cargo.make();
+      o.position.set(-1.3 + Math.max(0, (6.2 - cargo.l) / 2) - 0.2, 1.3, 0);
+      v.group.add(o);
+    } else {
+      tr = trailer(m.vehicle, shadows, cargo.kind !== "trecc");
+      if (cargo.kind === "trecc") {
+        const o = cargo.make();
+        o.position.set(0, 0.8, 0);
+        tr.add(o);
+      }
+      g.add(tr);
+    }
+    g.add(v.group);
     convoy.push({ v, tr, to });
   });
-  const D = 6;
+  const D = 5.2;
   const update = (t: number) => {
     const T = Math.min(t, D);
     convoy.forEach(({ v, tr, to }, i) => {
       const k = easeOutCubic(clamp01((T - i * 0.35) / (D - 0.9)));
-      const x = to - 190 * (1 - k);
+      const x = to - 130 * (1 - k);
       v.group.position.set(x, 0, site.z + 0.2);
-      tr.position.set(x - 6.0, 0, site.z + 0.2);
+      tr?.position.set(x - 6.0, 0, site.z + 0.2);
     });
   };
   update(0);
@@ -256,6 +309,8 @@ function roadArrival(site: TransportSite, plan: CampPlan, m: ArrivalMats, shadow
     group: g,
     duration: D,
     update,
+    subject: () => convoy[0].v.group.position.clone().setY(1.5),
+    follow: { until: 4.4, dist: 30, el: 12 },
     busy: (t) => t < D,
     strip: { minX: end - len, maxX: end, minZ: site.z - 6, maxZ: site.z + 6 },
     focus: { x: site.x, z: site.z, r: 18 },
@@ -265,7 +320,7 @@ function roadArrival(site: TransportSite, plan: CampPlan, m: ArrivalMats, shadow
 
 // ---- ISO containers -----------------------------------------------------------------------------
 
-function seaArrival(site: TransportSite, plan: CampPlan, m: ArrivalMats, shadows: boolean): Arrival {
+function seaArrival(site: TransportSite, plan: CampPlan, m: ArrivalMats, shadows: boolean, cargo: Cargo): Arrival {
   const g = new THREE.Group();
   const surf = surfaceMats(m.ground, plan.climate);
   g.add(strip(surf, "dark", 16, 26, site.x, site.z));
@@ -274,9 +329,11 @@ function seaArrival(site: TransportSite, plan: CampPlan, m: ArrivalMats, shadows
   // Two rows of containers along z, some stacked two high.
   for (let r = 0; r < 2; r++) for (let i = 0; i < 4; i++) slots.push([site.x - 3.2 + r * 6.4 - 0, 0, site.z - 7.5 + i * 3.0]);
   slots.push([site.x - 3.2, 2.62, site.z - 4.5], [site.x - 3.2, 2.62, site.z - 1.5], [site.x + 3.2, 2.62, site.z + 1.5]);
+  // A container-built system ships as its own container: those are in its colours.
+  const own = new Set(cargo.kind === "container" ? [0, 4, 8] : []);
   const boxes = slots.map(([x, y, z], i) => {
     const mats = m.containers[Math.floor(rand() * m.containers.length)];
-    const c = container(mats, shadows);
+    const c = own.has(i) ? cargo.make() : container(mats, shadows);
     c.rotation.y = Math.PI / 2;
     c.position.set(x, y, z);
     c.userData.home = y;
@@ -286,7 +343,7 @@ function seaArrival(site: TransportSite, plan: CampPlan, m: ArrivalMats, shadows
   });
   // A truck bringing one more in.
   const t1 = truck(m.vehicle, shadows, "container");
-  const load = container(m.containers[0], shadows);
+  const load = cargo.kind === "container" ? cargo.make() : container(m.containers[0], shadows);
   load.position.set(-1.3, 1.3, 0);
   t1.group.add(load);
   g.add(t1.group);
@@ -309,13 +366,15 @@ function seaArrival(site: TransportSite, plan: CampPlan, m: ArrivalMats, shadows
     update,
     busy: (t) => t < D,
     focus: { x: site.x + 2, z: site.z, r: 18 },
+    subject: () => new THREE.Vector3(site.x + 3, 2, site.z + 2),
+    follow: { until: 3.6, dist: 34, el: 18 },
     dispose: () => disposeTree(g),
   };
 }
 
 // ---- by hand, sled or snowmobile ----------------------------------------------------------------
 
-function remoteArrival(site: TransportSite, plan: CampPlan, m: ArrivalMats, shadows: boolean): Arrival {
+function remoteArrival(site: TransportSite, plan: CampPlan, m: ArrivalMats, shadows: boolean, _cargo: Cargo): Arrival {
   const g = new THREE.Group();
   const snow = snowy(plan.climate);
   const lead = new THREE.Group();
@@ -362,31 +421,34 @@ function remoteArrival(site: TransportSite, plan: CampPlan, m: ArrivalMats, shad
   };
   update(0);
   void train;
+  void _cargo;
   return {
     group: g,
     duration: D,
     update,
     busy: (t) => t < D + 0.6,
     focus: { x: site.x - 2, z: site.z - 2, r: 12 },
+    subject: () => lead.position.clone().setY(1),
+    follow: { until: 4.6, dist: 22, el: 14 },
     dispose: () => disposeTree(g),
   };
 }
 
 /** Builds the scene around the origin; the stage places the group at the site, and `strip` and
  * `focus` are relative to it. */
-export function createArrival(kind: TransportSite["kind"], plan: CampPlan, m: ArrivalMats, shadows: boolean): Arrival {
+export function createArrival(kind: TransportSite["kind"], plan: CampPlan, m: ArrivalMats, shadows: boolean, cargo: Cargo): Arrival {
   const site: TransportSite = { kind, x: 0, z: 0, rot: 0 };
   switch (kind) {
     case "air":
-      return airArrival(site, plan, m, shadows);
+      return airArrival(site, plan, m, shadows, cargo);
     case "helo":
-      return heloArrival(site, plan, m, shadows);
+      return heloArrival(site, plan, m, shadows, cargo);
     case "road":
-      return roadArrival(site, plan, m, shadows);
+      return roadArrival(site, plan, m, shadows, cargo);
     case "sea":
-      return seaArrival(site, plan, m, shadows);
+      return seaArrival(site, plan, m, shadows, cargo);
     case "remote":
-      return remoteArrival(site, plan, m, shadows);
+      return remoteArrival(site, plan, m, shadows, cargo);
   }
 }
 
@@ -395,7 +457,8 @@ function disposeTree(root: THREE.Object3D) {
   root.traverse((o) => {
     const mesh = o as THREE.Mesh;
     if (mesh.isMesh) {
-      mesh.geometry?.dispose();
+      // Cargo built from a cached model (the stowed TRECC) shares its geometry with the stage.
+      if (!mesh.userData.shared) mesh.geometry?.dispose();
       const mat = mesh.material as THREE.Material;
       // Shared materials belong to the stage; the blur discs and surface tints belong to the scene.
       if (mat && ((mat as THREE.MeshBasicMaterial).isMeshBasicMaterial || mat.userData.owned)) mat.dispose();

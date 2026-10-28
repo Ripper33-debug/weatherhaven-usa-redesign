@@ -209,13 +209,11 @@ export function truck(mats: MatSet, shadows: boolean, load: "cover" | "container
 }
 
 /** A 20-ft ISO container (6.06 × 2.44 × 2.59 m), corrugated, standing on y = 0. */
-export function container(mats: MatSet, shadows: boolean): THREE.Group {
+export function container(mats: MatSet, shadows: boolean, l = 6.058, h = 2.591): THREE.Group {
   const b = new GeoBag();
-  const l = 6.058;
   const w = 2.438;
-  const h = 2.591;
   b.block("shell", l, h, w);
-  const n = 20;
+  const n = Math.max(4, Math.round(l / 0.3));
   for (const s of [-1, 1]) for (let i = 0; i < n; i++) b.box("shell2", 0.12, h - 0.34, 0.05, -l / 2 + 0.3 + i * ((l - 0.6) / (n - 1)), h / 2, s * (w / 2 + 0.02));
   for (const sx of [-1, 1]) for (const sz of [-1, 1]) for (const y of [0.09, h - 0.09]) b.box("dark", 0.18, 0.18, 0.18, sx * (l / 2 - 0.08), y, sz * (w / 2 - 0.08));
   for (const z of [-0.85, -0.35, 0.35, 0.85]) b.block("trim", 0.06, h - 0.5, 0.05, l / 2 + 0.03, 0.25, z);
@@ -223,12 +221,15 @@ export function container(mats: MatSet, shadows: boolean): THREE.Group {
 }
 
 /** A light two-wheel trailer with a packed load. */
-export function trailer(mats: MatSet, shadows: boolean): THREE.Group {
+/** A light two-wheel trailer; its bed is at y = 0.8. */
+export function trailer(mats: MatSet, shadows: boolean, packed = true): THREE.Group {
   const b = new GeoBag();
   b.block("dark", 3.2, 0.18, 2.0, 0, 0.62, 0);
   b.block("dark", 1.6, 0.1, 0.12, 2.3, 0.62, 0);
-  b.block("shell2", 2.9, 1.25, 1.9, 0, 0.8, 0);
-  b.block("dark", 2.9, 0.06, 1.94, 0, 2.05, 0);
+  if (packed) {
+    b.block("shell2", 2.9, 1.25, 1.9, 0, 0.8, 0);
+    b.block("dark", 2.9, 0.06, 1.94, 0, 2.05, 0);
+  }
   for (const s of [-1, 1]) wheel(b, 0.45, 0.3, 0, s * 1.05);
   return meshesFor(b.build(), mats, shadows);
 }
@@ -277,6 +278,31 @@ export function figure(mats: MatSet, shadows: boolean, vest = false): THREE.Grou
   b.add("dark", new THREE.CapsuleGeometry(0.17, 0.4, 3, 8), 0, 1.17, 0, 0, 0, 0, 0.75, 1, 1);
   b.add("dark", new THREE.SphereGeometry(0.105, 10, 8), 0, 1.68, 0);
   if (vest) b.add("accent", new THREE.CylinderGeometry(0.175, 0.175, 0.3, 10), 0, 1.2, 0, 0, 0, 0, 0.76, 1, 1);
+  return meshesFor(b.build(), mats, shadows);
+}
+
+/** A soft-wall or inflatable shelter packed in bags on a 463L pallet. */
+export function bagsLoad(mats: MatSet, shadows: boolean): THREE.Group {
+  const b = new GeoBag();
+  b.block("trim", 2.74, 0.06, 2.235, 0, 0, 0);
+  const spots: [number, number, number, number][] = [
+    [-0.75, -0.55, 0, 1.0], [0.55, -0.55, 0, 1.15], [-0.75, 0.55, 0, 1.1], [0.55, 0.55, 0, 0.95], [-0.1, 0, 0.62, 1.05],
+  ];
+  for (const [x, z, y0, sc] of spots) {
+    b.add("shell2", new THREE.CapsuleGeometry(0.42 * sc, 0.75 * sc, 3, 10), x, 0.06 + y0 + 0.42 * sc, z, 0, 0.3, Math.PI / 2);
+  }
+  b.box("dark", 2.5, 0.04, 0.06, 0, 1.15, 0);
+  b.box("dark", 0.06, 0.04, 2.0, 0, 1.15, 0);
+  return meshesFor(b.build(), mats, shadows);
+}
+
+/** ATEPS stowed on its 463L pallet: 84 × 104 in, 91 in high. */
+export function palletShelter(mats: MatSet, shadows: boolean): THREE.Group {
+  const b = new GeoBag();
+  b.block("trim", 2.235, 0.06, 2.743, 0, 0, 0);
+  b.block("shell", 2.134, 2.25, 2.642, 0, 0.06, 0);
+  b.box("shell2", 2.1, 0.06, 2.6, 0, 2.34, 0);
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) b.block("dark", 0.16, 2.3, 0.16, sx * 1.0, 0.06, sz * 1.25);
   return meshesFor(b.build(), mats, shadows);
 }
 

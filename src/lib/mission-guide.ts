@@ -371,6 +371,12 @@ function factFor(p: Profile, key: QuestionKey, value: string): string | undefine
   return p.facts[`${key}:${value}` as const] ?? p.facts[key];
 }
 
+/** The published fact that ties a system to one answer (the same text the results show), if any. */
+export function publishedFact(slug: string, key: QuestionKey, value: string | undefined): string | undefined {
+  const p = PROFILES.find((x) => x.slug === slug);
+  return p && value ? factFor(p, key, value) : undefined;
+}
+
 export function isComplete(a: GuideAnswers): a is Required<GuideAnswers> {
   return QUESTIONS.every((q) => !!a[q.key]);
 }

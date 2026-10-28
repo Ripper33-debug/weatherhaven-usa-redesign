@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useClientMediaQuery } from "@/hooks/useClientMediaQuery";
 import { campPlan } from "@/lib/camp-scene-plan";
-import type { GuideAnswers } from "@/lib/mission-guide";
+import { publishedFact, QUESTIONS, type GuideAnswers, type QuestionKey } from "@/lib/mission-guide";
 import type { CampFocus, CampStage, TagPos } from "@/lib/three/camp/campStage";
 import { startWhenNear } from "@/lib/start-when-near";
 
@@ -16,17 +16,31 @@ type LoadState = "idle" | "loading" | "ready" | "fallback";
  * accessible way to use the builder; the scene is an illustration with a text description, and
  * its labels repeat links that are also in the results.
  */
+/** What the page can ask of the scene. */
+export type CampSceneApi = { snapshot: () => string | null };
+
+const MISSION_ROOM: Record<string, string> = {
+  command: "a command post",
+  medical: "a clinic",
+  maintenance: "a maintenance bay",
+  living: "accommodation",
+  research: "a field lab",
+  response: "emergency shelter",
+};
+
 export function CampScene({
   answers,
   focus,
   results,
   photos,
+  apiRef,
 }: {
   answers: GuideAnswers;
   focus: CampFocus;
   results: boolean;
   /** Product photos by slug, shown instead of the 3D camp where WebGL is off. */
   photos?: Record<string, { src: string; blur?: string; representative?: boolean }>;
+  apiRef?: React.MutableRefObject<CampSceneApi | null>;
 }) {
   const router = useRouter();
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -36,6 +50,8 @@ export function CampScene({
   const [load, setLoad] = useState<LoadState>("idle");
   const [hover, setHover] = useState<string | null>(null);
   const [touched, setTouched] = useState(false);
+  // Look-inside view of the best match, tied to the plan it was opened on.
+  const [insideKey, setInsideKey] = useState<string | null>(null);
   const compact = useClientMediaQuery("(max-width: 1023px)");
   const coarse = useClientMediaQuery("(pointer: coarse)");
 
@@ -108,6 +124,7 @@ export function CampScene({
           return;
         }
         stageRef.current = stage;
+        if (apiRef) apiRef.current = { snapshot: () => stageRef.current?.snapshot(960) ?? null };
         setLoad("ready");
       } catch {
         if (!cancelled) setLoad("fallback");
@@ -119,13 +136,17 @@ export function CampScene({
       stop();
       stageRef.current?.dispose();
       stageRef.current = null;
+      if (apiRef) apiRef.current = null;
     };
+    // The stage is created once; apiRef is a stable ref object.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Hand every new plan to the stage.
   useEffect(() => {
     if (load !== "ready") return;
     stageRef.current?.setPlan(plan, focus);
+    // A new plan or step closes the look-inside view (the stage does the same).
   }, [load, plan, focus]);
 
   // Size and visibility.
@@ -147,7 +168,18 @@ export function CampScene({
   const ready = load === "ready";
   const lead = plan.lead;
   const tags = plan.tags;
-  const showTags = ready && (results ? tags : tags.slice(0, 1));
+  const planKey = `${JSON.stringify(answers)}|${results}`;
+  const inside = results && insideKey === planKey;
+  const showTags = ready && (results && !inside ? tags : tags.slice(0, 1));
+  const toggleInside = () => {
+    const on = !inside;
+    stageRef.current?.setInside(on);
+    setInsideKey(on ? planKey : null);
+  };
+  // The published fact behind the answer the camera is showing (the same text the results use).
+  const factKey = QUESTIONS.some((q) => q.key === focus) ? (focus as QuestionKey) : null;
+  const factText = lead && factKey ? publishedFact(lead.slug, factKey, answers[factKey]) : undefined;
+  const fact = factText && factKey ? { label: QUESTIONS.find((q) => q.key === factKey)!.label, text: factText } : null;
   // Hovering any shelter lights up the label for its system.
   const hoverName = hover ? plan.units.find((u) => u.id === hover)?.name : undefined;
 
@@ -236,18 +268,39 @@ export function CampScene({
       {/* What the scene is showing */}
       <div className="pointer-events-none absolute inset-x-0 top-0 bg-gradient-to-b from-ink/70 to-transparent px-4 pb-10 pt-3 sm:px-6 sm:pt-5">
         {lead ? (
-          <p className="text-[0.8rem] text-snow/75 sm:text-[0.85rem]">
-            {results ? "Recommended camp" : "Leading match so far"}
-            <span className="mt-0.5 block text-[1.15rem] font-semibold text-snow sm:text-[1.35rem] [font-variation-settings:'wdth'_110]">{lead.name}</span>
-          </p>
+          <>
+            <p className="text-[0.8rem] text-snow/75 sm:text-[0.85rem]">
+              {results ? "Recommended camp" : "Leading match so far"}
+              <span className="mt-0.5 block text-[1.15rem] font-semibold text-snow sm:text-[1.35rem] [font-variation-settings:'wdth'_110]">{lead.name}</span>
+            </p>
+            {fact ? (
+              <p key={`${focus}-${lead.slug}`} className="v2-step-in mt-2 line-clamp-2 max-w-[44ch] text-[0.8rem] leading-snug text-snow/80 sm:line-clamp-3 sm:text-[0.85rem]">
+                <span className="font-semibold text-signal">{fact.label}: </span>
+                {fact.text}
+              </p>
+            ) : null}
+          </>
         ) : load === "fallback" ? null : (
           <p className="max-w-[26ch] text-[0.95rem] leading-snug text-snow/85 sm:text-[1.05rem]">Your camp builds here as you answer.</p>
         )}
       </div>
 
+      {ready && results && lead ? (
+        <button
+          type="button"
+          aria-pressed={inside}
+          onClick={toggleInside}
+          className="absolute right-3 top-3 z-30 inline-flex h-9 items-center bg-ink/75 px-3 text-[0.85rem] font-semibold text-snow shadow-[inset_0_0_0_1px_rgb(148_170_196/0.4)] backdrop-blur-sm transition-colors hover:bg-ink hover:text-signal sm:right-5 sm:top-5"
+        >
+          {inside ? "Back to the camp" : <>Look inside<span className="hidden sm:inline">&nbsp;the {lead.name}</span></>}
+        </button>
+      ) : null}
+
       <div className="pointer-events-none absolute inset-x-0 bottom-0 flex h-[4.5rem] items-end justify-between gap-4 bg-gradient-to-t from-ink/75 to-transparent px-4 pb-2.5 sm:h-24 sm:px-6 sm:pb-4">
         <p className="max-w-[52ch] text-[0.72rem] leading-snug text-snow/70 sm:text-[0.78rem]">
-          {load === "fallback"
+          {inside
+            ? `Example fit-out for ${MISSION_ROOM[answers.mission ?? "response"]}. Each layout is configured for the program.`
+            : load === "fallback"
             ? lead
               ? `${photos?.[lead.slug]?.representative ? "Representative photo" : "Photo"} of the ${lead.name}. This browser can't show the 3D camp.`
               : "This browser can't show the 3D camp (it needs hardware graphics). The questions and results work the same."

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
@@ -13,6 +14,9 @@ import type { Product } from "@/lib/products";
 import {
   clearContactPrefill,
   readContactPrefill,
+  clearCampSnapshot,
+  readCampSnapshot,
+  type CampSnapshot,
   type ContactPrefillPayload,
 } from "@/lib/contact-prefill";
 import { findProductInCatalog } from "@/lib/published-catalog";
@@ -116,9 +120,12 @@ function urlFormDefaults(
 function ContactEngineeringFormInner({
   urlDefaults,
   product,
+  planPreview,
 }: {
   urlDefaults: Partial<FormState>;
   product?: Product;
+  /** The camp from the mission builder, when the visitor came from there. */
+  planPreview?: CampSnapshot | null;
 }) {
   const [step, setStep] = useState<1 | 2>(1);
   const [form, setForm] = useState(() => ({ ...initial, ...urlDefaults }));
@@ -247,6 +254,26 @@ function ContactEngineeringFormInner({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 border border-line bg-hull p-6 sm:p-8">
+      {planPreview ? (
+        <figure className="border border-line">
+          {/* A data URL made in this browser from the 3D camp; nothing to optimize. */}
+          <Image
+            src={planPreview.image}
+            alt="Illustration of your camp from the mission builder"
+            width={960}
+            height={600}
+            unoptimized
+            className="aspect-[16/10] h-auto w-full object-cover"
+          />
+          <figcaption className="px-4 py-3 text-sm text-muted">
+            <span className="text-white">Your camp from the mission builder.</span> A link to the plan is included in your
+            message, so the expert sees the same camp.{" "}
+            <a href={planPreview.link} className="text-signal hover:underline">
+              Open it in 3D
+            </a>
+          </figcaption>
+        </figure>
+      ) : null}
       {product && (
         <div className="border border-signal/30 bg-signal/[0.06] px-4 py-3 text-sm text-muted">
           <span className="text-white">Inquiry about {product.name}.</span> We&apos;ve filled in what we know; edit
@@ -440,6 +467,11 @@ export function ContactEngineeringForm() {
     clearContactPrefill();
     return payload;
   });
+  const [planPreview] = useState<CampSnapshot | null>(() => (handoff === "camp-plan" ? readCampSnapshot() : null));
+  // Shown once: a later hand-off (from the SOF planner, say) shouldn't pick up an old picture.
+  useEffect(() => {
+    if (planPreview) clearCampSnapshot();
+  }, [planPreview]);
   const resolvedSlug = sessionPrefill?.system?.trim() || systemSlug;
   const product = useMemo(
     () => (resolvedSlug ? findProductInCatalog(catalog, resolvedSlug) : undefined),
@@ -455,6 +487,7 @@ export function ContactEngineeringForm() {
       key={`${handoff}:${resolvedSlug}:${inquiryParam}:${deploymentParam}:${subjectParam}`}
       urlDefaults={urlDefaults}
       product={product}
+      planPreview={planPreview}
     />
   );
 }
