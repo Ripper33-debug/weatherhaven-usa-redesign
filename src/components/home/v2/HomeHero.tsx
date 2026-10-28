@@ -12,7 +12,7 @@ import { useClientMediaQuery } from "@/hooks/useClientMediaQuery";
 function loadSource(video: HTMLVideoElement) {
   if (video.getAttribute("src")) return;
   const small = window.matchMedia("(max-width: 767px)").matches;
-  video.src = small ? "/hero/hero-720.mp4" : "/hero/hero-1080.mp4";
+  video.src = small ? "/hero/hero-v2-720.mp4" : "/hero/hero-v2-1080.mp4";
 }
 
 export function HomeHero() {
@@ -62,7 +62,7 @@ export function HomeHero() {
     <section className="relative isolate flex min-h-[100svh] flex-col justify-end overflow-hidden bg-ink">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/hero/hero-poster.jpg"
+        src="/hero/hero-v2-poster.jpg"
         alt=""
         fetchPriority="high"
         className="absolute inset-0 -z-20 h-full w-full object-cover object-[60%_center]"
