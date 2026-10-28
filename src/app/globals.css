@@ -1398,3 +1398,8 @@ body .wh-v2 .wh-marketing-display {
 .wh-v2 .wh-label::before {
   display: none;
 }
+
+/* Align an absolutely positioned element with the right edge of .v2-wrap content */
+.v2-inset-r {
+  right: max(var(--v2-gutter), calc((100vw - var(--v2-max)) / 2 + var(--v2-gutter)));
+}

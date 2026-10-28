@@ -4,6 +4,8 @@ import { getProductContent, PRODUCT_FAMILIES } from "@/lib/product-content";
 import { contactUrl } from "@/lib/contact-url";
 import { SystemGallery } from "@/components/systems/SystemGallery";
 import { SystemCard } from "@/components/systems/SystemCard";
+import { TreccViewer } from "@/components/systems/TreccViewer";
+import { HomeDeploySequence } from "@/components/home/v2/HomeDeploySequence";
 import { COMPANY_CONTACT, companyPhoneHref } from "@/lib/company-facts";
 
 export function SystemDetail({
@@ -86,6 +88,27 @@ export function SystemDetail({
           </div>
         </div>
       </section>
+
+      {product.slug === "trecc" ? (
+        <section aria-labelledby="trecc-3d-heading" className="border-b border-line py-16 sm:py-20">
+          <div className="v2-wrap">
+            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.8fr)] lg:items-end">
+              <h2 id="trecc-3d-heading" className="v2-h2 text-snow">
+                Explore the TRECC in 3D.
+              </h2>
+              <p className="v2-body lg:justify-self-end">
+                Drag to turn it, switch between stowed and deployed, and try the three finishes.
+              </p>
+            </div>
+            <div className="mt-8">
+              <TreccViewer />
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      {/* The MECC's scroll drawing lives on its own page now that the homepage shows the TRECC in 3D. */}
+      {product.slug === "mecc" ? <HomeDeploySequence /> : null}
 
       {/* Specifications */}
       <section id="specifications" aria-labelledby="spec-heading" className="scroll-mt-24 border-b border-line py-20 sm:py-24">

@@ -1,0 +1,337 @@
+/**
+ * Framework-free three.js stage for the TRECC models (stowed + deployed).
+ * Used by the homepage scroll scene and the TRECC product-page viewer.
+ *
+ * The two models are separate CAD exports that share an origin, so "deploying" is a reveal:
+ * an orange scan plane sweeps across the unit, with the stowed model clipped on one side and
+ * the deployed model on the other.
+ */
+import * as THREE from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.js";
+import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { TRECC_FINISHES, type TreccFinish } from "@/lib/three/treccFinishes";
+
+export { TRECC_FINISHES, type TreccFinish };
+
+export const TRECC_MODELS = {
+  stowed: "/models/trecc-stowed.glb",
+  open: "/models/trecc-open.glb",
+};
+
+/** Scan sweeps along x; the deployed model spans about ±2.26 m. */
+const SCAN_FROM = -2.45;
+const SCAN_TO = 2.45;
+
+export type CameraPose = { az: number; el: number; dist: number; ty: number };
+
+export type TreccStage = {
+  /** 0 = fully stowed, 1 = fully deployed. */
+  setDeploy: (t: number) => void;
+  setCamera: (pose: CameraPose) => void;
+  setFinish: (finish: TreccFinish, animate?: boolean) => void;
+  /** Shift the image horizontally by a fraction of the width (positive = right). */
+  setShift: (fraction: number) => void;
+  /** Turns on drag-to-rotate (product viewer); onChange fires whenever the view moves. */
+  enableControls: (onChange?: () => void) => void;
+  render: () => void;
+  resize: () => void;
+  dispose: () => void;
+  /** True while the finish tween still needs frames. */
+  isAnimating: () => boolean;
+};
+
+const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+
+export async function createTreccStage(
+  canvas: HTMLCanvasElement,
+  { maxDpr = 1.75, shadows = true }: { maxDpr?: number; shadows?: boolean } = {},
+): Promise<TreccStage> {
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: "high-performance" });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, maxDpr));
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.0;
+  renderer.localClippingEnabled = true;
+  renderer.shadowMap.enabled = shadows;
+  renderer.shadowMap.type = THREE.PCFShadowMap;
+  // The light and models are static; the shadow only changes with the scan, so redraw it on demand.
+  renderer.shadowMap.autoUpdate = false;
+  renderer.shadowMap.needsUpdate = true;
+
+  const scene = new THREE.Scene();
+  scene.fog = new THREE.Fog(0x0a0f17, 14, 30);
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  const envTex = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  scene.environment = envTex;
+  scene.environmentIntensity = 0.38;
+
+  // Lighting: warm key from front-right, cool fill, orange rim from behind (Weatherhaven signal).
+  const key = new THREE.DirectionalLight(0xfff4e6, 2.3);
+  key.position.set(4.5, 7.5, 6);
+  key.castShadow = shadows;
+  key.shadow.mapSize.set(2048, 2048);
+  key.shadow.bias = -0.0004;
+  key.shadow.normalBias = 0.02;
+  Object.assign(key.shadow.camera, { left: -4, right: 4, top: 4, bottom: -4, near: 1, far: 20 });
+  scene.add(key);
+  scene.add(new THREE.HemisphereLight(0x9fb7d1, 0x0a0f17, 0.35));
+  const rim = new THREE.DirectionalLight(0xffb070, 1.15);
+  rim.position.set(-6, 3.5, -5.5);
+  scene.add(rim);
+
+  // Ground: soft contact shadow + a blueprint grid that fades out radially.
+  const shadowFloor = new THREE.Mesh(
+    new THREE.CircleGeometry(9, 64),
+    new THREE.ShadowMaterial({ color: 0x000000, opacity: 0.55 }),
+  );
+  shadowFloor.rotation.x = -Math.PI / 2;
+  shadowFloor.receiveShadow = true;
+  scene.add(shadowFloor);
+  const gridMat = new THREE.ShaderMaterial({
+    transparent: true,
+    depthWrite: false,
+    uniforms: { uColor: { value: new THREE.Color(0x94aac4) } },
+    vertexShader: /* glsl */ `
+      varying vec2 vXZ;
+      void main() {
+        vec4 w = modelMatrix * vec4(position, 1.0);
+        vXZ = w.xz;
+        gl_Position = projectionMatrix * viewMatrix * w;
+      }`,
+    fragmentShader: /* glsl */ `
+      uniform vec3 uColor;
+      varying vec2 vXZ;
+      float line(float x, float w) {
+        float d = abs(fract(x - 0.5) - 0.5) / fwidth(x);
+        return 1.0 - min(d / w, 1.0);
+      }
+      void main() {
+        float minor = max(line(vXZ.x * 2.0, 1.0), line(vXZ.y * 2.0, 1.0)) * 0.35;
+        float major = max(line(vXZ.x * 0.5, 1.2), line(vXZ.y * 0.5, 1.2));
+        float fade = 1.0 - smoothstep(2.5, 8.5, length(vXZ));
+        float a = max(minor, major) * fade * 0.16;
+        if (a < 0.002) discard;
+        gl_FragColor = vec4(uColor, a);
+      }`,
+  });
+  const grid = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), gridMat);
+  grid.rotation.x = -Math.PI / 2;
+  grid.position.y = 0.001;
+  scene.add(grid);
+
+  // Scan plane: hairline frame plus a faint glowing sheet.
+  const scanGroup = new THREE.Group();
+  const scanFrame = new THREE.LineSegments(
+    new THREE.EdgesGeometry(new THREE.PlaneGeometry(2.7, 2.6)),
+    new THREE.LineBasicMaterial({ color: 0xf18522, transparent: true, opacity: 0.95 }),
+  );
+  const scanSheet = new THREE.Mesh(
+    new THREE.PlaneGeometry(2.7, 2.6),
+    new THREE.MeshBasicMaterial({
+      color: 0xf18522,
+      transparent: true,
+      opacity: 0.08,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+    }),
+  );
+  scanGroup.add(scanFrame, scanSheet);
+  scanGroup.rotation.y = Math.PI / 2;
+  scanGroup.position.set(SCAN_FROM, 1.3, 0.06);
+  scanGroup.visible = false;
+  scene.add(scanGroup);
+
+  const camera = new THREE.PerspectiveCamera(28, 1, 0.1, 60);
+  const target = new THREE.Vector3(0, 1, 0.06);
+
+  // Clipping planes: stowed keeps x ≥ s, deployed keeps x ≤ s.
+  const clipStowed = new THREE.Plane(new THREE.Vector3(1, 0, 0), -SCAN_FROM);
+  const clipOpen = new THREE.Plane(new THREE.Vector3(-1, 0, 0), SCAN_FROM);
+  // Shared uniforms for the orange glow where the scan passes over surfaces.
+  const scanUniforms = { uScanX: { value: SCAN_FROM }, uScanOn: { value: 0 } };
+
+  const shellMaterials: THREE.MeshStandardMaterial[] = [];
+  const patch = (mat: THREE.MeshStandardMaterial, plane: THREE.Plane) => {
+    mat.clippingPlanes = [plane];
+    mat.clipShadows = true;
+    mat.onBeforeCompile = (shader) => {
+      shader.uniforms.uScanX = scanUniforms.uScanX;
+      shader.uniforms.uScanOn = scanUniforms.uScanOn;
+      shader.vertexShader = shader.vertexShader
+        .replace("#include <common>", "#include <common>\nvarying float vWorldX;")
+        .replace("#include <worldpos_vertex>", "#include <worldpos_vertex>\nvWorldX = (modelMatrix * vec4(transformed, 1.0)).x;");
+      shader.fragmentShader = shader.fragmentShader
+        .replace("#include <common>", "#include <common>\nvarying float vWorldX;\nuniform float uScanX;\nuniform float uScanOn;")
+        .replace(
+          "#include <emissivemap_fragment>",
+          "#include <emissivemap_fragment>\ntotalEmissiveRadiance += vec3(0.95, 0.42, 0.08) * 2.2 * uScanOn * (1.0 - smoothstep(0.0, 0.14, abs(vWorldX - uScanX)));",
+        );
+    };
+    mat.needsUpdate = true;
+  };
+
+  const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
+  const [stowedGltf, openGltf] = await Promise.all([
+    loader.loadAsync(TRECC_MODELS.stowed),
+    loader.loadAsync(TRECC_MODELS.open),
+  ]);
+  const prep = (root: THREE.Object3D, plane: THREE.Plane) => {
+    root.traverse((o) => {
+      const mesh = o as THREE.Mesh;
+      if (!mesh.isMesh) return;
+      // Cast onto the ground only: self-shadowing on the decimated panels shows acne.
+      mesh.castShadow = shadows;
+      mesh.receiveShadow = false;
+      const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+      mesh.material = mats.map((m) => {
+        const mat = (m as THREE.MeshStandardMaterial).clone();
+        if (mat.name === "shell") shellMaterials.push(mat);
+        // Non-slip roof and rubber read as warm brown under the key light; push them to charcoal.
+        if (mat.name === "rubber") {
+          mat.color.multiplyScalar(0.45);
+          mat.roughness = 0.95;
+        }
+        patch(mat, plane);
+        return mat;
+      }) as never;
+      if (mats.length === 1) mesh.material = (mesh.material as THREE.Material[])[0];
+    });
+    scene.add(root);
+  };
+  prep(stowedGltf.scene, clipStowed);
+  prep(openGltf.scene, clipOpen);
+  const stowedRoot = stowedGltf.scene;
+  const openRoot = openGltf.scene;
+
+  // ---- finish ------------------------------------------------------------------
+  let finishFrom = new THREE.Color(...TRECC_FINISHES[0].color);
+  let finishTo = finishFrom.clone();
+  let finishT = 1;
+  let finishStart = 0;
+  const applyFinish = (c: THREE.Color) => shellMaterials.forEach((m) => m.color.copy(c));
+  applyFinish(finishTo);
+
+  // ---- state ------------------------------------------------------------------------
+  let deploy = -1;
+  const setDeploy = (t: number) => {
+    const next = Math.min(1, Math.max(0, t));
+    if (next === deploy) return;
+    deploy = next;
+    // Only draw what can be seen: one model at rest, both during the scan.
+    stowedRoot.visible = deploy < 0.999;
+    openRoot.visible = deploy > 0.001;
+    renderer.shadowMap.needsUpdate = true;
+    const s = lerp(SCAN_FROM, SCAN_TO, deploy);
+    clipStowed.constant = -s;
+    clipOpen.constant = s;
+    scanUniforms.uScanX.value = s;
+    const on = deploy > 0.001 && deploy < 0.999;
+    scanUniforms.uScanOn.value = on ? Math.min(1, Math.min(deploy, 1 - deploy) * 12) : 0;
+    scanGroup.visible = on;
+    scanGroup.position.x = s;
+  };
+  setDeploy(0);
+
+  const setCamera = ({ az, el, dist, ty }: CameraPose) => {
+    const a = (az * Math.PI) / 180;
+    const e = (el * Math.PI) / 180;
+    target.set(0, ty, 0.06);
+    camera.position.set(
+      target.x + dist * Math.cos(e) * Math.sin(a),
+      target.y + dist * Math.sin(e),
+      target.z + dist * Math.cos(e) * Math.cos(a),
+    );
+    camera.lookAt(target);
+  };
+  setCamera({ az: 38, el: 13, dist: 8.5, ty: 0.9 });
+
+  let controls: OrbitControls | null = null;
+  let shift = 0;
+
+  const resize = () => {
+    const w = canvas.clientWidth || 1;
+    const h = canvas.clientHeight || 1;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    // Hold the horizontal field of view (the deployed unit is wide), so tall phone screens
+    // frame it the same way a desktop does.
+    const hfov = 2 * Math.atan(Math.tan((14 * Math.PI) / 180) * 1.6);
+    camera.fov = Math.max(28, (2 * Math.atan(Math.tan(hfov / 2) / camera.aspect) * 180) / Math.PI);
+    if (shift) camera.setViewOffset(w, h, -w * shift, 0, w, h);
+    else camera.clearViewOffset();
+    camera.updateProjectionMatrix();
+  };
+  resize();
+
+  const render = () => {
+    if (finishT < 1) {
+      finishT = Math.min(1, (performance.now() - finishStart) / 600);
+      const k = 1 - (1 - finishT) ** 3;
+      applyFinish(finishFrom.clone().lerp(finishTo, k));
+    }
+    controls?.update();
+    renderer.render(scene, camera);
+  };
+
+  return {
+    setDeploy,
+    setCamera,
+    setFinish: (finish, animate = true) => {
+      const f = TRECC_FINISHES.find((x) => x.id === finish) ?? TRECC_FINISHES[0];
+      finishFrom = shellMaterials[0]?.color.clone() ?? finishTo.clone();
+      finishTo = new THREE.Color(...f.color);
+      if (animate) {
+        finishT = 0;
+        finishStart = performance.now();
+      } else {
+        finishT = 1;
+        applyFinish(finishTo);
+      }
+    },
+    enableControls: (onChange) => {
+      if (controls) return;
+      controls = new OrbitControls(camera, canvas);
+      if (onChange) controls.addEventListener("change", onChange);
+      controls.target.copy(target);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.08;
+      controls.enablePan = false;
+      controls.minDistance = 5;
+      controls.maxDistance = 13;
+      controls.minPolarAngle = Math.PI * 0.18;
+      controls.maxPolarAngle = Math.PI * 0.49;
+      controls.update();
+    },
+    setShift: (fraction) => {
+      shift = fraction;
+      resize();
+    },
+    render,
+    resize,
+    isAnimating: () => finishT < 1,
+    dispose: () => {
+      controls?.dispose();
+      scene.traverse((o) => {
+        const mesh = o as THREE.Mesh;
+        if (mesh.geometry) mesh.geometry.dispose();
+        const mats = mesh.material ? (Array.isArray(mesh.material) ? mesh.material : [mesh.material]) : [];
+        mats.forEach((m) => m.dispose());
+      });
+      envTex.dispose();
+      pmrem.dispose();
+      renderer.dispose();
+    },
+  };
+}
+
+/** WebGL availability check without keeping a context around. */
+export function canUseWebGL(): boolean {
+  try {
+    const c = document.createElement("canvas");
+    return !!(c.getContext("webgl2") || c.getContext("webgl"));
+  } catch {
+    return false;
+  }
+}

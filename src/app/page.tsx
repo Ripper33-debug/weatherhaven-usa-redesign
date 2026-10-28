@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { pageMeta } from "@/lib/page-meta";
 import { HomeHero } from "@/components/home/v2/HomeHero";
 import { HomeDataPlate } from "@/components/home/v2/HomeDataPlate";
-import { HomeDeploySequence } from "@/components/home/v2/HomeDeploySequence";
+import { HomeTreccScene } from "@/components/home/v2/HomeTreccScene";
 import { HomeSystems } from "@/components/home/v2/HomeSystems";
 import { HomeDeploymentMap } from "@/components/home/v2/HomeDeploymentMap";
 import { HomeFactory } from "@/components/home/v2/HomeFactory";
@@ -29,7 +29,7 @@ export default function HomePage() {
     <>
       <HomeHero />
       <HomeDataPlate />
-      <HomeDeploySequence />
+      <HomeTreccScene />
       <HomeSystems />
       <HomeDeploymentMap />
       <HomeFactory />
