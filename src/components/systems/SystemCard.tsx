@@ -21,7 +21,7 @@ export function SystemCard({
   return (
     <article className="group relative flex h-full flex-col bg-ink">
       {/* Shares a name with the product page's main photo, so the card morphs into it on navigation. */}
-      <ViewTransition name={`system-photo-${product.slug}`} share="v2-morph">
+      <ViewTransition name={`system-photo-${product.slug}`} share="v2-morph" default="none">
         <div className="relative aspect-[4/3] overflow-hidden bg-hull">
           <Image
             src={productCover(product.slug, product.coverImageUrl)}

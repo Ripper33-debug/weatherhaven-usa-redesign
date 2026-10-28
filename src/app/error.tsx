@@ -1,10 +1,10 @@
 "use client";
 
-import * as Sentry from "@sentry/nextjs";
 import Link from "next/link";
 import { useEffect } from "react";
 import { WeatherhavenLogoLink } from "@/components/brand/WeatherhavenLogoLink";
 import { btnMarketingOutline, btnMarketingPrimary } from "@/lib/cta-buttons";
+import { reportError } from "@/lib/sentry-client";
 
 export default function Error({
   error,
@@ -15,9 +15,7 @@ export default function Error({
 }) {
   useEffect(() => {
     console.error(error);
-    if (process.env.NEXT_PUBLIC_SENTRY_DSN?.trim()) {
-      Sentry.captureException(error);
-    }
+    reportError(error);
   }, [error]);
 
   return (

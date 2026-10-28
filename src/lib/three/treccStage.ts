@@ -35,6 +35,8 @@ export type TreccStage = {
   setShift: (fraction: number) => void;
   /** Turns on drag-to-rotate (product viewer); onChange fires whenever the view moves. */
   enableControls: (onChange?: () => void) => void;
+  /** Turns the view by some degrees (positive = clockwise from above), eased by the controls. */
+  turn: (degrees: number) => void;
   render: () => void;
   resize: () => void;
   dispose: () => void;
@@ -62,7 +64,9 @@ export async function createTreccStage(
   const scene = new THREE.Scene();
   scene.fog = new THREE.Fog(0x0a0f17, 14, 30);
   const pmrem = new THREE.PMREMGenerator(renderer);
-  const envTex = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  const room = new RoomEnvironment();
+  const envTex = pmrem.fromScene(room, 0.04).texture;
+  room.dispose();
   scene.environment = envTex;
   scene.environmentIntensity = 0.38;
 
@@ -172,11 +176,38 @@ export async function createTreccStage(
     mat.needsUpdate = true;
   };
 
+  let controls: OrbitControls | null = null;
+  // Frees everything on the GPU; also used if a model fails to load, so a failed attempt
+  // doesn't leave a live WebGL context behind.
+  const disposeAll = () => {
+    controls?.dispose();
+    controls = null;
+    scene.traverse((o) => {
+      const mesh = o as THREE.Mesh;
+      if (mesh.geometry) mesh.geometry.dispose();
+      const mats = mesh.material ? (Array.isArray(mesh.material) ? mesh.material : [mesh.material]) : [];
+      mats.forEach((m) => m.dispose());
+    });
+    key.dispose();
+    rim.dispose();
+    envTex.dispose();
+    pmrem.dispose();
+    renderer.dispose();
+    renderer.forceContextLoss();
+  };
+
   const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
-  const [stowedGltf, openGltf] = await Promise.all([
-    loader.loadAsync(TRECC_MODELS.stowed),
-    loader.loadAsync(TRECC_MODELS.open),
-  ]);
+  let stowedGltf: Awaited<ReturnType<typeof loader.loadAsync>>;
+  let openGltf: Awaited<ReturnType<typeof loader.loadAsync>>;
+  try {
+    [stowedGltf, openGltf] = await Promise.all([
+      loader.loadAsync(TRECC_MODELS.stowed),
+      loader.loadAsync(TRECC_MODELS.open),
+    ]);
+  } catch (err) {
+    disposeAll();
+    throw err;
+  }
   const prep = (root: THREE.Object3D, plane: THREE.Plane) => {
     root.traverse((o) => {
       const mesh = o as THREE.Mesh;
@@ -247,7 +278,6 @@ export async function createTreccStage(
   };
   setCamera({ az: 38, el: 13, dist: 8.5, ty: 0.9 });
 
-  let controls: OrbitControls | null = null;
   let shift = 0;
 
   const resize = () => {
@@ -298,11 +328,17 @@ export async function createTreccStage(
       controls.enableDamping = true;
       controls.dampingFactor = 0.08;
       controls.enablePan = false;
-      controls.minDistance = 5;
-      controls.maxDistance = 13;
+      // No wheel or pinch zoom: the wheel keeps scrolling the page instead of being captured.
+      controls.enableZoom = false;
       controls.minPolarAngle = Math.PI * 0.18;
       controls.maxPolarAngle = Math.PI * 0.49;
+      // Let vertical swipes scroll the page on touch screens; sideways drags still turn the model.
+      canvas.style.touchAction = "pan-y";
       controls.update();
+    },
+    turn: (degrees) => {
+      controls?.rotateLeft((-degrees * Math.PI) / 180);
+      controls?.update();
     },
     setShift: (fraction) => {
       shift = fraction;
@@ -311,18 +347,7 @@ export async function createTreccStage(
     render,
     resize,
     isAnimating: () => finishT < 1,
-    dispose: () => {
-      controls?.dispose();
-      scene.traverse((o) => {
-        const mesh = o as THREE.Mesh;
-        if (mesh.geometry) mesh.geometry.dispose();
-        const mats = mesh.material ? (Array.isArray(mesh.material) ? mesh.material : [mesh.material]) : [];
-        mats.forEach((m) => m.dispose());
-      });
-      envTex.dispose();
-      pmrem.dispose();
-      renderer.dispose();
-    },
+    dispose: disposeAll,
   };
 }
 
@@ -330,7 +355,9 @@ export async function createTreccStage(
 export function canUseWebGL(): boolean {
   try {
     const c = document.createElement("canvas");
-    return !!(c.getContext("webgl2") || c.getContext("webgl"));
+    const gl = c.getContext("webgl2") || c.getContext("webgl");
+    gl?.getExtension("WEBGL_lose_context")?.loseContext();
+    return !!gl;
   } catch {
     return false;
   }

@@ -40,9 +40,11 @@ export function TreccViewer() {
         stage.setDeploy(deployRef.current);
         if (t >= 1) tweenRef.current = null;
       }
+      // render() runs the orbit controls, whose change event calls kick(); that may already
+      // have queued the next frame, so only queue one if nothing is pending.
       stage.render();
       const busy = !!tweenRef.current || stage.isAnimating() || performance.now() - lastMove < 400;
-      if (visible && busy) raf = requestAnimationFrame(frame);
+      if (visible && busy && !raf) raf = requestAnimationFrame(frame);
     };
     const kick = () => {
       lastMove = performance.now();
@@ -125,6 +127,11 @@ export function TreccViewer() {
     kickRef.current();
   }, []);
 
+  const turn = useCallback((degrees: number) => {
+    stageRef.current?.turn(degrees);
+    kickRef.current();
+  }, []);
+
   const ready = load === "ready";
 
   return (
@@ -133,14 +140,17 @@ export function TreccViewer() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/models/trecc-poster-viewer.jpg"
+          loading="lazy"
+          decoding="async"
           alt={load === "fallback" ? "Weatherhaven TRECC expandable shelter, deployed" : ""}
           aria-hidden={load !== "fallback"}
           className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${ready ? "opacity-0" : "opacity-100"}`}
         />
         <canvas
           ref={canvasRef}
-          role="img"
-          aria-label={`3D model of the TRECC, ${deployed ? "deployed" : "stowed"}. Drag to turn it.`}
+          role={ready ? "img" : undefined}
+          aria-hidden={!ready}
+          aria-label={ready ? `3D model of the TRECC, ${deployed ? "deployed" : "stowed"}. Drag or use the turn buttons to rotate it.` : undefined}
           className={`absolute inset-0 h-full w-full cursor-grab touch-none transition-opacity duration-700 active:cursor-grabbing ${ready ? "opacity-100" : "opacity-0"}`}
         />
         {load === "loading" || load === "idle" ? (
@@ -166,7 +176,26 @@ export function TreccViewer() {
                 </button>
               ))}
             </div>
-            <p className="pointer-events-none absolute bottom-4 left-4 hidden text-[0.8rem] text-muted sm:block">Drag to turn it</p>
+            <div role="group" aria-label="Turn the model" className="absolute bottom-3 left-3 flex items-center bg-ink/70 p-1 backdrop-blur-md sm:bottom-4 sm:left-4">
+              {[
+                { deg: -45, label: "Turn left", d: "M9.5 4.5 5 9l4.5 4.5M5.5 9H12a4 4 0 0 1 0 8h-1" },
+                { deg: 45, label: "Turn right", d: "M10.5 4.5 15 9l-4.5 4.5M14.5 9H8a4 4 0 0 0 0 8h1" },
+              ].map((b) => (
+                <button
+                  key={b.label}
+                  type="button"
+                  aria-label={b.label}
+                  title={b.label}
+                  onClick={() => turn(b.deg)}
+                  className="flex h-9 w-9 items-center justify-center text-snow/80 transition-colors hover:bg-white/[0.06] hover:text-snow"
+                >
+                  <svg aria-hidden viewBox="0 0 20 20" className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                    <path d={b.d} />
+                  </svg>
+                </button>
+              ))}
+              <span className="hidden px-2 text-[0.8rem] text-muted sm:inline">or drag</span>
+            </div>
             <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4">
               <TreccFinishPicker value={finish} onChange={chooseFinish} />
             </div>

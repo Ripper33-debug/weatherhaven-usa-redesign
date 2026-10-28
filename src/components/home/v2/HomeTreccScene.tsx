@@ -78,40 +78,57 @@ export function HomeTreccScene() {
   const [step, setStep] = useState(0);
   const stepRef = useRef(0);
 
-  // Load three.js and the models only when the section is close.
+  // Load three.js and the models once the page has loaded and the visitor starts scrolling
+  // toward the section, so they never compete with the hero film for bandwidth.
   useEffect(() => {
     const el = sectionRef.current;
     if (!el) return;
     let cancelled = false;
-    const io = new IntersectionObserver(
-      async ([entry]) => {
-        if (!entry.isIntersecting) return;
-        io.disconnect();
-        const { canUseWebGL, createTreccStage } = await import("@/lib/three/treccStage");
-        if (cancelled) return;
-        if (!canUseWebGL() || !canvasRef.current) {
-          setLoad("fallback");
+    let io: IntersectionObserver | null = null;
+    const start = async () => {
+      const { canUseWebGL, createTreccStage } = await import("@/lib/three/treccStage");
+      if (cancelled) return;
+      if (!canUseWebGL() || !canvasRef.current) {
+        setLoad("fallback");
+        return;
+      }
+      setLoad("loading");
+      try {
+        const stage = await createTreccStage(canvasRef.current, { maxDpr: window.matchMedia("(max-width: 1023px)").matches ? 1.5 : 1.75 });
+        if (cancelled) {
+          stage.dispose();
           return;
         }
-        setLoad("loading");
-        try {
-          const stage = await createTreccStage(canvasRef.current, { maxDpr: window.matchMedia("(max-width: 1023px)").matches ? 1.5 : 1.75 });
-          if (cancelled) {
-            stage.dispose();
-            return;
-          }
-          stageRef.current = stage;
-          setLoad("ready");
-        } catch {
-          if (!cancelled) setLoad("fallback");
-        }
-      },
-      { rootMargin: "1400px 0px" },
-    );
-    io.observe(el);
+        stageRef.current = stage;
+        setLoad("ready");
+      } catch {
+        if (!cancelled) setLoad("fallback");
+      }
+    };
+    const arm = () => {
+      window.removeEventListener("scroll", arm);
+      if (cancelled || io) return;
+      io = new IntersectionObserver(
+        ([entry]) => {
+          if (!entry.isIntersecting) return;
+          io?.disconnect();
+          void start();
+        },
+        { rootMargin: "100% 0px" },
+      );
+      io.observe(el);
+    };
+    const afterLoad = () => {
+      if (window.scrollY > 0 || el.getBoundingClientRect().top < window.innerHeight) arm();
+      else window.addEventListener("scroll", arm, { passive: true });
+    };
+    if (document.readyState === "complete") afterLoad();
+    else window.addEventListener("load", afterLoad, { once: true });
     return () => {
       cancelled = true;
-      io.disconnect();
+      io?.disconnect();
+      window.removeEventListener("load", afterLoad);
+      window.removeEventListener("scroll", arm);
       stageRef.current?.dispose();
       stageRef.current = null;
     };
@@ -126,28 +143,40 @@ export function HomeTreccScene() {
     let raf = 0;
     let visible = true;
     let shown = reduced ? 1 : -1;
+    let last = 0;
+    // Skip redrawing identical frames (scrolling past either end, reduced motion).
+    let drawn = -1;
+    let dirty = true;
     const progress = () => {
       if (reduced) return 1;
       const r = section.getBoundingClientRect();
       const travel = r.height - window.innerHeight;
       return travel > 0 ? clamp(-r.top / travel) : 1;
     };
-    const frame = () => {
+    const frame = (now: number) => {
       raf = 0;
       const target = progress();
-      // Ease toward the scroll position; headless test runs can opt out with window.__TRECC_INSTANT__.
+      // Ease toward the scroll position by elapsed time, so a slow phone keeps up with the finger
+      // instead of trailing it. Headless test runs can opt out with window.__TRECC_INSTANT__.
       const instant = (window as unknown as { __TRECC_INSTANT__?: boolean }).__TRECC_INSTANT__;
-      shown = shown < 0 || instant ? target : shown + (target - shown) * 0.12;
+      const dt = last ? Math.min(0.25, (now - last) / 1000) : 1 / 60;
+      last = now;
+      shown = shown < 0 || instant ? target : shown + (target - shown) * (1 - Math.exp(-dt / 0.13));
       if (Math.abs(target - shown) < 0.0004) shown = target;
-      stage.setDeploy(smooth(DEPLOY_FROM, DEPLOY_TO, shown));
-      stage.setCamera(poseAt(shown, compact));
-      stage.render();
+      if (shown !== drawn || dirty || stage.isAnimating()) {
+        stage.setDeploy(smooth(DEPLOY_FROM, DEPLOY_TO, shown));
+        stage.setCamera(poseAt(shown, compact));
+        stage.render();
+        drawn = shown;
+        dirty = false;
+      }
       const s = stepAt(shown);
       if (s !== stepRef.current) {
         stepRef.current = s;
         setStep(s);
       }
       if (visible && (shown !== target || stage.isAnimating())) raf = requestAnimationFrame(frame);
+      else last = 0;
     };
     const kick = () => {
       if (!raf && visible) raf = requestAnimationFrame(frame);
@@ -155,6 +184,7 @@ export function HomeTreccScene() {
     kickRef.current = kick;
     const onResize = () => {
       stage.resize();
+      dirty = true;
       kick();
     };
     const io = new IntersectionObserver(([entry]) => {
@@ -182,32 +212,37 @@ export function HomeTreccScene() {
 
   const ready = load === "ready";
   const active = reduced ? 3 : step;
+  const still = load === "fallback" ? "deployed" : "stowed";
 
   return (
     <section
       ref={sectionRef}
       aria-labelledby="trecc-heading"
-      className={`relative border-t border-line bg-ink ${reduced ? "" : "h-[400svh]"}`}
+      className="relative h-[400svh] border-t border-line bg-ink motion-reduce:h-auto"
     >
-      <div className={`${reduced ? "relative h-[100svh] min-h-[620px]" : "sticky top-0 h-[100svh]"} overflow-hidden`}>
-        {/* Still frame while the model loads, and the fallback without WebGL */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={`/models/trecc-poster-${reduced || load === "fallback" ? "deployed" : "stowed"}${compact ? "-m" : ""}.jpg`}
-          alt={
-            load === "fallback"
-              ? "Weatherhaven TRECC expandable shelter, deployed"
-              : ""
-          }
-          aria-hidden={load !== "fallback"}
-          className={`absolute inset-x-0 top-0 h-[60svh] w-full object-cover transition-opacity duration-700 lg:inset-0 lg:h-full ${
-            ready ? "opacity-0" : "opacity-100"
-          }`}
-        />
+      <div className="sticky top-0 h-[100svh] overflow-hidden motion-reduce:relative motion-reduce:min-h-[620px]">
+        {/* Still frame while the model loads, and the fallback without WebGL. Sources are chosen by
+            media query so the server HTML is already right for phones and reduced motion. */}
+        <picture>
+          <source media="(prefers-reduced-motion: reduce) and (max-width: 1023px)" srcSet="/models/trecc-poster-deployed-m.jpg" />
+          <source media="(prefers-reduced-motion: reduce)" srcSet="/models/trecc-poster-deployed.jpg" />
+          <source media="(max-width: 1023px)" srcSet={`/models/trecc-poster-${still}-m.jpg`} />
+          <img
+            src={`/models/trecc-poster-${still}.jpg`}
+            loading="lazy"
+            decoding="async"
+            alt={load === "fallback" ? "Weatherhaven TRECC expandable shelter, deployed" : ""}
+            aria-hidden={load !== "fallback"}
+            className={`absolute inset-x-0 top-0 h-[60svh] w-full object-cover transition-opacity duration-700 lg:inset-0 lg:h-full ${
+              ready ? "opacity-0" : "opacity-100"
+            }`}
+          />
+        </picture>
         <canvas
           ref={canvasRef}
-          aria-label="3D model of a Weatherhaven TRECC going from stowed to deployed as you scroll"
-          role="img"
+          aria-label={ready ? "3D model of a Weatherhaven TRECC going from stowed to deployed as you scroll" : undefined}
+          role={ready ? "img" : undefined}
+          aria-hidden={!ready}
           className={`absolute inset-x-0 top-0 h-[60svh] w-full transition-opacity duration-700 lg:inset-0 lg:h-full ${
             ready ? "opacity-100" : "opacity-0"
           }`}

@@ -65,11 +65,7 @@ export function SystemsCatalogFallback(props: CatalogProps) {
   return <CatalogBody {...props} urlFamily="all" />;
 }
 
-function CatalogBody({ products, blurs = {}, urlFamily }: CatalogProps & { urlFamily: FamilyFilter }) {
-  // A ?family= link (homepage, menu) sets the starting filter; chip clicks are local state, so they
-  // don't trigger a route update (and its page cross-fade). A new ?family= from a link wins again.
-  const [picked, setPicked] = useState<{ value: FamilyFilter; forUrl: FamilyFilter } | null>(null);
-  const family: FamilyFilter = picked && picked.forUrl === urlFamily ? picked.value : urlFamily;
+function CatalogBody({ products, blurs = {}, urlFamily: family }: CatalogProps & { urlFamily: FamilyFilter }) {
   const [mission, setMission] = useState<ProductFilterMission>("all");
   const [environment, setEnvironment] = useState<ProductFilterEnvironment>("all");
   const [mobility, setMobility] = useState<ProductFilterMobility>("all");
@@ -85,7 +81,14 @@ function CatalogBody({ products, blurs = {}, urlFamily }: CatalogProps & { urlFa
 
   const anyFilter = family !== "all" || mission !== "all" || environment !== "all" || mobility !== "all" || search.trim() !== "";
 
-  const chooseFamily = (f: FamilyFilter) => setPicked({ value: f, forUrl: urlFamily });
+  // The family lives in the URL (?family=), so a filtered view can be shared and survives Back.
+  // replaceState updates useSearchParams without a server round trip or a new history entry.
+  const chooseFamily = (f: FamilyFilter) => {
+    const url = new URL(window.location.href);
+    if (f === "all") url.searchParams.delete("family");
+    else url.searchParams.set("family", f);
+    window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+  };
 
   const reset = () => {
     chooseFamily("all");

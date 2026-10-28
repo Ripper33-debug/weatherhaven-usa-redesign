@@ -44,7 +44,7 @@ export function SystemGallery({
 
   return (
     <div className="min-w-0">
-      <ViewTransition name={transitionName} share="v2-morph">
+      <ViewTransition name={transitionName} share="v2-morph" default="none">
         <div className="relative aspect-[4/3] overflow-hidden bg-hull">
           <Image
             key={current}
