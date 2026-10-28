@@ -46,7 +46,8 @@ To share it, deploy it as a **new** Vercel project (`npx vercel`), not the produ
 - The SOF portal (`/sof-solutions`, `/sof-solutions/request-access`, `/sof-solutions/secure`) and `/login` were screenshotted next to the untouched original at desktop and phone widths, and they are pixel-identical.
 - Lighthouse on a local production build:
   - Desktop homepage: 98 performance, 100 accessibility, 96 best practices, 100 SEO. Desktop TRECC page: 98 / 100 / 96 / 100.
-  - Simulated mid-range phone on slow 4G: homepage 69–77 (it was 65–70), TRECC page 70–82, contact 78, capabilities 88. Layout shift is 0 on every public page.
+  - Desktop deployments page: 94; desktop mission builder: 99.
+  - Simulated mid-range phone on slow 4G (scores vary a few points run to run): homepage 67–77 (it was 65–70), TRECC page 70–82, catalog 75, deployments 70–73, mission builder 85, contact 78, capabilities 88. Layout shift is 0 on every public page.
   - The 4 best-practices points are console errors that only happen locally (the Vercel analytics script and Supabase without keys).
 - What made phones faster: the hero headline paints on the first frame, headings no longer reflow when the page script runs, the world map's land dots and the 3D models load only as you scroll toward them, Sentry and the Supabase client load only when needed, and the factory film's still image loads lazily.
 - At 390 px, no public page scrolls sideways. Checked in Chrome, Safari (WebKit, desktop and iPhone) and Firefox, including the 3D scene, the 3D viewer and the page transitions.
