@@ -5,7 +5,7 @@ import { WEATHERHAVEN_PRODUCT_LINES } from "@/lib/weatherhaven-product-lines";
 export const NAV_LINKS = [
   { href: "/capabilities", label: "Capabilities" },
   { href: "/mission-solution-builder", label: "Mission builder" },
-  { href: "/#deployments", label: "Deployments" },
+  { href: "/deployments", label: "Deployments" },
   { href: "/news", label: "News" },
 ] as const;
 

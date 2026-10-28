@@ -228,7 +228,7 @@ export function Navbar() {
             ) : null}
             </div>
             {NAV_LINKS.map((link) => {
-              const active = link.href !== "/#deployments" && pathname.startsWith(link.href);
+              const active = pathname.startsWith(link.href);
               return (
                 <Link
                   key={link.href}

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import worldDots from "@/data/world-dots.json";
 import { GLOBAL_DEPLOYMENTS } from "@/lib/global-deployments";
 import { deploymentPinKind } from "@/lib/deployment-pin-style";
@@ -71,7 +72,8 @@ function regionFor(country: string, lat: number, lng: number): string {
   return "asia-pacific";
 }
 
-export function HomeDeploymentMap() {
+/** `storiesLink`: link to the deployment stories page (off on that page itself). */
+export function HomeDeploymentMap({ storiesLink = true }: { storiesLink?: boolean } = {}) {
   const pins: MapPin[] = GLOBAL_DEPLOYMENTS.flatMap((d) => {
     const xy = (worldDots.pins as Record<string, number[]>)[d.id];
     if (!xy) return [];
@@ -91,7 +93,6 @@ export function HomeDeploymentMap() {
 
   const theaters = REGIONS.filter((r) => pins.some((p) => p.theater === r.id)).map((r) => ({ id: r.id, label: r.label }));
 
-  // Build the dot path once on the server: one path, round caps, zero-length segments.
   return (
     <section id="deployments" aria-labelledby="map-heading" className="scroll-mt-20 border-t border-line bg-ink py-20 sm:py-28">
       <div className="v2-wrap">
@@ -99,10 +100,17 @@ export function HomeDeploymentMap() {
           <h2 id="map-heading" className="v2-h1 max-w-[16ch] text-snow">
             Deployed from the Arctic to the South Pole.
           </h2>
-          <p className="v2-body lg:justify-self-end">
-            {pins.length} documented Weatherhaven deployments for defense, humanitarian and research programs. Select
-            a site to see who it served.
-          </p>
+          <div className="lg:justify-self-end">
+            <p className="v2-body">
+              {pins.length} documented Weatherhaven deployments for defense, humanitarian and research programs. Select
+              a site to see who it served.
+            </p>
+            {storiesLink ? (
+              <Link href="/deployments" className="v2-link mt-4 inline-block text-[0.95rem]">
+                Read the deployment stories
+              </Link>
+            ) : null}
+          </div>
         </div>
         <DeploymentMapClient
           pins={pins}

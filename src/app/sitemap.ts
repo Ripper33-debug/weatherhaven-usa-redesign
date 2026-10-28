@@ -12,6 +12,7 @@ const MARKETING_PATHS = [
   "/events",
   "/news",
   "/mission-solution-builder",
+  "/deployments",
   "/resources",
   "/sof-solutions",
   "/privacy",

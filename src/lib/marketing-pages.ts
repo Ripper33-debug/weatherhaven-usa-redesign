@@ -10,6 +10,7 @@ const MARKETING_PREFIXES = [
   "/events",
   "/news",
   "/mission-solution-builder",
+  "/deployments",
 ] as const;
 
 /** SOF auth/secure paths use workspace chrome, not marketing mobile bar etc. */

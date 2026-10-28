@@ -7,7 +7,7 @@ import { NAV_CTA, SYSTEMS_BY_FAMILY } from "@/lib/site-nav";
 
 const companyLinks = [
   { href: "/capabilities", label: "Capabilities" },
-  { href: "/#deployments", label: "Global deployments" },
+  { href: "/deployments", label: "Deployments" },
   { href: "/news", label: "News" },
   { href: "/events", label: "Events and briefings" },
   { href: "/resources", label: "Resources" },
