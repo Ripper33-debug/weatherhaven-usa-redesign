@@ -7,6 +7,8 @@ import { SystemCard } from "@/components/systems/SystemCard";
 import { blurProps } from "@/lib/image-blur";
 import { productCover } from "@/lib/product-covers";
 import { TreccViewer } from "@/components/systems/TreccViewer";
+import { SizeCompare } from "@/components/systems/SizeCompare";
+import { sizesForSlug } from "@/lib/system-sizes";
 import { HomeDeploySequence } from "@/components/home/v2/HomeDeploySequence";
 import { COMPANY_CONTACT, companyPhoneHref } from "@/lib/company-facts";
 
@@ -24,6 +26,7 @@ export function SystemDetail({
   const sheet = product.downloads.find((d) => d.type === "PDF");
   const otherLinks = product.downloads.filter((d) => d !== sheet);
   const contactHref = contactUrl({ system: product.slug, inquiry: "Program Requirement" });
+  const sizes = sizesForSlug(product.slug);
 
   return (
     <article className="bg-ink">
@@ -116,6 +119,26 @@ export function SystemDetail({
 
       {/* The MECC's scroll drawing lives on its own page now that the homepage shows the TRECC in 3D. */}
       {product.slug === "mecc" ? <HomeDeploySequence /> : null}
+
+      {sizes.length > 0 ? (
+        <section aria-labelledby="size-heading" className="border-b border-line py-16 sm:py-20">
+          <div className="v2-wrap">
+            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.8fr)] lg:items-end">
+              <h2 id="size-heading" className="v2-h2 text-snow">
+                Packed and deployed, to scale.
+              </h2>
+              <p className="v2-body lg:justify-self-end">
+                The {product.name} beside a 20-ft ISO container
+                {sizes.some((s) => typeof s.deployed.h === "number") ? " and a 6-ft person" : ""}, drawn from published
+                dimensions.
+              </p>
+            </div>
+            <div className="mt-10">
+              <SizeCompare sizes={sizes} />
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       {/* Specifications */}
       <section id="specifications" aria-labelledby="spec-heading" className="scroll-mt-24 border-b border-line py-20 sm:py-24">

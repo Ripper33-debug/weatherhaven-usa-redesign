@@ -46,7 +46,7 @@ export const PRODUCT_FAMILIES: {
     id: "polar",
     name: "Polar shelters",
     summary:
-      "Insulated shelters built for the coldest places people work, used by national Antarctic programs since 1988.",
+      "Insulated shelters built for the coldest places people work, in Antarctica since Weatherhaven's first camp there in 1988.",
     cover: "/products/polar-chief/gallery/01-com-PolarChief149.jpg",
   },
 ];
@@ -481,7 +481,7 @@ export const PRODUCT_CONTENT: Record<string, ProductContent> = {
     name: "Polarhaven",
     fullName: "Polarhaven polar base-camp shelter",
     description:
-      "A modular, insulated tensioned-fabric shelter for long-term polar base camps, used by national Antarctic programs since 1988.",
+      "A modular, insulated tensioned-fabric shelter for long-term polar base camps, in Antarctica since 1988.",
     keySpec: "Antarctic base camps since 1988",
     overview: [
       "Polarhaven was Weatherhaven's first Antarctic camp shelter, in 1988. It comes in seven widths from 8 to 20 ft at any length, with translucent insulation for solar gain or foil-bubble insulation for maximum warmth.",

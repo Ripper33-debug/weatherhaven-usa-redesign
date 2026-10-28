@@ -1401,6 +1401,22 @@ body .wh-v2 .wh-marketing-display {
   animation-delay: 0.36s;
 }
 
+/* Mission builder: each question and the result settle in from slightly below. */
+@keyframes v2-step-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.v2-step-in {
+  animation: v2-step-in 0.42s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
 /* Horizontal timeline rail */
 .v2-rail {
   padding-inline: max(var(--v2-gutter), calc((100vw - var(--v2-max)) / 2 + var(--v2-gutter)));
@@ -1418,6 +1434,7 @@ body .wh-v2 .wh-marketing-display {
 @media (prefers-reduced-motion: reduce) {
   .v2-rise,
   .v2-rise-hero,
+  .v2-step-in,
   .v2-pin-sonar {
     animation: none !important;
   }

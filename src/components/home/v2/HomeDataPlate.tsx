@@ -1,13 +1,14 @@
 /**
  * Company facts presented as the riveted ID plate found on every shipping container.
- * All figures are Weatherhaven's own published numbers (weatherhaven.com, Oct 2026).
+ * All figures are Weatherhaven's own published numbers (Oct 2026): weatherhaven.com home page (95+ countries),
+ * /Innovation (3,000+ containers, 51 patents in 30 countries) and /Commercial/antarctic-climate-research.
  */
 const FACTS = [
   { value: "1981", label: "Founded in British Columbia, Canada" },
   { value: "95+", label: "Countries with Weatherhaven shelters, on all seven continents" },
   { value: "3,000+", label: "Expandable containers sold to more than 25 military customers" },
   { value: "51", label: "Patents granted across 30 countries" },
-  { value: "20 of 32", label: "Nations researching in Antarctica that use Weatherhaven shelters" },
+  { value: "20+ of 32", label: "Countries doing climate research in Antarctica that use Weatherhaven products" },
 ] as const;
 
 function Rivets() {
