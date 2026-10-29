@@ -70,6 +70,13 @@ const nextConfig: NextConfig = {
         source: "/models/ar/:name.glb",
         headers: [{ key: "Cache-Control", value: "public, max-age=86400" }],
       },
+      {
+        // Demo and preview copies on *.vercel.app stay out of search results, so they never
+        // compete with the real site. The real domain is unaffected.
+        source: "/:path*",
+        has: [{ type: "host", value: ".*\\.vercel\\.app" }],
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+      },
     ];
   },
   images: {
