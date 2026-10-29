@@ -5,11 +5,15 @@ import { useClientMediaQuery } from "@/hooks/useClientMediaQuery";
 import type { TreccStage } from "@/lib/three/treccStage";
 import type { TreccFinish } from "@/lib/three/treccFinishes";
 import { TreccFinishPicker } from "@/components/three/TreccFinishPicker";
+import { TreccArButton } from "@/components/three/TreccArButton";
 import { startWhenNear } from "@/lib/start-when-near";
 
 type LoadState = "idle" | "loading" | "ready" | "fallback";
 
-/** Interactive TRECC on its product page: drag to turn, stowed/deployed, three finishes. */
+/**
+ * Interactive TRECC on its product page: drag to turn, stowed/deployed, three finishes, and
+ * "See it full size" in the phone's AR viewer (shown even when the 3D view can't load).
+ */
 export function TreccViewer() {
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -152,6 +156,7 @@ export function TreccViewer() {
         {load === "loading" || load === "idle" ? (
           <p className="absolute bottom-4 left-4 text-[0.85rem] text-muted">Loading the 3D model</p>
         ) : null}
+        <TreccArButton finish={finish} className="absolute right-3 top-3 sm:right-4 sm:top-4" />
         {ready ? (
           <>
             <div role="group" aria-label="Configuration" className="absolute left-3 top-3 flex bg-ink/70 p-1 backdrop-blur-md sm:left-4 sm:top-4">

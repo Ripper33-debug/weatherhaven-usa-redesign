@@ -6,6 +6,7 @@ import { useClientMediaQuery } from "@/hooks/useClientMediaQuery";
 import type { CameraPose, TreccStage } from "@/lib/three/treccStage";
 import type { TreccFinish } from "@/lib/three/treccFinishes";
 import { TreccFinishPicker } from "@/components/three/TreccFinishPicker";
+import { TreccArButton } from "@/components/three/TreccArButton";
 import { startWhenNear } from "@/lib/start-when-near";
 
 /**
@@ -340,15 +341,19 @@ export function HomeTreccScene() {
           </div>
         </div>
 
-        {ready ? (
-          <div className="v2-inset-r absolute top-[calc(60svh-3.75rem)] flex flex-col items-end gap-2 lg:bottom-10 lg:top-auto">
+        <div className="v2-inset-r absolute top-[calc(60svh-3.75rem)] flex flex-col items-end gap-2 lg:bottom-10 lg:top-auto">
+          {ready ? (
             <p aria-live="polite" className="hidden bg-ink/70 px-3 py-1.5 text-[0.8rem] text-snow/90 backdrop-blur-md lg:block">
               {weatherOn ? `${CLIMATE_NOTE[finish].weather} ` : null}
               {CLIMATE_NOTE[finish].rating}
             </p>
-            <TreccFinishPicker value={finish} onChange={chooseFinish} />
+          ) : null}
+          <div className="flex items-center gap-2">
+            {/* Available before the 3D view loads, and without WebGL: AR uses the phone's own viewer. */}
+            <TreccArButton finish={finish} tall />
+            {ready ? <TreccFinishPicker value={finish} onChange={chooseFinish} /> : null}
           </div>
-        ) : null}
+        </div>
         <p className="v2-inset-r pointer-events-none absolute bottom-3 hidden text-[0.75rem] text-muted/80 lg:block">
           3D model for illustration. Configuration varies by program.
         </p>

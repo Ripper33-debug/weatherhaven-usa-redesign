@@ -107,7 +107,7 @@ export function SystemDetail({
                 Explore the TRECC in 3D.
               </h2>
               <p className="v2-body lg:justify-self-end">
-                Drag to turn it, switch between stowed and deployed, and try the three finishes.
+                Drag to turn it, switch between stowed and deployed, and try the three finishes. On a phone, see it full size where you stand.
               </p>
             </div>
             <div className="mt-8">

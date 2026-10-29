@@ -58,6 +58,18 @@ const nextConfig: NextConfig = {
         source: "/(.*)",
         headers: securityHeaders,
       },
+      {
+        // AR Quick Look on iPhone only opens USDZ files served with their own media type.
+        source: "/models/ar/:name.usdz",
+        headers: [
+          { key: "Content-Type", value: "model/vnd.usdz+zip" },
+          { key: "Cache-Control", value: "public, max-age=86400" },
+        ],
+      },
+      {
+        source: "/models/ar/:name.glb",
+        headers: [{ key: "Cache-Control", value: "public, max-age=86400" }],
+      },
     ];
   },
   images: {
