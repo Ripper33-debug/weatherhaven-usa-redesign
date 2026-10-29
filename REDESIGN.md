@@ -23,10 +23,11 @@ To share it, deploy it as a **new** Vercel project (`npx vercel`), not the produ
 - **Look:** dark defense-tech theme with Weatherhaven orange as the accent. One typeface (Archivo, with wide headlines), chamfered buttons, riveted "data plate" panels.
 - **Homepage:**
   - Film hero: a 17-second seamless loop cut from the best shots of the original film, with one consistent color grade.
+  - A live readout along the bottom of the hero: the coldest and hottest places on Weatherhaven's deployment map right now (for example Concordia Station in Antarctica against Doha), with each place's temperature, coordinates, local time and whether the sun is up, plus a running UTC clock (see "Live weather" below). On phones the hero's two buttons give way to it, since the bar fixed along the bottom of the screen carries the same two actions.
   - Verified numbers.
-  - A 3D TRECC driven by scrolling: it rides in stowed, an orange scan line sweeps across it and reveals the deployed shelter, and the camera orbits to the finished building. Visitors can switch the shell between green, desert tan and arctic white.
+  - A 3D TRECC driven by scrolling: it rides in stowed, an orange scan line sweeps across it and reveals the deployed shelter, and the camera orbits to the finished building. Visitors can switch the shell between green, desert tan and arctic white, and each finish brings its weather: wind and rain, blowing sand or blowing snow, with the ground, light and glow to match and the published rating beside it (TRECC is rated from −40 °F to +120 °F and for 55 mph sustained winds).
   - The four shelter families.
-  - A dot-matrix world map of the 155 documented deployments, with filters.
+  - A dot-matrix world map of the 155 documented deployments, with filters. The land is lit where it's daylight right now and dimmed where it's night, with a mark where the sun is overhead, redrawn every minute. Selecting a named place shows its local time and its weather this hour.
   - The factory film, a 1981–2026 timeline, the latest news and a contact band.
 - **Systems** (`/configurable-solutions`): a catalog filtered by family, mission, environment and transport. All 17 product pages have published specs taken from Weatherhaven literature (ISO containers and Series 1.5 & 2 say "specifications on request" because nothing is published for them).
   - The TRECC page has an interactive 3D model: turn it by dragging or with the turn buttons, switch between stowed and deployed, and change the finish.
@@ -42,17 +43,28 @@ To share it, deploy it as a **new** Vercel project (`npx vercel`), not the produ
 
 ## How it was checked
 
-- `npm run lint` has no errors and all 178 tests pass. Tests cover the mission builder's scoring and the 3D camp's layout across all 2,700 answer combinations (no two shelters overlap, the camp is always built around the builder's own best match and pairings). `npm run build` succeeds, including every SOF and admin route.
+- `npm run lint` has no errors and all 200 tests pass (including the sun position, the map projection and the weather readout). Tests cover the mission builder's scoring and the 3D camp's layout across all 2,700 answer combinations (no two shelters overlap, the camp is always built around the builder's own best match and pairings). `npm run build` succeeds, including every SOF and admin route.
 - The SOF portal (`/sof-solutions`, `/sof-solutions/request-access`, `/sof-solutions/secure`) and `/login` were screenshotted next to the untouched original at desktop and phone widths, and they are pixel-identical.
 - Lighthouse on a local production build:
-  - Desktop homepage: 98 performance, 100 accessibility, 96 best practices, 100 SEO. Desktop TRECC page: 98 / 100 / 96 / 100.
+  - Desktop homepage: 97–99 performance, 100 accessibility, 96 best practices, 100 SEO, unchanged by the live data. Desktop TRECC page: 98 / 100 / 96 / 100.
   - Desktop deployments page: 94; desktop mission builder (with the 3D camp): 99.
-  - Simulated mid-range phone on slow 4G (scores vary a few points run to run): homepage 67–77 (it was 65–70), TRECC page 70–82, catalog 75, deployments 70–73, mission builder 85–87, contact 78, capabilities 88. Layout shift is 0 on every public page.
+  - Simulated mid-range phone on slow 4G (scores vary a few points run to run): homepage 68–76 with the live data (it was 67–77 before it and 65–70 on the original site), TRECC page 70–82, catalog 75, deployments 70–73, mission builder 85–87, contact 78, capabilities 88. Layout shift is 0 on every public page.
   - The 4 best-practices points are console errors that only happen locally (the Vercel analytics script and Supabase without keys).
 - What made phones faster: the hero headline paints on the first frame, headings no longer reflow when the page script runs, the world map's land dots and the 3D models load only as you scroll toward them, Sentry and the Supabase client load only when needed, and the factory film's still image loads lazily.
 - At 390 px, no public page scrolls sideways. Checked in Chrome, Safari (WebKit, desktop and iPhone) and Firefox, including the 3D scene, the 3D viewer and the page transitions.
 - Every internal link, image and external news link returns 200.
 - Independent reviews covered bugs, accessibility, performance, content accuracy and SOF/admin regressions, and a separate fact-check compared every story, builder reason and drawing dimension with its source. Their findings were fixed or are listed below.
+
+## Live weather (homepage)
+
+- **Source:** MET Norway (the Norwegian Meteorological Institute) location forecasts, which are free for commercial use with credit (CC BY 4.0). The credit is shown under the hero readout and the map. Temperatures are MET's forecast for the current hour.
+- **Which places:** every named place on the deployment map within 38° of the equator or 55° and further from it (73 places; country centre points are left out). Places between those bands are never the coldest or hottest. The readout shows the coldest place in the cold band and the hottest in the hot band, and stays hidden unless at least three quarters of each band answered.
+- **Load on MET:** each place's forecast is cached for 30 minutes on the server, so the site makes at most one call per place per half hour whatever the traffic. A place whose call fails isn't asked again for two minutes, at most five calls run at once, and every wait is capped, so a slow reply never holds up a page. The map asks for one place's weather only when a visitor selects it (through `/api/site-weather`, which accepts only pins on the map; the CDN keeps each answer for 15 minutes and a failure for one).
+- **Honest labels:** the readout says "places on Weatherhaven's deployment map", not that shelters are there today. If a visitor gets a cached page whose reading is more than 75 minutes old, the readout says "Latest reading" with the hour, and gives local times for that hour.
+- **Local time and daylight:** time zones come from each place's coordinates (`@photostructure/tz-lookup`, on the server only). Daylight, twilight and night use the sun's position (`src/lib/solar.ts`), the same bands the map shades.
+- **Without MET:** if the service can't be reached, the hero simply has no readout and the map's panel says the weather isn't available right now.
+- **Code:** `src/lib/field-sites.ts`, `field-weather.ts` (server), `field-readout.ts`, `deployment-pins.ts`, `src/components/home/v2/HeroFieldReadout.tsx`, `DeploymentMapClient.tsx`, `world-dot-path.ts`, `src/app/api/site-weather/route.ts`.
+- **3D weather:** `src/lib/three/treccStage.ts` (the `climate` option, used only on the homepage; the TRECC page's viewer is unchanged) reuses the mission builder's weather particles at a smaller scale. While falling weather is on screen the scene draws 30 frames a second; if a device can't keep up, the weather thins out and then stops. With reduced motion the weather is shown but doesn't move.
 
 ## The 3D model
 
@@ -117,3 +129,5 @@ Then copy the new media from this folder's `public/` into the repo and commit it
 13. **Fonts for the SOF portal and admin.** Geist and Playfair (about 180 KB) are preloaded on every page, including the public site that doesn't use them. Loading them only in the SOF and admin sections would speed up phones further, but it changes how those sections load, so it was left alone.
 14. **Supabase on public pages.** Public pages no longer load the Supabase client for anonymous visitors, except that Next.js prefetches the SOF portal link in the menu, and the SOF navigation loads it. That happens after the page has loaded, so it doesn't slow the first screen.
 15. **3D camp estimates.** The 3D camp draws MTS and HERCon at estimated sizes, RDMSS and MEX-26 at estimated heights, and Series 4 and Airmax HP at chosen lengths, because those aren't published. Someone who knows the products should look the models over; CAD files for any of them would replace the estimates.
+16. **MET Norway contact.** MET asks every site that uses its data to identify itself with a contact. `USER_AGENT` in `src/lib/field-weather.ts` names weatherhavenusa.com; add a contact email there before launch.
+17. **Two misplaced pins.** On the deployment map's source data, "Bogota, Colombia" sits about 600 km from Bogotá and "Loro, Colombia" sits on Bogotá's coordinates. They stay on the map but get no local time or weather until the source is fixed.
