@@ -11,7 +11,7 @@ import { conditionsNow, pickExtremes, type Conditions, type FieldExtremes, type 
  * - successful replies are cached for 30 minutes (their forecasts update about that often), so
  *   each place costs one call per half hour whatever the traffic;
  * - a place whose call just failed isn't asked again for two minutes;
- * - at most five calls run at once.
+ * - at most six calls run at once.
  * Every wait is capped outside fetch (Next drops a fetch's abort signal when it refreshes a cached
  * reply), so a slow reply can never hold up a page.
  *
@@ -20,11 +20,14 @@ import { conditionsNow, pickExtremes, type Conditions, type FieldExtremes, type 
 const MET_URL = "https://api.met.no/weatherapi/locationforecast/2.0/compact";
 const USER_AGENT = "WeatherhavenUSA/1.0 (+https://weatherhavenusa.com)";
 const CALL_LIMIT_MS = 2500;
-const READOUT_LIMIT_MS = 4000;
+const READOUT_LIMIT_MS = 9000;
 const RETRY_AFTER_MS = 120_000;
-const PARALLEL = 5;
+const PARALLEL = 6;
 
 const failedAt = new Map<string, number>();
+// The last complete readout, used when a refresh comes back short (the hero then labels it as the
+// latest reading if it's over an hour old).
+let lastGood: FieldExtremes | null = null;
 
 function within<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -82,8 +85,9 @@ async function inBatches<T, R>(items: T[], parallel: number, work: (item: T) => 
 }
 
 /**
- * Coldest and hottest place on the deployment map right now. Null if too few places answered in
- * time (the hero then leaves the readout out).
+ * Coldest and hottest place on the deployment map right now. If too few places answer in time,
+ * the last complete readout is used; null (the hero leaves the readout out) only if there has
+ * never been one.
  */
 export async function getFieldExtremes(): Promise<FieldExtremes | null> {
   const results: (FieldReading | null)[] = [];
@@ -97,8 +101,10 @@ export async function getFieldExtremes(): Promise<FieldExtremes | null> {
     cold: FIELD_SITES.filter((s) => s.band === "cold").length,
     hot: FIELD_SITES.filter((s) => s.band === "hot").length,
   };
-  return pickExtremes(
+  const fresh = pickExtremes(
     results.filter((r): r is FieldReading => r !== null),
     expected,
   );
+  if (fresh) lastGood = fresh;
+  return fresh ?? lastGood;
 }
