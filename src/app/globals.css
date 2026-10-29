@@ -17,7 +17,7 @@
   --color-hull-2: #172233;
   --color-line: rgb(148 170 196 / 0.16);
   --color-line-strong: rgb(148 170 196 / 0.32);
-  --color-muted: #93a1b5;
+  --color-muted: #a6b2c3;
   --color-snow: #eef2f6;
   --color-signal: #f18522;
   --color-signal-soft: #f6a45c;
@@ -1375,77 +1375,12 @@ body .wh-v2 .wh-marketing-display {
   animation: v2-sonar 2.4s cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
 }
 
-/* Homepage map tour: the route drawn from the last stop, a ping at the stop, its name */
-@keyframes v2-tour-draw {
-  from {
-    stroke-dashoffset: 1;
-  }
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-@keyframes v2-tour-ping {
-  from {
-    transform: scale(1);
-    opacity: 0.9;
-  }
-  to {
-    transform: scale(4.5);
-    opacity: 0;
-  }
-}
-
-@keyframes v2-tour-fade {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.v2-tour-arc {
-  stroke: #f18522;
-  stroke-opacity: 0.85;
-  stroke-linecap: round;
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  animation: v2-tour-draw 1.5s cubic-bezier(0.45, 0, 0.2, 1) 0.1s forwards;
-}
-
-.v2-tour-area {
-  fill: rgb(241 133 34 / 0.1);
-  stroke: rgb(241 133 34 / 0.6);
-}
-
-.v2-tour-sonar {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: v2-tour-ping 2.2s cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
-}
-
-.v2-tour-label {
-  animation: v2-tour-fade 0.5s ease 1.2s both;
-}
-
-.v2-tour-slide-in {
-  animation: v2-tour-fade 0.45s ease both;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .v2-tour-arc {
-    animation: none;
-    stroke-dashoffset: 0;
-  }
-  .v2-tour-sonar {
-    animation: none;
-    opacity: 0;
-  }
-  .v2-tour-label,
-  .v2-tour-slide-in {
-    animation: none;
-  }
+/* One grade for Weatherhaven's mixed product photography (bright snow shots next to grey overcast
+   and warehouse interiors), so photos sit together in grids and bands. Public pages only. */
+.wh-v2 img[src*="%2Fproducts%2F"],
+.wh-v2 img[src^="/products/"],
+.v2-photo {
+  filter: saturate(0.86) contrast(1.04) brightness(0.97);
 }
 
 /* Hero entrance — the one orchestrated page-load moment */

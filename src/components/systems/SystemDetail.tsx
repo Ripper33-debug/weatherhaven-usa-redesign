@@ -27,6 +27,18 @@ export function SystemDetail({
   const otherLinks = product.downloads.filter((d) => d !== sheet);
   const contactHref = contactUrl({ system: product.slug, inquiry: "Program Requirement" });
   const sizes = sizesForSlug(product.slug);
+  // The TRECC is the one system with a real 3D model, so its page opens on it; the photos follow.
+  const leadWith3d = product.slug === "trecc";
+  // Field shots first; the hero used to open on a TRECC parked outside a warehouse.
+  const photos = leadWith3d ? [...images].sort((a, b) => Number(/Woods|T_deployed|Multiple/i.test(b)) - Number(/Woods|T_deployed|Multiple/i.test(a))) : images;
+  const gallery = (
+    <SystemGallery
+      images={photos}
+      name={`Weatherhaven ${product.name}`}
+      transitionName={`system-photo-${product.slug}`}
+      blurs={Object.fromEntries(photos.flatMap((src) => (blurProps(src).blurDataURL ? [[src, blurProps(src).blurDataURL as string]] : [])))}
+    />
+  );
 
   return (
     <article className="bg-ink">
@@ -58,12 +70,11 @@ export function SystemDetail({
           </nav>
 
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] lg:gap-14">
-            <SystemGallery
-              images={images}
-              name={`Weatherhaven ${product.name}`}
-              transitionName={`system-photo-${product.slug}`}
-              blurs={Object.fromEntries(images.flatMap((src) => (blurProps(src).blurDataURL ? [[src, blurProps(src).blurDataURL as string]] : [])))}
-            />
+            {leadWith3d ? (
+              <TreccViewer lead />
+            ) : (
+              gallery
+            )}
             <div className="flex flex-col">
               <h1 className="v2-h1 text-snow">{product.name}</h1>
               <p className="mt-3 text-[1rem] font-medium text-signal">{product.subtitle}</p>
@@ -99,20 +110,13 @@ export function SystemDetail({
         </div>
       </section>
 
-      {product.slug === "trecc" ? (
-        <section aria-labelledby="trecc-3d-heading" className="border-b border-line py-16 sm:py-20">
+      {leadWith3d ? (
+        <section aria-labelledby="photos-heading" className="border-b border-line py-16 sm:py-20">
           <div className="v2-wrap">
-            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.8fr)] lg:items-end">
-              <h2 id="trecc-3d-heading" className="v2-h2 text-snow">
-                Explore the TRECC in 3D.
-              </h2>
-              <p className="v2-body lg:justify-self-end">
-                Drag to turn it, switch between stowed and deployed, and try the three finishes. On a phone, see it full size where you stand.
-              </p>
-            </div>
-            <div className="mt-8">
-              <TreccViewer />
-            </div>
+            <h2 id="photos-heading" className="v2-h2 text-snow">
+              Photos of the {product.name}.
+            </h2>
+            <div className="mt-8 max-w-[56rem]">{gallery}</div>
           </div>
         </section>
       ) : null}

@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { V2PageHeader } from "@/components/site/V2PageHeader";
 import { FieldStory, LeadStory } from "@/components/deployments/FieldStory";
-import { HomeDeploymentMap } from "@/components/home/v2/HomeDeploymentMap";
+import { DeploymentGlobe } from "@/components/deployments/DeploymentGlobe";
+import { CONFIRMED_DEPLOYMENTS } from "@/lib/confirmed-deployments";
 import { DEPLOYMENT_STORIES, FIELD_NOTES, sourceHost } from "@/lib/field-stories";
 import { pageMeta } from "@/lib/page-meta";
 
@@ -56,7 +57,7 @@ export default function DeploymentsPage() {
                 <li key={n.place} className="border-t border-line pt-5">
                   <p className="text-[1.05rem] font-semibold text-snow">{n.place}</p>
                   <p className="mt-2 text-[0.95rem] leading-relaxed text-muted">{n.text}</p>
-                  <p className="mt-2 text-[0.8rem] text-muted">
+                  <p className="mt-2 text-[0.85rem] text-muted">
                     Source:{" "}
                     <a
                       href={n.source.href}
@@ -73,7 +74,23 @@ export default function DeploymentsPage() {
           </div>
         </section>
 
-        <HomeDeploymentMap storiesLink={false} />
+        <section aria-labelledby="globe-heading" className="border-b border-line bg-[#03080F]">
+          <div className="v2-wrap flex flex-col gap-4 py-14 sm:flex-row sm:items-end sm:justify-between sm:py-16">
+            <div>
+              <h2 id="globe-heading" className="v2-h2 text-snow">
+                Every confirmed deployment
+              </h2>
+              <p className="v2-body mt-3 max-w-[56ch]">
+                {CONFIRMED_DEPLOYMENTS.length} deployments on every continent. Spin the globe, switch to the flat map, or play the
+                tour.
+              </p>
+            </div>
+            <Link href="/deployments/map" className="v2-link shrink-0 text-[0.95rem]">
+              Open the full map
+            </Link>
+          </div>
+          <DeploymentGlobe title="Globe of Weatherhaven deployments" />
+        </section>
 
         <section className="bg-hull py-20 sm:py-24">
           <div className="v2-wrap grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">

@@ -73,7 +73,7 @@ function PickMap({ places, value, onPick }: { places: GuidePlace[]; value: Guide
           </g>
         ) : null}
       </svg>
-      <p className="px-3 py-2 text-[0.78rem] text-muted">Click anywhere, or on a blue dot for a place Weatherhaven has deployed.</p>
+      <p className="px-3 py-2 text-[0.8125rem] text-muted">Click anywhere, or on a blue dot for a place Weatherhaven has deployed.</p>
     </div>
   );
 }
@@ -209,7 +209,7 @@ export function PlacePicker({
             }}
             onBlur={() => window.setTimeout(() => setOpen(false), 120)}
             onKeyDown={onKey}
-            className="h-11 w-full min-w-0 border border-line-strong sm:w-auto sm:flex-1 bg-ink px-3 text-[1rem] text-snow placeholder:text-muted/80 focus:border-signal focus:outline-none"
+            className="h-11 w-full min-w-0 border border-line-strong sm:w-auto sm:flex-1 bg-ink px-3 text-[1rem] text-snow placeholder:text-muted focus:border-signal focus:outline-none"
           />
           {/* The map only works with a pointer; keyboard and screen-reader users have the search. */}
           <button
@@ -234,7 +234,7 @@ export function PlacePicker({
           className="absolute inset-x-0 top-[calc(100%+4px)] z-30 max-h-72 overflow-y-auto border border-line-strong bg-hull shadow-[0_16px_40px_rgb(0_0_0/0.45)] sm:right-auto sm:w-[min(28rem,100%)]"
         >
           {!query.trim() ? (
-            <li role="presentation" className="px-3 pb-1 pt-2.5 text-[0.75rem] text-muted">
+            <li role="presentation" className="px-3 pb-1 pt-2.5 text-[0.8125rem] text-muted">
               Places Weatherhaven has deployed
             </li>
           ) : null}
@@ -260,7 +260,7 @@ export function PlacePicker({
 
       {mapOpen ? <PickMap places={places} value={value} onPick={(p) => onPick(p)} /> : null}
 
-      <p className="mt-3 text-[0.75rem] text-muted/80">
+      <p className="mt-3 text-[0.8125rem] text-muted">
         Weather: this hour&rsquo;s forecast from{" "}
         <a href="https://www.met.no/en" className="underline decoration-line-strong underline-offset-2 hover:text-snow">
           MET Norway

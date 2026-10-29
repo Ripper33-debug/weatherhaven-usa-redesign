@@ -1,5 +1,5 @@
 /**
- * Places on Weatherhaven's deployment map (src/data/global-deployments.json) that can be the
+ * Places on Weatherhaven's deployment map (the confirmed list, src/lib/confirmed-deployments.ts) that can be the
  * coldest or hottest of them, for the live "weather right now" readout on the homepage hero.
  *
  * Every named place (not country centre points) in the cold band (55° and further from the
@@ -9,7 +9,7 @@
  * the same way the deployment map gets them.
  */
 import tzlookup from "@photostructure/tz-lookup";
-import deployments from "@/data/global-deployments.json";
+import { CONFIRMED_DEPLOYMENTS } from "@/lib/confirmed-deployments";
 import { isPrecisePin, placeName } from "@/lib/deployment-pins";
 
 export type FieldSite = {
@@ -25,7 +25,7 @@ export type FieldSite = {
 
 type Pin = { id: string; label: string; title: string; lat: number; lng: number };
 
-export const FIELD_SITES: FieldSite[] = (deployments as Pin[]).flatMap((d) => {
+export const FIELD_SITES: FieldSite[] = (CONFIRMED_DEPLOYMENTS as Pin[]).flatMap((d) => {
   if (!isPrecisePin(d)) return [];
   const band = Math.abs(d.lat) >= 55 ? "cold" : Math.abs(d.lat) <= 38 ? "hot" : null;
   if (!band) return [];

@@ -118,7 +118,7 @@ export function HomeHero({ field }: { field: FieldExtremes | null }) {
           <button
             type="button"
             onClick={togglePlayback}
-            className="absolute right-3 top-20 flex h-10 shrink-0 items-center gap-2 bg-ink/40 px-3 text-[0.8rem] font-medium text-snow/80 transition-colors hover:text-snow sm:static sm:-mr-3 sm:bg-transparent"
+            className="absolute right-3 top-20 flex h-10 shrink-0 items-center gap-2 bg-ink/40 px-3 text-[0.85rem] font-medium text-snow/80 transition-colors hover:text-snow sm:static sm:-mr-3 sm:bg-transparent"
             aria-label={paused ? "Play film: background video" : "Pause film: background video"}
           >
             <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden>

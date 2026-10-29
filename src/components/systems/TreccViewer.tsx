@@ -14,7 +14,8 @@ type LoadState = "idle" | "loading" | "ready" | "fallback";
  * Interactive TRECC on its product page: drag to turn, stowed/deployed, three finishes, and
  * "See it full size" in the phone's AR viewer (shown even when the 3D view can't load).
  */
-export function TreccViewer() {
+/** `lead`: the viewer opens the page, so its still is the first thing to load. */
+export function TreccViewer({ lead = false }: { lead?: boolean } = {}) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const stageRef = useRef<TreccStage | null>(null);
@@ -64,9 +65,17 @@ export function TreccViewer() {
     onScreen.observe(el);
 
     const start = async () => {
-      const { canUseWebGL, createTreccStage } = await import("@/lib/three/treccStage");
+      // Checked before three.js downloads: no WebGL, or WebGL drawn in software (which turns every
+      // frame into a long main-thread task), gets the still instead.
+      const { canUseWebGL } = await import("@/lib/three/camp/webgl-check");
       if (cancelled) return;
-      if (!canUseWebGL() || !canvasRef.current) {
+      if (!canUseWebGL()) {
+        setLoad("fallback");
+        return;
+      }
+      const { createTreccStage } = await import("@/lib/three/treccStage");
+      if (cancelled) return;
+      if (!canvasRef.current) {
         setLoad("fallback");
         return;
       }
@@ -140,7 +149,8 @@ export function TreccViewer() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/models/trecc-poster-viewer.jpg"
-          loading="lazy"
+          loading={lead ? "eager" : "lazy"}
+          fetchPriority={lead ? "high" : "auto"}
           decoding="async"
           alt={load === "fallback" ? "Weatherhaven TRECC expandable shelter, deployed" : ""}
           aria-hidden={load !== "fallback"}
@@ -195,7 +205,7 @@ export function TreccViewer() {
                   </svg>
                 </button>
               ))}
-              <span className="hidden px-2 text-[0.8rem] text-muted sm:inline">or drag</span>
+              <span className="hidden px-2 text-[0.85rem] text-muted sm:inline">or drag</span>
             </div>
             <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4">
               <TreccFinishPicker value={finish} onChange={chooseFinish} />
@@ -203,7 +213,15 @@ export function TreccViewer() {
           </>
         ) : null}
       </div>
-      <p className="mt-3 text-[0.8rem] text-muted">3D model for illustration. Configuration varies by program.</p>
+      <p className="mt-3 text-[0.85rem] text-muted">
+        3D model for illustration. Configuration varies by program.
+        {lead ? (
+          <span className="mt-2 block min-h-[3em] text-[0.9rem]">
+            {ready ? "Drag to turn it, switch between stowed and deployed, and try the three finishes. " : null}On a phone, see it full
+            size where you stand.
+          </span>
+        ) : null}
+      </p>
     </div>
   );
 }

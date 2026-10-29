@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { GLOBAL_DEPLOYMENTS } from "@/lib/global-deployments";
+import { CONFIRMED_DEPLOYMENTS } from "@/lib/confirmed-deployments";
 import { isPrecisePin } from "@/lib/deployment-pins";
 import { conditionsAt } from "@/lib/field-weather";
 
@@ -11,7 +11,7 @@ import { conditionsAt } from "@/lib/field-weather";
  */
 export async function GET(request: Request) {
   const id = new URL(request.url).searchParams.get("id") ?? "";
-  const pin = GLOBAL_DEPLOYMENTS.find((d) => d.id === id);
+  const pin = CONFIRMED_DEPLOYMENTS.find((d) => d.id === id);
   if (!pin || !isPrecisePin(pin)) return NextResponse.json({ error: "Unknown site" }, { status: 404 });
   const now = await conditionsAt(pin.lat, pin.lng);
   if (!now) {

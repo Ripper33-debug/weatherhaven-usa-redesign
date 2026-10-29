@@ -129,7 +129,7 @@ function ProgressRail({
                   {i + 1}
                   <span className="sr-only sm:not-sr-only sm:ml-2">{q.label}</span>
                 </span>
-                <span className="mt-0.5 hidden w-full truncate text-[0.8rem] text-muted group-enabled:group-hover:text-snow sm:block">
+                <span className="mt-0.5 hidden w-full truncate text-[0.85rem] text-muted group-enabled:group-hover:text-snow sm:block">
                   {done ? (q.key === "climate" && place ? place.name : labelFor(q.key, answers[q.key])) : " "}
                 </span>
               </button>
@@ -244,7 +244,7 @@ function Results({
             {...(bestProduct?.blur ? { placeholder: "blur" as const, blurDataURL: bestProduct.blur } : {})}
           />
           {bestProduct?.representative ? (
-            <p className="absolute bottom-3 left-3 bg-ink/75 px-2.5 py-1 text-[0.75rem] text-muted backdrop-blur-sm">Representative photo</p>
+            <p className="absolute bottom-3 left-3 bg-ink/75 px-2.5 py-1 text-[0.8125rem] text-muted backdrop-blur-sm">Representative photo</p>
           ) : null}
         </div>
         <div className="flex flex-col p-6 sm:p-10">

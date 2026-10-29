@@ -42,17 +42,10 @@ export function splitTitle(title: string, label: string): { country: string; pro
  * country sit at the country's centre point, where local weather or time would mean little.
  */
 export function isPrecisePin(d: { id: string; label: string; title: string }): boolean {
-  if (MISPLACED.has(d.id)) return false;
   const label = d.label.trim();
   return label !== splitTitle(d.title, d.label).country && label !== d.title.trim();
 }
 
-/**
- * Pins whose coordinates don't match their label in the source map: "Bogota" sits about 600 km
- * from Bogotá and "Loro" sits on Bogotá; "Munich" and "Hamburg" have each other's coordinates.
- * They stay on the map but get no local weather or time until the source is fixed.
- */
-const MISPLACED = new Set(["colombia-bogota-colombia", "colombia-loro-colombia", "gemany-munich-gemany", "gemany-hamburg-gemany"]);
 
 /** Spelling fixes and operators' station names for place labels on the map. */
 const NAME_FIXES: Record<string, string> = {

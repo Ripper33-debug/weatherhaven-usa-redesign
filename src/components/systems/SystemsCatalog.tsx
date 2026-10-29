@@ -133,7 +133,7 @@ function CatalogBody({ products, blurs = {}, urlFamily: family }: CatalogProps &
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search: TRECC, polar, 463L"
-                className="h-10 w-[13.5rem] border border-line-strong bg-hull px-3 text-[0.9rem] text-snow placeholder:text-muted/80"
+                className="h-10 w-[13.5rem] border border-line-strong bg-hull px-3 text-[0.9rem] text-snow placeholder:text-muted"
               />
             </label>
             <Select label="Mission" value={mission} options={FILTER_MISSION_OPTIONS} onChange={setMission} />

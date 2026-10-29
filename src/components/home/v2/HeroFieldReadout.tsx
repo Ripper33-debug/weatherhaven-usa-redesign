@@ -74,7 +74,7 @@ function Reading({ kind, r, at }: { kind: "cold" | "hot"; r: FieldReading; at: D
   const c = signedDegrees(r.tempC);
   return (
     <div className="min-w-0 border-l-2 pl-3 sm:pl-4" style={{ borderColor: kind === "cold" ? ICE : "var(--v2-signal)" }}>
-      <p className="text-[0.8rem] text-muted">{kind === "cold" ? "Coldest" : "Hottest"}</p>
+      <p className="text-[0.85rem] text-muted">{kind === "cold" ? "Coldest" : "Hottest"}</p>
       <p className="mt-1 flex items-baseline gap-2 whitespace-nowrap">
         <span className="v2-figure text-[1.7rem] leading-none text-snow sm:text-[2rem]">
           {f}
@@ -83,7 +83,7 @@ function Reading({ kind, r, at }: { kind: "cold" | "hot"; r: FieldReading; at: D
         <span className="v2-figure text-[0.95rem] text-muted">{c} °C</span>
       </p>
       <p className="mt-1.5 text-[0.82rem] leading-snug text-snow/90 sm:truncate sm:text-[0.88rem]">{r.name}</p>
-      <p className="v2-tnum mt-0.5 hidden flex-wrap gap-x-3 text-[0.78rem] text-muted sm:flex">
+      <p className="v2-tnum mt-0.5 hidden flex-wrap gap-x-3 text-[0.8125rem] text-muted sm:flex">
         <span>{formatCoords(r.lat, r.lng)}</span>
         {local ? (
           <span className="inline-flex items-center gap-1.5">
@@ -131,14 +131,14 @@ export function HeroFieldReadout({ field }: { field: FieldExtremes }) {
             {stale ? "Latest reading" : "Right now"}, where Weatherhaven has deployed
           </p>
           <p className="v2-figure hidden shrink-0 text-[0.95rem] text-muted sm:block lg:mt-1.5 lg:text-[1.05rem]">{clock}</p>
-          <p className="mt-1.5 hidden text-[0.75rem] leading-snug text-muted/80 lg:block">
+          <p className="mt-1.5 hidden text-[0.8125rem] leading-snug text-muted lg:block">
             The hour&rsquo;s forecast from <MetCredit />, at places on Weatherhaven&rsquo;s deployment map.
           </p>
         </div>
         <Reading kind="cold" r={field.cold} at={at} />
         <Reading kind="hot" r={field.hot} at={at} />
-        <div className="col-span-2 flex items-baseline justify-between gap-4 text-[0.72rem] leading-snug text-muted/80 sm:block lg:hidden">
-          <p className="v2-figure shrink-0 text-[0.8rem] text-muted sm:hidden">{clock}</p>
+        <div className="col-span-2 flex items-baseline justify-between gap-4 text-[0.8125rem] leading-snug text-muted sm:block lg:hidden">
+          <p className="v2-figure shrink-0 text-[0.85rem] text-muted sm:hidden">{clock}</p>
           <p className="text-right sm:text-left">
             <span className="sm:hidden">
               Forecast: <MetCredit />

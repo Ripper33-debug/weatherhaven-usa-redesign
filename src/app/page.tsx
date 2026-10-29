@@ -4,9 +4,8 @@ import { HomeHero } from "@/components/home/v2/HomeHero";
 import { HomeDataPlate } from "@/components/home/v2/HomeDataPlate";
 import { HomeTreccScene } from "@/components/home/v2/HomeTreccScene";
 import { HomeSystems } from "@/components/home/v2/HomeSystems";
-import { HomeDeploymentMap } from "@/components/home/v2/HomeDeploymentMap";
+import { HomeDeploymentGlobe } from "@/components/home/v2/HomeDeploymentGlobe";
 import { HomeFactory } from "@/components/home/v2/HomeFactory";
-import { HomeTimeline } from "@/components/home/v2/HomeTimeline";
 import { HomeNews } from "@/components/home/v2/HomeNews";
 import { HomeCta } from "@/components/home/v2/HomeCta";
 import { getFieldExtremes } from "@/lib/field-weather";
@@ -34,9 +33,8 @@ export default async function HomePage() {
       <HomeDataPlate />
       <HomeTreccScene />
       <HomeSystems />
-      <HomeDeploymentMap tour />
+      <HomeDeploymentGlobe />
       <HomeFactory />
-      <HomeTimeline />
       <HomeNews />
       <HomeCta />
     </>

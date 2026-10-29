@@ -103,9 +103,17 @@ export function HomeTreccScene() {
     if (!el) return;
     let cancelled = false;
     const start = async () => {
-      const { canUseWebGL, createTreccStage } = await import("@/lib/three/treccStage");
+      // Checked before three.js downloads: no WebGL, or WebGL drawn in software (which turns every
+      // frame into a long main-thread task), gets the still instead.
+      const { canUseWebGL } = await import("@/lib/three/camp/webgl-check");
       if (cancelled) return;
-      if (!canUseWebGL() || !canvasRef.current) {
+      if (!canUseWebGL()) {
+        setLoad("fallback");
+        return;
+      }
+      const { createTreccStage } = await import("@/lib/three/treccStage");
+      if (cancelled) return;
+      if (!canvasRef.current) {
         setLoad("fallback");
         return;
       }
@@ -298,7 +306,7 @@ export function HomeTreccScene() {
               headline never runs under them. Desktop: bottom right of the stage. */}
           <div className="v2-inset-r pointer-events-auto sticky bottom-[calc(40svh+0.5rem)] mb-3 mr-[var(--v2-gutter)] flex flex-col items-end gap-2 self-end lg:absolute lg:bottom-10 lg:mb-0 lg:mr-0">
             {ready ? (
-              <p aria-live="polite" className="hidden bg-ink/70 px-3 py-1.5 text-[0.8rem] text-snow/90 backdrop-blur-md lg:block">
+              <p aria-live="polite" className="hidden bg-ink/70 px-3 py-1.5 text-[0.85rem] text-snow/90 backdrop-blur-md lg:block">
                 {weatherOn ? `${CLIMATE_NOTE[finish].weather} ` : null}
                 {CLIMATE_NOTE[finish].rating}
               </p>
@@ -357,7 +365,7 @@ export function HomeTreccScene() {
           </div>
         </div>
 
-        <p className="v2-inset-r pointer-events-none absolute bottom-3 hidden text-[0.75rem] text-muted/80 lg:block">
+        <p className="v2-inset-r pointer-events-none absolute bottom-3 hidden text-[0.8125rem] text-muted lg:block">
           3D model for illustration. Configuration varies by program.
         </p>
       </div>

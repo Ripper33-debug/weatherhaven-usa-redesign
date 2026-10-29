@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { HomeTimeline } from "@/components/home/v2/HomeTimeline";
 import { V2PageHeader } from "@/components/site/V2PageHeader";
 import { CAPABILITY_CATEGORIES } from "@/lib/capabilitiesExplorer";
 import { pageMeta } from "@/lib/page-meta";
@@ -80,7 +81,7 @@ export default function CapabilitiesPage() {
                             </span>
                             <span>
                               <span className="block font-semibold text-snow group-hover:text-signal">{PRODUCT_CONTENT[slug].name}</span>
-                              <span className="block text-[0.8rem] leading-snug text-muted">{PRODUCT_CONTENT[slug].keySpec}</span>
+                              <span className="block text-[0.85rem] leading-snug text-muted">{PRODUCT_CONTENT[slug].keySpec}</span>
                             </span>
                           </Link>
                         </li>
@@ -92,6 +93,7 @@ export default function CapabilitiesPage() {
           </div>
         </div>
       </div>
+      <HomeTimeline />
       <section className="border-t border-line bg-hull py-20">
         <div className="v2-wrap flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
           <h2 className="v2-h2 max-w-[22ch] text-snow">Planning a full camp rather than a single shelter?</h2>

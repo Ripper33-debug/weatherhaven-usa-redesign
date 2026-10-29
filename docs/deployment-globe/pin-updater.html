@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pin updater</title>
+<style>
+:root{--bg:#060E18;--panel:#0B1724;--line:rgba(160,190,215,.18);--fg:#E8EEF4;--muted:#8FA3B6;--accent:#F18522;--ok:#4FD3E8;--warn:#F7C548;--err:#F2545B;
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--fg);background:var(--bg)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);min-height:100vh}
+main{max-width:860px;margin:0 auto;padding:40px 20px 60px;display:flex;flex-direction:column;gap:22px}
+h1{margin:0;font-size:30px;letter-spacing:.01em}
+p{margin:0;line-height:1.55;color:#C9D5E0}
+ol{margin:0;padding-left:22px;line-height:1.7;color:#C9D5E0}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.92em;background:rgba(255,255,255,.06);padding:1px 5px;border-radius:3px}
+.drop{border:1.5px dashed var(--line);border-radius:8px;padding:34px 20px;text-align:center;background:var(--panel);cursor:pointer;transition:border-color .2s,background .2s}
+.drop.over{border-color:var(--accent);background:#0F1E2E}
+.drop b{display:block;font-size:17px;margin-bottom:6px}
+.drop span{color:var(--muted);font-size:14px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+button{font:inherit;font-size:14px;font-weight:600;padding:11px 16px;border-radius:5px;border:1px solid var(--line);background:#102030;color:var(--fg);cursor:pointer}
+button.primary{background:var(--accent);border-color:var(--accent);color:#0A1620}
+button:disabled{opacity:.4;cursor:not-allowed}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:18px 20px;display:flex;flex-direction:column;gap:12px}
+.card h2{margin:0;font-size:16px}
+.stats{display:flex;flex-wrap:wrap;gap:8px 28px}
+.stats div{display:flex;flex-direction:column}
+.stats b{font-size:26px}
+.stats small{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+ul.msgs{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px;max-height:340px;overflow:auto}
+ul.msgs li{font-size:14px;line-height:1.45;padding-left:14px;position:relative}
+ul.msgs li::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:7px;border-radius:50%;background:var(--c)}
+.err{--c:var(--err)} .warn{--c:var(--warn)} .good{color:var(--ok)}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+  <h1>Pin updater</h1>
+  <p>Turns the pin spreadsheet into the file the globe reads. Everything happens in this browser; nothing is uploaded anywhere.</p>
+  <ol>
+    <li>Open <code>data/pins.csv</code> in Excel or Google Sheets, make your changes, and save or download it as <b>CSV</b> (in Excel, "CSV UTF-8" is best).</li>
+    <li>Drop that file below. Fix anything listed in red.</li>
+    <li>Click <b>Download pins.js</b> and replace <code>data/pins.js</code> with it (keep the name). Reload the globe.</li>
+  </ol>
+  <label class="drop" id="drop"><input type="file" id="file" accept=".csv,text/csv" hidden>
+    <b>Drop pins.csv here</b><span>or click to choose the file</span></label>
+  <section class="card" id="result" hidden>
+    <h2 id="r-title"></h2>
+    <div class="stats" id="r-stats"></div>
+    <ul class="msgs" id="r-msgs"></ul>
+    <div class="row"><button class="primary" id="dl" type="button" disabled>Download pins.js</button></div>
+  </section>
+  <section class="card">
+    <h2>Lost the spreadsheet?</h2>
+    <p id="cur-note">Download the pins the globe is showing right now as a fresh <code>pins.csv</code>.</p>
+    <div class="row"><button id="dl-csv" type="button">Download current pins as CSV</button></div>
+  </section>
+  <section class="card">
+    <h2>Columns</h2>
+    <p><code>id</code> stays the same for a pin forever (it is the link people share, like <code>#japan-osaka-japan</code>); use lowercase letters, numbers and dashes for new ones.
+      <code>latitude</code>/<code>longitude</code> are decimal degrees (south and west are negative).
+      <code>mission_type</code> is Defence/Peacekeeping, Commercial/Scientific or Medical/Disaster Relief.
+      <code>command</code> is NORTHCOM, SOUTHCOM, EUCOM, AFRICOM, CENTCOM or PACOM.
+      <code>show_story</code> is yes or no: with no, the card shows just the place and mission type; with yes it needs a <code>headline</code> and <code>story</code>.
+      <code>photo</code> (optional) is a file in the <code>photos/</code> folder, e.g. <code>photos/concordia.jpg</code>, with an optional <code>photo_caption</code>.</p>
+  </section>
+</main>
+<script src="../data/pins.js"></script>
+<script>
+const CATS = {'defence/peacekeeping':'Defence/Peacekeeping', 'commercial/scientific':'Commercial/Scientific', 'medical/disaster relief':'Medical/Disaster Relief'};
+const CAT_ALIAS = {defence:'Defence/Peacekeeping', defense:'Defence/Peacekeeping', 'defense/peacekeeping':'Defence/Peacekeeping', peacekeeping:'Defence/Peacekeeping',
+  commercial:'Commercial/Scientific', scientific:'Commercial/Scientific', medical:'Medical/Disaster Relief', 'disaster relief':'Medical/Disaster Relief',
+  'medical/disaster-relief':'Medical/Disaster Relief'};
+const CMDS = {northcom:'northcom', southcom:'southcom', eucom:'eucom', africom:'africom', centcom:'centcom', pacom:'indopacom', indopacom:'indopacom'};
+const SHORT = {northcom:'NORTHCOM', southcom:'SOUTHCOM', eucom:'EUCOM', africom:'AFRICOM', centcom:'CENTCOM', indopacom:'PACOM'};
+const COLS = ['id', 'location', 'program', 'latitude', 'longitude', 'mission_type', 'command', 'show_story', 'headline', 'story', 'photo', 'photo_caption'];
+const $ = id => document.getElementById(id);
+let output = null;
+
+function parseCSV(text){
+  text = text.replace(/^﻿/, '');
+  const first = text.split(/\r?\n/, 1)[0];
+  const delim = (first.match(/;/g) || []).length > (first.match(/,/g) || []).length ? ';' : (first.includes('\t') && !first.includes(',') ? '\t' : ',');
+  const rows = []; let row = [], cell = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) {
+      if (c === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; }
+      else cell += c;
+    } else if (c === '"') q = true;
+    else if (c === delim) { row.push(cell); cell = ''; }
+    else if (c === '\n' || c === '\r') { if (c === '\r' && text[i + 1] === '\n') i++; row.push(cell); rows.push(row); row = []; cell = ''; }
+    else cell += c;
+  }
+  if (cell !== '' || row.length) { row.push(cell); rows.push(row); }
+  return rows.filter(r => r.some(v => v.trim() !== ''));
+}
+function decode(buf){
+  try { return new TextDecoder('utf-8', {fatal:true}).decode(buf); }
+  catch (e) { return new TextDecoder('windows-1252').decode(buf); }   // older Excel "CSV" saves
+}
+function convert(rows){
+  const errs = [], warns = [];
+  if (!rows.length) return {errs:['The file is empty.'], warns, pins:[]};
+  const head = rows[0].map(h => h.trim().toLowerCase().replace(/\s+/g, '_'));
+  const idx = Object.fromEntries(COLS.map(c => [c, head.indexOf(c)]));
+  for (const c of ['id', 'location', 'latitude', 'longitude', 'mission_type', 'command'])
+    if (idx[c] < 0) errs.push(`Missing the "${c}" column. The first row must be the column names from pins.csv.`);
+  if (errs.length) return {errs, warns, pins:[]};
+  const get = (r, c) => idx[c] < 0 ? '' : String(r[idx[c]] ?? '').trim();
+  const seen = new Map(), at = new Map(), pins = [];
+  rows.slice(1).forEach((r, n) => {
+    const line = n + 2, id = get(r, 'id'), where = `Row ${line}${id ? ` (${id})` : ''}`;
+    if (!id) { errs.push(`${where}: no id.`); return; }
+    if (!/^[a-z0-9][a-z0-9-]*$/.test(id)) errs.push(`${where}: the id can only use lowercase letters, numbers and dashes.`);
+    if (seen.has(id)) errs.push(`${where}: the same id is already used on row ${seen.get(id)}.`); else seen.set(id, line);
+    const location = get(r, 'location'); if (!location) errs.push(`${where}: no location.`);
+    const lat = Number(get(r, 'latitude').replace(',', '.')), lng = Number(get(r, 'longitude').replace(',', '.'));
+    if (!get(r, 'latitude') || !isFinite(lat) || lat < -90 || lat > 90) errs.push(`${where}: latitude must be a number from -90 to 90.`);
+    if (!get(r, 'longitude') || !isFinite(lng) || lng < -180 || lng > 180) errs.push(`${where}: longitude must be a number from -180 to 180.`);
+    const ck = get(r, 'mission_type').toLowerCase(), category = CATS[ck] || CAT_ALIAS[ck];
+    if (!category) errs.push(`${where}: mission_type "${get(r, 'mission_type')}" isn't one of Defence/Peacekeeping, Commercial/Scientific, Medical/Disaster Relief.`);
+    const cmd = CMDS[get(r, 'command').toLowerCase().replace(/^us/, '')];
+    if (!cmd) errs.push(`${where}: command "${get(r, 'command')}" isn't one of NORTHCOM, SOUTHCOM, EUCOM, AFRICOM, CENTCOM, PACOM.`);
+    const ss = get(r, 'show_story').toLowerCase(), headline = get(r, 'headline'), story = get(r, 'story');
+    let hasStory = ['yes', 'y', 'true', '1'].includes(ss);
+    if (ss && !['yes', 'y', 'true', '1', 'no', 'n', 'false', '0'].includes(ss)) warns.push(`${where}: show_story "${get(r, 'show_story')}" read as no (use yes or no).`);
+    if (hasStory && (!headline || !story)) { warns.push(`${where}: show_story is yes but the headline or story is empty, so the card will show just the place.`); hasStory = false; }
+    if (story && story.length > 900) warns.push(`${where}: the story is ${story.length} characters; cards read best under about 600.`);
+    const key = isFinite(lat) && isFinite(lng) ? lat.toFixed(3) + ',' + lng.toFixed(3) : null;
+    if (key && at.has(key)) warns.push(`${where}: same coordinates as row ${at.get(key)}, so the two pins sit on top of each other.`); else if (key) at.set(key, line);
+    const pin = {id, location, program:get(r, 'program') || location, lat, lng, category, theaterCode:cmd,
+      headline: hasStory ? headline : (headline || location), narrative: story || null, hasStory};
+    const photo = get(r, 'photo');
+    if (photo) {
+      if (!/^photos\//.test(photo) && !/^https?:\/\//.test(photo)) warns.push(`${where}: photo "${photo}" should be in the photos/ folder, e.g. photos/${photo.split(/[\\/]/).pop()}.`);
+      pin.photo = {src:photo, caption:get(r, 'photo_caption')};
+    }
+    pins.push(pin);
+  });
+  if (!pins.length && !errs.length) errs.push('No pins found under the column names.');
+  return {errs, warns, pins};
+}
+function show(res, name){
+  $('result').hidden = false;
+  const n = res.pins.length, stories = res.pins.filter(p => p.hasStory).length;
+  $('r-title').innerHTML = res.errs.length ? `<span style="color:var(--err)">${res.errs.length} thing${res.errs.length > 1 ? 's' : ''} to fix in ${esc(name)}</span>`
+    : `<span class="good">${esc(name)} looks good</span>`;
+  const by = k => res.pins.reduce((a, p) => (a[p[k]] = (a[p[k]] || 0) + 1, a), {});
+  const cats = by('category'), cmds = by('theaterCode');
+  $('r-stats').innerHTML = [[n, 'Pins'], [stories, 'With a story'],
+    ...Object.entries(cats).map(([k, v]) => [v, k.split('/')[0]]), ...Object.entries(cmds).map(([k, v]) => [v, SHORT[k] || k])]
+    .map(([v, k]) => `<div><b>${v}</b><small>${esc(k)}</small></div>`).join('');
+  $('r-msgs').innerHTML = [...res.errs.map(m => `<li class="err">${esc(m)}</li>`), ...res.warns.map(m => `<li class="warn">${esc(m)}</li>`)].join('')
+    || '<li class="good" style="padding-left:0">No problems found.</li>';
+  output = res.errs.length ? null : res.pins;
+  $('dl').disabled = !output;
+}
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;'}[c]));
+function save(name, text, type){
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], {type})); a.download = name;
+  document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+async function load(file){
+  const res = convert(parseCSV(decode(await file.arrayBuffer())));
+  show(res, file.name);
+}
+$('file').addEventListener('change', e => { if (e.target.files[0]) load(e.target.files[0]); });
+const drop = $('drop');
+['dragenter', 'dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', e => { const f = e.dataTransfer.files[0]; if (f) load(f); });
+$('dl').onclick = () => {
+  if (!output) return;
+  save('pins.js', '// The confirmed deployments shown on the globe. Made with tools/pin-updater.html from pins.csv.\n'
+    + 'window.GLOBE_PINS = ' + JSON.stringify(output, null, 1).replace(/<\//g, '<\\/') + ';\n', 'text/javascript');
+};
+function toCSV(pins){
+  const q = v => { v = v == null ? '' : String(v); return /[",\r\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+  const lines = [COLS.join(',')].concat(pins.map(p => [p.id, p.location, p.program, p.lat, p.lng, p.category, SHORT[p.theaterCode] || p.theaterCode,
+    p.hasStory ? 'yes' : 'no', p.hasStory ? p.headline : '', p.narrative || '', p.photo ? p.photo.src : '', p.photo ? p.photo.caption || '' : ''].map(q).join(',')));
+  return '﻿' + lines.join('\r\n') + '\r\n';
+}
+if (!Array.isArray(window.GLOBE_PINS)) { $('dl-csv').disabled = true; $('cur-note').textContent = 'Open this page from the tools folder inside the globe package to download the current pins.'; }
+$('dl-csv').onclick = () => save('pins.csv', toCSV(window.GLOBE_PINS), 'text/csv');
+</script>
+</body>
+</html>

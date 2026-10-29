@@ -255,7 +255,7 @@ export function SizeCompare({ sizes, heading }: { sizes: SystemSize[]; heading?:
               />
             ))}
           </svg>
-          <figcaption className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 px-1 text-[0.8rem] text-muted">
+          <figcaption className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 px-1 text-[0.85rem] text-muted">
             <span className="inline-flex items-center gap-2">
               <span aria-hidden className="h-2.5 w-4 border border-signal bg-signal/25" />
               {size.name}, {state === "packed" && P ? "packed" : "deployed"}
@@ -306,7 +306,7 @@ export function SizeCompare({ sizes, heading }: { sizes: SystemSize[]; heading?:
               />
               <Person x={personX} ground={ground} />
             </svg>
-            <figcaption className="mt-3 px-1 text-[0.8rem] text-muted">Side view, with a 6-ft person for scale</figcaption>
+            <figcaption className="mt-3 px-1 text-[0.85rem] text-muted">Side view, with a 6-ft person for scale</figcaption>
           </figure>
         ) : null}
       </div>
@@ -333,7 +333,7 @@ export function SizeCompare({ sizes, heading }: { sizes: SystemSize[]; heading?:
             </dd>
           </div>
         </dl>
-        <p className="mt-4 text-[0.8rem] leading-relaxed text-muted">
+        <p className="mt-4 text-[0.85rem] leading-relaxed text-muted">
           Drawn to scale from Weatherhaven&apos;s published outside dimensions.
           {size.areaPublished ? " Floor area is the published figure." : " Footprint is worked out from those dimensions."}{" "}
           Outlines show overall size, not how the system unfolds.

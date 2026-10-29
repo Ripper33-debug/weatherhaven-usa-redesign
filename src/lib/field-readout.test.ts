@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import deployments from "@/data/global-deployments.json";
+import deployments from "@/data/confirmed-pins.json";
 import { FIELD_SITES } from "@/lib/field-sites";
 import {
   conditionsNow,
@@ -19,7 +19,7 @@ const met = (rows: [string, number][]) => ({
 });
 
 describe("field sites", () => {
-  it("are real place pins on the deployment map, with valid time zones", () => {
+  it("are confirmed place pins on the deployment map, with valid time zones", () => {
     const cold = FIELD_SITES.filter((s) => s.band === "cold");
     const hot = FIELD_SITES.filter((s) => s.band === "hot");
     expect(cold.length).toBeGreaterThanOrEqual(25);
@@ -35,7 +35,7 @@ describe("field sites", () => {
 
   it("covers the coldest and hottest places on the map", () => {
     const names = FIELD_SITES.map((s) => s.name);
-    for (const n of ["Concordia Station, Antarctica", "Antarctic interior", "Alert, Nunavut", "Svalbard, Norway"]) {
+    for (const n of ["Concordia Station, Antarctica", "Alert, Nunavut", "Svalbard, Norway"]) {
       expect(names).toContain(n);
     }
     for (const n of ["Reggane, Algeria", "Taraq, UAE", "Zekreet, Qatar", "Riyadh, Saudi Arabia", "Kabul, Afghanistan"]) {

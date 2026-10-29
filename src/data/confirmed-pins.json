@@ -1,0 +1,1280 @@
+[
+ {
+  "id": "afghanistan-nato-herat-afghanistan",
+  "location": "Herat, Afghanistan",
+  "program": "Afghanistan (NATO)",
+  "lat": 34.352865,
+  "lng": 62.204029,
+  "category": "Medical/Disaster Relief",
+  "theaterCode": "centcom"
+ },
+ {
+  "id": "afghanistan-nato-kabul-afghanistan",
+  "location": "Kabul, Afghanistan",
+  "program": "Afghanistan (NATO)",
+  "lat": 34.555349,
+  "lng": 69.207486,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "centcom"
+ },
+ {
+  "id": "algeria-un-algiers-algeria",
+  "location": "Algiers, Algeria",
+  "program": "Algeria (UN)",
+  "lat": 36.753768,
+  "lng": 3.058756,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "africom"
+ },
+ {
+  "id": "algeria-un-reggane-algeria",
+  "location": "Reggane, Algeria",
+  "program": "Algeria (UN)",
+  "lat": 25.030077,
+  "lng": 0.585126,
+  "category": "Commercial/Scientific",
+  "theaterCode": "africom"
+ },
+ {
+  "id": "angola-un-angola",
+  "location": "Angola",
+  "program": "Angola (UN)",
+  "lat": -11.202692,
+  "lng": 17.873887,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "africom"
+ },
+ {
+  "id": "antarctica-adelaide-antarctica",
+  "location": "Adelaide, Antarctica",
+  "program": "Antarctica",
+  "lat": -67.12942,
+  "lng": -68.143328,
+  "category": "Commercial/Scientific",
+  "theaterCode": "indopacom"
+ },
+ {
+  "id": "antarctica-base-concordia-antarctica",
+  "location": "Base Concordia, Antarctica",
+  "program": "Antarctica",
+  "lat": -75.100337,
+  "lng": 123.346712,
+  "category": "Commercial/Scientific",
+  "theaterCode": "indopacom"
+ },
+ {
+  "id": "antarctica-base-yelcho-antarctica",
+  "location": "Base Yelcho, Antarctica",
+  "program": "Antarctica",
+  "lat": -64.875873,
+  "lng": -63.583877,
+  "category": "Commercial/Scientific",
+  "theaterCode": "indopacom"
+ },
+ {
+  "id": "antarctica-davis-station-antarctica",
+  "location": "Davis Station, Antarctica",
+  "program": "Antarctica",
+  "lat": -68.576247,
+  "lng": 77.969624,
+  "category": "Commercial/Scientific",
+  "theaterCode": "indopacom"
+ },
+ {
+  "id": "antarctica-fort-n-sgto-cabral-antarctica",
+  "location": "Fortín Sgto Cabral, Antarctica",
+  "program": "Antarctica",
+  "lat": -63.397301,
+  "lng": -56.997419,
+  "category": "Commercial/Scientific",
+  "theaterCode": "indopacom"
+ },
+ {
+  "id": "antarctica-james-ross-antarctica",
+  "location": "James Ross, Antarctica",
+  "program": "Antarctica",
+  "lat": -64.314451,
+  "lng": -57.788912,
+  "category": "Commercial/Scientific",
+  "theaterCode": "indopacom"
+ },
+ {
+  "id": "antarctica-mcmurdo-station-antarctica",
+  "location": "McMurdo Station, Antarctica",
+  "program": "Antarctica",
+  "lat": -77.841878,
+  "lng": 166.686345,
+  "category": "Commercial/Scientific",
+  "theaterCode": "indopacom"
+ },
+ {
+  "id": "antarctica-troll-antarctica",
+  "location": "Troll, Antarctica",
+  "program": "Antarctica",
+  "lat": -72.002877,
+  "lng": 2.525675,
+  "category": "Commercial/Scientific",
+  "theaterCode": "indopacom"
+ },
+ {
+  "id": "argentina-argentina",
+  "location": "Argentina",
+  "program": "Argentina",
+  "lat": -38.416097,
+  "lng": -63.616672,
+  "category": "Commercial/Scientific",
+  "theaterCode": "southcom"
+ },
+ {
+  "id": "australia-melbourne-australia",
+  "location": "Melbourne, Australia",
+  "program": "Australia",
+  "lat": -37.813628,
+  "lng": 144.963058,
+  "category": "Commercial/Scientific",
+  "theaterCode": "indopacom"
+ },
+ {
+  "id": "australia-perth-australia",
+  "location": "Perth, Australia",
+  "program": "Australia",
+  "lat": -31.950527,
+  "lng": 115.860457,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "indopacom"
+ },
+ {
+  "id": "australia-townsville-australia",
+  "location": "Townsville, Australia",
+  "program": "Australia",
+  "lat": -19.258964,
+  "lng": 146.816948,
+  "category": "Medical/Disaster Relief",
+  "theaterCode": "indopacom"
+ },
+ {
+  "id": "belgium-including-nato-belgium",
+  "location": "Belgium",
+  "program": "Belgium (including NATO)",
+  "lat": 50.503887,
+  "lng": 4.469936,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "eucom"
+ },
+ {
+  "id": "belize-carmelita-belize",
+  "location": "Carmelita, Belize",
+  "program": "Belize",
+  "lat": 18.011427,
+  "lng": -88.540822,
+  "category": "Commercial/Scientific",
+  "theaterCode": "southcom"
+ },
+ {
+  "id": "belize-punta-gorda-belize",
+  "location": "Punta Gorda, Belize",
+  "program": "Belize",
+  "lat": 16.098935,
+  "lng": -88.809491,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "southcom"
+ },
+ {
+  "id": "bolivia-bolivia",
+  "location": "Bolivia",
+  "program": "Bolivia",
+  "lat": -16.290154,
+  "lng": -63.588653,
+  "category": "Commercial/Scientific",
+  "theaterCode": "southcom"
+ },
+ {
+  "id": "bosnia-herzegovina-un-coalition-doboj-bosnia-herzegovina",
+  "location": "Doboj, Bosnia & Herzegovina",
+  "program": "Bosnia & Herzegovina (UN & Coalition)",
+  "lat": 44.732456,
+  "lng": 18.085016,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "eucom"
+ },
+ {
+  "id": "bosnia-herzegovina-un-coalition-mostar-bosnia-herzegovina",
+  "location": "Mostar, Bosnia & Herzegovina",
+  "program": "Bosnia & Herzegovina (UN & Coalition)",
+  "lat": 43.343586,
+  "lng": 17.807658,
+  "category": "Medical/Disaster Relief",
+  "theaterCode": "eucom"
+ },
+ {
+  "id": "brazil-brasilla-brazil",
+  "location": "Brasília, Brazil",
+  "program": "Brazil",
+  "lat": -15.826691,
+  "lng": -47.92182,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "southcom"
+ },
+ {
+  "id": "brazil-manaus-brazil",
+  "location": "Manaus, Brazil",
+  "program": "Brazil",
+  "lat": -3.119028,
+  "lng": -60.021731,
+  "category": "Commercial/Scientific",
+  "theaterCode": "southcom"
+ },
+ {
+  "id": "brazil-rio-de-janeiro-brazil",
+  "location": "Rio de Janeiro, Brazil",
+  "program": "Brazil",
+  "lat": -22.906847,
+  "lng": -43.172896,
+  "category": "Medical/Disaster Relief",
+  "theaterCode": "southcom"
+ },
+ {
+  "id": "burkina-faso-banfora-burkina-faso",
+  "location": "Banfora, Burkina Faso",
+  "program": "Burkina Faso",
+  "lat": 10.640016,
+  "lng": -4.758804,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "africom"
+ },
+ {
+  "id": "burkina-faso-kaya-burkina-faso",
+  "location": "Kaya, Burkina Faso",
+  "program": "Burkina Faso",
+  "lat": 13.091041,
+  "lng": -1.087355,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "africom"
+ },
+ {
+  "id": "burundi-un-bujumbura-burundi",
+  "location": "Bujumbura, Burundi",
+  "program": "Burundi (UN)",
+  "lat": -3.361378,
+  "lng": 29.359878,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "africom"
+ },
+ {
+  "id": "burundi-un-mutumba-burundi",
+  "location": "Mutumba, Burundi",
+  "program": "Burundi (UN)",
+  "lat": -3.219252,
+  "lng": 30.259927,
+  "category": "Medical/Disaster Relief",
+  "theaterCode": "africom"
+ },
+ {
+  "id": "cambodia-un-cambodia",
+  "location": "Cambodia",
+  "program": "Cambodia (UN)",
+  "lat": 12.565679,
+  "lng": 104.990963,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "indopacom"
+ },
+ {
+  "id": "canada-alert-nunavut",
+  "location": "Alert, Nunavut",
+  "program": "Canada",
+  "lat": 82.501777,
+  "lng": -62.348092,
+  "category": "Commercial/Scientific",
+  "theaterCode": "northcom"
+ },
+ {
+  "id": "canada-baker-lake-nunavut",
+  "location": "Baker Lake, Nunavut",
+  "program": "Canada",
+  "lat": 64.317604,
+  "lng": -96.022001,
+  "category": "Commercial/Scientific",
+  "theaterCode": "northcom"
+ },
+ {
+  "id": "canada-bathurst-inlet-nunavut",
+  "location": "Bathurst Inlet, Nunavut",
+  "program": "Canada",
+  "lat": 66.866068,
+  "lng": -108.104607,
+  "category": "Commercial/Scientific",
+  "theaterCode": "northcom"
+ },
+ {
+  "id": "canada-hall-beach-nunavut",
+  "location": "Hall Beach, Nunavut",
+  "program": "Canada",
+  "lat": 68.772735,
+  "lng": -81.235208,
+  "category": "Commercial/Scientific",
+  "theaterCode": "northcom"
+ },
+ {
+  "id": "canada-ottawa-canada",
+  "location": "Ottawa, Canada",
+  "program": "Canada",
+  "lat": 45.42153,
+  "lng": -75.697193,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "northcom"
+ },
+ {
+  "id": "canada-pond-inlet-nunavut",
+  "location": "Pond Inlet, Nunavut",
+  "program": "Canada",
+  "lat": 72.700117,
+  "lng": -77.958531,
+  "category": "Commercial/Scientific",
+  "theaterCode": "northcom"
+ },
+ {
+  "id": "canada-resolute-bay-nunavut",
+  "location": "Resolute Bay, Nunavut",
+  "program": "Canada",
+  "lat": 74.697299,
+  "lng": -94.829729,
+  "category": "Commercial/Scientific",
+  "theaterCode": "northcom"
+ },
+ {
+  "id": "canada-ross-river-yukon",
+  "location": "Ross River, Yukon",
+  "program": "Canada",
+  "lat": 61.979117,
+  "lng": -132.448478,
+  "category": "Commercial/Scientific",
+  "theaterCode": "northcom"
+ },
+ {
+  "id": "canada-tuktoyaktuk-north-west-territories",
+  "location": "Tuktoyaktuk, North West Territories",
+  "program": "Canada",
+  "lat": 69.445358,
+  "lng": -133.034181,
+  "category": "Commercial/Scientific",
+  "theaterCode": "northcom"
+ },
+ {
+  "id": "canada-vancouver-canada",
+  "location": "Vancouver, Canada",
+  "program": "Canada",
+  "lat": 49.2827,
+  "lng": -123.1207,
+  "category": "Medical/Disaster Relief",
+  "theaterCode": "northcom"
+ },
+ {
+  "id": "canada-wekweeti-north-west-territories",
+  "location": "Wekweeti, North West Territories",
+  "program": "Canada",
+  "lat": 64.190371,
+  "lng": -114.184102,
+  "category": "Commercial/Scientific",
+  "theaterCode": "northcom"
+ },
+ {
+  "id": "canada-winnipeg-canada",
+  "location": "Winnipeg, Canada",
+  "program": "Canada",
+  "lat": 49.895136,
+  "lng": -97.138374,
+  "category": "Commercial/Scientific",
+  "theaterCode": "northcom"
+ },
+ {
+  "id": "chile-antofagasta-chile",
+  "location": "Antofagasta, Chile",
+  "program": "Chile",
+  "lat": -23.650928,
+  "lng": -70.397502,
+  "category": "Commercial/Scientific",
+  "theaterCode": "southcom"
+ },
+ {
+  "id": "chile-santiago-chile",
+  "location": "Santiago, Chile",
+  "program": "Chile",
+  "lat": -33.44889,
+  "lng": -70.669265,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "southcom"
+ },
+ {
+  "id": "colombia-bogota-colombia",
+  "location": "Bogotá, Colombia",
+  "program": "Colombia",
+  "lat": 4.710989,
+  "lng": -74.072092,
+  "category": "Commercial/Scientific",
+  "theaterCode": "southcom"
+ },
+ {
+  "id": "commercial-scientific-zucchelli-antarctica",
+  "location": "Zucchelli, Antarctica",
+  "program": "Antarctica",
+  "lat": -74.695379,
+  "lng": 164.096178,
+  "category": "Commercial/Scientific",
+  "theaterCode": "indopacom"
+ },
+ {
+  "id": "congo-brazzaville-congo",
+  "location": "Brazzaville, Congo",
+  "program": "Congo",
+  "lat": -4.26336,
+  "lng": 15.242885,
+  "category": "Commercial/Scientific",
+  "theaterCode": "africom"
+ },
+ {
+  "id": "congo-pointe-noire-congo",
+  "location": "Pointe-Noire, Congo",
+  "program": "Congo",
+  "lat": -4.769162,
+  "lng": 11.866362,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "africom"
+ },
+ {
+  "id": "cote-d-ivoire-cote-d-ivoire",
+  "location": "Cote d’Ivoire",
+  "program": "Cote d’Ivoire",
+  "lat": 7.539989,
+  "lng": -5.54708,
+  "category": "Commercial/Scientific",
+  "theaterCode": "africom"
+ },
+ {
+  "id": "croatia-un-croatia",
+  "location": "Croatia",
+  "program": "Croatia (UN)",
+  "lat": 45.1,
+  "lng": 15.2,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "eucom"
+ },
+ {
+  "id": "cuba-cuba",
+  "location": "Cuba",
+  "program": "Cuba",
+  "lat": 21.521757,
+  "lng": -77.781167,
+  "category": "Commercial/Scientific",
+  "theaterCode": "southcom"
+ },
+ {
+  "id": "democratic-republic-of-the-congo-un-democratic-republic-of-the-congo",
+  "location": "Democratic Republic of the Congo",
+  "program": "Democratic Republic of the Congo (UN)",
+  "lat": -4.038333,
+  "lng": 21.758664,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "africom"
+ },
+ {
+  "id": "east-timor-east-timor",
+  "location": "East Timor",
+  "program": "East Timor",
+  "lat": -8.874217,
+  "lng": 125.727539,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "indopacom"
+ },
+ {
+  "id": "ecuador-guayaquil-ecuador",
+  "location": "Guayaquil, Ecuador",
+  "program": "Ecuador",
+  "lat": -2.189413,
+  "lng": -79.889066,
+  "category": "Commercial/Scientific",
+  "theaterCode": "southcom"
+ },
+ {
+  "id": "ecuador-quito-ecuador",
+  "location": "Quito, Ecuador",
+  "program": "Ecuador",
+  "lat": -0.180653,
+  "lng": -78.467838,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "southcom"
+ },
+ {
+  "id": "eritrea-un-eritrea",
+  "location": "Eritrea",
+  "program": "Eritrea (UN)",
+  "lat": 15.179384,
+  "lng": 39.782334,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "africom"
+ },
+ {
+  "id": "ethiopia-un-ethiopia",
+  "location": "Ethiopia",
+  "program": "Ethiopia (UN)",
+  "lat": 9.145,
+  "lng": 40.489673,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "africom"
+ },
+ {
+  "id": "france-france",
+  "location": "France",
+  "program": "France",
+  "lat": 46.227638,
+  "lng": 2.213749,
+  "category": "Commercial/Scientific",
+  "theaterCode": "eucom"
+ },
+ {
+  "id": "french-guiana-french-guiana",
+  "location": "French Guiana",
+  "program": "French Guiana",
+  "lat": 3.933889,
+  "lng": -53.125782,
+  "category": "Commercial/Scientific",
+  "theaterCode": "southcom"
+ },
+ {
+  "id": "gemany-hamburg-gemany",
+  "location": "Hamburg, Germany",
+  "program": "Germany",
+  "lat": 53.551085,
+  "lng": 9.993682,
+  "category": "Commercial/Scientific",
+  "theaterCode": "eucom"
+ },
+ {
+  "id": "gemany-munich-gemany",
+  "location": "Munich, Germany",
+  "program": "Germany",
+  "lat": 48.135125,
+  "lng": 11.581981,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "eucom"
+ },
+ {
+  "id": "ghana-ghana",
+  "location": "Ghana",
+  "program": "Ghana",
+  "lat": 7.946527,
+  "lng": -1.023194,
+  "category": "Commercial/Scientific",
+  "theaterCode": "africom"
+ },
+ {
+  "id": "greece-greece",
+  "location": "Greece",
+  "program": "Greece",
+  "lat": 39.074208,
+  "lng": 21.824312,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "eucom"
+ },
+ {
+  "id": "greenland-daneborg-greenland",
+  "location": "Daneborg, Greenland",
+  "program": "Greenland",
+  "lat": 74.3,
+  "lng": -20.233333,
+  "category": "Commercial/Scientific",
+  "theaterCode": "northcom"
+ },
+ {
+  "id": "greenland-greenland",
+  "location": "Greenland",
+  "program": "Greenland",
+  "lat": 71.706936,
+  "lng": -42.604303,
+  "category": "Commercial/Scientific",
+  "theaterCode": "northcom"
+ },
+ {
+  "id": "greenland-narsarsuaq",
+  "location": "Narsarsuaq",
+  "program": "Greenland",
+  "lat": 61.156703,
+  "lng": -45.42543,
+  "category": "Commercial/Scientific",
+  "theaterCode": "northcom"
+ },
+ {
+  "id": "greenland-thule-greenland",
+  "location": "Thule, Greenland",
+  "program": "Greenland",
+  "lat": 77.467043,
+  "lng": -69.228483,
+  "category": "Commercial/Scientific",
+  "theaterCode": "northcom"
+ },
+ {
+  "id": "guatemala-un-guatemala",
+  "location": "Guatemala",
+  "program": "Guatemala (UN)",
+  "lat": 15.783471,
+  "lng": -90.230759,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "southcom"
+ },
+ {
+  "id": "guinea-guinea",
+  "location": "Guinea",
+  "program": "Guinea",
+  "lat": 9.945587,
+  "lng": -9.696645,
+  "category": "Commercial/Scientific",
+  "theaterCode": "africom"
+ },
+ {
+  "id": "guyana-guyana",
+  "location": "Guyana",
+  "program": "Guyana",
+  "lat": 4.860416,
+  "lng": -58.93018,
+  "category": "Commercial/Scientific",
+  "theaterCode": "southcom"
+ },
+ {
+  "id": "haiti-un-haiti",
+  "location": "Haiti",
+  "program": "Haiti (UN)",
+  "lat": 18.971187,
+  "lng": -72.285215,
+  "category": "Medical/Disaster Relief",
+  "theaterCode": "southcom"
+ },
+ {
+  "id": "iceland-reykjav-k",
+  "location": "Reykjavík",
+  "program": "Iceland",
+  "lat": 64.146582,
+  "lng": -21.942635,
+  "category": "Commercial/Scientific",
+  "theaterCode": "eucom"
+ },
+ {
+  "id": "iraq-coalition-iraq",
+  "location": "Iraq",
+  "program": "Iraq (Coalition)",
+  "lat": 33.223191,
+  "lng": 43.679291,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "centcom"
+ },
+ {
+  "id": "ireland-ireland",
+  "location": "Ireland",
+  "program": "Ireland",
+  "lat": 53.142367,
+  "lng": -7.692054,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "eucom"
+ },
+ {
+  "id": "japan-osaka-japan",
+  "location": "Osaka, Japan",
+  "program": "Japan",
+  "lat": 34.693725,
+  "lng": 135.502253,
+  "category": "Medical/Disaster Relief",
+  "theaterCode": "indopacom"
+ },
+ {
+  "id": "jordan-jordan",
+  "location": "Jordan",
+  "program": "Jordan",
+  "lat": 30.585164,
+  "lng": 36.238414,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "centcom"
+ },
+ {
+  "id": "kazakhstan-kazakhstan",
+  "location": "Kazakhstan",
+  "program": "Kazakhstan",
+  "lat": 48.019573,
+  "lng": 66.923684,
+  "category": "Commercial/Scientific",
+  "theaterCode": "centcom"
+ },
+ {
+  "id": "korea-south-south-korea",
+  "location": "South Korea",
+  "program": "Korea (South)",
+  "lat": 35.907757,
+  "lng": 127.766922,
+  "category": "Commercial/Scientific",
+  "theaterCode": "indopacom"
+ },
+ {
+  "id": "kosovo-un-kosovo",
+  "location": "Kosovo",
+  "program": "Kosovo (NATO)",
+  "lat": 42.602636,
+  "lng": 20.902977,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "eucom"
+ },
+ {
+  "id": "kuwait-coalition-kuwait",
+  "location": "Kuwait",
+  "program": "Kuwait (UN)",
+  "lat": 29.31166,
+  "lng": 47.481766,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "centcom"
+ },
+ {
+  "id": "latvia-latvia",
+  "location": "Latvia",
+  "program": "Latvia",
+  "lat": 56.879635,
+  "lng": 24.603189,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "eucom"
+ },
+ {
+  "id": "lebanon-un-lebanon",
+  "location": "Lebanon",
+  "program": "Lebanon (UN)",
+  "lat": 33.854721,
+  "lng": 35.862285,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "centcom"
+ },
+ {
+  "id": "lesotho-lesotho",
+  "location": "Lesotho",
+  "program": "Lesotho",
+  "lat": -29.609988,
+  "lng": 28.233608,
+  "category": "Commercial/Scientific",
+  "theaterCode": "africom"
+ },
+ {
+  "id": "macedonia-un-bitola-macedonia",
+  "location": "Bitola, Macedonia",
+  "program": "Macedonia (UN)",
+  "lat": 41.029677,
+  "lng": 21.329216,
+  "category": "Commercial/Scientific",
+  "theaterCode": "eucom"
+ },
+ {
+  "id": "macedonia-un-skopje-macedonia",
+  "location": "Skopje, Macedonia",
+  "program": "Macedonia (UN)",
+  "lat": 42.005027,
+  "lng": 21.440766,
+  "category": "Medical/Disaster Relief",
+  "theaterCode": "eucom"
+ },
+ {
+  "id": "mali-un-mali",
+  "location": "Mali",
+  "program": "Mali (UN)",
+  "lat": 17.570692,
+  "lng": -3.996166,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "africom"
+ },
+ {
+  "id": "marshall-islands-marshall-islands",
+  "location": "Marshall Islands",
+  "program": "Marshall Islands",
+  "lat": 7.131474,
+  "lng": 171.184478,
+  "category": "Commercial/Scientific",
+  "theaterCode": "indopacom"
+ },
+ {
+  "id": "mauritania-mauritania",
+  "location": "Mauritania",
+  "program": "Mauritania",
+  "lat": 21.00789,
+  "lng": -10.940835,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "africom"
+ },
+ {
+  "id": "mexico-mexico",
+  "location": "Mexico",
+  "program": "Mexico",
+  "lat": 23.634501,
+  "lng": -102.552784,
+  "category": "Commercial/Scientific",
+  "theaterCode": "northcom"
+ },
+ {
+  "id": "mexico-mexico-city-mexico",
+  "location": "Mexico City, Mexico",
+  "program": "Mexico",
+  "lat": 19.432608,
+  "lng": -99.133208,
+  "category": "Medical/Disaster Relief",
+  "theaterCode": "northcom"
+ },
+ {
+  "id": "mongolia-mongolia",
+  "location": "Mongolia",
+  "program": "Mongolia",
+  "lat": 46.862496,
+  "lng": 103.846656,
+  "category": "Commercial/Scientific",
+  "theaterCode": "indopacom"
+ },
+ {
+  "id": "mozambique-un-maputo-mozambique",
+  "location": "Maputo, Mozambique",
+  "program": "Mozambique (UN)",
+  "lat": -25.969248,
+  "lng": 32.573175,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "africom"
+ },
+ {
+  "id": "namibia-namibia",
+  "location": "Namibia",
+  "program": "Namibia",
+  "lat": -22.95764,
+  "lng": 18.49041,
+  "category": "Commercial/Scientific",
+  "theaterCode": "africom"
+ },
+ {
+  "id": "nepal-kathmandu-nepal",
+  "location": "Kathmandu, Nepal",
+  "program": "Nepal",
+  "lat": 27.717245,
+  "lng": 85.32396,
+  "category": "Commercial/Scientific",
+  "theaterCode": "indopacom"
+ },
+ {
+  "id": "netherlands-netherlands",
+  "location": "Netherlands",
+  "program": "Netherlands",
+  "lat": 52.132633,
+  "lng": 5.291266,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "eucom"
+ },
+ {
+  "id": "new-zealand-auckland-new-zealand",
+  "location": "Auckland, New Zealand",
+  "program": "New Zealand",
+  "lat": -36.84846,
+  "lng": 174.763331,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "indopacom"
+ },
+ {
+  "id": "new-zealand-christchurch-new-zealand",
+  "location": "Christchurch, New Zealand",
+  "program": "New Zealand",
+  "lat": -43.532054,
+  "lng": 172.636225,
+  "category": "Commercial/Scientific",
+  "theaterCode": "indopacom"
+ },
+ {
+  "id": "niger-niger",
+  "location": "Niger",
+  "program": "Niger",
+  "lat": 17.607789,
+  "lng": 8.081666,
+  "category": "Commercial/Scientific",
+  "theaterCode": "africom"
+ },
+ {
+  "id": "norway-svaldbard-norway",
+  "location": "Svalbard, Norway",
+  "program": "Norway",
+  "lat": 77.874972,
+  "lng": 20.975182,
+  "category": "Commercial/Scientific",
+  "theaterCode": "eucom"
+ },
+ {
+  "id": "panama-panama",
+  "location": "Panama",
+  "program": "Panama",
+  "lat": 8.537981,
+  "lng": -80.782127,
+  "category": "Commercial/Scientific",
+  "theaterCode": "southcom"
+ },
+ {
+  "id": "papua-new-guinea-papua-new-guinea",
+  "location": "Papua New Guinea",
+  "program": "Papua New Guinea",
+  "lat": -6.314993,
+  "lng": 143.95555,
+  "category": "Commercial/Scientific",
+  "theaterCode": "indopacom"
+ },
+ {
+  "id": "peru-lima-peru",
+  "location": "Lima, Peru",
+  "program": "Peru",
+  "lat": -12.046373,
+  "lng": -77.042754,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "southcom"
+ },
+ {
+  "id": "peru-puno-peru",
+  "location": "Puno, Peru",
+  "program": "Peru",
+  "lat": -15.840222,
+  "lng": -70.02188,
+  "category": "Medical/Disaster Relief",
+  "theaterCode": "southcom"
+ },
+ {
+  "id": "peru-soplin-peru",
+  "location": "Soplin, Peru",
+  "program": "Peru",
+  "lat": -6.399774,
+  "lng": -73.747786,
+  "category": "Commercial/Scientific",
+  "theaterCode": "southcom"
+ },
+ {
+  "id": "poland-nato-poland",
+  "location": "Poland",
+  "program": "Poland (NATO)",
+  "lat": 51.919438,
+  "lng": 19.145136,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "eucom"
+ },
+ {
+  "id": "qatar-doha-qatar",
+  "location": "Doha, Qatar",
+  "program": "Qatar",
+  "lat": 25.285447,
+  "lng": 51.53104,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "centcom"
+ },
+ {
+  "id": "qatar-zekreet-qatar",
+  "location": "Zekreet, Qatar",
+  "program": "Qatar",
+  "lat": 25.485465,
+  "lng": 50.846933,
+  "category": "Commercial/Scientific",
+  "theaterCode": "centcom"
+ },
+ {
+  "id": "romania-romania",
+  "location": "Romania",
+  "program": "Romania",
+  "lat": 45.943161,
+  "lng": 24.96676,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "eucom"
+ },
+ {
+  "id": "rwanda-un-rwanda",
+  "location": "Rwanda",
+  "program": "Rwanda (UN)",
+  "lat": -1.940278,
+  "lng": 29.873888,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "africom"
+ },
+ {
+  "id": "saudi-arabia-medina-saudi-arabia",
+  "location": "Medina, Saudi Arabia",
+  "program": "Saudi Arabia",
+  "lat": 24.524654,
+  "lng": 39.569184,
+  "category": "Commercial/Scientific",
+  "theaterCode": "centcom"
+ },
+ {
+  "id": "saudi-arabia-riyadh-saudi-arabia",
+  "location": "Riyadh, Saudi Arabia",
+  "program": "Saudi Arabia",
+  "lat": 24.713552,
+  "lng": 46.675296,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "centcom"
+ },
+ {
+  "id": "seychelles-grand-anse-seychelles",
+  "location": "Grand Anse, Seychelles",
+  "program": "Seychelles",
+  "lat": -4.317622,
+  "lng": 55.707836,
+  "category": "Commercial/Scientific",
+  "theaterCode": "africom"
+ },
+ {
+  "id": "seychelles-victoria-seychelles",
+  "location": "Victoria, Seychelles",
+  "program": "Seychelles",
+  "lat": -4.619143,
+  "lng": 55.451315,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "africom"
+ },
+ {
+  "id": "sierra-leone-sierra-leone",
+  "location": "Sierra Leone",
+  "program": "Sierra Leone",
+  "lat": 8.460555,
+  "lng": -11.779889,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "africom"
+ },
+ {
+  "id": "singapore-singapore",
+  "location": "Singapore",
+  "program": "Singapore",
+  "lat": 1.352083,
+  "lng": 103.819836,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "indopacom"
+ },
+ {
+  "id": "somalia-un-balcad-somalia",
+  "location": "Balcad, Somalia",
+  "program": "Somalia (UN)",
+  "lat": 2.358395,
+  "lng": 45.386289,
+  "category": "Commercial/Scientific",
+  "theaterCode": "africom"
+ },
+ {
+  "id": "somalia-un-burco-somalia",
+  "location": "Burco, Somalia",
+  "program": "Somalia (UN)",
+  "lat": 9.525917,
+  "lng": 45.534631,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "africom"
+ },
+ {
+  "id": "somalia-un-jilib-somalia",
+  "location": "Jilib, Somalia",
+  "program": "Somalia (UN)",
+  "lat": 0.491919,
+  "lng": 42.778437,
+  "category": "Medical/Disaster Relief",
+  "theaterCode": "africom"
+ },
+ {
+  "id": "south-africa-south-africa",
+  "location": "South Africa",
+  "program": "South Africa",
+  "lat": -30.559482,
+  "lng": 22.937506,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "africom"
+ },
+ {
+  "id": "south-sudan-un-south-sudan",
+  "location": "South Sudan",
+  "program": "South Sudan (UN)",
+  "lat": 6.876992,
+  "lng": 31.306979,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "africom"
+ },
+ {
+  "id": "sudan-sudan",
+  "location": "Sudan",
+  "program": "Sudan",
+  "lat": 12.862807,
+  "lng": 30.217636,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "africom"
+ },
+ {
+  "id": "suriname-suriname",
+  "location": "Suriname",
+  "program": "Suriname",
+  "lat": 3.919305,
+  "lng": -56.027783,
+  "category": "Commercial/Scientific",
+  "theaterCode": "southcom"
+ },
+ {
+  "id": "sweden-sweden",
+  "location": "Sweden",
+  "program": "Sweden",
+  "lat": 60.128161,
+  "lng": 18.643501,
+  "category": "Commercial/Scientific",
+  "theaterCode": "eucom"
+ },
+ {
+  "id": "switzerland-bern-switzerland",
+  "location": "Bern, Switzerland",
+  "program": "Switzerland",
+  "lat": 46.947974,
+  "lng": 7.447447,
+  "category": "Medical/Disaster Relief",
+  "theaterCode": "eucom"
+ },
+ {
+  "id": "switzerland-geneva-switzerland",
+  "location": "Geneva, Switzerland",
+  "program": "Switzerland",
+  "lat": 46.204391,
+  "lng": 6.143158,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "eucom"
+ },
+ {
+  "id": "tanzania-tanzania",
+  "location": "Tanzania",
+  "program": "Tanzania",
+  "lat": -6.369028,
+  "lng": 34.888822,
+  "category": "Commercial/Scientific",
+  "theaterCode": "africom"
+ },
+ {
+  "id": "trinidad-tobago-trinidad-tobago",
+  "location": "Trinidad & Tobago",
+  "program": "Trinidad & Tobago",
+  "lat": 10.691803,
+  "lng": -61.222503,
+  "category": "Commercial/Scientific",
+  "theaterCode": "southcom"
+ },
+ {
+  "id": "turkey-turkey",
+  "location": "Turkey",
+  "program": "Turkey",
+  "lat": 38.963745,
+  "lng": 35.243322,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "eucom"
+ },
+ {
+  "id": "uae-dubai-uae",
+  "location": "Dubai, UAE",
+  "program": "UAE",
+  "lat": 25.204849,
+  "lng": 55.270783,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "centcom"
+ },
+ {
+  "id": "uae-taraq-uae",
+  "location": "Taraq, UAE",
+  "program": "UAE",
+  "lat": 23.115192,
+  "lng": 53.623109,
+  "category": "Commercial/Scientific",
+  "theaterCode": "centcom"
+ },
+ {
+  "id": "united-kingdom-glasgow-united-kingdom",
+  "location": "Glasgow, United Kingdom",
+  "program": "United Kingdom",
+  "lat": 55.864237,
+  "lng": -4.251806,
+  "category": "Commercial/Scientific",
+  "theaterCode": "eucom"
+ },
+ {
+  "id": "united-kingdom-liverpool-united-kingdom",
+  "location": "Liverpool, United Kingdom",
+  "program": "United Kingdom",
+  "lat": 53.408371,
+  "lng": -2.991573,
+  "category": "Medical/Disaster Relief",
+  "theaterCode": "eucom"
+ },
+ {
+  "id": "united-kingdom-london-united-kingdom",
+  "location": "London, United Kingdom",
+  "program": "United Kingdom",
+  "lat": 51.507351,
+  "lng": -0.127758,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "eucom"
+ },
+ {
+  "id": "united-states-atquasuk-alaska",
+  "location": "Atquasuk, Alaska",
+  "program": "United States",
+  "lat": 70.482171,
+  "lng": -157.420695,
+  "category": "Commercial/Scientific",
+  "theaterCode": "northcom"
+ },
+ {
+  "id": "united-states-hobart-bay-alaska",
+  "location": "Hobart Bay, Alaska",
+  "program": "United States",
+  "lat": 57.465833,
+  "lng": -133.353333,
+  "category": "Commercial/Scientific",
+  "theaterCode": "northcom"
+ },
+ {
+  "id": "united-states-kansas-city-united-states",
+  "location": "Kansas City, United States",
+  "program": "United States",
+  "lat": 39.099727,
+  "lng": -94.578567,
+  "category": "Medical/Disaster Relief",
+  "theaterCode": "northcom"
+ },
+ {
+  "id": "united-states-new-york-united-states",
+  "location": "New York, United States",
+  "program": "United States",
+  "lat": 40.712775,
+  "lng": -74.005973,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "northcom"
+ },
+ {
+  "id": "united-states-reno-united-states",
+  "location": "Reno, United States",
+  "program": "United States",
+  "lat": 39.529633,
+  "lng": -119.813803,
+  "category": "Commercial/Scientific",
+  "theaterCode": "northcom"
+ },
+ {
+  "id": "united-states-tanana-alaska",
+  "location": "Tanana, Alaska",
+  "program": "United States",
+  "lat": 65.171944,
+  "lng": -152.078889,
+  "category": "Commercial/Scientific",
+  "theaterCode": "northcom"
+ },
+ {
+  "id": "venezuela-venezuela",
+  "location": "Venezuela",
+  "program": "Venezuela",
+  "lat": 6.42375,
+  "lng": -66.58973,
+  "category": "Medical/Disaster Relief",
+  "theaterCode": "southcom"
+ },
+ {
+  "id": "western-sahara-un-western-sahara",
+  "location": "Western Sahara",
+  "program": "Western Sahara (UN)",
+  "lat": 24.215527,
+  "lng": -12.885834,
+  "category": "Defence/Peacekeeping",
+  "theaterCode": "africom"
+ }
+]

@@ -71,6 +71,16 @@ const nextConfig: NextConfig = {
         headers: [{ key: "Cache-Control", value: "public, max-age=86400" }],
       },
       {
+        // The deployment globe's own files: the page is shown inside /, /deployments and
+        // /deployments/map, so it isn't indexed on its own; its assets are long-lived.
+        source: "/deployment-globe/index.html",
+        headers: [{ key: "X-Robots-Tag", value: "noindex" }],
+      },
+      {
+        source: "/deployment-globe/assets/:path*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=604800" }],
+      },
+      {
         // Demo and preview copies on *.vercel.app stay out of search results, so they never
         // compete with the real site. The real domain is unaffected.
         source: "/:path*",

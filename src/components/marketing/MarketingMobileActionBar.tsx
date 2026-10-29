@@ -9,6 +9,8 @@ import { isMarketingPage, isProductCatalogPath, isPublicSitePage } from "@/lib/m
 export function MarketingMobileActionBar() {
   const pathname = usePathname();
   if (!isMarketingPage(pathname) || isProductCatalogPath(pathname)) return null;
+  // The full-screen deployment map has its own contact button, and the bar would cover its controls.
+  if (pathname === "/deployments/map") return null;
 
   const productSlug = pathname.match(/^\/configurable-solutions\/([^/]+)$/)?.[1];
   const contactHref = productSlug

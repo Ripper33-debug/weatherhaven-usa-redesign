@@ -232,7 +232,7 @@ export function CampScene({
             const chip = (
               <>
                 <span
-                  className={`block whitespace-nowrap px-2.5 py-1 text-[0.8rem] font-semibold leading-none transition-colors ${
+                  className={`block whitespace-nowrap px-2.5 py-1 text-[0.85rem] font-semibold leading-none transition-colors ${
                     best ? "bg-signal text-ink" : on ? "bg-snow text-ink" : "bg-ink/80 text-snow shadow-[inset_0_0_0_1px_rgb(148_170_196/0.4)] backdrop-blur-sm"
                   }`}
                 >
@@ -283,19 +283,19 @@ export function CampScene({
       >
         {lead ? (
           <>
-            <p className="text-[0.8rem] text-snow/75 sm:text-[0.85rem]">
+            <p className="text-[0.85rem] text-snow/75 sm:text-[0.85rem]">
               {results ? "Recommended camp" : "Leading match so far"}
               <span className="mt-0.5 block text-[1.15rem] font-semibold text-snow sm:text-[1.35rem] [font-variation-settings:'wdth'_110]">{lead.name}</span>
             </p>
             {live ? (
-              <p className="mt-2 max-w-[46ch] text-[0.8rem] leading-snug text-snow/85 sm:text-[0.85rem]">
+              <p className="mt-2 max-w-[46ch] text-[0.85rem] leading-snug text-snow/85 sm:text-[0.85rem]">
                 <span className="font-semibold text-snow">This hour {placePhrase(live, "at")}: </span>
                 {liveLine(live)}
                 <span className="text-snow/60"> (forecast: MET Norway)</span>
               </p>
             ) : null}
             {fact ? (
-              <p key={`${focus}-${lead.slug}`} className="v2-step-in mt-2 line-clamp-2 max-w-[44ch] text-[0.8rem] leading-snug text-snow/80 sm:line-clamp-3 sm:text-[0.85rem]">
+              <p key={`${focus}-${lead.slug}`} className="v2-step-in mt-2 line-clamp-2 max-w-[44ch] text-[0.85rem] leading-snug text-snow/80 sm:line-clamp-3 sm:text-[0.85rem]">
                 <span className="font-semibold text-signal">{fact.label}: </span>
                 {fact.text}
               </p>
@@ -317,7 +317,7 @@ export function CampScene({
       ) : null}
 
       <div className="pointer-events-none absolute inset-x-0 bottom-0 flex h-[4.5rem] items-end justify-between gap-4 bg-gradient-to-t from-ink/75 to-transparent px-4 pb-2.5 sm:h-24 sm:px-6 sm:pb-4">
-        <p className="max-w-[52ch] text-[0.72rem] leading-snug text-snow/70 sm:text-[0.78rem]">
+        <p className="max-w-[52ch] text-[0.8125rem] leading-snug text-snow/80 sm:text-[0.8125rem]">
           {inside
             ? `Example fit-out for ${MISSION_ROOM[answers.mission ?? "response"]}. Each layout is configured for the program.`
             : load === "fallback"
@@ -329,7 +329,7 @@ export function CampScene({
               : "Illustration: simplified models drawn from published dimensions where they exist; quantities are illustrative. Major grid lines are 5 m apart."}
         </p>
         {ready && !touched ? (
-          <p className="shrink-0 text-[0.72rem] text-snow/70 sm:text-[0.78rem]">
+          <p className="shrink-0 text-[0.8125rem] text-snow/80 sm:text-[0.8125rem]">
             {coarse ? "Swipe sideways to turn" : results ? "Drag to turn, click a shelter for specs" : "Drag to turn"}
           </p>
         ) : null}

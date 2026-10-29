@@ -21,7 +21,7 @@ function Figures({ story, large = false }: { story: DeploymentStory; large?: boo
 
 function Sources({ story }: { story: DeploymentStory }) {
   return (
-    <p className="text-[0.8rem] leading-relaxed text-muted">
+    <p className="text-[0.85rem] leading-relaxed text-muted">
       <span className="mr-1.5">Sources:</span>
       {story.sources.map((s, i) => (
         <span key={s.href}>
@@ -82,7 +82,7 @@ export function LeadStory({ story }: { story: DeploymentStory }) {
             <Image src={photo.src} alt={photo.alt} fill priority={false} sizes="100vw" className="object-cover" {...blurProps(photo.src)} />
             <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-ink via-ink/30 to-transparent" />
           </div>
-          <figcaption className="v2-wrap -mt-10 relative text-right text-[0.8rem] text-muted">{photo.caption}</figcaption>
+          <figcaption className="v2-wrap -mt-10 relative text-right text-[0.85rem] text-muted">{photo.caption}</figcaption>
         </figure>
       ) : null}
       <div className="v2-wrap grid gap-12 pb-20 pt-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:gap-16 lg:pb-24">
@@ -129,7 +129,7 @@ export function FieldStory({ story, flip }: { story: DeploymentStory; flip: bool
               <div className="relative aspect-[4/3] overflow-hidden lg:aspect-[16/11]">
                 <Image src={photo.src} alt={photo.alt} fill sizes="(min-width: 1024px) 56vw, 100vw" className="object-cover" {...blurProps(photo.src)} />
               </div>
-              <figcaption className="mt-3 text-[0.8rem] text-muted">{photo.caption}</figcaption>
+              <figcaption className="mt-3 text-[0.85rem] text-muted">{photo.caption}</figcaption>
             </figure>
           ) : (
             <div className="v2-plate v2-chamfer px-6 py-4 sm:px-10 sm:py-6">

@@ -33,7 +33,7 @@ export function HomeDataPlate() {
             <h2 id="plate-heading" className="text-[0.95rem] font-semibold text-snow [font-variation-settings:'wdth'_112]">
               Weatherhaven by the numbers
             </h2>
-            <p className="text-[0.8rem] text-muted">ISO 9001:2015 certified. CAGE 0EYW4.</p>
+            <p className="text-[0.85rem] text-muted">ISO 9001:2015 certified. CAGE 0EYW4.</p>
           </div>
           <dl className="grid grid-cols-2 gap-x-6 gap-y-8 pt-7 sm:grid-cols-3 lg:grid-cols-5 lg:gap-x-0">
             {FACTS.map((fact, i) => (

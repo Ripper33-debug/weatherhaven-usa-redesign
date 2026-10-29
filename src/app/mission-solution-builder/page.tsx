@@ -5,7 +5,7 @@ import { PRODUCT_CONTENT } from "@/lib/product-content";
 import { PRODUCT_COVERS, productCover } from "@/lib/product-covers";
 import { blurProps } from "@/lib/image-blur";
 import { pageMeta } from "@/lib/page-meta";
-import { GLOBAL_DEPLOYMENTS } from "@/lib/global-deployments";
+import { CONFIRMED_DEPLOYMENTS } from "@/lib/confirmed-deployments";
 import { isPrecisePin, placeName } from "@/lib/deployment-pins";
 import type { GuidePlace } from "@/lib/live-site";
 
@@ -43,7 +43,7 @@ function guideProducts(): Record<string, GuideProduct> {
 
 /** Named places on the deployment map, for "build it where you're going". */
 function guidePlaces(): GuidePlace[] {
-  return GLOBAL_DEPLOYMENTS.filter(isPrecisePin)
+  return CONFIRMED_DEPLOYMENTS.filter(isPrecisePin)
     .map((d) => ({ id: d.id, name: placeName(d), lat: d.lat, lng: d.lng }))
     .sort((a, b) => a.name.localeCompare(b.name));
 }

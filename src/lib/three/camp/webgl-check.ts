@@ -1,6 +1,7 @@
-/** Kept apart from the scene so the check doesn't download three.js. */
+/** Kept apart from the scenes so the check doesn't download three.js. */
 /**
- * Whether this browser can draw the camp: WebGL must be on and drawn by a GPU. Software WebGL
+ * Whether this browser can draw the 3D scenes (the mission builder's camp and the TRECC on the
+ * homepage and its product page): WebGL must be on and drawn by a GPU. Software WebGL
  * (SwiftShader, llvmpipe, Windows' Basic Render Driver) turns every frame into a long main-thread task, so those browsers get
  * the photo instead. Test runs that render in software on purpose set __CAMP_ALLOW_SOFTWARE__.
  */

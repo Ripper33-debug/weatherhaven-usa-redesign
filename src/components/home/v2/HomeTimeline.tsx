@@ -10,6 +10,7 @@ const MILESTONES = [
   { year: "2026", title: "Supacat partnership", body: "TRECC-T paired with Supacat high-mobility vehicles; field trials planned for 2027." },
 ] as const;
 
+/** Company milestones, oldest first, laid out as a grid that reads left to right, row by row. */
 export function HomeTimeline() {
   return (
     <section aria-labelledby="timeline-heading" className="border-t border-line bg-ink py-20 sm:py-28">
@@ -17,24 +18,19 @@ export function HomeTimeline() {
         <h2 id="timeline-heading" className="v2-h1 max-w-[18ch] text-snow">
           Forty-five years in the field.
         </h2>
-      </div>
-      <div
-        role="region"
-        aria-label="Company milestones"
-        tabIndex={0}
-        className="v2-rail mt-12 flex gap-0 overflow-x-auto pb-6"
-      >
-        {MILESTONES.map((m, i) => (
-          <article key={m.year} className="relative w-[78vw] max-w-[300px] shrink-0 pr-8 sm:w-[300px]">
-            <div className="flex items-center gap-3">
-              <span className={`h-2.5 w-2.5 shrink-0 ${i === MILESTONES.length - 1 ? "bg-signal" : "bg-snow"}`} aria-hidden />
-              <span className="h-px flex-1 bg-line-strong" aria-hidden />
-            </div>
-            <p className="v2-figure mt-5 text-[2.6rem] leading-none text-snow">{m.year}</p>
-            <h3 className="mt-3 text-[1.05rem] font-semibold text-snow">{m.title}</h3>
-            <p className="mt-2 text-[0.92rem] leading-relaxed text-muted">{m.body}</p>
-          </article>
-        ))}
+        <ol className="mt-12 grid gap-x-10 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+          {MILESTONES.map((m, i) => (
+            <li key={m.year} className="relative">
+              <div className="flex items-center gap-3">
+                <span className={`h-2.5 w-2.5 shrink-0 ${i === MILESTONES.length - 1 ? "bg-signal" : "bg-snow"}`} aria-hidden />
+                <span className="h-px flex-1 bg-line-strong" aria-hidden />
+              </div>
+              <p className="v2-figure mt-5 text-[2.6rem] leading-none text-snow">{m.year}</p>
+              <h3 className="mt-3 text-[1.05rem] font-semibold text-snow">{m.title}</h3>
+              <p className="mt-2 max-w-[36ch] text-[0.95rem] leading-relaxed text-muted">{m.body}</p>
+            </li>
+          ))}
+        </ol>
       </div>
     </section>
   );

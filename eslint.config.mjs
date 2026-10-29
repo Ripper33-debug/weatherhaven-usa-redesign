@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // The deployment globe is a self-contained page with its own (minified) libraries.
+    "public/deployment-globe/**",
+    // Reference copies from the globe package, not part of the build.
+    "docs/**",
   ]),
 ]);
 
