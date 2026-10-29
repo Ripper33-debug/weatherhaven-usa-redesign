@@ -10,7 +10,7 @@
  */
 import tzlookup from "@photostructure/tz-lookup";
 import deployments from "@/data/global-deployments.json";
-import { cleanLabel, isPrecisePin } from "@/lib/deployment-pins";
+import { isPrecisePin, placeName } from "@/lib/deployment-pins";
 
 export type FieldSite = {
   /** Pin id on the deployment map. */
@@ -23,24 +23,11 @@ export type FieldSite = {
   band: "cold" | "hot";
 };
 
-const NAME_FIXES: Record<string, string> = {
-  "Base Concordia, Antarctica": "Concordia Station, Antarctica",
-  "Troll, Antarctica": "Troll Station, Antarctica",
-  "Svaldbard, Norway": "Svalbard, Norway",
-  "Atquasuk, Alaska": "Atqasuk, Alaska",
-  "Brasilla, Brazil": "Brasília, Brazil",
-  Narsarsuaq: "Narsarsuaq, Greenland",
-  Reykjavík: "Reykjavík, Iceland",
-  "Wekweeti, North West Territories": "Wekweètì, Northwest Territories",
-  "Tuktoyaktuk, North West Territories": "Tuktoyaktuk, Northwest Territories",
-};
-
 type Pin = { id: string; label: string; title: string; lat: number; lng: number };
 
 export const FIELD_SITES: FieldSite[] = (deployments as Pin[]).flatMap((d) => {
   if (!isPrecisePin(d)) return [];
   const band = Math.abs(d.lat) >= 55 ? "cold" : Math.abs(d.lat) <= 38 ? "hot" : null;
   if (!band) return [];
-  const label = cleanLabel(d.label, d.lat);
-  return [{ id: d.id, name: NAME_FIXES[label] ?? label, tz: tzlookup(d.lat, d.lng), lat: d.lat, lng: d.lng, band }];
+  return [{ id: d.id, name: placeName(d), tz: tzlookup(d.lat, d.lng), lat: d.lat, lng: d.lng, band }];
 });

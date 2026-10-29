@@ -78,3 +78,13 @@ describe("mission guide", () => {
     expect((p.subject ?? "").length).toBeLessThanOrEqual(160);
   });
 });
+
+describe("hand-off with a real place", () => {
+  it("names the site right after the climate", () => {
+    const a = { mission: "medical", climate: "polar", people: "9-25", transport: "air", duration: "months" } as const;
+    const lines = guideContactPrefill(a, recommend(a), "Alert, Nunavut (82.50° N 62.35° W)").message!.split("\n");
+    const i = lines.findIndex((l) => l.startsWith("Climate:"));
+    expect(lines[i + 1]).toBe("Site: Alert, Nunavut (82.50° N 62.35° W)");
+    expect(guideContactPrefill(a, recommend(a)).message).not.toContain("Site:");
+  });
+});

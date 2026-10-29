@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isDaylight, subsolarPoint, sunElevation } from "@/lib/solar";
+import { isDaylight, subsolarPoint, sunElevation, sunPosition } from "@/lib/solar";
 
 describe("solar position", () => {
   it("puts the sun over the equator near Greenwich at the March equinox, noon UTC", () => {
@@ -40,5 +40,21 @@ describe("solar position", () => {
     // Riyadh is UTC+3: local noon is about 09:00 UTC.
     expect(sunElevation(new Date("2026-10-29T09:00:00Z"), 24.71, 46.68)).toBeGreaterThan(50);
     expect(sunElevation(new Date("2026-10-28T21:00:00Z"), 24.71, 46.68)).toBeLessThan(-40);
+  });
+
+  it("gives the sun's compass direction", () => {
+    // Riyadh (UTC+3) in late October: sun in the east mid-morning, due south near noon, west mid-afternoon.
+    const morning = sunPosition(new Date("2026-10-29T05:30:00Z"), 24.71, 46.68);
+    const noon = sunPosition(new Date("2026-10-29T08:50:00Z"), 24.71, 46.68);
+    const afternoon = sunPosition(new Date("2026-10-29T12:00:00Z"), 24.71, 46.68);
+    expect(morning.azimuth).toBeGreaterThan(95);
+    expect(morning.azimuth).toBeLessThan(140);
+    expect(Math.abs(noon.azimuth - 180)).toBeLessThan(8);
+    expect(afternoon.azimuth).toBeGreaterThan(220);
+    expect(afternoon.azimuth).toBeLessThan(265);
+    // Elevation matches the other formula.
+    expect(noon.elevation).toBeCloseTo(sunElevation(new Date("2026-10-29T08:50:00Z"), 24.71, 46.68), 6);
+    // McMurdo in October: the sun circles low in the sky, north at local noon (about 00:00 UTC).
+    expect(Math.abs(((sunPosition(new Date("2026-10-29T00:00:00Z"), -77.84, 166.69).azimuth + 180) % 360) - 180)).toBeLessThan(12);
   });
 });

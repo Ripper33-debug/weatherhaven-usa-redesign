@@ -42,3 +42,23 @@ export function lightAt(date: Date, lat: number, lng: number): Light {
 function wrap180(deg: number): number {
   return ((((deg + 180) % 360) + 360) % 360) - 180;
 }
+
+/**
+ * Sun elevation and compass azimuth (degrees clockwise from north) at a place, from the sun's
+ * direction in the local east/north/up frame.
+ */
+export function sunPosition(date: Date, lat: number, lng: number): { elevation: number; azimuth: number } {
+  const s = subsolarPoint(date);
+  const d = s.lat * RAD;
+  const ls = s.lng * RAD;
+  const p = lat * RAD;
+  const l = lng * RAD;
+  const sx = Math.cos(d) * Math.cos(ls);
+  const sy = Math.cos(d) * Math.sin(ls);
+  const sz = Math.sin(d);
+  const e = -Math.sin(l) * sx + Math.cos(l) * sy;
+  const n = -Math.sin(p) * Math.cos(l) * sx - Math.sin(p) * Math.sin(l) * sy + Math.cos(p) * sz;
+  const u = Math.cos(p) * Math.cos(l) * sx + Math.cos(p) * Math.sin(l) * sy + Math.sin(p) * sz;
+  const azimuth = ((Math.atan2(e, n) / RAD) + 360) % 360;
+  return { elevation: Math.asin(Math.max(-1, Math.min(1, u))) / RAD, azimuth };
+}

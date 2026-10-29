@@ -477,12 +477,12 @@ export function labelFor(key: QuestionKey, id: string | undefined): string {
   return QUESTIONS.find((q) => q.key === key)?.options.find((o) => o.id === id)?.label ?? "";
 }
 
-/** Pre-fills the contact form with the answers and the recommendation. */
-export function guideContactPrefill(a: Required<GuideAnswers>, recs: Recommendation[]): ContactPrefillPayload {
+/** Pre-fills the contact form with the answers, the place if one was picked, and the recommendation. */
+export function guideContactPrefill(a: Required<GuideAnswers>, recs: Recommendation[], site?: string): ContactPrefillPayload {
   const top = recs[0];
   const lines = [
     "Mission builder plan:",
-    ...QUESTIONS.map((q) => `${q.label}: ${labelFor(q.key, a[q.key])}`),
+    ...QUESTIONS.flatMap((q) => [`${q.label}: ${labelFor(q.key, a[q.key])}`, ...(q.key === "climate" && site ? [`Site: ${site}`] : [])]),
     "",
     `Suggested systems: ${recs.slice(0, 3).map((r) => r.name).join(", ")}`,
   ];

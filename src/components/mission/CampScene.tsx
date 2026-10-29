@@ -8,6 +8,7 @@ import { campPlan } from "@/lib/camp-scene-plan";
 import { publishedFact, QUESTIONS, type GuideAnswers, type QuestionKey } from "@/lib/mission-guide";
 import type { CampFocus, CampStage, TagPos } from "@/lib/three/camp/campStage";
 import { startWhenNear } from "@/lib/start-when-near";
+import { liveLine, type LiveConditions } from "@/lib/live-site";
 
 type LoadState = "idle" | "loading" | "ready" | "fallback";
 
@@ -30,12 +31,15 @@ const MISSION_ROOM: Record<string, string> = {
 
 export function CampScene({
   answers,
+  live = null,
   focus,
   results,
   photos,
   apiRef,
 }: {
   answers: GuideAnswers;
+  /** Real conditions at the place the visitor picked: the camp is built in them. */
+  live?: LiveConditions | null;
   focus: CampFocus;
   results: boolean;
   /** Product photos by slug, shown instead of the 3D camp where WebGL is off. */
@@ -149,6 +153,12 @@ export function CampScene({
     stageRef.current?.setPlan(plan, focus);
     // A new plan or step closes the look-inside view (the stage does the same).
   }, [load, plan, focus]);
+
+  // The place's weather, sun and light.
+  useEffect(() => {
+    if (load !== "ready") return;
+    stageRef.current?.setLive(live);
+  }, [load, live]);
 
   // Size and visibility.
   useEffect(() => {
@@ -277,6 +287,12 @@ export function CampScene({
               {results ? "Recommended camp" : "Leading match so far"}
               <span className="mt-0.5 block text-[1.15rem] font-semibold text-snow sm:text-[1.35rem] [font-variation-settings:'wdth'_110]">{lead.name}</span>
             </p>
+            {live ? (
+              <p className="mt-2 max-w-[46ch] text-[0.8rem] leading-snug text-snow/85 sm:text-[0.85rem]">
+                <span className="font-semibold text-snow">Right now at {live.name}: </span>
+                {liveLine(live, new Date())}
+              </p>
+            ) : null}
             {fact ? (
               <p key={`${focus}-${lead.slug}`} className="v2-step-in mt-2 line-clamp-2 max-w-[44ch] text-[0.8rem] leading-snug text-snow/80 sm:line-clamp-3 sm:text-[0.85rem]">
                 <span className="font-semibold text-signal">{fact.label}: </span>

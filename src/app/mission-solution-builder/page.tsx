@@ -5,6 +5,9 @@ import { PRODUCT_CONTENT } from "@/lib/product-content";
 import { PRODUCT_COVERS, productCover } from "@/lib/product-covers";
 import { blurProps } from "@/lib/image-blur";
 import { pageMeta } from "@/lib/page-meta";
+import { GLOBAL_DEPLOYMENTS } from "@/lib/global-deployments";
+import { isPrecisePin, placeName } from "@/lib/deployment-pins";
+import type { GuidePlace } from "@/lib/live-site";
 
 export const metadata: Metadata = pageMeta({
   title: "Mission builder",
@@ -38,12 +41,20 @@ function guideProducts(): Record<string, GuideProduct> {
   );
 }
 
+/** Named places on the deployment map, for "build it where you're going". */
+function guidePlaces(): GuidePlace[] {
+  return GLOBAL_DEPLOYMENTS.filter(isPrecisePin)
+    .map((d) => ({ id: d.id, name: placeName(d), lat: d.lat, lng: d.lng }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
 export default function MissionSolutionBuilderPage() {
   const products = guideProducts();
+  const places = guidePlaces();
   return (
     <div className="bg-ink pb-24 text-snow">
-      <Suspense fallback={<MissionGuideFallback products={products} />}>
-        <MissionGuide products={products} />
+      <Suspense fallback={<MissionGuideFallback products={products} places={places} />}>
+        <MissionGuide products={products} places={places} />
       </Suspense>
     </div>
   );

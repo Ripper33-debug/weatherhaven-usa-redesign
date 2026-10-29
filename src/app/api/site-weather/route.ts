@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import tzlookup from "@photostructure/tz-lookup";
 import { GLOBAL_DEPLOYMENTS } from "@/lib/global-deployments";
 import { isPrecisePin } from "@/lib/deployment-pins";
 import { conditionsAt } from "@/lib/field-weather";
@@ -18,5 +19,5 @@ export async function GET(request: Request) {
     // Cached briefly too, so an outage at MET doesn't turn into one call per visitor.
     return NextResponse.json({ error: "Weather unavailable" }, { status: 503, headers: { "Cache-Control": "public, s-maxage=60" } });
   }
-  return NextResponse.json(now, { headers: { "Cache-Control": "public, s-maxage=900, stale-while-revalidate=1800" } });
+  return NextResponse.json({ ...now, tz: tzlookup(pin.lat, pin.lng) }, { headers: { "Cache-Control": "public, s-maxage=900, stale-while-revalidate=1800" } });
 }

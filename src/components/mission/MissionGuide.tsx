@@ -23,7 +23,10 @@ import { sizesForSlug } from "@/lib/system-sizes";
 import { SizeCompare } from "@/components/systems/SizeCompare";
 import { V2PageHeader } from "@/components/site/V2PageHeader";
 import { CampScene, type CampSceneApi } from "@/components/mission/CampScene";
+import { PlacePicker } from "@/components/mission/PlacePicker";
 import type { CampFocus } from "@/lib/three/camp/campStage";
+import { climateForPlace, placeFromParams, placeToParams, type GuidePlace, type LiveConditions } from "@/lib/live-site";
+import { formatCoords } from "@/lib/field-readout";
 
 const MissionSolutionBuilder = dynamic(
   () => import("@/components/mission/MissionSolutionBuilder").then((m) => m.MissionSolutionBuilder),
@@ -47,15 +50,18 @@ function firstOpen(a: GuideAnswers): Step {
   return i === -1 ? "results" : i;
 }
 
-/** A link to this page with the answers in it, built from the answers rather than the address bar. */
-function shareUrl(a: GuideAnswers): string {
+/** A link to this page with the answers (and the place) in it, built from the answers rather than the address bar. */
+function shareUrl(a: GuideAnswers, place: GuidePlace | null): string {
   const url = new URL("/mission-solution-builder", window.location.origin);
   for (const q of QUESTIONS) {
     const v = a[q.key];
     if (v) url.searchParams.set(ANSWER_PARAMS[q.key], v);
   }
+  for (const [k, v] of Object.entries(placeToParams(place))) if (v) url.searchParams.set(k, v);
   return url.toString();
 }
+
+type LiveState = LiveConditions | "loading" | "error" | null;
 
 function writeUrl(a: GuideAnswers, extra?: Record<string, string | null>) {
   const url = new URL(window.location.href);
@@ -79,7 +85,17 @@ function Check() {
   );
 }
 
-function ProgressRail({ answers, step, onJump }: { answers: GuideAnswers; step: Step; onJump: (i: number) => void }) {
+function ProgressRail({
+  answers,
+  place,
+  step,
+  onJump,
+}: {
+  answers: GuideAnswers;
+  place: GuidePlace | null;
+  step: Step;
+  onJump: (i: number) => void;
+}) {
   const current = step === "results" ? QUESTIONS.length : step;
   return (
     <nav aria-label="Mission builder steps" className="border-b border-line pb-6">
@@ -106,7 +122,7 @@ function ProgressRail({ answers, step, onJump }: { answers: GuideAnswers; step: 
                   <span className="sr-only sm:not-sr-only sm:ml-2">{q.label}</span>
                 </span>
                 <span className="mt-0.5 hidden w-full truncate text-[0.8rem] text-muted group-enabled:group-hover:text-snow sm:block">
-                  {done ? labelFor(q.key, answers[q.key]) : " "}
+                  {done ? (q.key === "climate" && place ? place.name : labelFor(q.key, answers[q.key])) : " "}
                 </span>
               </button>
             </li>
@@ -124,6 +140,7 @@ function firstOpenIndex(a: GuideAnswers): number {
 
 function Results({
   answers,
+  place,
   recs,
   products,
   onEdit,
@@ -132,6 +149,7 @@ function Results({
   sceneApi,
 }: {
   answers: Required<GuideAnswers>;
+  place: GuidePlace | null;
   recs: Recommendation[];
   products: Record<string, GuideProduct>;
   onEdit: (i: number) => void;
@@ -148,9 +166,9 @@ function Results({
   const sizes = sizesForSlug(best.slug);
 
   const sendToExpert = () => {
-    const prefill = guideContactPrefill(answers, recs);
+    const prefill = guideContactPrefill(answers, recs, place ? `${place.name} (${formatCoords(place.lat, place.lng)})` : undefined);
     // The expert gets a link to this exact plan, so they can open the same camp in 3D.
-    const link = shareUrl(answers);
+    const link = shareUrl(answers, place);
     // The contact form takes up to 500 characters; keep the link whole and trim the summary if needed.
     const tail = `\nPlan in 3D: ${link}`;
     storeContactPrefill({ ...prefill, message: `${(prefill.message ?? "").slice(0, Math.max(0, 500 - tail.length))}${tail}` });
@@ -160,13 +178,14 @@ function Results({
       systems: recs.slice(0, 3).map((r) => r.slug),
       people: answers.people,
       climate: answers.climate,
+      site: place?.name,
     });
     router.push("/contact?handoff=camp-plan");
   };
 
   const copyLink = async () => {
     try {
-      await navigator.clipboard.writeText(shareUrl(answers));
+      await navigator.clipboard.writeText(shareUrl(answers, place));
       setCopied(true);
       window.setTimeout(() => setCopied(false), 2500);
     } catch {
@@ -183,7 +202,8 @@ function Results({
           </h2>
           <p className="mt-3 max-w-[60ch] text-[1rem] leading-relaxed text-muted">
             For {labelFor("mission", answers.mission).toLowerCase()}, {labelFor("people", answers.people)} people,{" "}
-            {labelFor("climate", answers.climate).toLowerCase()}, moved by {labelFor("transport", answers.transport).toLowerCase()},
+            {place ? `in ${place.name}` : labelFor("climate", answers.climate).toLowerCase()}, moved by{" "}
+            {labelFor("transport", answers.transport).toLowerCase()},
             standing for {labelFor("duration", answers.duration).toLowerCase()}.
           </p>
         </div>
@@ -364,7 +384,19 @@ const anyAnswer = (a: GuideAnswers) => QUESTIONS.some((q) => !!a[q.key]);
  * screen); this component only tracks which question is showing and what the 3D camp should
  * point its camera at.
  */
-function GuideBody({ products, answers, detailed }: { products: Record<string, GuideProduct>; answers: GuideAnswers; detailed: boolean }) {
+function GuideBody({
+  products,
+  answers,
+  place,
+  places,
+  detailed,
+}: {
+  products: Record<string, GuideProduct>;
+  answers: GuideAnswers;
+  place: GuidePlace | null;
+  places: GuidePlace[];
+  detailed: boolean;
+}) {
   const [step, setStep] = useState<Step>(() => firstOpen(answers));
   // What the last action changed, so the camp's camera can show it.
   const [focus, setFocus] = useState<CampFocus>(() => (anyAnswer(answers) ? "overview" : "empty"));
@@ -388,6 +420,28 @@ function GuideBody({ products, answers, detailed }: { products: Record<string, G
     () => Object.fromEntries(Object.values(products).map((p) => [p.slug, { src: p.cover, blur: p.blur, representative: p.representative }])),
     [products],
   );
+
+  // Live conditions at the chosen place (fetched once per place).
+  const placeKey = place ? `${place.id ?? ""}|${place.lat},${place.lng}` : null;
+  const [liveFetched, setLiveFetched] = useState<{ key: string; value: LiveConditions | "error" } | null>(null);
+  useEffect(() => {
+    if (!place || !placeKey) return;
+    const ctrl = new AbortController();
+    const url = place.id
+      ? `/api/site-weather?id=${encodeURIComponent(place.id)}`
+      : `/api/place-weather?lat=${place.lat}&lng=${place.lng}`;
+    fetch(url, { signal: ctrl.signal })
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then((c: Omit<LiveConditions, keyof GuidePlace>) => setLiveFetched({ key: placeKey, value: { ...place, ...c } }))
+      .catch((err: unknown) => {
+        if ((err as Error).name !== "AbortError") setLiveFetched({ key: placeKey, value: "error" });
+      });
+    return () => ctrl.abort();
+    // placeKey stands for the place.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [placeKey]);
+  const live: LiveState = !place ? null : liveFetched?.key === placeKey ? liveFetched.value : "loading";
+  const liveForScene = live && typeof live === "object" ? live : null;
 
   // After the visitor moves between questions, put focus on the new heading so keyboard and
   // screen-reader users land on it (not on the first visit).
@@ -429,7 +483,8 @@ function GuideBody({ products, answers, detailed }: { products: Record<string, G
 
   const choose = (key: keyof GuideAnswers, id: string, index: number) => {
     const next = { ...answers, [key]: id } as GuideAnswers;
-    writeUrl(next);
+    // Picking a climate by hand replaces a place picked earlier.
+    writeUrl(next, key === "climate" ? placeToParams(null) : undefined);
     setFocus(key);
     // A short pause so the choice registers before the next question slides in.
     window.clearTimeout(advanceTimer.current);
@@ -442,8 +497,29 @@ function GuideBody({ products, answers, detailed }: { products: Record<string, G
     }, 220);
   };
 
+  /** A real place: sets the climate answer it implies, then moves on once the choice has shown. */
+  const pickPlace = (p: GuidePlace) => {
+    const next = { ...answers, climate: climateForPlace(p.lat, p.lng) } as GuideAnswers;
+    writeUrl(next, placeToParams(p));
+    setFocus("climate");
+    window.clearTimeout(advanceTimer.current);
+    const index = QUESTIONS.findIndex((x) => x.key === "climate");
+    advanceTimer.current = window.setTimeout(() => {
+      const after = index + 1 < QUESTIONS.length ? index + 1 : "results";
+      moveFocus.current = true;
+      const to = after === "results" && !isComplete(next) ? firstOpen(next) : after;
+      setStep(to);
+      scrollToTop(to === "results");
+    }, 1400);
+  };
+
+  const clearPlace = () => {
+    window.clearTimeout(advanceTimer.current);
+    writeUrl(answers, placeToParams(null));
+  };
+
   const restart = () => {
-    writeUrl({});
+    writeUrl({}, placeToParams(null));
     setFocus("empty");
     goTo(0);
   };
@@ -504,7 +580,7 @@ function GuideBody({ products, answers, detailed }: { products: Record<string, G
             atResults ? "relative h-[56svh] min-h-[320px]" : "sticky top-16 z-20 h-[38svh] min-h-[250px]"
           } border-y border-line lg:sticky lg:top-[72px] lg:z-auto lg:h-[calc(100svh-72px)] lg:min-h-[520px] lg:border-y-0 lg:border-l`}
         >
-          <CampScene answers={answers} focus={sceneFocus} results={atResults} photos={photos} apiRef={sceneApi} />
+          <CampScene answers={answers} live={liveForScene} focus={sceneFocus} results={atResults} photos={photos} apiRef={sceneApi} />
         </div>
       </div>
 
@@ -512,7 +588,7 @@ function GuideBody({ products, answers, detailed }: { products: Record<string, G
         ref={topRef}
         className={`v2-pad-l @container px-[var(--v2-gutter)] pt-8 lg:col-start-1 lg:row-start-2 lg:pr-12 lg:pt-0 ${atResults ? "" : "v2-under-scene"}`}
       >
-        <ProgressRail answers={answers} step={shown} onJump={(i) => goTo(i)} />
+        <ProgressRail answers={answers} place={place} step={shown} onJump={(i) => goTo(i)} />
 
         <div className="pt-10 sm:pt-12">
           {q && typeof shown === "number" ? (
@@ -520,7 +596,17 @@ function GuideBody({ products, answers, detailed }: { products: Record<string, G
               <h2 id={`q-${q.key}`} ref={headingRef} tabIndex={-1} className="v2-h2 max-w-[22ch] text-snow outline-none">
                 {q.title}
               </h2>
-              <div role="radiogroup" aria-labelledby={`q-${q.key}`} className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+              {q.key === "climate" ? (
+                <>
+                  <PlacePicker places={places} value={place} live={live} onPick={pickPlace} onClear={clearPlace} />
+                  <p className="mt-8 text-[0.95rem] text-muted">Or describe the climate:</p>
+                </>
+              ) : null}
+              <div
+                role="radiogroup"
+                aria-labelledby={`q-${q.key}`}
+                className={`${q.key === "climate" ? "mt-4" : "mt-8"} grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2`}
+              >
                 {q.options.map((o, i) => {
                   const on = answers[q.key] === o.id;
                   const selected = q.options.findIndex((x) => x.id === answers[q.key]);
@@ -576,7 +662,16 @@ function GuideBody({ products, answers, detailed }: { products: Record<string, G
               </div>
             </div>
           ) : isComplete(answers) ? (
-            <Results answers={answers} recs={recs} products={products} onEdit={(i) => goTo(i)} onRestart={restart} headingRef={headingRef} sceneApi={sceneApi} />
+            <Results
+              answers={answers}
+              place={place}
+              recs={recs}
+              products={products}
+              onEdit={(i) => goTo(i)}
+              onRestart={restart}
+              headingRef={headingRef}
+              sceneApi={sceneApi}
+            />
           ) : null}
         </div>
 
@@ -592,14 +687,15 @@ function GuideBody({ products, answers, detailed }: { products: Record<string, G
   );
 }
 
-/** Reads the answers from the URL, so a finished plan can be shared as a link. */
-export function MissionGuide({ products }: { products: Record<string, GuideProduct> }) {
+/** Reads the answers (and the place) from the URL, so a finished plan can be shared as a link. */
+export function MissionGuide({ products, places }: { products: Record<string, GuideProduct>; places: GuidePlace[] }) {
   const params = useSearchParams();
   const answers = answersFromParams((k) => params.get(k));
-  return <GuideBody products={products} answers={answers} detailed={params.get("form") === "full"} />;
+  const place = useMemo(() => placeFromParams((k) => params.get(k), places), [params, places]);
+  return <GuideBody products={products} answers={answers} place={place} places={places} detailed={params.get("form") === "full"} />;
 }
 
 /** Server-rendered first question, shown only if the URL can't be read on the server. */
-export function MissionGuideFallback({ products }: { products: Record<string, GuideProduct> }) {
-  return <GuideBody products={products} answers={{}} detailed={false} />;
+export function MissionGuideFallback({ products, places }: { products: Record<string, GuideProduct>; places: GuidePlace[] }) {
+  return <GuideBody products={products} answers={{}} place={null} places={places} detailed={false} />;
 }

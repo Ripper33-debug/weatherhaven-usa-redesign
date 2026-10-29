@@ -33,6 +33,8 @@ import {
 } from "@/lib/three/camp/kit";
 import { buildKind, scanFrame, treccStandIn, type KindModel } from "@/lib/three/camp/shelters";
 import { CLIMATES, createEnvironment, createProps, createWeather, mixPreset, type Avoid, type ClimateKey, type ClimatePreset, type Weather } from "@/lib/three/camp/environment";
+import { livePreset } from "@/lib/three/camp/live-preset";
+import type { LiveConditions } from "@/lib/live-site";
 import { createArrival, type Arrival, type ArrivalMats, type Cargo } from "@/lib/three/camp/arrivals";
 import { bagsLoad, container, figure, palletShelter } from "@/lib/three/camp/vehicles";
 import { buildSiteLayer, disposeGlowTexture, type SiteLayer } from "@/lib/three/camp/siteworks";
@@ -70,6 +72,8 @@ export type CampStage = {
   setInside: (on: boolean) => boolean;
   /** A JPEG of the current view, at most `width` pixels wide. */
   snapshot: (width: number) => string | null;
+  /** Real conditions at the chosen place (weather, sun, day or night), or null for the preset. */
+  setLive: (live: LiveConditions | null) => void;
 };
 
 type Struct = {
@@ -554,12 +558,18 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
   let climateFrom: ClimatePreset = CLIMATES.none;
   let climateTo: ClimatePreset = CLIMATES.none;
   let climateE = 1;
+  // Real conditions at the chosen place shape the preset (weather, sun, night).
+  let live: LiveConditions | null = null;
+  let shownSig = "none|";
+  const liveSig = () => (live ? `${live.lat},${live.lng},${live.time},${live.symbol},${Math.round(live.windMs ?? 0)}` : "");
 
   const setClimate = (next: ClimateKey) => {
-    if (next === climateKey) return;
+    const sig = `${next}|${next === "none" ? "" : liveSig()}`;
+    if (sig === shownSig) return;
+    shownSig = sig;
     // Start from what is on screen, even if the last change is still fading in.
     const from = climateE >= 1 ? shownPreset : mixPreset(climateFrom, climateTo, climateE);
-    const to = CLIMATES[next];
+    const to = live && next !== "none" ? livePreset(CLIMATES[next], live, new Date()) : CLIMATES[next];
     climateFrom = from;
     climateTo = to;
     climateE = 0;
@@ -593,7 +603,8 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
       },
       "climate",
     );
-    // Weather: fade the old one out, the new one in.
+    // Weather: fade the old one out, the new one in (unless it's the same weather).
+    if (weather && weather.kind === to.weather) return;
     if (weather) {
       const old = weather;
       fading.push(old);
@@ -1363,6 +1374,11 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
 
   return {
     setPlan,
+    setLive: (next) => {
+      live = next;
+      setClimate(climateKey);
+      invalidate();
+    },
     setActive: (on) => {
       active = on;
       if (on) invalidate();

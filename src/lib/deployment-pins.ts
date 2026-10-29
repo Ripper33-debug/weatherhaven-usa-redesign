@@ -53,3 +53,22 @@ export function isPrecisePin(d: { id: string; label: string; title: string }): b
  * until the source is fixed.
  */
 const MISPLACED = new Set(["colombia-bogota-colombia", "colombia-loro-colombia"]);
+
+/** Spelling fixes and operators' station names for place labels on the map. */
+const NAME_FIXES: Record<string, string> = {
+  "Base Concordia, Antarctica": "Concordia Station, Antarctica",
+  "Troll, Antarctica": "Troll Station, Antarctica",
+  "Svaldbard, Norway": "Svalbard, Norway",
+  "Atquasuk, Alaska": "Atqasuk, Alaska",
+  "Brasilla, Brazil": "Brasília, Brazil",
+  Narsarsuaq: "Narsarsuaq, Greenland",
+  Reykjavík: "Reykjavík, Iceland",
+  "Wekweeti, North West Territories": "Wekweètì, Northwest Territories",
+  "Tuktoyaktuk, North West Territories": "Tuktoyaktuk, Northwest Territories",
+};
+
+/** A place pin's name as people would write it ("Svalbard, Norway", "Concordia Station, Antarctica"). */
+export function placeName(d: { label: string; lat: number }): string {
+  const label = cleanLabel(d.label, d.lat);
+  return NAME_FIXES[label] ?? label;
+}
