@@ -36,6 +36,23 @@ export function ContactPageSections() {
           </div>
 
           <div>
+            <h2 className="text-[1.05rem] font-semibold text-snow">Meet the team</h2>
+            <ul className="mt-3 space-y-2 text-[0.95rem]">
+              {[
+                { inquiry: "Capability Briefing", label: "Request a capability briefing" },
+                { inquiry: "Demo Request", label: "Request a demo" },
+                { inquiry: "Factory Tour", label: "Request a factory tour" },
+              ].map((m) => (
+                <li key={m.inquiry}>
+                  <Link href={`/contact?inquiry=${encodeURIComponent(m.inquiry)}`} scroll={false} className="v2-link">
+                    {m.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
             <h2 className="text-[1.05rem] font-semibold text-snow">What happens next</h2>
             <ol className="mt-4 space-y-4">
               {[

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { btnMarketingOutline, btnMarketingPrimary } from "@/lib/cta-buttons";
 import { contactUrl } from "@/lib/contact-url";
 import { isMarketingPage, isProductCatalogPath, isPublicSitePage } from "@/lib/marketing-pages";
+import { NAV_CTA } from "@/lib/site-nav";
 
 export function MarketingMobileActionBar() {
   const pathname = usePathname();
@@ -49,8 +50,8 @@ export function MarketingMobileActionBar() {
         <Link href="/configurable-solutions" className="v2-btn v2-btn-ghost w-full !min-h-11 text-sm">
           Systems
         </Link>
-        <Link href={contactHref} className="v2-btn w-full !min-h-11 text-sm">
-          Talk to an expert
+        <Link href={productSlug ? contactHref : NAV_CTA.href} className="v2-btn w-full !min-h-11 text-sm">
+          {productSlug ? "Ask about this system" : NAV_CTA.label}
         </Link>
       </div>
     </div>

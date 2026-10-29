@@ -8,7 +8,9 @@ import { PROCUREMENT } from "@/lib/procurement";
 
 const companyLinks = [
   { href: "/capabilities", label: "Capabilities" },
+  { href: "/who-we-serve", label: "Who we serve" },
   { href: "/deployments", label: "Deployments" },
+  { href: "/deployments/record", label: "Track record" },
   { href: "/news", label: "News" },
   { href: "/events", label: "Events and briefings" },
   { href: "/resources", label: "Resources" },

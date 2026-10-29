@@ -46,6 +46,12 @@ export default function DeploymentsPage() {
             ))}
           </ul>
         </nav>
+        <p className="mt-6 text-[0.95rem] text-muted">
+          <Link href="/deployments/record" className="v2-link">
+            Full track record
+          </Link>
+          : contracts on public record and all {CONFIRMED_DEPLOYMENTS.length} confirmed sites in one table.
+        </p>
       </V2PageHeader>
 
       <div className="bg-ink">
@@ -110,9 +116,14 @@ export default function DeploymentsPage() {
                 gone to more than 95 countries in all.
               </p>
             </div>
-            <Link href="/deployments/map" className="v2-link shrink-0 text-[0.95rem]">
-              Open the full map
-            </Link>
+            <div className="flex shrink-0 flex-wrap gap-x-6 gap-y-2 text-[0.95rem]">
+              <Link href="/deployments/record" className="v2-link">
+                Full track record
+              </Link>
+              <Link href="/deployments/map" className="v2-link">
+                Open the full map
+              </Link>
+            </div>
           </div>
           <DeploymentGlobe title="Globe of Weatherhaven deployments" />
         </section>

@@ -145,6 +145,12 @@ export default function GovernmentBuyersPage() {
               </li>
             ))}
           </ul>
+          <p className="mt-6 text-[0.95rem] text-muted">
+            <Link href="/deployments/record" className="v2-link">
+              Full track record
+            </Link>
+            : every contract on public record and every confirmed site, in one table.
+          </p>
         </section>
 
         {/* What we provide */}

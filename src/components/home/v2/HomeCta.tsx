@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { COMPANY_CONTACT, companyPhoneHref } from "@/lib/company-facts";
 import { blurProps } from "@/lib/image-blur";
+import { NAV_CTA } from "@/lib/site-nav";
 
 const PHOTO = "/products/ehmecc/gallery/14-NATO_EHMECCs.jpg";
 
@@ -34,8 +35,8 @@ export function HomeCta() {
           starting configuration, usually within 48 hours.
         </p>
         <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
-          <Link href="/contact" className="v2-btn">
-            Talk to an expert
+          <Link href={NAV_CTA.href} className="v2-btn">
+            {NAV_CTA.label}
           </Link>
           <Link href="/mission-solution-builder" className="v2-btn v2-btn-ghost bg-ink/60 backdrop-blur-sm">
             Build a mission profile

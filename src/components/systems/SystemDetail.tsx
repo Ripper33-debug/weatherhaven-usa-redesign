@@ -10,6 +10,8 @@ import { TreccViewer } from "@/components/systems/TreccViewer";
 import { SizeCompare } from "@/components/systems/SizeCompare";
 import { sizesForSlug } from "@/lib/system-sizes";
 import { HomeDeploySequence } from "@/components/home/v2/HomeDeploySequence";
+import { ProductBuying } from "@/components/systems/ProductBuying";
+import { ProductProof } from "@/components/systems/ProductProof";
 
 /** The generic placeholder older CMS rows carry; it says nothing about the product. */
 const PLACEHOLDER_CONFIGURATION = "Configured to your requirement";
@@ -114,6 +116,8 @@ export function SystemDetail({
                   </a>
                 )}
               </div>
+
+              <ProductBuying product={product} fullName={showsFullName(product.name, product.subtitle) ? product.subtitle : undefined} />
             </div>
           </div>
         </div>
@@ -184,6 +188,8 @@ export function SystemDetail({
           )}
         </div>
       </section>
+
+      <ProductProof slug={product.slug} name={product.name} specs={product.specs} />
 
       {/* Background and configurations, only where there is something specific to say */}
       {hasAbout ? (

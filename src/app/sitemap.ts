@@ -3,6 +3,7 @@ import { listNewsReleases } from "@/app/api/_lib/news-releases";
 import { PRODUCTION_SITE_URL } from "@/lib/site-url";
 import { listPublishedProducts } from "@/app/api/_lib/catalog-products";
 import { isExternalNewsLink, isPlaceholderNewsRelease } from "@/lib/news-releases";
+import { BUYER_SEGMENTS } from "@/lib/buyer-segments";
 
 const MARKETING_PATHS = [
   "/",
@@ -14,7 +15,10 @@ const MARKETING_PATHS = [
   "/mission-solution-builder",
   "/deployments",
   "/deployments/map",
+  "/deployments/record",
   "/government",
+  "/who-we-serve",
+  ...BUYER_SEGMENTS.map((s) => `/who-we-serve/${s.slug}`),
   "/resources",
   "/sof-solutions",
   "/privacy",

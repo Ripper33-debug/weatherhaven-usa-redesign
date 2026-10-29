@@ -23,9 +23,11 @@ import { findProductInCatalog } from "@/lib/published-catalog";
 import { usePublishedCatalog } from "@/lib/use-published-catalog";
 
 const INQUIRY_TYPES = [
+  "Capability Briefing",
   "Program Requirement",
   "Technical Exchange",
   "Demo Request",
+  "Factory Tour",
   "Program Availability",
   "Existing Program Support",
   "Other",
@@ -42,6 +44,18 @@ export const CONTACT_REGIONS = [
 
 const CONTACT_METHODS = ["Email", "Phone", "Secure Message"] as const;
 
+/** Inquiry types that arrange a meeting: they ask who is coming, from where and when. */
+const VISIT_TYPES: readonly string[] = ["Capability Briefing", "Demo Request", "Factory Tour"];
+
+const VISIT_LABEL: Record<string, string> = {
+  "Capability Briefing": "Briefing details",
+  "Demo Request": "Demo details",
+  "Factory Tour": "Tour details",
+};
+
+/** Default for a visitor who arrives without an inquiry type in the link. */
+const DEFAULT_INQUIRY = "Capability Briefing";
+
 const inputClass =
   "mt-1.5 w-full border border-line-strong bg-ink px-3 py-3 text-[0.95rem] text-snow outline-none placeholder:text-muted/70 focus:border-signal focus:shadow-[0_0_0_3px_rgb(241_133_34/0.18)]";
 
@@ -57,6 +71,11 @@ type FormState = {
   contact_method: string;
   phone: string;
   email: string;
+  /** Briefing, demo and tour details: sent inside the message, not as separate fields. */
+  agency: string;
+  base: string;
+  dates: string;
+  visitors: string;
 };
 
 /** The server accepts up to 500 characters per field (MAX_FIELD_LENGTH in api-validation.ts). */
@@ -67,14 +86,30 @@ const initial: FormState = {
   organization: "",
   role: "",
   region: "",
-  inquiry_type: "Program Requirement",
+  inquiry_type: DEFAULT_INQUIRY,
   program: "",
   subject: "",
   message: "",
   contact_method: "Email",
   phone: "",
   email: "",
+  agency: "",
+  base: "",
+  dates: "",
+  visitors: "",
 };
+
+/** The visit details as a short block for the message, or "" when there are none. */
+function visitDetails(form: FormState): string {
+  if (!VISIT_TYPES.includes(form.inquiry_type)) return "";
+  const lines = [
+    form.agency.trim() && `Service or agency: ${form.agency.trim()}`,
+    form.base.trim() && `Base or location: ${form.base.trim()}`,
+    form.dates.trim() && `Preferred dates: ${form.dates.trim()}`,
+    form.inquiry_type === "Factory Tour" && form.visitors.trim() && `Visitors: ${form.visitors.trim()}`,
+  ].filter(Boolean);
+  return lines.length ? `${VISIT_LABEL[form.inquiry_type]}\n${lines.join("\n")}` : "";
+}
 
 const WHAT_HAPPENS_NEXT = [
   "A Weatherhaven expert reviews your inquiry within one business day.",
@@ -103,10 +138,13 @@ function urlFormDefaults(
     };
   }
 
+  // A link from a product page without an inquiry type is a question about that product.
   const inquiry =
     inquiryParam && INQUIRY_TYPES.includes(inquiryParam as (typeof INQUIRY_TYPES)[number])
       ? inquiryParam
-      : "Program Requirement";
+      : product
+        ? "Program Requirement"
+        : DEFAULT_INQUIRY;
   const program = product ? `${product.name} (${product.code})` : "";
   const subject = product ? `Discussion: ${product.name}` : subjectParam.slice(0, 160);
   const message = deploymentNotes
@@ -165,6 +203,11 @@ function ContactEngineeringFormInner({
     setForm((f) => ({ ...f, [key]: value }));
   }
 
+  const visit = VISIT_TYPES.includes(form.inquiry_type);
+  // The server takes 500 characters per field; the visit details share the message with the note.
+  const details = visitDetails(form);
+  const messageMax = Math.max(0, MESSAGE_MAX - (details ? details.length + 2 : 0));
+
   function validateStep1() {
     if (!form.organization.trim() || !form.email.trim() || !form.inquiry_type.trim() || !form.region.trim()) {
       setError("Organization, email, region, and inquiry type are required.");
@@ -190,14 +233,26 @@ function ContactEngineeringFormInner({
       return;
     }
 
+    const message = [form.message.trim(), details].filter(Boolean).join("\n\n");
+    if (message.length > MESSAGE_MAX) {
+      setError(`Shorten the message: with the ${VISIT_LABEL[form.inquiry_type]?.toLowerCase() ?? "details"} it can be up to ${MESSAGE_MAX} characters.`);
+      return;
+    }
+    // The visit fields travel inside the message; the API takes the original fields only.
     const payload = {
-      ...form,
+      organization: form.organization,
+      email: form.email,
+      region: form.region,
+      inquiry_type: form.inquiry_type,
+      program: form.program,
+      contact_method: form.contact_method,
+      phone: form.phone,
       full_name: form.full_name.trim() || "Not provided",
       role: form.role.trim() || "Not provided",
       subject:
         form.subject.trim() ||
         (product ? `Discussion: ${product.name}` : `Inquiry: ${form.inquiry_type}`),
-      message: form.message.trim() || "Submitted via short contact form — details to follow.",
+      message: message || "Submitted with the short contact form; details to follow.",
     };
 
     setLoading(true);
@@ -374,14 +429,64 @@ function ContactEngineeringFormInner({
               <input className={inputClass} value={form.full_name} onChange={(e) => patch("full_name", e.target.value)} />
             </label>
             <label className="block text-[0.875rem] font-medium text-muted">
-              Role / title
+              {visit ? "Rank or title" : "Role or title"}
               <input className={inputClass} value={form.role} onChange={(e) => patch("role", e.target.value)} />
             </label>
           </div>
-          <label className="block text-[0.875rem] font-medium text-muted">
-            Program or unit
-            <input className={inputClass} value={form.program} onChange={(e) => patch("program", e.target.value)} />
-          </label>
+          {visit ? (
+            <fieldset className="space-y-6 border-t border-line pt-6">
+              <legend className="float-left mb-4 w-full text-[0.95rem] font-semibold text-snow">
+                {VISIT_LABEL[form.inquiry_type]}
+              </legend>
+              <div className="clear-left grid gap-6 sm:grid-cols-2">
+                <label className="block text-[0.875rem] font-medium text-muted">
+                  Service or agency
+                  <input
+                    maxLength={80}
+                    className={inputClass}
+                    value={form.agency}
+                    onChange={(e) => patch("agency", e.target.value)}
+                    placeholder="US Army, FEMA, NATO…"
+                  />
+                </label>
+                <label className="block text-[0.875rem] font-medium text-muted">
+                  Unit or program
+                  <input maxLength={120} className={inputClass} value={form.program} onChange={(e) => patch("program", e.target.value)} />
+                </label>
+                <label className="block text-[0.875rem] font-medium text-muted">
+                  {form.inquiry_type === "Factory Tour" ? "Where you're coming from" : "Base or location"}
+                  <input maxLength={80} className={inputClass} value={form.base} onChange={(e) => patch("base", e.target.value)} />
+                </label>
+                <label className="block text-[0.875rem] font-medium text-muted">
+                  Preferred dates
+                  <input
+                    maxLength={80}
+                    className={inputClass}
+                    value={form.dates}
+                    onChange={(e) => patch("dates", e.target.value)}
+                    placeholder="A week, a month or a range"
+                  />
+                </label>
+                {form.inquiry_type === "Factory Tour" ? (
+                  <label className="block text-[0.875rem] font-medium text-muted">
+                    Number of visitors
+                    <input
+                      inputMode="numeric"
+                      maxLength={3}
+                      className={inputClass}
+                      value={form.visitors}
+                      onChange={(e) => patch("visitors", e.target.value.replace(/[^0-9]/g, ""))}
+                    />
+                  </label>
+                ) : null}
+              </div>
+            </fieldset>
+          ) : (
+            <label className="block text-[0.875rem] font-medium text-muted">
+              Program or unit
+              <input className={inputClass} value={form.program} onChange={(e) => patch("program", e.target.value)} />
+            </label>
+          )}
           <label className="block text-[0.875rem] font-medium text-muted">
             Subject
             <input className={inputClass} value={form.subject} onChange={(e) => patch("subject", e.target.value)} />
@@ -390,15 +495,19 @@ function ContactEngineeringFormInner({
             Message
             <textarea
               rows={5}
-              maxLength={MESSAGE_MAX}
+              maxLength={messageMax}
               aria-describedby="message-count"
               className={`${inputClass} min-h-[120px] resize-y`}
               value={form.message}
               onChange={(e) => patch("message", e.target.value)}
-              placeholder="Mission, timeline, environment, or questions for our engineers…"
+              placeholder={
+                visit
+                  ? "What you'd like to see or discuss, and anything we should prepare"
+                  : "Mission, timeline, environment, or questions for our engineers"
+              }
             />
             <p id="message-count" className="mt-1.5 text-right text-xs text-muted">
-              {form.message.length} of {MESSAGE_MAX} characters
+              {form.message.length} of {messageMax} characters
             </p>
           </label>
           <fieldset>
@@ -437,7 +546,7 @@ function ContactEngineeringFormInner({
               Back
             </button>
             <button type="submit" disabled={loading} className={"v2-btn w-full flex-1 disabled:opacity-60"}>
-              {loading ? "Sending…" : "Submit inquiry"}
+              {loading ? "Sending…" : visit ? "Send request" : "Submit inquiry"}
             </button>
           </div>
         </>

@@ -16,6 +16,7 @@ import {
   NAV_GOV,
   NAV_LINKS,
   NAV_PROGRAMS,
+  NAV_WHO_WE_SERVE,
   NAV_SOF,
   SYSTEMS_BY_FAMILY,
 } from "@/lib/site-nav";
@@ -126,6 +127,9 @@ function CapabilitiesMenu({ onNavigate }: { onNavigate: () => void }) {
             </li>
           ))}
         </ul>
+        <Link href={NAV_WHO_WE_SERVE.href} onClick={onNavigate} className="v2-link mt-4 inline-block text-[0.9rem]">
+          {NAV_WHO_WE_SERVE.label}
+        </Link>
       </div>
       <div className="v2-plate flex flex-col justify-between px-6 py-6">
         <div>
@@ -243,7 +247,7 @@ export function Navbar() {
   const solid = scrolled || !!menu || !publicSite;
   const active: Record<MenuId, boolean> = {
     systems: pathname.startsWith("/configurable-solutions"),
-    capabilities: pathname.startsWith("/capabilities") || pathname.startsWith("/government"),
+    capabilities: pathname.startsWith("/capabilities") || pathname.startsWith("/government") || pathname.startsWith("/who-we-serve"),
   };
 
   if (isLogin) {

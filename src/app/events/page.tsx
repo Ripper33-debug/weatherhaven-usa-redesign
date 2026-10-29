@@ -51,7 +51,7 @@ const BRIEFINGS = [
   {
     title: "Capability briefing",
     body: "A closed-door walkthrough of systems and camp layouts matched to your program requirements and release controls.",
-    inquiry: "Demo Request",
+    inquiry: "Capability Briefing",
     subject: "Capability briefing request",
   },
   {

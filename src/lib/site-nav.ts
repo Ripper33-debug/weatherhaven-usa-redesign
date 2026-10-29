@@ -9,7 +9,7 @@ export const NAV_LINKS = [
   { href: "/news", label: "News" },
 ] as const;
 
-export const NAV_CTA = { href: "/contact", label: "Talk to an expert" } as const;
+export const NAV_CTA = { href: "/contact?inquiry=Capability%20Briefing", label: "Request a briefing" } as const;
 export const NAV_SOF = { href: "/sof-solutions", label: "SOF portal" } as const;
 export const NAV_GOV = { href: "/government", label: "Government buyers" } as const;
 export const NAV_CAPABILITIES_PAGE = { href: "/capabilities", label: "Capabilities" } as const;
@@ -22,14 +22,16 @@ const sentence = (s: string) => {
 /** The capability areas on /capabilities, for the Capabilities menu. */
 export const NAV_CAPABILITIES = CAPABILITY_CATEGORIES.map((c) => ({ href: `/capabilities#${c.id}`, label: sentence(c.label) }));
 
-/** Who Weatherhaven serves, each pointing to the story (or portal) that shows it. */
+/** Who Weatherhaven serves: the menu's short list, each leading to its page under /who-we-serve. */
 export const NAV_PROGRAMS = [
-  { href: "/deployments#trecc-us-army", label: "US Army", note: "TRECC, developed with the US Army" },
-  { href: "/sof-solutions", label: "Special operations", note: "Planning tools in the SOF portal" },
-  { href: "/deployments#nato-headquarters", label: "NATO and UN", note: "Deployable headquarters, peacekeeping camps" },
-  { href: "/deployments#covid-mobile-health-units", label: "Medical and disaster relief", note: "100-bed field hospitals" },
-  { href: "/deployments#beyond-epica", label: "Polar and research", note: "Ice-core drilling at 3,200 m" },
+  { href: "/who-we-serve/us-army", label: "US Army", note: "TRECC, developed with DEVCOM" },
+  { href: "/who-we-serve/special-operations", label: "Special operations", note: "Small, air-mobile systems and the SOF portal" },
+  { href: "/who-we-serve/nato-allies", label: "NATO and UN", note: "Deployable headquarters, UN mission sites" },
+  { href: "/who-we-serve/emergency-medical", label: "Medical and disaster relief", note: "100-bed field hospitals" },
+  { href: "/who-we-serve/polar-research", label: "Polar and research", note: "Ice-core drilling at 3,200 m" },
 ] as const;
+
+export const NAV_WHO_WE_SERVE = { href: "/who-we-serve", label: "All buyers" } as const;
 
 /** Display order inside each family: best-known, best-documented systems first. */
 export const FAMILY_ORDER: string[] = [
