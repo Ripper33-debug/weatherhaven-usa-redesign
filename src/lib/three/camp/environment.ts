@@ -500,7 +500,19 @@ export type Weather = {
   dispose: () => void;
 };
 
-const WEATHER: Record<Exclude<WeatherKind, "none">, { vel: [number, number, number]; box: [number, number, number]; size: number; color: number; alpha: number; streak: number; sway: number; low: number; count: number }> = {
+export type WeatherPreset = {
+  vel: [number, number, number];
+  box: [number, number, number];
+  size: number;
+  color: number;
+  alpha: number;
+  streak: number;
+  sway: number;
+  low: number;
+  count: number;
+};
+
+const WEATHER: Record<Exclude<WeatherKind, "none">, WeatherPreset> = {
   snow: { vel: [1.2, -1.4, 0.4], box: [70, 30, 70], size: 0.14, color: 0xf2f6fb, alpha: 0.85, streak: 1, sway: 0.5, low: 0, count: 6000 },
   blizzard: { vel: [11, -1.6, 3.5], box: [80, 22, 80], size: 0.12, color: 0xeef4fb, alpha: 0.75, streak: 2.6, sway: 1.2, low: 0.55, count: 9000 },
   rain: { vel: [1.2, -14, 0.4], box: [70, 30, 70], size: 0.16, color: 0xb9c9d8, alpha: 0.35, streak: 7, sway: 0, low: 0, count: 5000 },
@@ -510,8 +522,14 @@ const WEATHER: Record<Exclude<WeatherKind, "none">, { vel: [number, number, numb
 
 let weatherIds = 0;
 
-export function createWeather(kind: Exclude<WeatherKind, "none">, mobile: boolean, seed = 7): Weather {
-  const w = WEATHER[kind];
+/** `tune` overrides the camp-scale preset (the homepage TRECC scene uses a smaller, closer box). */
+export function createWeather(
+  kind: Exclude<WeatherKind, "none">,
+  mobile: boolean,
+  seed = 7,
+  tune?: Partial<WeatherPreset>,
+): Weather {
+  const w = { ...WEATHER[kind], ...tune };
   const n = Math.round(w.count * (mobile ? 0.45 : 1));
   const rand = rng(seed);
   const base = new Float32Array(n * 3);

@@ -3,6 +3,8 @@
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { prefersReducedMotion } from "@/lib/effects/media";
+import { describeSky, localTimeFormatter, signedDegrees, toFahrenheit, toMph, type Conditions } from "@/lib/field-readout";
+import { lightAt } from "@/lib/solar";
 
 export type PinKind = "military" | "humanitarian" | "scientific";
 
@@ -11,6 +13,11 @@ export type MapPin = {
   x: number;
   y: number;
   lat: number;
+  lng: number;
+  /** IANA time zone at the pin. */
+  tz: string;
+  /** False for pins that mark a whole country rather than a place (no local weather for those). */
+  precise: boolean;
   kind: PinKind;
   label: string;
   country: string;
@@ -69,20 +76,47 @@ export function DeploymentMapClient({
   const viewRef = useRef(view);
   const rafRef = useRef(0);
   const svgRef = useRef<SVGSVGElement>(null);
-  const [dotPath, setDotPath] = useState("");
+  const [dotPaths, setDotPaths] = useState<[string, string, string] | null>(null);
+  const [sun, setSun] = useState<[number, number] | null>(null);
+  const [now, setNow] = useState<Date | null>(null);
+  const [weather, setWeather] = useState<Record<string, Conditions | "error">>({});
 
-  // The land dots load as the map nears the screen instead of riding in the page HTML.
+  // The land dots load as the map nears the screen instead of riding in the page HTML. Once they
+  // are in, they are shaded by daylight and redrawn on every minute, with the sun's position,
+  // while the map is near the screen.
   useEffect(() => {
     const el = svgRef.current;
     if (!el) return;
+    type DotModule = typeof import("@/components/home/v2/world-dot-path");
     let cancelled = false;
+    let timer = 0;
+    let mod: DotModule | null = null;
+    let loading = false;
+    let near = false;
+    const tick = () => {
+      window.clearTimeout(timer);
+      if (cancelled || !mod || !near) return;
+      const d = new Date();
+      setNow(d);
+      setDotPaths(mod.dotPathsByLight(d));
+      setSun(mod.sunOnMap(d));
+      timer = window.setTimeout(tick, 60_000 - (d.getTime() % 60_000) + 50);
+    };
     const io = new IntersectionObserver(
       ([entry]) => {
-        if (!entry.isIntersecting) return;
-        io.disconnect();
-        void import("@/components/home/v2/world-dot-path").then((m) => {
-          if (!cancelled) setDotPath(m.worldDotPath());
-        });
+        near = entry.isIntersecting;
+        if (!near) {
+          window.clearTimeout(timer);
+          return;
+        }
+        if (mod) tick();
+        else if (!loading) {
+          loading = true;
+          void import("@/components/home/v2/world-dot-path").then((m) => {
+            mod = m;
+            tick();
+          });
+        }
       },
       { rootMargin: "1000px 0px" },
     );
@@ -90,6 +124,7 @@ export function DeploymentMapClient({
     return () => {
       cancelled = true;
       io.disconnect();
+      window.clearTimeout(timer);
     };
   }, []);
 
@@ -107,6 +142,26 @@ export function DeploymentMapClient({
   // The selection always stays inside the current filter.
   const selected = visible.find((p) => p.id === selectedId) ?? visible[0];
   const hovered = hoverId ? pins.find((p) => p.id === hoverId) : null;
+
+  // Weather at the selected site, fetched once per site after a short pause (arrowing through
+  // sites doesn't fire a request for each one), and only once the map has come near the screen.
+  const selectedWeatherId = now && selected?.precise && !weather[selected.id] ? selected.id : null;
+  useEffect(() => {
+    if (!selectedWeatherId) return;
+    const ctrl = new AbortController();
+    const t = window.setTimeout(() => {
+      fetch(`/api/site-weather?id=${encodeURIComponent(selectedWeatherId)}`, { signal: ctrl.signal })
+        .then((r) => (r.ok ? (r.json() as Promise<Conditions>) : Promise.reject(new Error(String(r.status)))))
+        .then((c) => setWeather((w) => ({ ...w, [selectedWeatherId]: c })))
+        .catch((err: unknown) => {
+          if ((err as Error).name !== "AbortError") setWeather((w) => ({ ...w, [selectedWeatherId]: "error" }));
+        });
+    }, 250);
+    return () => {
+      window.clearTimeout(t);
+      ctrl.abort();
+    };
+  }, [selectedWeatherId]);
 
   const animateTo = useCallback((target: { x: number; y: number; w: number; h: number }) => {
     cancelAnimationFrame(rafRef.current);
@@ -247,11 +302,20 @@ export function DeploymentMapClient({
             role="group"
             aria-label={`World map with ${visible.length} Weatherhaven deployment sites. Use the arrow keys to move between sites.`}
           >
-            <path
-              d={dotPath || "M0 0"}
-              className="v2-map-dots"
-              style={{ strokeWidth: 2.4 * Math.max(scale, 0.8), opacity: dotPath ? 1 : 0, transition: "opacity 600ms ease" }}
-            />
+            {(["day", "dusk", "night"] as const).map((light, i) => (
+              <path
+                key={light}
+                d={dotPaths?.[i] || "M0 0"}
+                className={`v2-map-dots v2-map-dots-${light}`}
+                style={{ strokeWidth: 2.4 * Math.max(scale, 0.8), opacity: dotPaths ? 1 : 0, transition: "opacity 600ms ease" }}
+              />
+            ))}
+            {sun ? (
+              <g pointerEvents="none" aria-hidden className="v2-map-sun">
+                <circle cx={sun[0]} cy={sun[1]} r={11 * Math.max(scale, 0.5)} className="v2-map-sun-halo" />
+                <circle cx={sun[0]} cy={sun[1]} r={4.2 * Math.max(scale, 0.5)} className="v2-map-sun-core" />
+              </g>
+            ) : null}
             {visible.map((p) => {
               const active = p.id === selected?.id;
               return (
@@ -322,7 +386,7 @@ export function DeploymentMapClient({
 
         {/* Selected site */}
         {selected ? (
-          <aside aria-live="polite" className="flex flex-col border-t border-line pt-6 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
+          <aside className="flex flex-col border-t border-line pt-6 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
             {photo ? (
               <figure>
                 <div className="relative aspect-[3/2] overflow-hidden bg-hull">
@@ -335,7 +399,10 @@ export function DeploymentMapClient({
               <span aria-hidden className="inline-block h-2 w-2 rounded-full" style={{ background: KIND_COLOR[selected.kind] }} />
               {kindInfo?.label}
             </p>
-            <h3 className="v2-h3 mt-2 text-snow">{selected.label}</h3>
+            {/* Only the site's name is announced; the clock and weather below change on their own. */}
+            <h3 aria-live="polite" className="v2-h3 mt-2 text-snow">
+              {selected.label}
+            </h3>
             <dl className="mt-4 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-[0.9rem]">
               {!selected.label.includes(selected.country) ? (
                 <>
@@ -354,6 +421,15 @@ export function DeploymentMapClient({
                   <dt className="text-muted">Region</dt>
                   <dd className="text-snow">
                     {theaterInfo.label}
+                  </dd>
+                </>
+              ) : null}
+              {selected.precise && now ? (
+                <>
+                  <LocalTime now={now} tz={selected.tz} light={lightAt(now, selected.lat, selected.lng)} />
+                  <dt className="text-muted">Weather now</dt>
+                  <dd className="text-snow">
+                    <WeatherNow value={weather[selected.id]} />
                   </dd>
                 </>
               ) : null}
@@ -392,9 +468,42 @@ export function DeploymentMapClient({
         )}
       </div>
       <p className="mt-6 text-[0.8rem] text-muted">
-        Site data from Weatherhaven&apos;s deployment records. Base map: Natural Earth.
+        Site data from Weatherhaven&apos;s deployment records. Base map: Natural Earth. Lit land is in daylight now, and
+        the pale ring marks where the sun is overhead. Weather: this hour&rsquo;s forecast from{" "}
+        <a href="https://www.met.no/en" className="underline decoration-line-strong underline-offset-2 hover:text-snow">
+          MET Norway
+        </a>
+        .
       </p>
     </div>
+  );
+}
+
+function LocalTime({ now, tz, light }: { now: Date; tz: string; light: string }) {
+  const fmt = useMemo(() => localTimeFormatter(tz), [tz]);
+  if (!fmt) return null;
+  return (
+    <>
+      <dt className="text-muted">Local time</dt>
+      <dd className="v2-tnum text-snow">
+        <time>{fmt.format(now)}</time>, {light}
+      </dd>
+    </>
+  );
+}
+
+function WeatherNow({ value }: { value: Conditions | "error" | undefined }) {
+  if (value === undefined) return <span className="text-muted">Checking…</span>;
+  if (value === "error") return <span className="text-muted">Not available right now</span>;
+  const sky = describeSky(value.symbol);
+  const wind = value.windMs === null ? null : `wind ${Math.round(toMph(value.windMs))} mph`;
+  return (
+    <>
+      <span className="v2-figure">
+        {signedDegrees(toFahrenheit(value.tempC))} °F ({signedDegrees(value.tempC)} °C)
+      </span>
+      {[sky?.toLowerCase(), wind].filter(Boolean).map((part) => `, ${part}`)}
+    </>
   );
 }
 

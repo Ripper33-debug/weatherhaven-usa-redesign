@@ -9,6 +9,7 @@ import { HomeFactory } from "@/components/home/v2/HomeFactory";
 import { HomeTimeline } from "@/components/home/v2/HomeTimeline";
 import { HomeNews } from "@/components/home/v2/HomeNews";
 import { HomeCta } from "@/components/home/v2/HomeCta";
+import { getFieldExtremes } from "@/lib/field-weather";
 
 export const metadata: Metadata = {
   ...pageMeta({
@@ -24,10 +25,12 @@ export const metadata: Metadata = {
 /** Cache homepage CMS sections; admin publish calls revalidatePath("/"). */
 export const revalidate = 300;
 
-export default function HomePage() {
+export default async function HomePage() {
+  // Live weather for the hero readout (cached for 30 minutes; null hides the readout).
+  const field = await getFieldExtremes();
   return (
     <>
-      <HomeHero />
+      <HomeHero field={field} />
       <HomeDataPlate />
       <HomeTreccScene />
       <HomeSystems />

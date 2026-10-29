@@ -4,10 +4,13 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { prefersReducedMotion } from "@/lib/effects/media";
 import { useClientMediaQuery } from "@/hooks/useClientMediaQuery";
+import type { FieldExtremes } from "@/lib/field-readout";
+import { HeroFieldReadout } from "@/components/home/v2/HeroFieldReadout";
 
 /**
  * Full-bleed film hero. Poster paints first (LCP), the clip fades in once it can play.
- * Phones get a lighter 720p encode.
+ * Phones get a lighter 720p encode. Along the bottom, a live readout of the coldest and hottest
+ * places on the deployment map (hidden when the weather service couldn't be reached).
  */
 function loadSource(video: HTMLVideoElement) {
   if (video.getAttribute("src")) return;
@@ -15,7 +18,7 @@ function loadSource(video: HTMLVideoElement) {
   video.src = small ? "/hero/hero-v2-720.mp4" : "/hero/hero-v2-1080.mp4";
 }
 
-export function HomeHero() {
+export function HomeHero({ field }: { field: FieldExtremes | null }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
   const reduced = useClientMediaQuery("(prefers-reduced-motion: reduce)");
@@ -87,7 +90,7 @@ export function HomeHero() {
         }}
       />
 
-      <div className="v2-wrap pb-28 pt-32 sm:pb-20 lg:pb-24">
+      <div className={`v2-wrap pt-32 ${field ? "pb-8 sm:pb-10 lg:pb-14" : "pb-24 sm:pb-4 lg:pb-8"}`}>
         <h1 className="v2-display v2-rise-hero text-snow">
           <span className="lg:block">Ships in a container. </span>
           <span className="lg:block">Stands up in minutes.</span>
@@ -96,7 +99,8 @@ export function HomeHero() {
           Weatherhaven designs and builds rapidly deployable shelters, camps and field hospitals for military,
           medical and polar operations. Fielded in more than 95 countries since 1981.
         </p>
-        <div className="v2-rise v2-rise-3 mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
+        {/* Phones have the same two actions in the fixed bar along the bottom of the screen. */}
+        <div className="v2-rise v2-rise-3 mt-9 hidden flex-col gap-3 sm:flex-row sm:items-center md:flex">
           <Link href="/configurable-solutions" className="v2-btn">
             Explore systems
           </Link>
@@ -106,21 +110,28 @@ export function HomeHero() {
         </div>
       </div>
 
-      <button
-        type="button"
-        onClick={togglePlayback}
-        className="absolute right-3 top-20 flex h-10 items-center gap-2 bg-ink/40 px-3 text-[0.8rem] font-medium text-snow/80 transition-colors hover:text-snow sm:bottom-5 sm:right-5 sm:top-auto sm:bg-transparent"
-        aria-label={paused ? "Play film: background video" : "Pause film: background video"}
-      >
-        <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden>
-          {paused ? (
-            <path d="M3 1.5v9l7-4.5z" fill="currentColor" />
-          ) : (
-            <path d="M3 1.5h2v9H3zM7 1.5h2v9H7z" fill="currentColor" />
-          )}
-        </svg>
-        {paused ? "Play film" : "Pause film"}
-      </button>
+      <div className={`v2-wrap ${field ? "pb-[calc(5.25rem+env(safe-area-inset-bottom,0px))] md:pb-6" : "pb-5 sm:pb-6"}`}>
+        <div
+          className={`flex items-end justify-end gap-6 ${field ? "border-t border-line-strong pt-4 sm:pt-5" : ""}`}
+        >
+          {field ? <HeroFieldReadout field={field} /> : null}
+          <button
+            type="button"
+            onClick={togglePlayback}
+            className="absolute right-3 top-20 flex h-10 shrink-0 items-center gap-2 bg-ink/40 px-3 text-[0.8rem] font-medium text-snow/80 transition-colors hover:text-snow sm:static sm:-mr-3 sm:bg-transparent"
+            aria-label={paused ? "Play film: background video" : "Pause film: background video"}
+          >
+            <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden>
+              {paused ? (
+                <path d="M3 1.5v9l7-4.5z" fill="currentColor" />
+              ) : (
+                <path d="M3 1.5h2v9H3zM7 1.5h2v9H7z" fill="currentColor" />
+              )}
+            </svg>
+            {paused ? "Play film" : "Pause film"}
+          </button>
+        </div>
+      </div>
     </section>
   );
 }

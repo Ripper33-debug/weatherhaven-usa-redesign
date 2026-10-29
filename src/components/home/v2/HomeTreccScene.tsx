@@ -65,6 +65,20 @@ function poseAt(p: number, compact: boolean): CameraPose {
 
 const stepAt = (p: number) => (p < 0.27 ? 0 : p < 0.64 ? 1 : p < 0.86 ? 2 : 3);
 
+/** Glow behind the transparent 3D canvas, cross-faded with the finish's weather. */
+const CLIMATE_GLOW: Record<TreccFinish, string> = {
+  arctic: "radial-gradient(ellipse 55% 60% at 64% 58%, rgb(150 186 222 / 0.26), transparent 70%)",
+  tan: "radial-gradient(ellipse 55% 60% at 64% 58%, rgb(214 150 78 / 0.22), transparent 70%)",
+  green: "radial-gradient(ellipse 55% 60% at 64% 58%, rgb(96 128 104 / 0.18), transparent 70%)",
+};
+
+/** The weather each finish brings, and the published TRECC rating (the same for every finish). */
+const CLIMATE_NOTE: Record<TreccFinish, { weather: string; rating: string }> = {
+  arctic: { weather: "Blowing snow.", rating: "TRECC is rated down to −40 °F." },
+  tan: { weather: "Blowing sand.", rating: "TRECC is rated up to +120 °F." },
+  green: { weather: "Wind and rain.", rating: "TRECC is rated for 55 mph sustained winds." },
+};
+
 type LoadState = "idle" | "loading" | "ready" | "fallback";
 
 export function HomeTreccScene() {
@@ -78,6 +92,8 @@ export function HomeTreccScene() {
   const [finish, setFinish] = useState<TreccFinish>("green");
   const [step, setStep] = useState(0);
   const stepRef = useRef(0);
+  // False once a slow device has turned the weather off.
+  const [weatherOn, setWeatherOn] = useState(true);
 
   // Load three.js and the models once the page has loaded and the visitor starts scrolling
   // toward the section, so they never compete with the hero film for bandwidth.
@@ -94,7 +110,13 @@ export function HomeTreccScene() {
       }
       setLoad("loading");
       try {
-        const stage = await createTreccStage(canvasRef.current, { maxDpr: window.matchMedia("(max-width: 1023px)").matches ? 1.5 : 1.75 });
+        const small = window.matchMedia("(max-width: 1023px)").matches;
+        const stage = await createTreccStage(canvasRef.current, {
+          maxDpr: small ? 1.5 : 1.75,
+          climate: true,
+          mobile: small,
+          still: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+        });
         if (cancelled) {
           stage.dispose();
           return;
@@ -120,6 +142,7 @@ export function HomeTreccScene() {
     const section = sectionRef.current;
     if (load !== "ready" || !stage || !section) return;
     stage.setShift(compact ? 0 : 0.21);
+    stage.setStill(reduced);
     let raf = 0;
     let visible = true;
     let shown = reduced ? 1 : -1;
@@ -133,6 +156,23 @@ export function HomeTreccScene() {
       const travel = r.height - window.innerHeight;
       return travel > 0 ? clamp(-r.top / travel) : 1;
     };
+    // Falling weather is drawn at 30 frames a second. If a device can't keep that up while only
+    // the weather moves, the weather thins out, then stops.
+    let lastDraw = 0;
+    const gaps: number[] = [];
+    let density = 1;
+    const watchQuality = (gap: number) => {
+      if (density === 0 || gap > 400) return; // a hidden tab or a scroll jump isn't a slow device
+      gaps.push(gap);
+      if (gaps.length < 24) return;
+      const median = [...gaps].sort((a, b) => a - b)[12];
+      gaps.length = 0;
+      if (median > 48) {
+        density = density === 1 ? 0.45 : 0;
+        stage.setWeatherDensity(density);
+        if (density === 0) setWeatherOn(false);
+      }
+    };
     const frame = (now: number) => {
       raf = 0;
       const target = progress();
@@ -143,20 +183,27 @@ export function HomeTreccScene() {
       last = now;
       shown = shown < 0 || instant ? target : shown + (target - shown) * (1 - Math.exp(-dt / 0.13));
       if (Math.abs(target - shown) < 0.0004) shown = target;
-      if (shown !== drawn || dirty || stage.isAnimating()) {
+      const moving = shown !== drawn || dirty || stage.isAnimating();
+      const ambientDue = stage.isAmbient() && now - lastDraw >= 32;
+      if (moving || ambientDue) {
+        if (!moving && lastDraw) watchQuality(now - lastDraw);
         stage.setDeploy(smooth(DEPLOY_FROM, DEPLOY_TO, shown));
         stage.setCamera(poseAt(shown, compact));
         stage.render();
         drawn = shown;
         dirty = false;
+        lastDraw = now;
       }
       const s = stepAt(shown);
       if (s !== stepRef.current) {
         stepRef.current = s;
         setStep(s);
       }
-      if (visible && (shown !== target || stage.isAnimating())) raf = requestAnimationFrame(frame);
-      else last = 0;
+      if (visible && (shown !== target || stage.isAnimating() || stage.isAmbient())) raf = requestAnimationFrame(frame);
+      else {
+        last = 0;
+        lastDraw = 0;
+      }
     };
     const kick = () => {
       if (!raf && visible) raf = requestAnimationFrame(frame);
@@ -218,6 +265,16 @@ export function HomeTreccScene() {
             }`}
           />
         </picture>
+        {(Object.keys(CLIMATE_GLOW) as TreccFinish[]).map((f) => (
+          <div
+            key={f}
+            aria-hidden
+            className={`pointer-events-none absolute inset-x-0 top-0 h-[60svh] transition-opacity duration-1000 lg:inset-0 lg:h-full ${
+              ready && finish === f ? "opacity-100" : "opacity-0"
+            }`}
+            style={{ background: CLIMATE_GLOW[f] }}
+          />
+        ))}
         <canvas
           ref={canvasRef}
           aria-label={ready ? "3D model of a Weatherhaven TRECC going from stowed to deployed as you scroll" : undefined}
@@ -284,7 +341,11 @@ export function HomeTreccScene() {
         </div>
 
         {ready ? (
-          <div className="v2-inset-r absolute top-[calc(60svh-3.75rem)] lg:bottom-10 lg:top-auto">
+          <div className="v2-inset-r absolute top-[calc(60svh-3.75rem)] flex flex-col items-end gap-2 lg:bottom-10 lg:top-auto">
+            <p aria-live="polite" className="hidden bg-ink/70 px-3 py-1.5 text-[0.8rem] text-snow/90 backdrop-blur-md lg:block">
+              {weatherOn ? `${CLIMATE_NOTE[finish].weather} ` : null}
+              {CLIMATE_NOTE[finish].rating}
+            </p>
             <TreccFinishPicker value={finish} onChange={chooseFinish} />
           </div>
         ) : null}

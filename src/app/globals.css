@@ -1314,6 +1314,25 @@ body .wh-v2 .wh-marketing-display {
   stroke-width: 2.4;
 }
 
+/* Land shaded by where the sun is right now */
+.v2-map-dots-day {
+  stroke: #7890b0;
+}
+.v2-map-dots-dusk {
+  stroke: #435874;
+}
+.v2-map-dots-night {
+  stroke: #233044;
+}
+.v2-map-sun-halo {
+  fill: rgb(255 240 200 / 0.1);
+  stroke: rgb(255 240 200 / 0.55);
+  stroke-width: 0.8;
+}
+.v2-map-sun-core {
+  fill: #fff3d1;
+}
+
 .v2-pin:focus {
   outline: none;
 }

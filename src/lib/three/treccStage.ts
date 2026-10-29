@@ -12,6 +12,7 @@ import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.j
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { TRECC_FINISHES, type TreccFinish } from "@/lib/three/treccFinishes";
+import { createWeather, type Weather, type WeatherKind, type WeatherPreset } from "@/lib/three/camp/environment";
 
 export { TRECC_FINISHES, type TreccFinish };
 
@@ -42,13 +43,73 @@ export type TreccStage = {
   dispose: () => void;
   /** True while the finish tween still needs frames. */
   isAnimating: () => boolean;
+  /** True while weather is falling (needs frames at a steady rate while on screen). */
+  isAmbient: () => boolean;
+  /** Draws a share of the weather particles (0 turns the weather off; quality steps). */
+  setWeatherDensity: (share: number) => void;
+  /** Reduced motion: weather is drawn but holds still. */
+  setStill: (on: boolean) => void;
 };
 
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
+/**
+ * Climate around the unit when the stage runs with `climate` (homepage): each finish brings the
+ * weather it's made for. Particle boxes and sizes are tuned for a single unit seen from ~10 m.
+ */
+type Climate = {
+  weather: Exclude<WeatherKind, "none">;
+  tune: Partial<WeatherPreset>;
+  ground: number;
+  groundAlpha: number;
+  key: number;
+  hemiSky: number;
+};
+const CLIMATE: Record<TreccFinish, Climate> = {
+  arctic: {
+    weather: "blizzard",
+    tune: { box: [22, 8, 22], count: 6500, size: 0.07, vel: [4.6, -1.2, 1.4], streak: 1.7, alpha: 0.85, low: 0.4, sway: 0.5 },
+    ground: 0xdfe8f1,
+    groundAlpha: 0.5,
+    key: 0xeef4ff,
+    hemiSky: 0xc2d4e6,
+  },
+  tan: {
+    weather: "dust",
+    tune: { box: [24, 3, 24], count: 7000, size: 0.085, vel: [5.4, 0.12, 1.7], streak: 2.4, alpha: 0.42, low: 0.75, sway: 0.4 },
+    ground: 0xc29460,
+    groundAlpha: 0.42,
+    key: 0xffe0b5,
+    hemiSky: 0xcfb08a,
+  },
+  green: {
+    weather: "rain",
+    tune: { box: [22, 9, 22], count: 4200, size: 0.16, vel: [0.8, -10.5, 0.3], streak: 7, alpha: 0.45, color: 0xc4d3e0 },
+    ground: 0x4e6040,
+    groundAlpha: 0.38,
+    key: 0xf6f2e8,
+    hemiSky: 0x9fb7d1,
+  },
+};
+
 export async function createTreccStage(
   canvas: HTMLCanvasElement,
-  { maxDpr = 1.75, shadows = true }: { maxDpr?: number; shadows?: boolean } = {},
+  {
+    maxDpr = 1.75,
+    shadows = true,
+    climate = false,
+    mobile = false,
+    still = false,
+  }: {
+    maxDpr?: number;
+    shadows?: boolean;
+    /** Weather and ground that follow the finish (homepage scene). */
+    climate?: boolean;
+    /** Fewer weather particles. */
+    mobile?: boolean;
+    /** Reduced motion: the weather is drawn but doesn't move. */
+    still?: boolean;
+  } = {},
 ): Promise<TreccStage> {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: "high-performance" });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, maxDpr));
@@ -79,7 +140,8 @@ export async function createTreccStage(
   key.shadow.normalBias = 0.02;
   Object.assign(key.shadow.camera, { left: -4, right: 4, top: 4, bottom: -4, near: 1, far: 20 });
   scene.add(key);
-  scene.add(new THREE.HemisphereLight(0x9fb7d1, 0x0a0f17, 0.35));
+  const hemi = new THREE.HemisphereLight(0x9fb7d1, 0x0a0f17, 0.35);
+  scene.add(hemi);
   const rim = new THREE.DirectionalLight(0xffb070, 1.15);
   rim.position.set(-6, 3.5, -5.5);
   scene.add(rim);
@@ -123,6 +185,45 @@ export async function createTreccStage(
   grid.rotation.x = -Math.PI / 2;
   grid.position.y = 0.001;
   scene.add(grid);
+
+  // Climate ground: a patch of snow, sand or wet grass under the unit that fades into the page.
+  const groundUniforms = { uColor: { value: new THREE.Color(0x000000) }, uAlpha: { value: 0 } };
+  const groundMat = new THREE.ShaderMaterial({
+    transparent: true,
+    depthWrite: false,
+    uniforms: groundUniforms,
+    vertexShader: /* glsl */ `
+      varying vec2 vXZ;
+      void main() {
+        vec4 w = modelMatrix * vec4(position, 1.0);
+        vXZ = w.xz;
+        gl_Position = projectionMatrix * viewMatrix * w;
+      }`,
+    fragmentShader: /* glsl */ `
+      uniform vec3 uColor;
+      uniform float uAlpha;
+      varying vec2 vXZ;
+      float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+      float noise(vec2 p) {
+        vec2 i = floor(p), f = fract(p);
+        vec2 u = f * f * (3.0 - 2.0 * f);
+        return mix(mix(hash(i), hash(i + vec2(1, 0)), u.x), mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), u.x), u.y);
+      }
+      void main() {
+        float r = length(vXZ * vec2(0.8, 1.0));
+        float n = noise(vXZ * 1.7) * 0.6 + noise(vXZ * 6.0) * 0.4;
+        float a = uAlpha * (1.0 - smoothstep(2.0, 8.5, r)) * (0.7 + 0.6 * n);
+        if (a < 0.003) discard;
+        gl_FragColor = vec4(uColor * (0.8 + 0.35 * n), a);
+        #include <colorspace_fragment>
+      }`,
+  });
+  const ground = new THREE.Mesh(new THREE.CircleGeometry(9, 64), groundMat);
+  ground.rotation.x = -Math.PI / 2;
+  ground.position.y = -0.002;
+  ground.renderOrder = -1;
+  ground.visible = climate;
+  scene.add(ground);
 
   // Scan plane: hairline frame plus a faint glowing sheet.
   const scanGroup = new THREE.Group();
@@ -179,9 +280,11 @@ export async function createTreccStage(
   let controls: OrbitControls | null = null;
   // Frees everything on the GPU; also used if a model fails to load, so a failed attempt
   // doesn't leave a live WebGL context behind.
+  const weathers: Weather[] = [];
   const disposeAll = () => {
     controls?.dispose();
     controls = null;
+    weathers.forEach((w) => w.dispose());
     scene.traverse((o) => {
       const mesh = o as THREE.Mesh;
       if (mesh.geometry) mesh.geometry.dispose();
@@ -190,6 +293,7 @@ export async function createTreccStage(
     });
     key.dispose();
     rim.dispose();
+    hemi.dispose();
     envTex.dispose();
     pmrem.dispose();
     renderer.dispose();
@@ -244,6 +348,65 @@ export async function createTreccStage(
   const applyFinish = (c: THREE.Color) => shellMaterials.forEach((m) => m.color.copy(c));
   applyFinish(finishTo);
 
+  // ---- climate ------------------------------------------------------------------------
+  // Each finish's weather is built the first time it's chosen and kept; switching cross-fades.
+  const weatherFor: Partial<Record<TreccFinish, Weather>> = {};
+  let climateTo: Climate = CLIMATE.green;
+  let climateId: TreccFinish = "green";
+  let climateT = 1;
+  let climateStart = 0;
+  let density = 1;
+  const keyFrom = new THREE.Color();
+  const hemiFrom = new THREE.Color();
+  const groundFrom = new THREE.Color();
+  let groundAlphaFrom = 0;
+  const weatherOf = (f: TreccFinish) => {
+    let w = weatherFor[f];
+    if (!w) {
+      const c = CLIMATE[f];
+      w = createWeather(c.weather, mobile, f.length * 31 + 5, c.tune);
+      w.setDensity(density);
+      w.setOpacity(0);
+      weatherFor[f] = w;
+      weathers.push(w);
+      scene.add(w.points);
+    }
+    return w;
+  };
+  const applyClimate = (k: number) => {
+    key.color.copy(keyFrom).lerp(new THREE.Color(climateTo.key), k);
+    hemi.color.copy(hemiFrom).lerp(new THREE.Color(climateTo.hemiSky), k);
+    groundUniforms.uColor.value.copy(groundFrom).lerp(new THREE.Color(climateTo.ground), k);
+    groundUniforms.uAlpha.value = lerp(groundAlphaFrom, climateTo.groundAlpha, k);
+    for (const [id, w] of Object.entries(weatherFor) as [TreccFinish, Weather][]) {
+      if (id === climateId) w.setOpacity(Math.max(w.opacity(), k));
+      else w.setOpacity(Math.min(w.opacity(), 1 - k));
+      w.points.visible = density > 0 && w.opacity() > 0.001;
+    }
+  };
+  const setClimate = (f: TreccFinish, animate: boolean) => {
+    if (!climate) return;
+    climateTo = CLIMATE[f];
+    climateId = f;
+    keyFrom.copy(key.color);
+    hemiFrom.copy(hemi.color);
+    groundFrom.copy(groundUniforms.uColor.value);
+    groundAlphaFrom = groundUniforms.uAlpha.value;
+    weatherOf(f);
+    if (animate) {
+      climateT = 0;
+      climateStart = performance.now();
+    } else {
+      climateT = 1;
+      applyClimate(1);
+    }
+  };
+  if (climate) {
+    groundFrom.set(CLIMATE.green.ground);
+    setClimate("green", false);
+  }
+  const target3 = new THREE.Vector3(0, 0, 0);
+
   // ---- state ------------------------------------------------------------------------
   let deploy = -1;
   const setDeploy = (t: number) => {
@@ -296,10 +459,21 @@ export async function createTreccStage(
   resize();
 
   const render = () => {
+    const now = performance.now();
     if (finishT < 1) {
-      finishT = Math.min(1, (performance.now() - finishStart) / 600);
+      finishT = Math.min(1, (now - finishStart) / 600);
       const k = 1 - (1 - finishT) ** 3;
       applyFinish(finishFrom.clone().lerp(finishTo, k));
+    }
+    if (climateT < 1) {
+      climateT = Math.min(1, (now - climateStart) / 900);
+      applyClimate(1 - (1 - climateT) ** 3);
+    }
+    if (climate) {
+      // Particles drift around the unit; with reduced motion they hold still.
+      const t = still ? 0 : now / 1000;
+      const pr = renderer.getPixelRatio();
+      for (const w of weathers) if (w.points.visible) w.update(t, target3, pr);
     }
     controls?.update();
     renderer.render(scene, camera);
@@ -310,6 +484,7 @@ export async function createTreccStage(
     setCamera,
     setFinish: (finish, animate = true) => {
       const f = TRECC_FINISHES.find((x) => x.id === finish) ?? TRECC_FINISHES[0];
+      setClimate(f.id, animate);
       finishFrom = shellMaterials[0]?.color.clone() ?? finishTo.clone();
       finishTo = new THREE.Color(...f.color);
       if (animate) {
@@ -346,7 +521,18 @@ export async function createTreccStage(
     },
     render,
     resize,
-    isAnimating: () => finishT < 1,
+    isAnimating: () => finishT < 1 || climateT < 1,
+    isAmbient: () => climate && !still && density > 0,
+    setStill: (on) => {
+      still = on;
+    },
+    setWeatherDensity: (share) => {
+      density = share;
+      for (const w of weathers) {
+        w.setDensity(share);
+        w.points.visible = share > 0 && w.opacity() > 0.001;
+      }
+    },
     dispose: disposeAll,
   };
 }

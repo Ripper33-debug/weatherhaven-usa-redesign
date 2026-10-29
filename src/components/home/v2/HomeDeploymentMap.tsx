@@ -1,42 +1,10 @@
 import Link from "next/link";
+import tzlookup from "@photostructure/tz-lookup";
 import worldDots from "@/data/world-dots.json";
 import { GLOBAL_DEPLOYMENTS } from "@/lib/global-deployments";
 import { deploymentPinKind } from "@/lib/deployment-pin-style";
 import { DeploymentMapClient, type MapPin } from "@/components/home/v2/DeploymentMapClient";
-
-/** Coordinates-only labels from My Maps ("-84.41, -24.04") read better as a region. */
-function cleanLabel(label: string, lat: number): string {
-  if (/^-?\d+(\.\d+)?,\s*-?\d+(\.\d+)?$/.test(label.trim())) {
-    return lat < -60 ? "Antarctic interior" : "Remote site";
-  }
-  return label;
-}
-
-const COUNTRY_FIXES: Record<string, string> = { Gemany: "Germany" };
-const PROGRAM_NAMES: Record<string, string> = {
-  UN: "United Nations",
-  NATO: "NATO",
-  Coalition: "Coalition forces",
-  "UN and Coalition": "United Nations and coalition forces",
-};
-
-/** My Maps titles read "Somalia (UN)": split into the country and the program it served. */
-function splitTitle(title: string, label: string): { country: string; program?: string } {
-  let country = title;
-  if (/^(commercial|defence|medical)/i.test(title)) {
-    const parts = label.split(",");
-    country = parts[parts.length - 1].trim();
-  }
-  const m = country.match(/^(.*?)\s*\((.+)\)\s*$/);
-  if (m && !/\b(UN|NATO|Coalition)\b/.test(m[2])) {
-    // "Sudan (South)" is a place, not a program.
-    const place = `${m[2]} ${m[1]}`.trim();
-    return { country: place };
-  }
-  const base = (m ? m[1] : country).trim();
-  const program = m?.[2]?.replace(/^including\s+/i, "").replace("&", "and").trim();
-  return { country: COUNTRY_FIXES[base] ?? base, program: program ? (PROGRAM_NAMES[program] ?? program) : undefined };
-}
+import { cleanLabel, isPrecisePin, splitTitle } from "@/lib/deployment-pins";
 
 /**
  * Plain geographic regions, derived from each pin's country. (The theater tags in the imported
@@ -77,16 +45,21 @@ export function HomeDeploymentMap({ storiesLink = true }: { storiesLink?: boolea
   const pins: MapPin[] = GLOBAL_DEPLOYMENTS.flatMap((d) => {
     const xy = (worldDots.pins as Record<string, number[]>)[d.id];
     if (!xy) return [];
+    const { country, program } = splitTitle(d.title, d.label);
     return [
       {
         id: d.id,
         x: xy[0],
         y: xy[1],
         lat: d.lat,
+        lng: d.lng,
+        tz: tzlookup(d.lat, d.lng),
+        precise: isPrecisePin(d),
         kind: deploymentPinKind(d.category),
         label: cleanLabel(d.label, d.lat).replace(/\bGemany\b/g, "Germany"),
-        ...splitTitle(d.title, d.label),
-        theater: regionFor(splitTitle(d.title, d.label).country, d.lat, d.lng),
+        country,
+        program,
+        theater: regionFor(country, d.lat, d.lng),
       },
     ];
   });
@@ -103,7 +76,7 @@ export function HomeDeploymentMap({ storiesLink = true }: { storiesLink?: boolea
           <div className="lg:justify-self-end">
             <p className="v2-body">
               {pins.length} documented Weatherhaven deployments for defense, humanitarian and research programs. Select
-              a site to see who it served.
+              a site to see who it served; named places also show their weather right now.
             </p>
             {storiesLink ? (
               <Link href="/deployments" className="v2-link mt-4 inline-block text-[0.95rem]">
