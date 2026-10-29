@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // The deployment globe is a self-contained page with its own (minified) libraries.
     "public/deployment-globe/**",
+    // Vendored AR libraries for /ar (model-viewer, qrcode-generator, Draco), copied as-is.
+    "public/assets/**",
     // Reference copies from the globe package, not part of the build.
     "docs/**",
   ]),

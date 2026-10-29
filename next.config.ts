@@ -25,7 +25,9 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com",
+      // 'wasm-unsafe-eval' and blob: workers: the Draco decoder behind the /ar page's model-viewer.
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' https://va.vercel-scripts.com",
+      "worker-src 'self' blob:",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https:",
       "font-src 'self' data:",
@@ -69,6 +71,22 @@ const nextConfig: NextConfig = {
       {
         source: "/models/ar/:name.glb",
         headers: [{ key: "Cache-Control", value: "public, max-age=86400" }],
+      },
+      {
+        // The /ar page's model and Draco decoder. Vercel sends these types already; this makes
+        // sure every host does, since model-viewer needs them.
+        source: "/assets/models/:name.glb",
+        headers: [
+          { key: "Content-Type", value: "model/gltf-binary" },
+          { key: "Cache-Control", value: "public, max-age=86400" },
+        ],
+      },
+      {
+        source: "/assets/draco-ar/:name.wasm",
+        headers: [
+          { key: "Content-Type", value: "application/wasm" },
+          { key: "Cache-Control", value: "public, max-age=604800" },
+        ],
       },
       {
         // The deployment globe's own files: the page is shown inside /, /deployments and

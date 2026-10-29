@@ -115,6 +115,12 @@ export function SystemDetail({
                     See specifications
                   </a>
                 )}
+                {/* Real-scale AR page (model-viewer); a plain link, since /ar is a standalone page. */}
+                {leadWith3d ? (
+                  <a href="/ar" className="v2-btn v2-btn-ghost">
+                    See it at full size in AR
+                  </a>
+                ) : null}
               </div>
 
               <ProductBuying product={product} fullName={showsFullName(product.name, product.subtitle) ? product.subtitle : undefined} />
