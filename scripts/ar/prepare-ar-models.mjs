@@ -2,7 +2,7 @@
 // extensions and works best under ~100k triangles and ~10 materials, so the CAD cut is welded by
 // position (its per-face normals block simplification), simplified, given creased normals again,
 // and its many small part colours folded into a short palette.
-// Usage: node prep2.mjs <models dir> <out dir> <ratio> <error>
+// Usage: node prepare-ar-models.mjs <models dir> <out dir> <ratio> <error>
 import { NodeIO } from "@gltf-transform/core";
 import { ALL_EXTENSIONS } from "@gltf-transform/extensions";
 import { cloneDocument, dequantize, weld, simplify, flatten, join, dedup, prune } from "@gltf-transform/functions";
