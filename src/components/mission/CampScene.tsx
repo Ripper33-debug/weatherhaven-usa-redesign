@@ -175,7 +175,9 @@ export function CampScene({
     stageRef.current?.setInside(!inside);
   };
   // The published fact behind the answer the camera is showing (the same text the results use).
-  const factKey = QUESTIONS.some((q) => q.key === focus) ? (focus as QuestionKey) : null;
+  // On phones the mission close-up puts the name tag where this line would go, so it waits for the
+  // next answer there.
+  const factKey = QUESTIONS.some((q) => q.key === focus) && !(compact && focus === "mission") ? (focus as QuestionKey) : null;
   const factText = lead && factKey ? publishedFact(lead.slug, factKey, answers[factKey]) : undefined;
   const fact = factText && factKey ? { label: QUESTIONS.find((q) => q.key === factKey)!.label, text: factText } : null;
   // Hovering any shelter lights up the label for its system.
