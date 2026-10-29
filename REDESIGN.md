@@ -27,7 +27,7 @@ To share it, deploy it as a **new** Vercel project (`npx vercel`), not the produ
   - Verified numbers.
   - A 3D TRECC driven by scrolling: it rides in stowed, an orange scan line sweeps across it and reveals the deployed shelter, and the camera orbits to the finished building. Visitors can switch the shell between green, desert tan and arctic white, and each finish brings its weather: wind and rain, blowing sand or blowing snow, with the ground, light and glow to match and the published rating beside it (TRECC is rated from −40 °F to +120 °F and for 55 mph sustained winds). "See it full size" puts the deployed TRECC, at real size and in that finish, wherever the visitor is standing (see "See it full size" below).
   - The four shelter families.
-  - A dot-matrix world map of the 155 documented deployments, with filters. The land is lit where it's daylight right now and dimmed where it's night, with a mark where the sun is overhead, redrawn every minute. Selecting a named place shows its local time and its weather this hour.
+  - A dot-matrix world map of the 155 documented deployments. It opens on a guided tour: it flies to 11 deployments that have public records (see "Map tour" below), one every 11 seconds, with the story, two figures, the local time and weather, and the sources for each. "All sites" switches to the full map with filters. The land is lit where it's daylight right now and dimmed where it's night, with a mark where the sun is overhead, redrawn every minute. Selecting a named place shows its local time and its weather this hour.
   - The factory film, a 1981–2026 timeline, the latest news and a contact band.
 - **Systems** (`/configurable-solutions`): a catalog filtered by family, mission, environment and transport. All 17 product pages have published specs taken from Weatherhaven literature (ISO containers and Series 1.5 & 2 say "specifications on request" because nothing is published for them).
   - The TRECC page has an interactive 3D model: turn it by dragging or with the turn buttons, switch between stowed and deployed, and change the finish. "See it full size" opens the phone's AR view with a real-size TRECC; on a computer it shows a QR code that opens it on a phone.
@@ -43,7 +43,7 @@ To share it, deploy it as a **new** Vercel project (`npx vercel`), not the produ
 
 ## How it was checked
 
-- `npm run lint` has no errors and all 214 tests pass (including the sun position, the map projection and the weather readout). Tests cover the mission builder's scoring and the 3D camp's layout across all 2,700 answer combinations (no two shelters overlap, the camp is always built around the builder's own best match and pairings). `npm run build` succeeds, including every SOF and admin route.
+- `npm run lint` has no errors and all 219 tests pass (including the sun position, the map projection and the weather readout). Tests cover the mission builder's scoring and the 3D camp's layout across all 2,700 answer combinations (no two shelters overlap, the camp is always built around the builder's own best match and pairings). `npm run build` succeeds, including every SOF and admin route.
 - The SOF portal (`/sof-solutions`, `/sof-solutions/request-access`, `/sof-solutions/secure`) and `/login` were screenshotted next to the untouched original at desktop and phone widths, and they are pixel-identical.
 - Lighthouse on a local production build:
   - Desktop homepage: 97–99 performance, 100 accessibility, 96 best practices, 100 SEO, unchanged by the live data. Desktop TRECC page: 98 / 100 / 96 / 100.
@@ -66,6 +66,14 @@ To share it, deploy it as a **new** Vercel project (`npx vercel`), not the produ
 - **Without MET:** if the service can't be reached, the hero simply has no readout and the map's panel says the weather isn't available right now.
 - **Code:** `src/lib/field-sites.ts`, `field-weather.ts` (server), `field-readout.ts`, `deployment-pins.ts`, `src/components/home/v2/HeroFieldReadout.tsx`, `DeploymentMapClient.tsx`, `world-dot-path.ts`, `src/app/api/site-weather/route.ts`.
 - **3D weather:** `src/lib/three/treccStage.ts` (the `climate` option, used only on the homepage; the TRECC page's viewer is unchanged) reuses the mission builder's weather particles at a smaller scale. While falling weather is on screen the scene draws 30 frames a second; if a device can't keep up, the weather thins out and then stops. With reduced motion the weather is shown but doesn't move.
+
+## Map tour (homepage)
+
+- **Stops:** every stop is one of the eight deployment stories or four field notes on `/deployments`, so its title, figures, systems and sources are the ones already checked there (`src/lib/map-tour.ts`; a test fails if a summary uses a number the story doesn't contain). The NATO headquarters story is left out because it names no place.
+- **Where the marker goes:** at the place the story names (Little Dome C, West Lake Bonney and Mount Brown South at their published coordinates; Stratton Air National Guard Base, Letterkenny Army Depot, Aberdeen Test Center, Sunnybrook in Toronto, Tanquary Fiord). Canada's HQSS program, Ukraine and Quellaveco (whose camp site isn't published) are shown as a region, with no local time or weather.
+- **Behaviour:** it starts when the map is on screen, holds while the mouse is over the map or card, stops when keyboard focus moves into it, and pauses when the tab is hidden. With reduced motion it doesn't play on its own and the camera doesn't fly. Every stop is in the card's layout at once (only the current one shows), so the card never changes height and the page doesn't shift while it plays. Pause, previous, next and a list of all stops are under the map.
+- **Weather:** the same MET Norway lookups as the mission builder, one per stop, only when the stop is shown.
+- The `/deployments` page keeps the map as it was (no tour), since the stories are right above it.
 
 ## The 3D model
 

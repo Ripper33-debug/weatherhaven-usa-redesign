@@ -8,11 +8,7 @@ import { inferEnvironmentFromCoordinates } from "@/lib/climate-from-coordinates"
 import { describeSky, formatCoords, signedDegrees, toFahrenheit, toMph, type Conditions } from "@/lib/field-readout";
 import { lightAt } from "@/lib/solar";
 
-/** Map points are looked up on this grid (degrees): about 28 km, plenty for the camp's weather. */
-export const PLACE_GRID = 0.25;
-
-/** The grid point the weather for a map point is read at. */
-export const snapToGrid = (v: number) => Math.round(v / PLACE_GRID) * PLACE_GRID;
+export { PLACE_GRID, snapToGrid } from "@/lib/place-grid";
 
 /** A place picked in the builder: a named place on the deployment map, or a point on the map. */
 export type GuidePlace = { id: string | null; name: string; lat: number; lng: number };

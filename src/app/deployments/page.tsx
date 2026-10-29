@@ -46,7 +46,7 @@ export default function DeploymentsPage() {
           <FieldStory key={s.id} story={s} flip={i % 2 === 1} />
         ))}
 
-        <section aria-labelledby="notes-heading" className="border-b border-line py-20 sm:py-24">
+        <section id="more-from-the-field" aria-labelledby="notes-heading" className="scroll-mt-24 border-b border-line py-20 sm:py-24">
           <div className="v2-wrap">
             <h2 id="notes-heading" className="v2-h2 text-snow">
               More from the field

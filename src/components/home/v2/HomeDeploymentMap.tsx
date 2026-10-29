@@ -3,8 +3,10 @@ import tzlookup from "@photostructure/tz-lookup";
 import worldDots from "@/data/world-dots.json";
 import { GLOBAL_DEPLOYMENTS } from "@/lib/global-deployments";
 import { deploymentPinKind } from "@/lib/deployment-pin-style";
-import { DeploymentMapClient, type MapPin } from "@/components/home/v2/DeploymentMapClient";
+import { DeploymentMapClient, type MapPin, type TourPoint } from "@/components/home/v2/DeploymentMapClient";
+import { project } from "@/components/home/v2/world-dot-path";
 import { cleanLabel, isPrecisePin, splitTitle } from "@/lib/deployment-pins";
+import { TOUR_STOPS } from "@/lib/map-tour";
 
 /**
  * Plain geographic regions, derived from each pin's country. (The theater tags in the imported
@@ -40,8 +42,11 @@ function regionFor(country: string, lat: number, lng: number): string {
   return "asia-pacific";
 }
 
-/** `storiesLink`: link to the deployment stories page (off on that page itself). */
-export function HomeDeploymentMap({ storiesLink = true }: { storiesLink?: boolean } = {}) {
+/**
+ * `storiesLink`: link to the deployment stories page (off on that page itself).
+ * `tour`: open on the guided tour of the deployments with public sources (the homepage).
+ */
+export function HomeDeploymentMap({ storiesLink = true, tour = false }: { storiesLink?: boolean; tour?: boolean } = {}) {
   const pins: MapPin[] = GLOBAL_DEPLOYMENTS.flatMap((d) => {
     const xy = (worldDots.pins as Record<string, number[]>)[d.id];
     if (!xy) return [];
@@ -66,6 +71,13 @@ export function HomeDeploymentMap({ storiesLink = true }: { storiesLink?: boolea
 
   const theaters = REGIONS.filter((r) => pins.some((p) => p.theater === r.id)).map((r) => ({ id: r.id, label: r.label }));
 
+  const tourPoints: TourPoint[] | undefined = tour
+    ? TOUR_STOPS.map((s) => {
+        const [x, y] = project(s.lng, s.lat);
+        return { ...s, x, y, tz: s.area ? null : tzlookup(s.lat, s.lng) };
+      })
+    : undefined;
+
   return (
     <section id="deployments" aria-labelledby="map-heading" className="scroll-mt-20 border-t border-line bg-ink py-20 sm:py-28">
       <div className="v2-wrap">
@@ -75,8 +87,9 @@ export function HomeDeploymentMap({ storiesLink = true }: { storiesLink?: boolea
           </h2>
           <div className="lg:justify-self-end">
             <p className="v2-body">
-              {pins.length} documented Weatherhaven deployments for defense, humanitarian and research programs. Select
-              a site to see who it served; named places also show their weather right now.
+              {tourPoints
+                ? `${pins.length} documented Weatherhaven deployments for defense, humanitarian and research programs. The tour flies to ${tourPoints.length} of them with public records and shows the weather there right now; switch to all sites to explore every one.`
+                : `${pins.length} documented Weatherhaven deployments for defense, humanitarian and research programs. Select a site to see who it served; named places also show their weather right now.`}
             </p>
             {storiesLink ? (
               <Link href="/deployments" className="v2-link mt-4 inline-block text-[0.95rem]">
@@ -87,6 +100,7 @@ export function HomeDeploymentMap({ storiesLink = true }: { storiesLink?: boolea
         </div>
         <DeploymentMapClient
           pins={pins}
+          tour={tourPoints}
           theaters={theaters}
           width={worldDots.width}
           height={worldDots.height}

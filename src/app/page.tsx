@@ -34,7 +34,7 @@ export default async function HomePage() {
       <HomeDataPlate />
       <HomeTreccScene />
       <HomeSystems />
-      <HomeDeploymentMap />
+      <HomeDeploymentMap tour />
       <HomeFactory />
       <HomeTimeline />
       <HomeNews />
