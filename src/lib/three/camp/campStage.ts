@@ -54,6 +54,8 @@ export type CampStageOptions = {
   onPick?: (slug: string) => void;
   /** Fires when the pointer moves over (or off) a shelter in the finished camp. */
   onHover?: (unitId: string | null) => void;
+  /** Fires when the look-inside view opens or closes (including when a new plan closes it). */
+  onInside?: (on: boolean) => void;
 };
 
 export type CampStage = {
@@ -63,8 +65,9 @@ export type CampStage = {
   dispose: () => void;
   /** For tests: true while anything is still animating. */
   isBusy: () => boolean;
-  /** Cuts the roof off the best match and shows an example fit-out (results only). */
-  setInside: (on: boolean) => void;
+  /** Cuts the roof off the best match and shows an example fit-out (results only). Returns
+   * whether the view is open afterwards. */
+  setInside: (on: boolean) => boolean;
   /** A JPEG of the current view, at most `width` pixels wide. */
   snapshot: (width: number) => string | null;
 };
@@ -124,9 +127,18 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
   const clock = () => (capture ? captureTime : performance.now());
   const tweens: Tween[] = [];
   let now = clock();
-  /** Starts a tween; one with the same key replaces any still running (without finishing it). */
+  /** Starts a tween. One with the same key still running is finished first (jumped to its end,
+   * including anything its `done` starts under that key), so a shelter is never left half-built. */
   const tween = (delay: number, dur: number, update: (k: number) => void, done?: () => void, key?: string) => {
-    if (key) for (let i = tweens.length - 1; i >= 0; i--) if (tweens[i].key === key) tweens.splice(i, 1);
+    if (key) {
+      for (let guard = 0; guard < 6; guard++) {
+        const i = tweens.findIndex((tw) => tw.key === key);
+        if (i < 0) break;
+        const [old] = tweens.splice(i, 1);
+        old.update(1);
+        old.done?.();
+      }
+    }
     if (opts.reduced) {
       update(1);
       done?.();
@@ -220,13 +232,22 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
           if (key !== "shell") treccLoadMats[key].color.copy(mat.color);
         });
         stowed = body;
-        // Swap the stand-ins already on trailers, pallets or slings for the model.
-        for (const slot of stowedSlots) fillStowed(slot);
+        // Swap the stand-ins still in the scene (on trailers, pallets or slings) for the model.
+        for (const slot of stowedSlots) if (inScene(slot)) fillStowed(slot);
         stowedSlots.length = 0;
         invalidate();
       })
-      .catch(() => undefined);
+      .catch(() => {
+        // Keep the stand-ins; let a later arrival try again.
+        stowedSlots.length = 0;
+        stowedPromise = null;
+      });
     return stowedPromise;
+  };
+  const inScene = (o: THREE.Object3D) => {
+    let p: THREE.Object3D | null = o;
+    while (p && p !== scene) p = p.parent;
+    return p === scene;
   };
   const fillStowed = (slot: THREE.Group) => {
     slot.traverse((o) => {
@@ -432,12 +453,12 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
       finishRemoval();
       return;
     }
-    s.frame.visible = true;
     tween(
       0,
       0.55,
       (k) => {
         const y = lerp(from, -0.05, easeInOutCubic(k));
+        s.frame.visible = true;
         s.reveal.set(y, 1);
         s.frame.position.y = Math.max(0.02, y);
         renderer.shadowMap.needsUpdate = true;
@@ -859,6 +880,7 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
       if (drag.moved > 4) {
         if (!canvas.hasPointerCapture(e.pointerId)) canvas.setPointerCapture(e.pointerId);
         camTween = null;
+        follow = null;
         orbit = false;
         userMoved = true;
         cam.az -= dx * 0.28;
@@ -944,6 +966,10 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
   let weatherScale = 1;
   let samples: number[] = [];
   let settleFrames = 8;
+  const resetQuality = () => {
+    samples = [];
+    settleFrames = 8;
+  };
   const watchQuality = (dtMs: number) => {
     if (quality === 0 || testRun()) return;
     if (settleFrames > 0) {
@@ -972,7 +998,7 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
 
   // Headless test runs can set window.__CAMP_STILL__ so the scene stops drawing once built.
   const still = () => !!(window as unknown as { __CAMP_STILL__?: boolean }).__CAMP_STILL__;
-  const ambient = () => !opts.reduced && !still() && (!!weather || fading.length > 0 || beaconOn > 0.01 || orbit);
+  const ambient = () => !opts.reduced && !still() && ((!!weather && weatherScale > 0) || fading.length > 0 || beaconOn > 0.01 || orbit);
   const busy = () =>
     tweens.length > 0 || !!camTween || !!follow || (arrival && !opts.reduced && arrival.arrival.busy((now - arrival.start) / 1000)) || false;
 
@@ -982,13 +1008,16 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
     now = t;
     const interval = lastFrame ? t - lastFrame : 0;
     const dt = lastFrame ? Math.min(0.1, interval / 1000) : 1 / 60;
+    // The first frame after a rest starts a fresh measurement.
+    if (!lastFrame) resetQuality();
     lastFrame = t;
     const isBusy = busy();
+    // Real frame intervals (a slow device can take far longer than the 0.1 s the animation clock
+    // allows). A quality step resizes the canvas, which marks this frame as one to draw.
+    if ((isBusy || ambient()) && interval > 0 && interval < 2000) watchQuality(interval);
     // When only weather, the beacon or the orbit is moving, draw every other frame (30 fps).
     skip = !isBusy && !dirty ? !skip : false;
     const step = dt * (!isBusy && !dirty ? 2 : 1);
-    // Real frame intervals (a slow device can take far longer than the 0.1 s the animation clock allows).
-    if ((isBusy || ambient()) && interval > 0 && interval < 2000) watchQuality(interval);
     if (!skip) {
       elapsed += step;
       for (let i = tweens.length - 1; i >= 0; i--) {
@@ -1001,7 +1030,7 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
           tw.done?.();
         }
       }
-      if (follow && (follow.a !== arrival || userMoved)) follow = null;
+      if (follow && follow.a !== arrival) follow = null;
       if (follow) {
         const a = follow.a;
         const at = (t - a.start) / 1000;
@@ -1087,11 +1116,13 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
-    // Refit the distance for the new shape, keeping the angle (and any move or orbit under way).
+    // Refit what the camera is framing (the cut-away, or the step's view) for the new shape,
+    // keeping the angle and any move, follow or orbit under way.
     if (plan) {
-      const fresh = poseFor(plan, lastFocus);
+      const fresh = framing();
+      if (follow) follow.final = poseFor(plan, lastFocus);
       if (camTween) camTween.to = { ...fresh, az: camTween.to.az, el: camTween.to.el };
-      else if (!userMoved) {
+      else if (!userMoved && !follow) {
         cam.dist = fresh.dist;
         applyCamera();
       }
@@ -1190,7 +1221,8 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
     moveCamera(poseFor(next, focus), instant || firstPlan);
     // A new arrival on the transport question: follow it in.
     follow = null;
-    if (focus === "transport" && arrival && arrival.start > 0 && arrival !== lastFollowed && !opts.reduced && !instant && !firstPlan) {
+    const fresh = arrival && arrival.start > 0 && (clock() - arrival.start) / 1000 < arrival.arrival.follow.until - 1;
+    if (focus === "transport" && arrival && fresh && arrival !== lastFollowed && !opts.reduced && !instant && !firstPlan) {
       follow = { a: arrival, from: { ...cam }, t0: clock(), final: poseFor(next, focus) };
       lastFollowed = arrival;
       camTween = null;
@@ -1212,10 +1244,23 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
   // ---- look inside ----------------------------------------------------------------------------
   let inside: { s: Struct; group: THREE.Group; cut: number } | null = null;
 
+  const insidePose = (s: Struct, cut: number, az: number): Pose => {
+    const model = s.model!;
+    const u = s.unit;
+    const m = 1.2;
+    return fitBox(az, 54, { minX: u.x - model.l / 2 - m, maxX: u.x + model.l / 2 + m, minZ: u.z - model.w / 2 - m, maxZ: u.z + model.w / 2 + m, h: cut });
+  };
+  /** The view the camera should be holding right now. */
+  function framing(): Pose {
+    if (inside && inside.s.model) return insidePose(inside.s, inside.cut, cam.az);
+    return poseFor(plan!, lastFocus);
+  }
+
   const closeInside = (keepCamera: boolean) => {
     if (!inside) return;
     const { s, group, cut } = inside;
     inside = null;
+    opts.onInside?.(false);
     if (leadFigures?.id === s.unit.id) leadFigures.group.visible = true;
     if (s.removed || !s.model) {
       disposeOwned(group);
@@ -1240,22 +1285,22 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
     if (keepCamera && plan) moveCamera(poseFor(plan, "results"), false);
   };
 
-  const setInside = (on: boolean) => {
-    if (!plan || !resultsMode) return;
+  const setInside = (on: boolean): boolean => {
+    if (!plan || !resultsMode) return false;
     if (!on) {
       closeInside(true);
-      return;
+      return false;
     }
-    if (inside) return;
+    if (inside) return true;
     const lead = plan.units[0];
     const s = lead ? structs.get(lead.id) : undefined;
-    if (!s || !s.model) return;
+    if (!s || !s.model) return false;
     const model = s.model;
-    const group = buildInterior(plan.mission, { l: model.l, w: model.w, round: lead.kind === "polar-chief" }, s.mats, vehicleMats, shadows);
+    const group = buildInterior(plan.mission, { l: model.l, w: model.w, round: lead.kind === "polar-chief" }, s.mats, shadows);
     group.traverse((o) => (o.userData.ownGeometry = true));
     s.root.add(group);
     // Cut just above the tallest furniture for the mission, and always below the roof.
-    const furniture: Record<string, number> = { command: 1.25, medical: 1.45, maintenance: 1.3, living: 1.75, research: 1.25, response: 0.8 };
+    const furniture: Record<string, number> = { command: 1.25, medical: 1.45, maintenance: 1.9, living: 1.75, research: 1.25, response: 0.8 };
     const top = furniture[plan.mission ?? "response"] ?? 1.3;
     const cut = Math.min(model.h - 0.25, Math.min(2.8, Math.max(top + 0.15, model.h * 0.5)));
     inside = { s, group, cut };
@@ -1273,9 +1318,9 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
       () => s.reveal.set(cut, 0.5),
       `s:${s.unit.id}`,
     );
-    const m = 1.2;
-    const box = { minX: lead.x - model.l / 2 - m, maxX: lead.x + model.l / 2 + m, minZ: lead.z - model.w / 2 - m, maxZ: lead.z + model.w / 2 + m, h: cut };
-    moveCamera(fitBox(cam.az, 54, box), false);
+    moveCamera(insidePose(s, cut, cam.az), false);
+    opts.onInside?.(true);
+    return true;
   };
 
   const snapshot = (width: number): string | null => {
@@ -1283,11 +1328,19 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
       // Draw and read back in the same task, so the buffer is still there.
       renderer.render(scene, camera);
       const src = renderer.domElement;
-      const scale = Math.min(1, width / src.width);
+      // Crop to 16:10 around the middle, so a tall phone canvas still gives a wide picture.
+      const aspect = 1.6;
+      let sw = src.width;
+      let sh = src.height;
+      if (sw / sh < aspect) sh = Math.round(sw / aspect);
+      else sw = Math.round(sh * aspect);
+      const sx = Math.round((src.width - sw) / 2);
+      const sy = Math.round((src.height - sh) * 0.45);
+      const scale = Math.min(1, width / sw);
       const out = document.createElement("canvas");
-      out.width = Math.round(src.width * scale);
-      out.height = Math.round(src.height * scale);
-      out.getContext("2d")?.drawImage(src, 0, 0, out.width, out.height);
+      out.width = Math.round(sw * scale);
+      out.height = Math.round(sh * scale);
+      out.getContext("2d")?.drawImage(src, sx, sy, sw, sh, 0, 0, out.width, out.height);
       return out.toDataURL("image/jpeg", 0.82);
     } catch {
       return null;

@@ -151,7 +151,9 @@ function Results({
     const prefill = guideContactPrefill(answers, recs);
     // The expert gets a link to this exact plan, so they can open the same camp in 3D.
     const link = shareUrl(answers);
-    storeContactPrefill({ ...prefill, message: `${prefill.message}\nPlan in 3D: ${link}` });
+    // The contact form takes up to 500 characters; keep the link whole and trim the summary if needed.
+    const tail = `\nPlan in 3D: ${link}`;
+    storeContactPrefill({ ...prefill, message: `${(prefill.message ?? "").slice(0, Math.max(0, 500 - tail.length))}${tail}` });
     const image = sceneApi.current?.snapshot();
     if (image) storeCampSnapshot({ image, link });
     trackLead("mission_builder", `Mission builder: ${labelFor("mission", answers.mission)}`, {

@@ -59,6 +59,9 @@ type FormState = {
   email: string;
 };
 
+/** The server accepts up to 500 characters per field (MAX_FIELD_LENGTH in api-validation.ts). */
+const MESSAGE_MAX = 500;
+
 const initial: FormState = {
   full_name: "",
   organization: "",
@@ -268,8 +271,8 @@ function ContactEngineeringFormInner({
           <figcaption className="px-4 py-3 text-sm text-muted">
             <span className="text-white">Your camp from the mission builder.</span> A link to the plan is included in your
             message, so the expert sees the same camp.{" "}
-            <a href={planPreview.link} className="text-signal hover:underline">
-              Open it in 3D
+            <a href={planPreview.link} target="_blank" rel="noopener" className="text-signal hover:underline">
+              Open it in 3D (new tab)
             </a>
           </figcaption>
         </figure>
@@ -387,11 +390,16 @@ function ContactEngineeringFormInner({
             Message
             <textarea
               rows={5}
+              maxLength={MESSAGE_MAX}
+              aria-describedby="message-count"
               className={`${inputClass} min-h-[120px] resize-y`}
               value={form.message}
               onChange={(e) => patch("message", e.target.value)}
               placeholder="Mission, timeline, environment, or questions for our engineers…"
             />
+            <p id="message-count" className="mt-1.5 text-right text-xs text-muted">
+              {form.message.length} of {MESSAGE_MAX} characters
+            </p>
           </label>
           <fieldset>
             <legend className="text-[0.875rem] font-medium text-muted">
@@ -467,11 +475,16 @@ export function ContactEngineeringForm() {
     clearContactPrefill();
     return payload;
   });
-  const [planPreview] = useState<CampSnapshot | null>(() => (handoff === "camp-plan" ? readCampSnapshot() : null));
-  // Shown once: a later hand-off (from the SOF planner, say) shouldn't pick up an old picture.
+  // The picture belongs to this hand-off only if the prefilled message carries its plan link (an
+  // SOF planner hand-off, or an old picture from an interrupted one, doesn't).
+  const [planPreview] = useState<CampSnapshot | null>(() => {
+    if (handoff !== "camp-plan") return null;
+    const snap = readCampSnapshot();
+    return snap && sessionPrefill?.message?.includes(snap.link) ? snap : null;
+  });
   useEffect(() => {
-    if (planPreview) clearCampSnapshot();
-  }, [planPreview]);
+    if (handoff === "camp-plan") clearCampSnapshot();
+  }, [handoff]);
   const resolvedSlug = sessionPrefill?.system?.trim() || systemSlug;
   const product = useMemo(
     () => (resolvedSlug ? findProductInCatalog(catalog, resolvedSlug) : undefined),

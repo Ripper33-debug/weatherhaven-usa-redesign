@@ -280,7 +280,8 @@ function roadArrival(site: TransportSite, plan: CampPlan, m: ArrivalMats, shadow
     let tr: THREE.Group | null = null;
     if (onBed) {
       const o = cargo.make();
-      o.position.set(-1.3 + Math.max(0, (6.2 - cargo.l) / 2) - 0.2, 1.3, 0);
+      // Just behind the cab (which starts at x = 1.45).
+      o.position.set(1.3 - cargo.l / 2, 1.3, 0);
       v.group.add(o);
     } else {
       tr = trailer(m.vehicle, shadows, cargo.kind !== "trecc");

@@ -3,8 +3,9 @@
  * screens for a command post, beds for medical, a vehicle bay for maintenance, bunks for camp
  * life, benches for research, cots for disaster response. Illustrative only; the caption says so.
  *
- * Items are laid out inside the shelter's footprint (long side along x, door at +x) and stay
- * under 1.8 m, below where the roof is cut away.
+ * Items are laid out inside the shelter's footprint (long side along x, door at +x) and use the
+ * shelter's own materials, so the roof cut also slices anything taller (the vehicle in a
+ * maintenance bay), like a section drawing.
  */
 import * as THREE from "three";
 import type { MissionId } from "@/lib/mission-guide";
@@ -66,7 +67,7 @@ function crate(b: GeoBag, x: number, z: number, h = 0.7) {
 }
 
 /** Interior for the mission, in the shelter's local frame. */
-export function buildInterior(mission: MissionId | null, space: Space, mats: MatSet, vehicleMats: MatSet, shadows: boolean): THREE.Group {
+export function buildInterior(mission: MissionId | null, space: Space, mats: MatSet, shadows: boolean): THREE.Group {
   const g = new THREE.Group();
   const b = new GeoBag();
   const l = space.round ? space.l * 0.72 : space.l;
@@ -102,7 +103,7 @@ export function buildInterior(mission: MissionId | null, space: Space, mats: Mat
     }
     case "maintenance": {
       if (l >= 8 && w >= 5) {
-        const t = truck(vehicleMats, shadows, "cover");
+        const t = truck(mats, shadows, "cover");
         t.group.position.set(-0.4, 0, 0);
         g.add(t.group);
         const z = -(w / 2 - 0.55);

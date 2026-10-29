@@ -371,10 +371,13 @@ function factFor(p: Profile, key: QuestionKey, value: string): string | undefine
   return p.facts[`${key}:${value}` as const] ?? p.facts[key];
 }
 
-/** The published fact that ties a system to one answer (the same text the results show), if any. */
+/** The published fact that ties a system to one answer, under the same rule the results use:
+ * the mission fact always, other facts only where the system is a good fit (scores 2 or 3). */
 export function publishedFact(slug: string, key: QuestionKey, value: string | undefined): string | undefined {
   const p = PROFILES.find((x) => x.slug === slug);
-  return p && value ? factFor(p, key, value) : undefined;
+  if (!p || !value) return undefined;
+  if (key !== "mission" && ((p[key] as Partial<Record<string, Score>>)[value] ?? 0) < 2) return undefined;
+  return factFor(p, key, value);
 }
 
 export function isComplete(a: GuideAnswers): a is Required<GuideAnswers> {
@@ -478,7 +481,7 @@ export function labelFor(key: QuestionKey, id: string | undefined): string {
 export function guideContactPrefill(a: Required<GuideAnswers>, recs: Recommendation[]): ContactPrefillPayload {
   const top = recs[0];
   const lines = [
-    "From the mission builder on weatherhavenusa.com:",
+    "Mission builder plan:",
     ...QUESTIONS.map((q) => `${q.label}: ${labelFor(q.key, a[q.key])}`),
     "",
     `Suggested systems: ${recs.slice(0, 3).map((r) => r.name).join(", ")}`,

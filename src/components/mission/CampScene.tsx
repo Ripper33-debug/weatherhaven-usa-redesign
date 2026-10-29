@@ -50,8 +50,8 @@ export function CampScene({
   const [load, setLoad] = useState<LoadState>("idle");
   const [hover, setHover] = useState<string | null>(null);
   const [touched, setTouched] = useState(false);
-  // Look-inside view of the best match, tied to the plan it was opened on.
-  const [insideKey, setInsideKey] = useState<string | null>(null);
+  // Look-inside view of the best match, as the scene reports it (a new plan closes it there).
+  const [insideOn, setInsideOn] = useState(false);
   const compact = useClientMediaQuery("(max-width: 1023px)");
   const coarse = useClientMediaQuery("(pointer: coarse)");
 
@@ -118,6 +118,7 @@ export function CampScene({
           },
           onPick: (slug) => routerRef.current.push(`/configurable-solutions/${slug}`),
           onHover: setHover,
+          onInside: setInsideOn,
         });
         if (cancelled) {
           stage.dispose();
@@ -168,13 +169,10 @@ export function CampScene({
   const ready = load === "ready";
   const lead = plan.lead;
   const tags = plan.tags;
-  const planKey = `${JSON.stringify(answers)}|${results}`;
-  const inside = results && insideKey === planKey;
+  const inside = results && insideOn;
   const showTags = ready && (results && !inside ? tags : tags.slice(0, 1));
   const toggleInside = () => {
-    const on = !inside;
-    stageRef.current?.setInside(on);
-    setInsideKey(on ? planKey : null);
+    stageRef.current?.setInside(!inside);
   };
   // The published fact behind the answer the camera is showing (the same text the results use).
   const factKey = QUESTIONS.some((q) => q.key === focus) ? (focus as QuestionKey) : null;
@@ -266,7 +264,11 @@ export function CampScene({
         : null}
 
       {/* What the scene is showing */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 bg-gradient-to-b from-ink/70 to-transparent px-4 pb-10 pt-3 sm:px-6 sm:pt-5">
+      <div
+        className={`pointer-events-none absolute inset-x-0 top-0 bg-gradient-to-b from-ink/70 to-transparent px-4 pb-10 pt-3 sm:px-6 sm:pt-5 ${
+          ready && results ? "pr-32 sm:pr-56" : ""
+        }`}
+      >
         {lead ? (
           <>
             <p className="text-[0.8rem] text-snow/75 sm:text-[0.85rem]">
@@ -288,7 +290,6 @@ export function CampScene({
       {ready && results && lead ? (
         <button
           type="button"
-          aria-pressed={inside}
           onClick={toggleInside}
           className="absolute right-3 top-3 z-30 inline-flex h-9 items-center bg-ink/75 px-3 text-[0.85rem] font-semibold text-snow shadow-[inset_0_0_0_1px_rgb(148_170_196/0.4)] backdrop-blur-sm transition-colors hover:bg-ink hover:text-signal sm:right-5 sm:top-5"
         >
