@@ -30,7 +30,10 @@ export function ContactPageSections() {
             <a href={companyPhoneHref(COMPANY_CONTACT.phone)} className="v2-figure mt-5 block text-[1.9rem] text-snow no-underline hover:text-signal">
               {COMPANY_CONTACT.phone}
             </a>
-            <p className="mt-1 text-[0.85rem] text-muted">CAGE 0EYW4</p>
+            <p className="v2-tech mt-2 text-muted">CAGE 0EYW4 &nbsp;/&nbsp; UEI DBETGL9QKYH3</p>
+            <Link href="/government" className="v2-link mt-3 inline-block text-[0.9rem]">
+              Details for government buyers
+            </Link>
           </div>
 
           <div>

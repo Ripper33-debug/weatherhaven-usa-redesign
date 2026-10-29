@@ -135,8 +135,12 @@ export default function ResourcesPage() {
                   <dd className="text-snow">889 Erie Avenue, North Tonawanda, NY 14120</dd>
                 </div>
                 <div>
-                  <dt className="text-muted">CAGE code</dt>
-                  <dd className="v2-figure text-[1.4rem] text-snow">0EYW4</dd>
+                  <dt className="v2-tech text-muted">CAGE code</dt>
+                  <dd className="v2-code text-[1.3rem] text-snow">0EYW4</dd>
+                </div>
+                <div>
+                  <dt className="v2-tech text-muted">UEI</dt>
+                  <dd className="v2-code text-[1.3rem] text-snow">DBETGL9QKYH3</dd>
                 </div>
                 <div>
                   <dt className="text-muted">Certifications</dt>
@@ -149,6 +153,9 @@ export default function ResourcesPage() {
               </dl>
               <Link href="/contact?inquiry=Program%20Requirement" className="v2-btn mt-7 w-full">
                 Request technical data
+              </Link>
+              <Link href="/government" className="v2-link mt-4 inline-block text-[0.9rem]">
+                NAICS codes and contract vehicles
               </Link>
             </div>
           </aside>

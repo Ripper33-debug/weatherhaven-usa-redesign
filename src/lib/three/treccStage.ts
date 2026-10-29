@@ -49,7 +49,15 @@ export type TreccStage = {
   setWeatherDensity: (share: number) => void;
   /** Reduced motion: weather is drawn but holds still. */
   setStill: (on: boolean) => void;
+  /**
+   * Points on the deployed shelter, each given as fractions of its bounding box (x along the
+   * length, y up, z across) with the outward direction of the face it sits on, projected to the
+   * canvas in CSS pixels. `front` is false when that face points away from the camera.
+   */
+  projectOpen: (points: readonly OpenPoint[]) => { x: number; y: number; front: boolean }[];
 };
+
+export type OpenPoint = { at: readonly [number, number, number]; normal: readonly [number, number, number] };
 
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
@@ -479,7 +487,30 @@ export async function createTreccStage(
     renderer.render(scene, camera);
   };
 
+  const openBox = new THREE.Box3();
+  const pv = new THREE.Vector3();
+  const nv = new THREE.Vector3();
+  const toCam = new THREE.Vector3();
+  const projectOpen = (points: readonly OpenPoint[]) => {
+    openBox.setFromObject(openRoot);
+    const w = canvas.clientWidth || 1;
+    const h = canvas.clientHeight || 1;
+    return points.map(({ at, normal }) => {
+      pv.set(
+        lerp(openBox.min.x, openBox.max.x, at[0]),
+        lerp(openBox.min.y, openBox.max.y, at[1]),
+        lerp(openBox.min.z, openBox.max.z, at[2]),
+      );
+      nv.set(normal[0], normal[1], normal[2]);
+      toCam.subVectors(camera.position, pv);
+      const front = nv.dot(toCam) > 0;
+      pv.project(camera);
+      return { x: ((pv.x + 1) / 2) * w, y: ((1 - pv.y) / 2) * h, front: front && pv.z < 1 };
+    });
+  };
+
   return {
+    projectOpen,
     setDeploy,
     setCamera,
     setFinish: (finish, animate = true) => {

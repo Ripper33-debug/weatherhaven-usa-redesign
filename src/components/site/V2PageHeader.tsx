@@ -22,7 +22,7 @@ export function V2PageHeader({
       <div className="v2-wrap">
         {crumbs && crumbs.length > 0 ? (
           <nav aria-label="Breadcrumb" className="mb-6">
-            <ol className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[0.875rem] text-muted">
+            <ol className="v2-tech flex flex-wrap items-center gap-x-2 gap-y-1 text-muted">
               {crumbs.map((c, i) => (
                 <li key={`${c.label}-${i}`} className="flex items-center gap-2">
                   {i > 0 ? (

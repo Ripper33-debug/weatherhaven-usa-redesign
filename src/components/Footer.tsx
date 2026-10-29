@@ -3,7 +3,8 @@ import Link from "next/link";
 import { NavAdminLink } from "@/components/navigation/NavAdminLink";
 import { COMPANY_CONTACT, companyPhoneHref } from "@/lib/company-facts";
 import { company, legalLinks } from "@/lib/site";
-import { NAV_CTA, SYSTEMS_BY_FAMILY } from "@/lib/site-nav";
+import { NAV_CTA, NAV_GOV, SYSTEMS_BY_FAMILY } from "@/lib/site-nav";
+import { PROCUREMENT } from "@/lib/procurement";
 
 const companyLinks = [
   { href: "/capabilities", label: "Capabilities" },
@@ -14,6 +15,7 @@ const companyLinks = [
 ];
 
 const programLinks = [
+  NAV_GOV,
   { href: "/mission-solution-builder", label: "Mission builder" },
   { href: "/configurable-solutions", label: "Compare systems" },
   { href: "/sof-solutions", label: "SOF portal" },
@@ -24,6 +26,23 @@ export function Footer() {
   const year = new Date().getFullYear();
   return (
     <footer data-global-footer className="border-t border-line bg-ink text-snow">
+      {/* The company's identifiers and sites, as a readout across the top of the footer. */}
+      <div className="border-b border-line">
+        <dl className="v2-wrap v2-tech flex flex-wrap gap-x-10 gap-y-3 py-5 text-muted">
+          {[
+            ["CAGE", PROCUREMENT.cage],
+            ["UEI", PROCUREMENT.uei],
+            ["Quality", "ISO 9001:2015"],
+            ["US office", "North Tonawanda, NY / 43.0° N 78.9° W"],
+            ["Headquarters", "Burnaby, BC / 49.2° N 123.0° W"],
+          ].map(([k, v]) => (
+            <div key={k} className="flex gap-3">
+              <dt>{k}</dt>
+              <dd className="text-snow">{v}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
       <div className="v2-wrap grid gap-10 py-16 sm:py-20 lg:grid-cols-[1.1fr_2fr] lg:gap-16">
         <div>
           <Image
@@ -115,7 +134,12 @@ export function Footer() {
             <p>
               © {year} {company.name} All rights reserved.
             </p>
-            <p>ISO 9001:2015 certified. CAGE code 0EYW4.</p>
+            <p>
+              ISO 9001:2015 certified. CAGE code {PROCUREMENT.cage}.{" "}
+              <Link href={NAV_GOV.href} className="text-muted underline decoration-line-strong underline-offset-2 hover:text-snow">
+                Contracting details
+              </Link>
+            </p>
           </div>
           <p className="max-w-xl lg:text-right">
             Export-controlled technical data may apply; detailed specifications are released to authorized programs.

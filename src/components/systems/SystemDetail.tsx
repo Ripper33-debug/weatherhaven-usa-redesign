@@ -46,7 +46,7 @@ export function SystemDetail({
       <section className="border-b border-line pb-16 pt-28 sm:pt-32">
         <div className="v2-wrap">
           <nav aria-label="Breadcrumb" className="mb-8">
-            <ol className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[0.875rem] text-muted">
+            <ol className="v2-tech flex flex-wrap items-center gap-x-2 gap-y-1 text-muted">
               <li>
                 <Link href="/configurable-solutions" className="text-muted no-underline hover:text-snow">
                   Systems
@@ -161,7 +161,7 @@ export function SystemDetail({
               <dl>
                 {product.specs.map((s) => (
                   <div key={s.label} className="grid gap-1 border-b border-line py-4 last:border-b-0 sm:grid-cols-[minmax(0,0.9fr)_minmax(0,1.4fr)] sm:gap-6">
-                    <dt className="text-[0.9rem] text-muted">{s.label}</dt>
+                    <dt className="v2-tech pt-1 text-muted">{s.label}</dt>
                     <dd className="v2-tnum text-[1rem] font-medium text-snow">{s.value}</dd>
                   </div>
                 ))}

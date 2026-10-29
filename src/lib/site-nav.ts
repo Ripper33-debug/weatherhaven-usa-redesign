@@ -1,9 +1,9 @@
+import { CAPABILITY_CATEGORIES } from "@/lib/capabilitiesExplorer";
 import { PRODUCT_CONTENT, PRODUCT_FAMILIES, type ProductFamily } from "@/lib/product-content";
 import { WEATHERHAVEN_PRODUCT_LINES } from "@/lib/weatherhaven-product-lines";
 
-/** Primary navigation for the public site. */
+/** Primary navigation for the public site (after the Systems and Capabilities menus). */
 export const NAV_LINKS = [
-  { href: "/capabilities", label: "Capabilities" },
   { href: "/mission-solution-builder", label: "Mission builder" },
   { href: "/deployments", label: "Deployments" },
   { href: "/news", label: "News" },
@@ -11,6 +11,25 @@ export const NAV_LINKS = [
 
 export const NAV_CTA = { href: "/contact", label: "Talk to an expert" } as const;
 export const NAV_SOF = { href: "/sof-solutions", label: "SOF portal" } as const;
+export const NAV_GOV = { href: "/government", label: "Government buyers" } as const;
+export const NAV_CAPABILITIES_PAGE = { href: "/capabilities", label: "Capabilities" } as const;
+
+const sentence = (s: string) => {
+  const t = s.replace("&", "and").toLowerCase();
+  return t.charAt(0).toUpperCase() + t.slice(1);
+};
+
+/** The capability areas on /capabilities, for the Capabilities menu. */
+export const NAV_CAPABILITIES = CAPABILITY_CATEGORIES.map((c) => ({ href: `/capabilities#${c.id}`, label: sentence(c.label) }));
+
+/** Who Weatherhaven serves, each pointing to the story (or portal) that shows it. */
+export const NAV_PROGRAMS = [
+  { href: "/deployments#trecc-us-army", label: "US Army", note: "TRECC, built with the US Army" },
+  { href: "/sof-solutions", label: "Special operations", note: "Planning tools in the SOF portal" },
+  { href: "/deployments#nato-headquarters", label: "NATO and UN", note: "Deployable headquarters, peacekeeping camps" },
+  { href: "/deployments#covid-mobile-health-units", label: "Medical and disaster relief", note: "100-bed field hospitals" },
+  { href: "/deployments#beyond-epica", label: "Polar and research", note: "Ice-core drilling at 3,200 m" },
+] as const;
 
 /** Display order inside each family: best-known, best-documented systems first. */
 export const FAMILY_ORDER: string[] = [

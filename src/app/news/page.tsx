@@ -46,7 +46,7 @@ export default async function NewsPage() {
                         rel={external ? "noopener noreferrer" : undefined}
                         className="group grid gap-2 py-6 no-underline md:grid-cols-[11rem_minmax(0,1fr)] md:gap-8"
                       >
-                        <time dateTime={item.published_at ?? undefined} className="text-[0.9rem] text-muted">
+                        <time dateTime={item.published_at ?? undefined} className="v2-tech text-muted">
                           {formatNewsDate(item.published_at)}
                         </time>
                         <span>

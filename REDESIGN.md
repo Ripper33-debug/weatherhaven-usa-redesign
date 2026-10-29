@@ -84,6 +84,16 @@ To share it, deploy it as a **new** Vercel project (`npx vercel`), not the produ
 - The TRECC page opens on the 3D model, with the photos after it (field shots first).
 - The 3D TRECC (homepage and TRECC page) now shows its still instead of 3D when the browser draws WebGL in software, as the mission builder's camp already did. That keeps old or GPU-less machines responsive, and it's what Lighthouse sees.
 
+## Defence-company polish
+
+- **Instrument type.** Small technical text (spec labels, breadcrumbs, dates, coordinates, CAGE and UEI) is set in Geist Mono, which was already loaded, through `.v2-tech` (uppercase labels) and `.v2-code` (codes and numbers). Key panels get thin corner brackets (`.v2-ticks`), matching the deployment globe. All three are in `globals.css`.
+- **TRECC callouts.** With the 3D TRECC deployed, four numbered markers sit on the model (setup, footprint, shell and climate, transport), and a legend under it gives the published fact for each. Hovering a legend item lights its marker. Markers hide when their face turns away or while it's stowed. The points are in `CALLOUTS` in `TreccViewer.tsx`; `projectOpen` in `treccStage.ts` places them.
+- **For government buyers (`/government`).** Legal name, CAGE and UEI with copy buttons, registered NAICS codes, how agencies buy now (the Letterkenny BPAs, DLA spares by NSN, the 109th Airlift Wing award, allied programs) with a source on each, and what Weatherhaven provides for a procurement. The data and its sources are in `src/lib/procurement.ts`. It's linked from the Capabilities menu, the footer, Contact and Resources.
+- **Menus.** Systems is a mega menu with a photo per family and every system with its key figure. Capabilities lists the capability areas, who Weatherhaven serves (each linked to the deployment story that shows it) and a government-buyers panel with the CAGE and UEI. Both scroll on short laptop screens. The phone menu adds Capabilities and Government buyers.
+- **Footer.** An identifier strip (CAGE, UEI, ISO 9001:2015, US office and headquarters with coordinates) above the links, and a Contracting details link in the bottom line.
+- **Systems catalog.** The family buttons and the filters each sit on one row instead of wrapping into each other.
+- **Demo deployment.** Without Supabase settings, the menu no longer asks the server for a sign-in role, which failed with a 500 on every page.
+
 ## The 3D model
 
 - `public/models/trecc-stowed.glb` and `trecc-open.glb` were made from the TRECC CAD exports (about 5 million triangles each) by cutting them to about 4% of the triangles and compressing them. Each is about 3.5 MB. The three finishes are one model recolored in the browser.
@@ -173,3 +183,4 @@ Then copy the new media from this folder's `public/` into the repo and commit it
 17. **Misplaced pins.** Fixed by using the globe's confirmed list: Bogotá, Munich, Hamburg and Trinidad now have their right coordinates, and the 13 pins still awaiting confirmation (Loro among them) are off the public site until they're confirmed.
 18. **AR on real phones.** Open "See it full size" on an iPhone and an Android phone before launch (see "See it full size" above); it couldn't be tried on a physical phone here.
 19. **AR model height.** The AR model keeps the CAD export's size: 4.51 m long, 2.39 m wide and 2.35 m tall. Weatherhaven publishes TRECC-T deployed as 181 × 97 × 82 in (4.60 × 2.46 × 2.08 m). Length and width agree within about 10 cm; the extra height probably comes from parts the published figure leaves out (feet or roof fittings). Someone who knows the TRECC should confirm which is right, since visitors will stand next to it.
+20. **Procurement details.** The UEI, NAICS list and contract record on `/government` come from public SAM.gov and USAspending data (sources in `src/lib/procurement.ts`). Have Weatherhaven's contracts team confirm them, and say which vehicles they want shown, before launch.

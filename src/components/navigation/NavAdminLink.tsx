@@ -30,6 +30,12 @@ export function NavAdminLink({
     let cancelled = false;
 
     const sync = async () => {
+      // No Supabase project configured (the demo deployment): there is no sign-in to ask about,
+      // and the role check would only fail with a 500 on every page.
+      if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+        setMode("hidden");
+        return;
+      }
       try {
         const res = await fetch("/api/auth/session-role", { cache: "no-store" });
         if (!res.ok) throw new Error("session-role failed");

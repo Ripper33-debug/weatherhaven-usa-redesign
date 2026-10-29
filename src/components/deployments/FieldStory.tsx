@@ -61,7 +61,7 @@ function Systems({ story }: { story: DeploymentStory }) {
 
 function Where({ story }: { story: DeploymentStory }) {
   return (
-    <p className="text-[0.95rem] text-muted">
+    <p className="v2-tech text-muted">
       <span className="text-snow">{story.place}</span>
       <span aria-hidden className="mx-2 text-line-strong">
         /

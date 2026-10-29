@@ -74,7 +74,7 @@ function Reading({ kind, r, at }: { kind: "cold" | "hot"; r: FieldReading; at: D
   const c = signedDegrees(r.tempC);
   return (
     <div className="min-w-0 border-l-2 pl-3 sm:pl-4" style={{ borderColor: kind === "cold" ? ICE : "var(--v2-signal)" }}>
-      <p className="text-[0.85rem] text-muted">{kind === "cold" ? "Coldest" : "Hottest"}</p>
+      <p className="v2-tech text-muted">{kind === "cold" ? "Coldest" : "Hottest"}</p>
       <p className="mt-1 flex items-baseline gap-2 whitespace-nowrap">
         <span className="v2-figure text-[1.7rem] leading-none text-snow sm:text-[2rem]">
           {f}
@@ -83,7 +83,7 @@ function Reading({ kind, r, at }: { kind: "cold" | "hot"; r: FieldReading; at: D
         <span className="v2-figure text-[0.95rem] text-muted">{c} °C</span>
       </p>
       <p className="mt-1.5 text-[0.82rem] leading-snug text-snow/90 sm:truncate sm:text-[0.88rem]">{r.name}</p>
-      <p className="v2-tnum mt-0.5 hidden flex-wrap gap-x-3 text-[0.8125rem] text-muted sm:flex">
+      <p className="v2-code mt-0.5 hidden flex-wrap gap-x-3 text-[0.78rem] text-muted sm:flex">
         <span>{formatCoords(r.lat, r.lng)}</span>
         {local ? (
           <span className="inline-flex items-center gap-1.5">

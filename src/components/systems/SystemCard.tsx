@@ -45,7 +45,7 @@ export function SystemCard({
           <dl className="mt-4 border-t border-line text-[0.85rem]">
             {specs.map((s) => (
               <div key={s.label} className="grid grid-cols-[8.5rem_1fr] gap-3 border-b border-line py-2">
-                <dt className="text-muted">{s.label}</dt>
+                <dt className="v2-tech pt-[0.15em] !text-[0.72rem] text-muted">{s.label}</dt>
                 <dd className="text-snow">{s.value}</dd>
               </div>
             ))}

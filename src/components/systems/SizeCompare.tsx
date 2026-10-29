@@ -314,15 +314,15 @@ export function SizeCompare({ sizes, heading }: { sizes: SystemSize[]; heading?:
       <div className="flex flex-col @4xl:col-start-2 @4xl:row-start-2">
         <dl className="border-t border-line @4xl:mt-6">
           <div className="grid grid-cols-[6.5rem_1fr] gap-3 border-b border-line py-3.5">
-            <dt className="text-[0.9rem] text-muted">Packed</dt>
+            <dt className="v2-tech pt-1 text-muted">Packed</dt>
             <dd className="v2-tnum text-[0.95rem] text-snow">{size.packedNote}</dd>
           </div>
           <div className="grid grid-cols-[6.5rem_1fr] gap-3 border-b border-line py-3.5">
-            <dt className="text-[0.9rem] text-muted">Deployed</dt>
+            <dt className="v2-tech pt-1 text-muted">Deployed</dt>
             <dd className="v2-tnum text-[0.95rem] text-snow">{size.deployedNote}</dd>
           </div>
           <div className="grid grid-cols-[6.5rem_1fr] gap-3 border-b border-line py-3.5">
-            <dt className="text-[0.9rem] text-muted">{size.areaPublished ? "Floor" : "Footprint"}</dt>
+            <dt className="v2-tech pt-1 text-muted">{size.areaPublished ? "Floor" : "Footprint"}</dt>
             <dd className="v2-tnum text-[0.95rem] text-snow">
               {areaLabel}
               {P ? (

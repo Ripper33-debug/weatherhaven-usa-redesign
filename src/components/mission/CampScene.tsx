@@ -232,7 +232,7 @@ export function CampScene({
             const chip = (
               <>
                 <span
-                  className={`block whitespace-nowrap px-2.5 py-1 text-[0.85rem] font-semibold leading-none transition-colors ${
+                  className={`v2-tech block whitespace-nowrap px-2.5 py-1.5 !leading-none transition-colors ${
                     best ? "bg-signal text-ink" : on ? "bg-snow text-ink" : "bg-ink/80 text-snow shadow-[inset_0_0_0_1px_rgb(148_170_196/0.4)] backdrop-blur-sm"
                   }`}
                 >

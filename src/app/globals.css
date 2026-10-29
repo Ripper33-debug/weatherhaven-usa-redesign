@@ -1375,6 +1375,53 @@ body .wh-v2 .wh-marketing-display {
   animation: v2-sonar 2.4s cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
 }
 
+/* Technical type, the instrument language of the deployment globe: codes, coordinates, dates and
+   spec labels. Geist Mono is already loaded for the SOF portal, so this costs no extra font. */
+.v2-tech {
+  font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+
+.v2-code {
+  font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Corner brackets for instrument panels (spec tables, the 3D viewer): a thin frame that reads as
+   equipment rather than a card. Sits over whatever background the element has. */
+.v2-ticks {
+  position: relative;
+}
+
+.v2-ticks::before,
+.v2-ticks::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  --tick: 12px;
+  --tick-c: rgb(238 242 246 / 0.55);
+  background:
+    linear-gradient(var(--tick-c), var(--tick-c)) top left / var(--tick) 1px no-repeat,
+    linear-gradient(var(--tick-c), var(--tick-c)) top left / 1px var(--tick) no-repeat,
+    linear-gradient(var(--tick-c), var(--tick-c)) top right / var(--tick) 1px no-repeat,
+    linear-gradient(var(--tick-c), var(--tick-c)) top right / 1px var(--tick) no-repeat;
+}
+
+.v2-ticks::after {
+  background:
+    linear-gradient(var(--tick-c), var(--tick-c)) bottom left / var(--tick) 1px no-repeat,
+    linear-gradient(var(--tick-c), var(--tick-c)) bottom left / 1px var(--tick) no-repeat,
+    linear-gradient(var(--tick-c), var(--tick-c)) bottom right / var(--tick) 1px no-repeat,
+    linear-gradient(var(--tick-c), var(--tick-c)) bottom right / 1px var(--tick) no-repeat;
+}
+
 /* One grade for Weatherhaven's mixed product photography (bright snow shots next to grey overcast
    and warehouse interiors), so photos sit together in grids and bands. Public pages only. */
 .wh-v2 img[src*="%2Fproducts%2F"],

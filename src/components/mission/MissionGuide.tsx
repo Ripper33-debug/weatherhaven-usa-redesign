@@ -373,7 +373,7 @@ const CRUMBS = [{ href: "/", label: "Home" }, { label: "Mission builder" }];
 function Breadcrumb() {
   return (
     <nav aria-label="Breadcrumb">
-      <ol className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[0.875rem] text-muted">
+      <ol className="v2-tech flex flex-wrap items-center gap-x-2 gap-y-1 text-muted">
         <li>
           <Link href="/" className="text-muted no-underline hover:text-snow">
             Home

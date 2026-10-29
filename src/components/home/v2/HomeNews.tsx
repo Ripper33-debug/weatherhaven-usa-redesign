@@ -29,7 +29,7 @@ export async function HomeNews() {
                   rel={external ? "noopener noreferrer" : undefined}
                   className="group flex h-full flex-col py-6 no-underline md:px-6 md:first:pl-0"
                 >
-                  <time dateTime={item.published_at ?? undefined} className="text-[0.85rem] text-muted">
+                  <time dateTime={item.published_at ?? undefined} className="v2-tech text-muted">
                     {formatNewsDate(item.published_at)}
                   </time>
                   <h3 className="mt-3 text-[1.2rem] font-semibold leading-snug text-snow transition-colors group-hover:text-signal [font-variation-settings:'wdth'_106]">

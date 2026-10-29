@@ -9,7 +9,17 @@ import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 import { useMenuOpenForRoute } from "@/hooks/useMenuOpenForRoute";
 import { NavAdminLink } from "@/components/navigation/NavAdminLink";
 import { isPublicSitePage } from "@/lib/marketing-pages";
-import { NAV_CTA, NAV_LINKS, NAV_SOF, SYSTEMS_BY_FAMILY } from "@/lib/site-nav";
+import {
+  NAV_CAPABILITIES,
+  NAV_CAPABILITIES_PAGE,
+  NAV_CTA,
+  NAV_GOV,
+  NAV_LINKS,
+  NAV_PROGRAMS,
+  NAV_SOF,
+  SYSTEMS_BY_FAMILY,
+} from "@/lib/site-nav";
+import { PROCUREMENT } from "@/lib/procurement";
 import { COMPANY_CONTACT, companyPhoneHref } from "@/lib/company-facts";
 
 function Logo({ height = 24, priority = false }: { height?: number; priority?: boolean }) {
@@ -29,11 +39,28 @@ function Logo({ height = 24, priority = false }: { height?: number; priority?: b
 
 function SystemsMenu({ onNavigate }: { onNavigate: () => void }) {
   return (
-    <div className="v2-wrap grid gap-x-10 gap-y-8 py-10 lg:grid-cols-[1fr_1fr_1fr_1fr_minmax(0,0.9fr)]">
+    <div className="v2-wrap grid gap-x-10 gap-y-8 py-10 lg:grid-cols-[repeat(4,minmax(0,1fr))_minmax(13rem,0.9fr)]">
       {SYSTEMS_BY_FAMILY.map((family) => (
         <div key={family.id}>
-          <p className="text-[0.95rem] font-semibold text-snow [font-variation-settings:'wdth'_110]">{family.name}</p>
-          <ul className="mt-4 space-y-1">
+          <Link
+            href={`/configurable-solutions?family=${family.id}`}
+            onClick={onNavigate}
+            className="group block no-underline"
+          >
+            <span className="relative block aspect-[16/9] overflow-hidden bg-hull">
+              <Image
+                src={family.cover}
+                alt=""
+                fill
+                sizes="240px"
+                className="v2-photo object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+              />
+            </span>
+            <span className="mt-4 block text-[0.95rem] font-semibold text-snow [font-variation-settings:'wdth'_110] group-hover:text-signal">
+              {family.name}
+            </span>
+          </Link>
+          <ul className="mt-3 space-y-1">
             {family.systems.map((s) => (
               <li key={s.slug}>
                 <Link
@@ -51,13 +78,14 @@ function SystemsMenu({ onNavigate }: { onNavigate: () => void }) {
       ))}
       <div className="hidden flex-col justify-between border-l border-line pl-8 lg:flex">
         <div>
-          <p className="text-[0.95rem] font-semibold text-snow [font-variation-settings:'wdth'_110]">Not sure where to start?</p>
+          <p className="v2-tech text-muted">17 systems</p>
+          <p className="mt-4 text-[0.95rem] font-semibold text-snow [font-variation-settings:'wdth'_110]">Not sure where to start?</p>
           <p className="mt-3 text-[0.9rem] leading-relaxed text-muted">
             Describe the mission, climate and force size, and the mission builder suggests a starting camp layout.
           </p>
         </div>
         <div className="mt-6 flex flex-col gap-3">
-          <Link href="/mission-solution-builder" onClick={onNavigate} className="v2-btn v2-btn-ghost">
+          <Link href="/mission-solution-builder" onClick={onNavigate} className="v2-btn v2-btn-ghost whitespace-nowrap">
             Open mission builder
           </Link>
           <Link href="/configurable-solutions" onClick={onNavigate} className="v2-link text-[0.9rem]">
@@ -69,16 +97,66 @@ function SystemsMenu({ onNavigate }: { onNavigate: () => void }) {
   );
 }
 
+function CapabilitiesMenu({ onNavigate }: { onNavigate: () => void }) {
+  return (
+    <div className="v2-wrap grid gap-x-12 gap-y-8 py-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.9fr)]">
+      <div>
+        <p className="v2-tech text-muted">What a camp needs</p>
+        <ul className="mt-4 grid gap-x-6 sm:grid-cols-2">
+          {NAV_CAPABILITIES.map((c) => (
+            <li key={c.href}>
+              <Link href={c.href} onClick={onNavigate} className="-mx-3 block px-3 py-2 text-[0.95rem] font-medium text-snow no-underline hover:bg-white/[0.04] hover:text-signal">
+                {c.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+        <Link href={NAV_CAPABILITIES_PAGE.href} onClick={onNavigate} className="v2-link mt-4 inline-block text-[0.9rem]">
+          All capabilities
+        </Link>
+      </div>
+      <div>
+        <p className="v2-tech text-muted">Who we serve</p>
+        <ul className="mt-4 space-y-1">
+          {NAV_PROGRAMS.map((p) => (
+            <li key={p.href}>
+              <Link href={p.href} onClick={onNavigate} className="group -mx-3 block px-3 py-2 no-underline hover:bg-white/[0.04]">
+                <span className="block text-[0.95rem] font-medium text-snow group-hover:text-signal">{p.label}</span>
+                <span className="mt-0.5 block text-[0.85rem] leading-snug text-muted">{p.note}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div className="v2-plate v2-ticks flex flex-col justify-between px-6 py-6">
+        <div>
+          <p className="v2-tech text-muted">{NAV_GOV.label}</p>
+          <p className="v2-code mt-4 text-[1.05rem] text-snow">CAGE {PROCUREMENT.cage}</p>
+          <p className="v2-code mt-1 text-[1.05rem] text-snow">UEI {PROCUREMENT.uei}</p>
+          <p className="mt-4 text-[0.9rem] leading-relaxed text-muted">
+            NAICS codes, current Army and DLA contract vehicles, and how to request a configuration package.
+          </p>
+        </div>
+        <Link href={NAV_GOV.href} onClick={onNavigate} className="v2-btn v2-btn-ghost mt-6">
+          Contracting details
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+type MenuId = "systems" | "capabilities";
+
 export function Navbar() {
   const pathname = usePathname();
   const isLogin = pathname === "/login";
   const publicSite = isPublicSitePage(pathname);
   const [open, setOpen] = useMenuOpenForRoute();
   const [scrolled, setScrolled] = useState(false);
-  const [systemsOpen, setSystemsOpen] = useState(false);
+  const [menu, setMenu] = useState<MenuId | null>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const openedAt = useRef(0);
-  const systemsButtonRef = useRef<HTMLButtonElement>(null);
+  const menuButtons = useRef<Record<MenuId, HTMLButtonElement | null>>({ systems: null, capabilities: null });
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
 
@@ -89,23 +167,23 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, [pathname]);
 
-  // Close the systems menu on navigation (adjusting state during render, not in an effect).
+  // Close the menus on navigation (adjusting state during render, not in an effect).
   const [menuPath, setMenuPath] = useState(pathname);
   if (menuPath !== pathname) {
     setMenuPath(pathname);
-    setSystemsOpen(false);
+    setMenu(null);
   }
 
   useEffect(() => {
-    if (!systemsOpen) return;
+    if (!menu) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
-      setSystemsOpen(false);
-      systemsButtonRef.current?.focus();
+      setMenu(null);
+      menuButtons.current[menu]?.focus();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [systemsOpen]);
+  }, [menu]);
 
   useBodyScrollLock(open);
 
@@ -140,31 +218,35 @@ export function Navbar() {
     };
   }, [open, setOpen]);
 
-  const openSystems = useCallback(() => {
+  // Times come from the events themselves (ms since the page loaded).
+  const openMenu = useCallback((id: MenuId, at: number) => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
-    setSystemsOpen((was) => {
-      if (!was) openedAt.current = Date.now();
-      return true;
+    setMenu((was) => {
+      if (was !== id) openedAt.current = at;
+      return id;
     });
   }, []);
 
   // A click right after hover (or a touch tap, which fires both) should open, not toggle shut.
-  const onSystemsClick = () => {
-    if (systemsOpen && Date.now() - openedAt.current < 400) return;
-    if (!systemsOpen) openedAt.current = Date.now();
-    setSystemsOpen(!systemsOpen);
+  const onMenuClick = (id: MenuId, at: number) => {
+    if (menu === id && at - openedAt.current < 400) return;
+    if (menu !== id) openedAt.current = at;
+    setMenu(menu === id ? null : id);
   };
 
-  const onSystemsBlur = (e: React.FocusEvent<HTMLDivElement>) => {
-    if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setSystemsOpen(false);
+  const onMenuBlur = (e: React.FocusEvent<HTMLDivElement>) => {
+    if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setMenu(null);
   };
   const scheduleClose = useCallback(() => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
-    closeTimer.current = setTimeout(() => setSystemsOpen(false), 140);
+    closeTimer.current = setTimeout(() => setMenu(null), 140);
   }, []);
 
-  const solid = scrolled || systemsOpen || !publicSite;
-  const systemsActive = pathname.startsWith("/configurable-solutions");
+  const solid = scrolled || !!menu || !publicSite;
+  const active: Record<MenuId, boolean> = {
+    systems: pathname.startsWith("/configurable-solutions"),
+    capabilities: pathname.startsWith("/capabilities") || pathname.startsWith("/government"),
+  };
 
   if (isLogin) {
     return (
@@ -192,41 +274,50 @@ export function Navbar() {
           </Link>
 
           <nav aria-label="Main" className="hidden flex-1 items-center gap-1 xl:flex">
-            <div onBlur={onSystemsBlur}>
-            <button
-              ref={systemsButtonRef}
-              type="button"
-              aria-expanded={systemsOpen}
-              aria-controls="systems-menu"
-              onClick={onSystemsClick}
-              onMouseEnter={openSystems}
-              className={`flex h-10 items-center gap-1.5 whitespace-nowrap px-3 text-[0.95rem] font-medium transition-colors ${
-                systemsOpen || systemsActive ? "text-snow" : "text-snow/80 hover:text-snow"
-              }`}
-            >
-              Systems
-              <svg
-                width="10"
-                height="10"
-                viewBox="0 0 10 10"
-                aria-hidden
-                className={`transition-transform duration-200 ${systemsOpen ? "rotate-180" : ""}`}
-              >
-                <path d="M1.5 3.5 5 7l3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.5" />
-              </svg>
-            </button>
-            {systemsOpen ? (
-              <div
-                id="systems-menu"
-                role="region"
-                aria-label="Systems"
-                onMouseEnter={openSystems}
-                className="absolute inset-x-0 top-full border-t border-line bg-ink shadow-[0_24px_48px_rgb(0_0_0/0.35)]"
-              >
-                <SystemsMenu onNavigate={() => setSystemsOpen(false)} />
+            {(
+              [
+                { id: "systems", label: "Systems", panel: <SystemsMenu onNavigate={() => setMenu(null)} /> },
+                { id: "capabilities", label: "Capabilities", panel: <CapabilitiesMenu onNavigate={() => setMenu(null)} /> },
+              ] as const
+            ).map((m) => (
+              <div key={m.id} onBlur={onMenuBlur}>
+                <button
+                  ref={(el) => {
+                    menuButtons.current[m.id] = el;
+                  }}
+                  type="button"
+                  aria-expanded={menu === m.id}
+                  aria-controls={`${m.id}-menu`}
+                  onClick={(e) => onMenuClick(m.id, e.timeStamp)}
+                  onMouseEnter={(e) => openMenu(m.id, e.timeStamp)}
+                  className={`flex h-10 items-center gap-1.5 whitespace-nowrap px-3 text-[0.95rem] font-medium transition-colors ${
+                    menu === m.id || active[m.id] ? "text-snow" : "text-snow/80 hover:text-snow"
+                  }`}
+                >
+                  {m.label}
+                  <svg
+                    width="10"
+                    height="10"
+                    viewBox="0 0 10 10"
+                    aria-hidden
+                    className={`transition-transform duration-200 ${menu === m.id ? "rotate-180" : ""}`}
+                  >
+                    <path d="M1.5 3.5 5 7l3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.5" />
+                  </svg>
+                </button>
+                {menu === m.id ? (
+                  <div
+                    id={`${m.id}-menu`}
+                    role="region"
+                    aria-label={m.label}
+                    onMouseEnter={(e) => openMenu(m.id, e.timeStamp)}
+                    className="absolute inset-x-0 top-full max-h-[calc(100svh-72px)] overflow-y-auto overscroll-contain border-t border-line bg-ink shadow-[0_24px_48px_rgb(0_0_0/0.35)]"
+                  >
+                    {m.panel}
+                  </div>
+                ) : null}
               </div>
-            ) : null}
-            </div>
+            ))}
             {NAV_LINKS.map((link) => {
               const active = pathname.startsWith(link.href);
               return (
@@ -300,7 +391,7 @@ export function Navbar() {
           </div>
           <nav aria-label="Mobile" className="v2-wrap flex-1 pb-10 pt-4">
             <ul className="border-t border-line">
-              {[{ href: "/configurable-solutions", label: "All systems" }, ...NAV_LINKS, NAV_SOF].map((l) => (
+              {[{ href: "/configurable-solutions", label: "All systems" }, NAV_CAPABILITIES_PAGE, ...NAV_LINKS, NAV_GOV, NAV_SOF].map((l) => (
                 <li key={l.href} className="border-b border-line">
                   <Link
                     href={l.href}

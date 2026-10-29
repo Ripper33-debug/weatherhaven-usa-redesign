@@ -30,10 +30,10 @@ export function HomeDataPlate() {
         <div className="v2-plate v2-chamfer px-6 py-8 sm:px-10 sm:py-10">
           <Rivets />
           <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b border-line pb-5">
-            <h2 id="plate-heading" className="text-[0.95rem] font-semibold text-snow [font-variation-settings:'wdth'_112]">
+            <h2 id="plate-heading" className="v2-tech text-snow">
               Weatherhaven by the numbers
             </h2>
-            <p className="text-[0.85rem] text-muted">ISO 9001:2015 certified. CAGE 0EYW4.</p>
+            <p className="v2-tech text-muted">ISO 9001:2015 &nbsp;/&nbsp; CAGE 0EYW4 &nbsp;/&nbsp; UEI DBETGL9QKYH3</p>
           </div>
           <dl className="grid grid-cols-2 gap-x-6 gap-y-8 pt-7 sm:grid-cols-3 lg:grid-cols-5 lg:gap-x-0">
             {FACTS.map((fact, i) => (
