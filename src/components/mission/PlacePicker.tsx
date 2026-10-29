@@ -44,8 +44,9 @@ function PickMap({ places, value, onPick }: { places: GuidePlace[]; value: Guide
     const pt = new DOMPoint(e.clientX, e.clientY).matrixTransform(ctm.inverse());
     const [lng, lat] = map.invert(pt.x, pt.y);
     if (!Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lng) > 180 || Math.abs(lat) > 85) return;
-    // A tap within about 14 screen pixels of a documented place picks that place (the nearest).
-    const reach = 14 / ctm.a;
+    // A click within 8 screen pixels of a documented place (a tap within 14) picks that place,
+    // the nearest one; anywhere else picks the point itself.
+    const reach = (window.matchMedia("(pointer: coarse)").matches ? 14 : 8) / ctm.a;
     let near: GuidePlace | null = null;
     let best = reach;
     for (const { p, xy } of pins) {
