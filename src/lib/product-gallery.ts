@@ -1,5 +1,6 @@
 import { getProductImage, getProductGalleryUrls } from "@/lib/product-images";
 import manifest from "@/lib/product-gallery-manifest.json";
+import { EXCLUDED_PRODUCT_IMAGES } from "@/lib/product-content";
 
 export type LocalProductImages = {
   cover?: string;
@@ -29,7 +30,7 @@ export function mergeProductDetailImages(
 
   const push = (url: string) => {
     const trimmed = url.trim();
-    if (!trimmed || seen.has(trimmed)) return;
+    if (!trimmed || seen.has(trimmed) || EXCLUDED_PRODUCT_IMAGES.has(trimmed)) return;
     seen.add(trimmed);
     urls.push(trimmed);
   };

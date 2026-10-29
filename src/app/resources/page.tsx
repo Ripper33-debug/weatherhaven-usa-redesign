@@ -72,7 +72,7 @@ export default function ResourcesPage() {
     <>
       <V2PageHeader
         crumbs={[{ href: "/", label: "Home" }, { label: "Resources" }]}
-        title="Resources for program teams."
+        title="Resources for program teams"
         lead="Spec sheets, certifications and contracting details in one place. Detailed technical data for export-controlled programs is released through a Weatherhaven expert."
       />
       <div className="bg-ink py-14 sm:py-20">
@@ -121,7 +121,7 @@ export default function ResourcesPage() {
           </div>
 
           <aside aria-labelledby="buyer-heading" className="lg:pt-2">
-            <div className="v2-plate v2-chamfer px-6 py-7 lg:sticky lg:top-28">
+            <div className="v2-plate px-6 py-7 lg:sticky lg:top-28">
               <h2 id="buyer-heading" className="text-[1.1rem] font-semibold text-snow">
                 Contracting details
               </h2>
@@ -133,14 +133,6 @@ export default function ResourcesPage() {
                 <div>
                   <dt className="text-muted">Address</dt>
                   <dd className="text-snow">889 Erie Avenue, North Tonawanda, NY 14120</dd>
-                </div>
-                <div>
-                  <dt className="v2-tech text-muted">CAGE code</dt>
-                  <dd className="v2-code text-[1.3rem] text-snow">0EYW4</dd>
-                </div>
-                <div>
-                  <dt className="v2-tech text-muted">UEI</dt>
-                  <dd className="v2-code text-[1.3rem] text-snow">DBETGL9QKYH3</dd>
                 </div>
                 <div>
                   <dt className="text-muted">Certifications</dt>
@@ -155,7 +147,7 @@ export default function ResourcesPage() {
                 Request technical data
               </Link>
               <Link href="/government" className="v2-link mt-4 inline-block text-[0.9rem]">
-                NAICS codes and contract vehicles
+                CAGE, UEI, NAICS codes and contract vehicles
               </Link>
             </div>
           </aside>

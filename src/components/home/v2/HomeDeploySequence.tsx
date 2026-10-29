@@ -330,7 +330,7 @@ export function HomeDeploySequence() {
         <div className="v2-wrap grid w-full items-center gap-6 pt-16 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16 lg:pt-20">
           <div>
             <h2 id="deploy-heading" className="v2-h2 max-w-[16ch] text-snow">
-              160 ft² on the truck. 420 ft² on the ground.
+              How a MECC goes from 160 ft² to 420 ft²
             </h2>
             <p className="v2-body mt-4 hidden lg:block">
               Every MECC leaves the factory as a 20-ft shipping container and arrives as a building.

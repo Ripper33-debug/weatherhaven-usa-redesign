@@ -99,7 +99,7 @@ export default async function EventsPage() {
     <>
       <V2PageHeader
         crumbs={[{ href: "/", label: "Home" }, { label: "Events" }]}
-        title="Briefings and events."
+        title="Briefings and events"
         lead="Book a capability briefing at a time that suits your program, or meet the Weatherhaven team at a defense show."
       />
 

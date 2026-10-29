@@ -19,7 +19,6 @@ import {
   NAV_SOF,
   SYSTEMS_BY_FAMILY,
 } from "@/lib/site-nav";
-import { PROCUREMENT } from "@/lib/procurement";
 import { COMPANY_CONTACT, companyPhoneHref } from "@/lib/company-facts";
 
 function Logo({ height = 24, priority = false }: { height?: number; priority?: boolean }) {
@@ -128,13 +127,12 @@ function CapabilitiesMenu({ onNavigate }: { onNavigate: () => void }) {
           ))}
         </ul>
       </div>
-      <div className="v2-plate v2-ticks flex flex-col justify-between px-6 py-6">
+      <div className="v2-plate flex flex-col justify-between px-6 py-6">
         <div>
-          <p className="v2-tech text-muted">{NAV_GOV.label}</p>
-          <p className="v2-code mt-4 text-[1.05rem] text-snow">CAGE {PROCUREMENT.cage}</p>
-          <p className="v2-code mt-1 text-[1.05rem] text-snow">UEI {PROCUREMENT.uei}</p>
-          <p className="mt-4 text-[0.9rem] leading-relaxed text-muted">
-            NAICS codes, current Army and DLA contract vehicles, and how to request a configuration package.
+          <p className="text-[0.95rem] font-semibold text-snow [font-variation-settings:'wdth'_110]">{NAV_GOV.label}</p>
+          <p className="mt-3 text-[0.9rem] leading-relaxed text-muted">
+            CAGE code and UEI, NAICS codes, current Army and DLA contract vehicles, and how to request a
+            configuration package.
           </p>
         </div>
         <Link href={NAV_GOV.href} onClick={onNavigate} className="v2-btn v2-btn-ghost mt-6">

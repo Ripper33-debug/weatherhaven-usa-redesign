@@ -10,7 +10,7 @@ function SystemList({ systems, columns = 1 }: { systems: NavSystem[]; columns?: 
         <li key={s.slug} className="border-b border-line">
           <Link
             href={s.href}
-            className="group grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-4 py-3.5 no-underline"
+            className="group block py-3.5 no-underline"
           >
             <span>
               <span className="block text-[1.05rem] font-semibold text-snow transition-colors group-hover:text-signal [font-variation-settings:'wdth'_106]">
@@ -18,9 +18,6 @@ function SystemList({ systems, columns = 1 }: { systems: NavSystem[]; columns?: 
               </span>
               <span className="mt-0.5 block text-[0.875rem] leading-snug text-muted">{s.keySpec}</span>
             </span>
-            <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden className="text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-signal">
-              <path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5" fill="none" stroke="currentColor" strokeWidth="1.5" />
-            </svg>
           </Link>
         </li>
       ))}
@@ -36,11 +33,11 @@ export function HomeSystems() {
       <div className="v2-wrap">
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.8fr)] lg:items-end">
           <h2 id="systems-heading" className="v2-h1 max-w-[21ch] text-snow">
-            From a polar tent to a full field hospital.
+            Seventeen systems in four families
           </h2>
           <p className="v2-body lg:justify-self-end">
-            Four families of shelter, all designed and built by Weatherhaven, all engineered to be struck and
-            redeployed when the mission moves.
+            Each one is designed and built by Weatherhaven, and each one can be struck, moved and set up again
+            somewhere else.
           </p>
         </div>
 
@@ -49,11 +46,11 @@ export function HomeSystems() {
           <Link href={`/configurable-solutions?family=${lead.id}`} className="group relative block aspect-[4/3] overflow-hidden bg-hull lg:aspect-auto lg:min-h-[520px]">
             <Image
               src={lead.cover}
-              alt="Weatherhaven expandable container command post lit at dusk"
+              alt={`All ${lead.name.toLowerCase()}`}
               {...blurProps(lead.cover)}
               fill
               sizes="(max-width: 1024px) 100vw, 55vw"
-              className="object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+              className="object-cover"
             />
           </Link>
           <div className="flex flex-col">
@@ -75,11 +72,11 @@ export function HomeSystems() {
               >
                 <Image
                   src={family.cover}
-                  alt={`Weatherhaven ${family.name.toLowerCase()}`}
+                  alt={`All ${family.name.toLowerCase()}`}
                   {...blurProps(family.cover)}
                   fill
                   sizes="(max-width: 768px) 100vw, 33vw"
-                  className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                  className="object-cover"
                 />
               </Link>
               <h3 className="v2-h3 mt-6 text-snow">{family.name}</h3>

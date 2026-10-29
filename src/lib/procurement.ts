@@ -65,12 +65,12 @@ export const PROCUREMENT = {
     },
     {
       title: "Published specifications",
-      text: "Dimensions, weights, climate ratings and to-scale drawings for every system, with info sheets where Weatherhaven publishes them.",
+      text: "Dimensions, weights, climate ratings and to-scale drawings for every system, with info sheets where available.",
       link: { label: "Compare systems.", href: "/configurable-solutions", external: false },
     },
     {
       title: "Test record",
-      text: "TRECC completed MIL-STD-810G and safety testing at Aberdeen Test Center and is at technology readiness level 9 (TRECC-T), as published in Weatherhaven's capabilities statement.",
+      text: "TRECC completed MIL-STD-810G and safety testing at Aberdeen Test Center and TRECC-T is at technology readiness level 9.",
       link: {
         label: "Capabilities statement (PDF).",
         href: "https://usubc.org/wp-content/uploads/2026/08/Weatherhaven-2026-Capabilities-Statement-1.pdf",

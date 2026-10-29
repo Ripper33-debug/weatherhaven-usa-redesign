@@ -43,7 +43,7 @@ export function CampScene({
   focus: CampFocus;
   results: boolean;
   /** Product photos by slug, shown instead of the 3D camp where WebGL is off. */
-  photos?: Record<string, { src: string; blur?: string; representative?: boolean }>;
+  photos?: Record<string, { src: string; blur?: string; shows?: string }>;
   apiRef?: React.MutableRefObject<CampSceneApi | null>;
 }) {
   const router = useRouter();
@@ -322,11 +322,11 @@ export function CampScene({
             ? `Example fit-out for ${MISSION_ROOM[answers.mission ?? "response"]}. Each layout is configured for the program.`
             : load === "fallback"
             ? lead
-              ? `${photos?.[lead.slug]?.representative ? "Representative photo" : "Photo"} of the ${lead.name}. This browser can't show the 3D camp.`
+              ? `${photos?.[lead.slug]?.shows ? `Photo of ${photos[lead.slug].shows}, from the same family as the ${lead.name}` : `Photo of the ${lead.name}`}. This browser can't show the 3D camp.`
               : "This browser can't show the 3D camp (it needs hardware graphics). The questions and results work the same."
             : compact
-              ? "Illustration: simplified models, illustrative quantities. Major grid lines 5 m apart."
-              : "Illustration: simplified models drawn from published dimensions where they exist; quantities are illustrative. Major grid lines are 5 m apart."}
+              ? "Simplified models, illustrative quantities. Grid lines every 5 m."
+              : "Simplified models drawn from published dimensions; quantities are illustrative. Grid lines every 5 m."}
         </p>
         {ready && !touched ? (
           <p className="shrink-0 text-[0.8125rem] text-snow/80 sm:text-[0.8125rem]">

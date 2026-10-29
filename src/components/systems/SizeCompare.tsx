@@ -192,7 +192,7 @@ export function SizeCompare({ sizes, heading }: { sizes: SystemSize[]; heading?:
       </div>
 
       <div className="space-y-4 @4xl:col-start-1 @4xl:row-span-2 @4xl:row-start-1">
-        <figure className="v2-plate v2-chamfer overflow-hidden p-3 sm:p-5">
+        <figure className="v2-plate overflow-hidden p-3 sm:p-5">
           <svg
             viewBox={`0 0 ${sceneW} ${sceneH}`}
             className="block h-auto w-full"
@@ -275,7 +275,7 @@ export function SizeCompare({ sizes, heading }: { sizes: SystemSize[]; heading?:
         </figure>
 
         {hasSide ? (
-          <figure className="v2-plate v2-chamfer overflow-hidden p-3 sm:p-5">
+          <figure className="v2-plate overflow-hidden p-3 sm:p-5">
             <svg viewBox={`0 0 ${sideW} ${ground + 10}`} className="mx-auto block h-auto max-h-[220px] w-full" role="img" aria-labelledby={`${id}-side`}>
               <title id={`${id}-side`}>{`Side view to scale: ${size.name} ${state === "packed" && P ? "packed" : "deployed"} next to a 6-ft person.`}</title>
               <line x1="0" x2={sideW} y1={ground} y2={ground} stroke="rgb(148 170 196 / 0.45)" strokeWidth="1.25" vectorEffect="non-scaling-stroke" />
@@ -334,9 +334,7 @@ export function SizeCompare({ sizes, heading }: { sizes: SystemSize[]; heading?:
           </div>
         </dl>
         <p className="mt-4 text-[0.85rem] leading-relaxed text-muted">
-          Drawn to scale from Weatherhaven&apos;s published outside dimensions.
-          {size.areaPublished ? " Floor area is the published figure." : " Footprint is worked out from those dimensions."}{" "}
-          Outlines show overall size, not how the system unfolds.
+          Drawn to scale from published outside dimensions{size.areaPublished ? "" : "; footprint calculated from them"}.
         </p>
       </div>
     </div>

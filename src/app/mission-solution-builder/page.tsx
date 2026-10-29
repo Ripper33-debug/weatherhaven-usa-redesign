@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { MissionGuide, MissionGuideFallback, type GuideProduct } from "@/components/mission/MissionGuide";
-import { PRODUCT_CONTENT } from "@/lib/product-content";
+import { PRODUCT_CONTENT, showsFullName } from "@/lib/product-content";
 import { PRODUCT_COVERS, productCover } from "@/lib/product-covers";
 import { blurProps } from "@/lib/image-blur";
 import { pageMeta } from "@/lib/page-meta";
@@ -30,10 +30,10 @@ function guideProducts(): Record<string, GuideProduct> {
         {
           slug,
           name: c.name,
-          subtitle: c.fullName,
+          subtitle: showsFullName(c.name, c.fullName) ? c.fullName : "",
           cover,
           blur: blurProps(cover).blurDataURL,
-          representative: PRODUCT_COVERS[slug]?.representative,
+          shows: PRODUCT_COVERS[slug]?.shows,
           specs: c.specs.slice(0, 3),
         },
       ];

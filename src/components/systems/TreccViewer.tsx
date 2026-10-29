@@ -11,21 +11,16 @@ import { startWhenNear } from "@/lib/start-when-near";
 type LoadState = "idle" | "loading" | "ready" | "fallback";
 
 /**
- * Numbered callouts pinned to the deployed TRECC, each a published fact (the same figures as the
- * spec table and size drawing on this page). Points are fractions of the deployed model's box:
- * x along its length (the expanding end at 1), y up, z across (the long side facing the default
- * view at 1).
+ * Numbered callouts pinned to the deployed TRECC, each a published fact keyed to the part it
+ * describes (the size drawing further down the page covers the footprint). Points are fractions of
+ * the deployed model's box: x along its length (the expanding end at 1), y up, z across (the long
+ * side facing the default view at 1).
  */
 const CALLOUTS: { title: string; text: string; point: OpenPoint }[] = [
   {
-    title: "Up in under 3 minutes",
-    text: "Two people deploy it with 24 VDC electric actuators, with a manual backup.",
+    title: "Electric actuators",
+    text: "24 VDC actuators expand and stow it, with a manual backup.",
     point: { at: [0.82, 0.55, 1], normal: [0, 0, 1] },
-  },
-  {
-    title: "Footprint grows about 1.6×",
-    text: "TRECC-T: 114 × 94.5 in stowed, 181 × 97 in deployed.",
-    point: { at: [1, 0.15, 0.5], normal: [1, 0, 0] },
   },
   {
     title: "All-aluminum shell",
@@ -33,7 +28,7 @@ const CALLOUTS: { title: string; text: string; point: OpenPoint }[] = [
     point: { at: [0.3, 1, 0.55], normal: [0, 1, 0] },
   },
   {
-    title: "Rides what you drive",
+    title: "Trailer, vehicle or pallet",
     text: "A light tactical trailer, an M1289 JLTV trailer or one 463L pallet; under 60 in stowed, for CH-47 airlift.",
     point: { at: [0.12, 0.06, 1], normal: [0, 0, 1] },
   },
@@ -189,7 +184,7 @@ export function TreccViewer({ lead = false }: { lead?: boolean } = {}) {
 
   return (
     <div>
-      <div ref={wrapRef} className="v2-ticks relative aspect-[4/3] overflow-hidden border border-line bg-[radial-gradient(ellipse_at_60%_45%,#172233_0%,#0a0f17_70%)] sm:aspect-[16/9]">
+      <div ref={wrapRef} className="relative aspect-[4/3] overflow-hidden border border-line bg-[radial-gradient(ellipse_at_60%_45%,#172233_0%,#0a0f17_70%)] sm:aspect-[16/9]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/models/trecc-poster-viewer.jpg"
@@ -216,7 +211,7 @@ export function TreccViewer({ lead = false }: { lead?: boolean } = {}) {
                 }}
                 aria-hidden
                 style={{ opacity: 0 }}
-                className={`v2-tech pointer-events-none absolute left-0 top-0 flex h-6 w-6 items-center justify-center rounded-full !text-[0.72rem] transition-[opacity,background-color,color] duration-200 ${
+                className={`pointer-events-none absolute left-0 top-0 flex h-6 w-6 items-center justify-center rounded-full text-[0.75rem] font-semibold tabular-nums transition-[opacity,background-color,color] duration-200 ${
                   hot === i ? "bg-signal text-ink" : "bg-ink/80 text-snow shadow-[inset_0_0_0_1px_rgb(238_242_246/0.7)]"
                 }`}
               >
@@ -266,7 +261,6 @@ export function TreccViewer({ lead = false }: { lead?: boolean } = {}) {
                   </svg>
                 </button>
               ))}
-              <span className="hidden px-2 text-[0.85rem] text-muted sm:inline">or drag</span>
             </div>
             <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4">
               <TreccFinishPicker value={finish} onChange={chooseFinish} />
@@ -274,7 +268,7 @@ export function TreccViewer({ lead = false }: { lead?: boolean } = {}) {
           </>
         ) : null}
       </div>
-      <ol aria-label="TRECC at a glance" className="mt-5 grid gap-x-8 gap-y-4 sm:grid-cols-2">
+      <ol aria-label="TRECC at a glance" className="mt-5 grid gap-x-8 gap-y-4 sm:grid-cols-3">
         {CALLOUTS.map((c, i) => (
           <li
             key={c.title}
@@ -284,7 +278,7 @@ export function TreccViewer({ lead = false }: { lead?: boolean } = {}) {
           >
             <span
               aria-hidden
-              className={`v2-tech mt-0.5 flex h-6 w-6 items-center justify-center rounded-full !text-[0.72rem] transition-colors ${
+              className={`mt-0.5 flex h-6 w-6 items-center justify-center rounded-full text-[0.75rem] font-semibold tabular-nums transition-colors ${
                 hot === i ? "bg-signal text-ink" : "text-snow shadow-[inset_0_0_0_1px_rgb(238_242_246/0.7)]"
               }`}
             >
@@ -297,15 +291,7 @@ export function TreccViewer({ lead = false }: { lead?: boolean } = {}) {
           </li>
         ))}
       </ol>
-      <p className="mt-4 text-[0.85rem] text-muted">
-        3D model for illustration. Configuration varies by program.
-        {lead ? (
-          <span className="mt-2 block min-h-[3em] text-[0.9rem]">
-            {ready ? "Drag to turn it, switch between stowed and deployed, and try the three finishes. " : null}On a phone, see it full
-            size where you stand.
-          </span>
-        ) : null}
-      </p>
+      <p className="mt-4 text-[0.85rem] text-muted">Illustrative model. Configuration varies by program.</p>
     </div>
   );
 }

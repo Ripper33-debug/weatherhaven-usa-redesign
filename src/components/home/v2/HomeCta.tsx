@@ -27,7 +27,7 @@ export function HomeCta() {
       </div>
       <div className="v2-wrap relative pb-20 pt-4 sm:pb-24 lg:py-32">
         <h2 id="cta-heading" className="v2-display max-w-[14ch] text-snow">
-          Tell us where you&apos;re deploying.
+          Tell us where you&apos;re deploying
         </h2>
         <p className="v2-lead mt-6 max-w-[44ch]">
           Share the mission, the climate and the number of people. A Weatherhaven expert will come back with a

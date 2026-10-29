@@ -60,6 +60,8 @@ export function NavAdminLink({
     };
   }, []);
 
+  // No Supabase project (the demo deployment): there is no sign-in page to link to.
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return null;
   const footerAlwaysVisible = placement === "footer";
   if (!footerAlwaysVisible && (mode === "loading" || mode === "hidden")) return null;
   if (placement === "header" && mode === "guest") return null;

@@ -14,7 +14,7 @@ export const metadata: Metadata = pageMeta({
   description:
     "Published specifications for Weatherhaven expandable containers, soft-wall, inflatable and polar shelters. Filter by family, mission, environment and transport.",
   path: "/configurable-solutions",
-  image: "/products/hqss.jpg",
+  image: "/products/ehmecc/gallery/08-EHMECC.jpg",
 });
 
 /** CMS-backed catalog; admin publish revalidates this route. */
@@ -32,8 +32,8 @@ export default async function SystemsPage() {
     <>
       <V2PageHeader
         crumbs={[{ href: "/", label: "Home" }, { label: "Systems" }]}
-        title="Every system, with the numbers."
-        lead="Published specifications for Weatherhaven expandable containers, soft-wall, inflatable and polar shelters. Filter by family or mission, then open a system for its full spec sheet."
+        title="Shelter systems"
+        lead="Weatherhaven's expandable containers, soft-wall, inflatable and polar shelters, with their specifications."
       />
       <Suspense fallback={<SystemsCatalogFallback products={products} blurs={blurs} />}>
         <SystemsCatalog products={products} blurs={blurs} />
@@ -42,11 +42,10 @@ export default async function SystemsPage() {
         <div className="v2-wrap">
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.85fr)] lg:items-end">
             <h2 id="scale-heading" className="v2-h2 max-w-[18ch] text-snow">
-              Every system, to scale.
+              Floor plans compared
             </h2>
             <p className="v2-body lg:justify-self-end">
-              Floor plans at one scale, smallest to largest, with each system&apos;s packed size inside its deployed
-              size and a 20-ft ISO container for comparison.
+              Smallest to largest, each with its packed size inside its deployed size, beside a 20-ft ISO container.
             </p>
           </div>
           <div className="mt-12">
@@ -59,8 +58,7 @@ export default async function SystemsPage() {
           <div>
             <h2 className="v2-h2 max-w-[22ch] text-snow">Need a configuration package for a solicitation or J&amp;A?</h2>
             <p className="v2-body mt-4">
-              Weatherhaven assembles bounded option sets and technical narratives from your mission inputs, not from
-              a generic cut sheet.
+              Weatherhaven assembles bounded option sets and technical narratives from your mission inputs.
             </p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">

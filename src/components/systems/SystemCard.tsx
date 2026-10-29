@@ -2,7 +2,7 @@ import Image from "next/image";
 import { ViewTransition } from "react";
 import Link from "next/link";
 import type { Product } from "@/lib/products";
-import { getProductContent } from "@/lib/product-content";
+import { EXCLUDED_PRODUCT_IMAGES, getProductContent, showsFullName } from "@/lib/product-content";
 import { productCover } from "@/lib/product-covers";
 
 /** Photo-led system card with the most useful published figures. */
@@ -18,18 +18,19 @@ export function SystemCard({
 }) {
   const content = getProductContent(product.slug);
   const specs = product.specs.slice(0, 3);
+  const cms = product.coverImageUrl && !EXCLUDED_PRODUCT_IMAGES.has(product.coverImageUrl.trim()) ? product.coverImageUrl : undefined;
   return (
     <article className="group relative flex h-full flex-col bg-ink">
       {/* Shares a name with the product page's main photo, so the card morphs into it on navigation. */}
       <ViewTransition name={`system-photo-${product.slug}`} share="v2-morph" default="none">
         <div className="relative aspect-[4/3] overflow-hidden bg-hull">
           <Image
-            src={productCover(product.slug, product.coverImageUrl)}
+            src={productCover(product.slug, cms)}
             alt={`Weatherhaven ${product.name}`}
             fill
             sizes={sizes}
             {...(blurDataURL ? { placeholder: "blur" as const, blurDataURL } : {})}
-            className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+            className="object-cover"
           />
         </div>
       </ViewTransition>
@@ -39,13 +40,13 @@ export function SystemCard({
             {product.name}
           </Link>
         </h3>
-        <p className="mt-1 text-[0.85rem] text-muted">{product.subtitle}</p>
+        {showsFullName(product.name, product.subtitle) ? <p className="mt-1 text-[0.85rem] text-muted">{product.subtitle}</p> : null}
         <p className="mt-3 text-[0.95rem] leading-relaxed text-snow/85">{content?.keySpec ?? product.description}</p>
         {specs.length > 0 ? (
           <dl className="mt-4 border-t border-line text-[0.85rem]">
             {specs.map((s) => (
               <div key={s.label} className="grid grid-cols-[8.5rem_1fr] gap-3 border-b border-line py-2">
-                <dt className="v2-tech pt-[0.15em] !text-[0.72rem] text-muted">{s.label}</dt>
+                <dt className="v2-tech pt-[0.1em] text-muted">{s.label}</dt>
                 <dd className="text-snow">{s.value}</dd>
               </div>
             ))}

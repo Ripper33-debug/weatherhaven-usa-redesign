@@ -31,24 +31,24 @@ describe("product-gallery", () => {
 
   it("builds detail list with cover before gallery", () => {
     const local = {
-      cover: "/products/hqss.jpg",
+      cover: "/products/ehmecc.jpg",
       gallery: ["/products/hqss/gallery/01-field.jpg"],
     };
     const urls = mergeProductDetailImages("hqss", local);
-    expect(urls[0]).toBe("/products/hqss.jpg");
+    expect(urls[0]).toBe("/products/ehmecc.jpg");
     expect(urls[1]).toBe("/products/hqss/gallery/01-field.jpg");
   });
 
   it("skips CDN fallback when local images exist", () => {
-    const urls = mergeProductDetailImages("hqss", { cover: "/products/hqss.jpg", gallery: [] });
-    expect(urls).toEqual(["/products/hqss.jpg"]);
+    const urls = mergeProductDetailImages("hqss", { cover: "/products/ehmecc.jpg", gallery: [] });
+    expect(urls).toEqual(["/products/ehmecc.jpg"]);
   });
 
   it("merges CMS URLs with local gallery files", () => {
     const urls = mergeProductDetailImages(
       "hqss",
       {
-        cover: "/products/hqss.jpg",
+        cover: "/products/ehmecc.jpg",
         gallery: ["/products/hqss/gallery/01-field.jpg", "/products/hqss/gallery/02-interior.jpg"],
       },
       {
@@ -58,12 +58,19 @@ describe("product-gallery", () => {
     );
 
     expect(urls).toEqual([
-      "/products/hqss.jpg",
+      "/products/ehmecc.jpg",
       "/products/hqss/gallery/01-field.jpg",
       "/products/hqss/gallery/02-interior.jpg",
       "https://cdn.example/cover.jpg",
       "https://cdn.example/gallery-1.jpg",
     ]);
+  });
+
+  it("never returns the generated cut-away images", () => {
+    const urls = getProductDetailImages("ehmecc");
+    expect(urls.length).toBeGreaterThan(0);
+    expect(urls).not.toContain("/products/ehmecc/gallery/02-EHMECC-and-Command-Post.jpg");
+    expect(mergeProductDetailImages("hqss", { cover: "/products/hqss.jpg", gallery: [] })).not.toContain("/products/hqss.jpg");
   });
 
   it("reads bundled manifest for known slugs", () => {

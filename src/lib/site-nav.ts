@@ -24,7 +24,7 @@ export const NAV_CAPABILITIES = CAPABILITY_CATEGORIES.map((c) => ({ href: `/capa
 
 /** Who Weatherhaven serves, each pointing to the story (or portal) that shows it. */
 export const NAV_PROGRAMS = [
-  { href: "/deployments#trecc-us-army", label: "US Army", note: "TRECC, built with the US Army" },
+  { href: "/deployments#trecc-us-army", label: "US Army", note: "TRECC, developed with the US Army" },
   { href: "/sof-solutions", label: "Special operations", note: "Planning tools in the SOF portal" },
   { href: "/deployments#nato-headquarters", label: "NATO and UN", note: "Deployable headquarters, peacekeeping camps" },
   { href: "/deployments#covid-mobile-health-units", label: "Medical and disaster relief", note: "100-bed field hospitals" },

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Product } from "@/lib/products";
-import { getProductContent, PRODUCT_FAMILIES } from "@/lib/product-content";
+import { getProductContent, PRODUCT_FAMILIES, showsFullName } from "@/lib/product-content";
 import { contactUrl } from "@/lib/contact-url";
 import { SystemGallery } from "@/components/systems/SystemGallery";
 import { SystemCard } from "@/components/systems/SystemCard";
@@ -10,7 +10,9 @@ import { TreccViewer } from "@/components/systems/TreccViewer";
 import { SizeCompare } from "@/components/systems/SizeCompare";
 import { sizesForSlug } from "@/lib/system-sizes";
 import { HomeDeploySequence } from "@/components/home/v2/HomeDeploySequence";
-import { COMPANY_CONTACT, companyPhoneHref } from "@/lib/company-facts";
+
+/** The generic placeholder older CMS rows carry; it says nothing about the product. */
+const PLACEHOLDER_CONFIGURATION = "Configured to your requirement";
 
 export function SystemDetail({
   product,
@@ -24,7 +26,11 @@ export function SystemDetail({
   const content = getProductContent(product.slug);
   const family = PRODUCT_FAMILIES.find((f) => f.id === content?.family);
   const sheet = product.downloads.find((d) => d.type === "PDF");
-  const otherLinks = product.downloads.filter((d) => d !== sheet);
+  // Only real documents; the generic links to weatherhaven.com that every product carries are left out.
+  const documents = product.downloads.filter((d) => d !== sheet && d.type !== "Web");
+  const configurations = product.configurations.filter((c) => c.title !== PLACEHOLDER_CONFIGURATION);
+  const overview = product.overview.filter((p) => p.trim() && p !== product.description);
+  const hasAbout = overview.length > 0 || configurations.length > 0 || documents.length > 0;
   const contactHref = contactUrl({ system: product.slug, inquiry: "Program Requirement" });
   const sizes = sizesForSlug(product.slug);
   // The TRECC is the one system with a real 3D model, so its page opens on it; the photos follow.
@@ -77,10 +83,13 @@ export function SystemDetail({
             )}
             <div className="flex flex-col">
               <h1 className="v2-h1 text-snow">{product.name}</h1>
-              <p className="mt-3 text-[1rem] font-medium text-signal">{product.subtitle}</p>
+              {showsFullName(product.name, product.subtitle) ? (
+                <p className="mt-3 text-[1rem] font-medium text-signal">{product.subtitle}</p>
+              ) : null}
               <p className="v2-lead mt-6">{product.description}</p>
 
-              {product.features.length > 0 ? (
+              {/* On the TRECC page the callouts under the 3D model carry these facts. */}
+              {!leadWith3d && product.features.length > 0 ? (
                 <ul className="mt-8 border-t border-line">
                   {product.features.slice(0, 3).map((f) => (
                     <li key={f.title} className="grid gap-1 border-b border-line py-4 sm:grid-cols-[11rem_1fr] sm:gap-4">
@@ -93,7 +102,7 @@ export function SystemDetail({
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <Link href={contactHref} className="v2-btn">
-                  Talk to an expert about {product.name}
+                  Ask about {product.name}
                 </Link>
                 {sheet ? (
                   <a href={sheet.href} target="_blank" rel="noopener noreferrer" className="v2-btn v2-btn-ghost">
@@ -114,7 +123,7 @@ export function SystemDetail({
         <section aria-labelledby="photos-heading" className="border-b border-line py-16 sm:py-20">
           <div className="v2-wrap">
             <h2 id="photos-heading" className="v2-h2 text-snow">
-              Photos of the {product.name}.
+              Photos
             </h2>
             <div className="mt-8 max-w-[56rem]">{gallery}</div>
           </div>
@@ -129,12 +138,11 @@ export function SystemDetail({
           <div className="v2-wrap">
             <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.8fr)] lg:items-end">
               <h2 id="size-heading" className="v2-h2 text-snow">
-                Packed and deployed, to scale.
+                Packed and deployed size
               </h2>
               <p className="v2-body lg:justify-self-end">
-                The {product.name} beside a 20-ft ISO container
-                {sizes.some((s) => typeof s.deployed.h === "number") ? " and a 6-ft person" : ""}, drawn from published
-                dimensions.
+                Next to a 20-ft ISO container
+                {sizes.some((s) => typeof s.deployed.h === "number") ? " and a 6-ft person" : ""}.
               </p>
             </div>
             <div className="@container mt-10">
@@ -151,13 +159,10 @@ export function SystemDetail({
             <h2 id="spec-heading" className="v2-h2 text-snow">
               Specifications
             </h2>
-            <p className="v2-body mt-4">
-              Published figures from Weatherhaven product literature. Exact values depend on configuration; a
-              Weatherhaven expert will confirm them for your program.
-            </p>
+            {product.specs.length > 0 ? <p className="mt-4 text-[0.95rem] text-muted">Figures vary with configuration.</p> : null}
           </div>
           {product.specs.length > 0 ? (
-            <div className="v2-plate v2-chamfer px-6 py-2 sm:px-8">
+            <div className="v2-plate px-6 py-2 sm:px-8">
               <dl>
                 {product.specs.map((s) => (
                   <div key={s.label} className="grid gap-1 border-b border-line py-4 last:border-b-0 sm:grid-cols-[minmax(0,0.9fr)_minmax(0,1.4fr)] sm:gap-6">
@@ -168,60 +173,68 @@ export function SystemDetail({
               </dl>
             </div>
           ) : (
-            <div className="v2-plate v2-chamfer px-6 py-8 sm:px-8">
-              <p className="v2-h3 text-snow">Specifications are released per program.</p>
-              <p className="mt-3 text-muted">
-                Sizes, weights and ratings for {product.name} depend on the configuration. Ask a Weatherhaven expert
-                for the current data sheet.
+            <div className="v2-plate px-6 py-8 sm:px-8">
+              <p className="text-[1.05rem] text-snow">
+                Sizes, weights and ratings for {product.name} depend on the configuration.
               </p>
-              <Link href={contactHref} className="v2-btn mt-6">
-                Request the data sheet
+              <Link href={contactHref} className="v2-link mt-4 inline-block text-[0.95rem]">
+                Ask for the current data sheet
               </Link>
             </div>
           )}
         </div>
       </section>
 
-      {/* Overview + configurations */}
-      <section className="border-b border-line py-20 sm:py-24">
-        <div className="v2-wrap grid gap-14 lg:grid-cols-2 lg:gap-16">
-          <div>
-            <h2 className="v2-h2 text-snow">Overview</h2>
-            <div className="mt-6 space-y-5">
-              {product.overview.map((p) => (
-                <p key={p.slice(0, 40)} className="v2-body text-[1.05rem] text-snow/80">
-                  {p}
-                </p>
-              ))}
-            </div>
-          </div>
-          <div>
-            <h2 className="v2-h2 text-snow">Configurations</h2>
-            <ul className="mt-6 border-t border-line">
-              {product.configurations.map((c) => (
-                <li key={c.title} className="border-b border-line py-5">
-                  <p className="text-[1.05rem] font-semibold text-snow">{c.title}</p>
-                  <p className="mt-1.5 text-[0.95rem] leading-relaxed text-muted">{c.description}</p>
-                </li>
-              ))}
-            </ul>
-            {otherLinks.length > 0 ? (
-              <div className="mt-10">
-                <h3 className="text-[1rem] font-semibold text-snow">More from Weatherhaven</h3>
-                <ul className="mt-3 space-y-2">
-                  {otherLinks.map((d) => (
-                    <li key={d.href}>
-                      <a href={d.href} target="_blank" rel="noopener noreferrer" className="v2-link text-[0.95rem]">
-                        {d.name}
-                      </a>
-                    </li>
+      {/* Background and configurations, only where there is something specific to say */}
+      {hasAbout ? (
+        <section className="border-b border-line py-20 sm:py-24">
+          <div className={`v2-wrap grid gap-14 lg:gap-16 ${overview.length > 0 && (configurations.length > 0 || documents.length > 0) ? "lg:grid-cols-2" : ""}`}>
+            {overview.length > 0 ? (
+              <div className="max-w-[44rem]">
+                <h2 className="v2-h2 text-snow">Overview</h2>
+                <div className="mt-6 space-y-5">
+                  {overview.map((p) => (
+                    <p key={p.slice(0, 40)} className="v2-body text-[1.05rem] text-snow/80">
+                      {p}
+                    </p>
                   ))}
-                </ul>
+                </div>
+              </div>
+            ) : null}
+            {configurations.length > 0 || documents.length > 0 ? (
+              <div className="max-w-[44rem]">
+                {configurations.length > 0 ? (
+                  <>
+                    <h2 className="v2-h2 text-snow">Configurations</h2>
+                    <ul className="mt-6 border-t border-line">
+                      {configurations.map((c) => (
+                        <li key={c.title} className="border-b border-line py-5">
+                          <p className="text-[1.05rem] font-semibold text-snow">{c.title}</p>
+                          <p className="mt-1.5 text-[0.95rem] leading-relaxed text-muted">{c.description}</p>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                ) : null}
+                {documents.length > 0 ? (
+                  <div className={configurations.length > 0 ? "mt-10" : ""}>
+                    <h3 className="text-[1rem] font-semibold text-snow">Documents</h3>
+                    <ul className="mt-3 space-y-2">
+                      {documents.map((d) => (
+                        <li key={d.href}>
+                          <a href={d.href} target="_blank" rel="noopener noreferrer" className="v2-link text-[0.95rem]">
+                            {d.name}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
               </div>
             ) : null}
           </div>
-        </div>
-      </section>
+        </section>
+      ) : null}
 
       {/* Related */}
       {related.length > 0 ? (
@@ -239,25 +252,6 @@ export function SystemDetail({
         </section>
       ) : null}
 
-      {/* Contact */}
-      <section className="bg-hull py-20 sm:py-24">
-        <div className="v2-wrap grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
-          <div>
-            <h2 className="v2-h2 max-w-[20ch] text-snow">Scoping a program with {product.name}?</h2>
-            <p className="v2-body mt-4">
-              Tell us the mission, climate and headcount. You&apos;ll hear back from a Weatherhaven expert, usually
-              within 48 hours. Or call the US office at{" "}
-              <a href={companyPhoneHref(COMPANY_CONTACT.phone)} className="v2-link">
-                {COMPANY_CONTACT.phone}
-              </a>
-              .
-            </p>
-          </div>
-          <Link href={contactHref} className="v2-btn">
-            Talk to an expert
-          </Link>
-        </div>
-      </section>
     </article>
   );
 }

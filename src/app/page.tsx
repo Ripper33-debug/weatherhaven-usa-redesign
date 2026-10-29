@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { pageMeta } from "@/lib/page-meta";
 import { HomeHero } from "@/components/home/v2/HomeHero";
-import { HomeDataPlate } from "@/components/home/v2/HomeDataPlate";
 import { HomeTreccScene } from "@/components/home/v2/HomeTreccScene";
 import { HomeSystems } from "@/components/home/v2/HomeSystems";
 import { HomeDeploymentGlobe } from "@/components/home/v2/HomeDeploymentGlobe";
@@ -16,7 +15,7 @@ export const metadata: Metadata = {
     description:
       "Expandable containers, soft-wall, inflatable and polar shelters that ship as cargo and stand up in minutes. Fielded in 95+ countries since 1981.",
     path: "/",
-    imageAlt: "Weatherhaven expandable shelter at dawn",
+    imageAlt: "A Weatherhaven TRECC on its trailer behind a JLTV",
   }),
   title: { absolute: "Weatherhaven USA | Rapidly deployable shelters, camps and field hospitals" },
 };
@@ -30,7 +29,6 @@ export default async function HomePage() {
   return (
     <>
       <HomeHero field={field} />
-      <HomeDataPlate />
       <HomeTreccScene />
       <HomeSystems />
       <HomeDeploymentGlobe />

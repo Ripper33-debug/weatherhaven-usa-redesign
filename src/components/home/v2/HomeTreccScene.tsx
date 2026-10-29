@@ -20,7 +20,7 @@ const STEPS = [
   },
   {
     title: "Two people, under three minutes",
-    body: "Electric 24VDC actuators expand it, with a manual backup.",
+    body: "Electric 24 VDC actuators expand it, with a manual backup.",
   },
   {
     title: "A building on arrival",
@@ -320,7 +320,7 @@ export function HomeTreccScene() {
           <div className="v2-wrap w-full pb-24 md:pb-8 lg:pb-0">
             <div className="pointer-events-auto max-w-[30rem] bg-ink lg:bg-transparent">
               <h2 id="trecc-heading" className="v2-h2 pt-5 text-snow lg:pt-0">
-                Trailer to command post in under three minutes.
+                Trailer to command post in under three minutes
               </h2>
               <p className="v2-body mt-4 hidden lg:block">
                 TRECC is a patented all-aluminum shelter that rides on a trailer, a vehicle or a 463L pallet.
@@ -366,7 +366,7 @@ export function HomeTreccScene() {
         </div>
 
         <p className="v2-inset-r pointer-events-none absolute bottom-3 hidden text-[0.8125rem] text-muted lg:block">
-          3D model for illustration. Configuration varies by program.
+          Illustrative model. Configuration varies by program.
         </p>
       </div>
     </section>

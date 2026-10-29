@@ -309,7 +309,7 @@ function ContactEngineeringFormInner({
 
       {step === 1 ? (
         <>
-          <p className="text-sm text-muted">Step 1 — essentials (about 30 seconds)</p>
+          <p className="text-sm text-muted">Step 1: the essentials, about 30 seconds</p>
           <label className="block text-[0.875rem] font-medium text-muted">
             Organization
             <input
@@ -367,7 +367,7 @@ function ContactEngineeringFormInner({
         </>
       ) : (
         <>
-          <p className="text-sm text-muted">Step 2 — optional details (or send now)</p>
+          <p className="text-sm text-muted">Step 2: optional details, or send now</p>
           <div className="grid gap-6 sm:grid-cols-2">
             <label className="block text-[0.875rem] font-medium text-muted">
               Full name

@@ -5,7 +5,7 @@ export default function NotFound() {
     <div className="wh-v2 flex min-h-[80vh] items-center bg-ink pb-24 pt-32">
       <div className="v2-wrap">
         <p className="v2-figure text-[1.1rem] text-signal">404</p>
-        <h1 className="v2-h1 mt-4 max-w-[16ch] text-snow">This page isn&apos;t here.</h1>
+        <h1 className="v2-h1 mt-4 max-w-[16ch] text-snow">This page isn&apos;t here</h1>
         <p className="v2-lead mt-5">
           The link may be out of date or mistyped. Every system is listed on the systems page, and a Weatherhaven
           expert can point you to anything else.

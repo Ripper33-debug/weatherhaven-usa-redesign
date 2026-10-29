@@ -13,8 +13,8 @@ export function HomeDeploymentGlobe() {
       <DeploymentGlobe view="map" title="Map of Weatherhaven deployments" />
       <div className="v2-wrap flex flex-col gap-3 border-t border-line py-5 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-[0.95rem] text-muted">
-          {CONFIRMED_DEPLOYMENTS.length} confirmed deployments. The stories behind eight of them, with their sources, are on the
-          deployments page.
+          The {CONFIRMED_DEPLOYMENTS.length} confirmed sites that can be shown publicly. Weatherhaven shelters have gone to
+          more than 95 countries in all.
         </p>
         <div className="flex shrink-0 flex-wrap gap-x-6 gap-y-2 text-[0.95rem]">
           <Link href="/deployments" className="v2-link">

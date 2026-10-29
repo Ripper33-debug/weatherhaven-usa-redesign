@@ -1,135 +1,66 @@
-"use client";
-
+import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
-import { prefersReducedMotion } from "@/lib/effects/media";
-import { useClientMediaQuery } from "@/hooks/useClientMediaQuery";
 import type { FieldExtremes } from "@/lib/field-readout";
+import { blurProps } from "@/lib/image-blur";
 import { HeroFieldReadout } from "@/components/home/v2/HeroFieldReadout";
 
+const PHOTO = "/products/trecc/gallery/08-TRECC-and-Car.jpg";
+
 /**
- * Full-bleed film hero. Poster paints first (LCP), the clip fades in once it can play.
- * Phones get a lighter 720p encode. Along the bottom, a live readout of the coldest and hottest
- * places on the deployment map (hidden when the weather service couldn't be reached).
+ * Full-bleed photograph of a TRECC on its trailer behind a JLTV (a Weatherhaven field photo, not a
+ * render). The headline sits over the darkened lower left; a one-line weather note from two
+ * deployment sites runs along the bottom when the forecast service answered.
  */
-function loadSource(video: HTMLVideoElement) {
-  if (video.getAttribute("src")) return;
-  const small = window.matchMedia("(max-width: 767px)").matches;
-  video.src = small ? "/hero/hero-v2-720.mp4" : "/hero/hero-v2-1080.mp4";
-}
-
 export function HomeHero({ field }: { field: FieldExtremes | null }) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [playing, setPlaying] = useState(false);
-  const reduced = useClientMediaQuery("(prefers-reduced-motion: reduce)");
-  // Reduced motion starts paused; after that the visitor's own choice wins.
-  const [userPaused, setUserPaused] = useState<boolean | null>(null);
-  const paused = userPaused ?? reduced;
-  const userPausedRef = useRef(false);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    const onPlaying = () => setPlaying(true);
-    video.addEventListener("playing", onPlaying);
-    // The poster is the first paint; the film only starts downloading once the page has loaded.
-    const start = () => {
-      if (prefersReducedMotion() || userPausedRef.current) return;
-      loadSource(video);
-      void video.play().catch(() => undefined);
-    };
-    if (document.readyState === "complete") start();
-    else window.addEventListener("load", start, { once: true });
-    return () => {
-      video.removeEventListener("playing", onPlaying);
-      window.removeEventListener("load", start);
-    };
-  }, []);
-
-  const togglePlayback = () => {
-    const video = videoRef.current;
-    if (!video) return;
-    if (paused) {
-      loadSource(video);
-      void video.play().catch(() => undefined);
-      userPausedRef.current = false;
-      setUserPaused(false);
-    } else {
-      video.pause();
-      userPausedRef.current = true;
-      setUserPaused(true);
-    }
-  };
-
   return (
-    <section className="relative isolate flex min-h-[100svh] flex-col justify-end overflow-hidden bg-ink">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/hero/hero-v2-poster.jpg"
-        alt=""
-        fetchPriority="high"
-        className="absolute inset-0 -z-20 h-full w-full object-cover object-[60%_center]"
-      />
-      <video
-        ref={videoRef}
-        muted
-        loop
-        playsInline
-        preload="none"
-        aria-hidden
-        className={`absolute inset-0 -z-10 h-full w-full object-cover object-[60%_center] transition-opacity duration-1000 ${
-          playing ? "opacity-100" : "opacity-0"
-        }`}
-      />
+    <section className="relative isolate flex flex-col overflow-hidden bg-ink md:min-h-[100svh] md:justify-end">
+      {/* Phones: the photo is a band above the copy. Wider screens: full bleed behind it. */}
+      <div className="relative h-[54svh] min-h-[300px] md:absolute md:inset-0 md:-z-20 md:h-auto">
+        <Image
+          src={PHOTO}
+          alt="A Weatherhaven TRECC on its trailer, hitched to a JLTV on frozen grassland"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-[48%_62%] md:object-[62%_45%]"
+          {...blurProps(PHOTO)}
+        />
+        <div
+          aria-hidden
+          className="absolute inset-0 bg-[linear-gradient(180deg,rgb(10_15_23/0.6)_0%,rgb(10_15_23/0)_24%,rgb(10_15_23/0)_62%,#0a0f17_100%)] md:hidden"
+        />
+      </div>
       <div
         aria-hidden
-        className="absolute inset-0 -z-10"
+        className="absolute inset-0 -z-10 hidden md:block"
         style={{
           background:
-            "linear-gradient(90deg, rgb(10 15 23 / 0.86) 0%, rgb(10 15 23 / 0.55) 38%, rgb(10 15 23 / 0.05) 70%), linear-gradient(0deg, rgb(10 15 23 / 0.95) 0%, rgb(10 15 23 / 0) 45%)",
+            "linear-gradient(180deg, rgb(10 15 23 / 0.55) 0%, rgb(10 15 23 / 0) 22%), linear-gradient(90deg, rgb(10 15 23 / 0.9) 0%, rgb(10 15 23 / 0.72) 30%, rgb(10 15 23 / 0.25) 55%, rgb(10 15 23 / 0) 70%), linear-gradient(0deg, rgb(10 15 23 / 0.96) 0%, rgb(10 15 23 / 0.35) 40%, rgb(10 15 23 / 0) 62%)",
         }}
       />
 
-      <div className={`v2-wrap pt-32 ${field ? "pb-8 sm:pb-10 lg:pb-14" : "pb-24 sm:pb-4 lg:pb-8"}`}>
-        <h1 className="v2-display v2-rise-hero text-snow">
-          <span className="lg:block">Ships in a container. </span>
-          <span className="lg:block">Stands up in minutes.</span>
-        </h1>
-        <p className="v2-lead v2-rise v2-rise-2 mt-6 max-w-[54ch] sm:mt-8">
-          Weatherhaven designs and builds rapidly deployable shelters, camps and field hospitals for military,
-          medical and polar operations. Fielded in more than 95 countries since 1981.
+      <div className="v2-wrap relative -mt-6 pb-8 sm:pb-12 md:mt-0 md:pt-32 lg:pb-14">
+        <h1 className="v2-display v2-rise-hero max-w-[20ch] text-snow">Deployable shelters, camps and field hospitals</h1>
+        <p className="v2-lead v2-rise v2-rise-2 mt-6 max-w-[56ch] sm:mt-8">
+          Expandable containers, soft-wall, inflatable and polar shelters that travel as cargo and stand up in
+          minutes. Customers include the US Army, the Air National Guard, NATO and the Canadian Armed Forces, in
+          more than 95 countries since 1981.
         </p>
-        {/* Phones have the same two actions in the fixed bar along the bottom of the screen. */}
+        {/* Phones have the same actions in the fixed bar along the bottom of the screen. */}
         <div className="v2-rise v2-rise-3 mt-9 hidden flex-col gap-3 sm:flex-row sm:items-center md:flex">
           <Link href="/configurable-solutions" className="v2-btn">
-            Explore systems
+            See the systems
           </Link>
-          <Link href="/contact" className="v2-btn v2-btn-ghost">
-            Talk to an expert
+          <Link href="/government" className="v2-btn v2-btn-ghost">
+            Contracting details
           </Link>
         </div>
       </div>
 
-      <div className={`v2-wrap ${field ? "pb-[calc(5.25rem+env(safe-area-inset-bottom,0px))] md:pb-6" : "pb-5 sm:pb-6"}`}>
-        <div
-          className={`flex items-end justify-end gap-6 ${field ? "border-t border-line-strong pt-4 sm:pt-5" : ""}`}
-        >
-          {field ? <HeroFieldReadout field={field} /> : null}
-          <button
-            type="button"
-            onClick={togglePlayback}
-            className="absolute right-3 top-20 flex h-10 shrink-0 items-center gap-2 bg-ink/40 px-3 text-[0.85rem] font-medium text-snow/80 transition-colors hover:text-snow sm:static sm:-mr-3 sm:bg-transparent"
-            aria-label={paused ? "Play film: background video" : "Pause film: background video"}
-          >
-            <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden>
-              {paused ? (
-                <path d="M3 1.5v9l7-4.5z" fill="currentColor" />
-              ) : (
-                <path d="M3 1.5h2v9H3zM7 1.5h2v9H7z" fill="currentColor" />
-              )}
-            </svg>
-            {paused ? "Play film" : "Pause film"}
-          </button>
+      <div className="v2-wrap pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] md:pb-6">
+        <div className="flex flex-col gap-2 border-t border-line-strong pt-4 text-[0.8125rem] leading-snug text-muted sm:flex-row sm:items-baseline sm:justify-between sm:gap-8">
+          {field ? <HeroFieldReadout field={field} /> : <span />}
+          <p className="shrink-0">TRECC and JLTV. Weatherhaven photo.</p>
         </div>
       </div>
     </section>

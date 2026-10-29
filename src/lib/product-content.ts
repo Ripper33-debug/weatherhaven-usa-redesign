@@ -26,8 +26,8 @@ export const PRODUCT_FAMILIES: {
     id: "expandable",
     name: "Expandable containers",
     summary:
-      "Hard-wall shelters that ship as ISO containers, pallets or trailers and unfold to two to three times their shipping footprint in minutes.",
-    cover: "/products/hqss.jpg",
+      "Hard-wall shelters that ship as ISO containers, pallets or trailers and expand on site in minutes.",
+    cover: "/products/ehmecc/gallery/08-EHMECC.jpg",
   },
   {
     id: "softwall",
@@ -51,10 +51,19 @@ export const PRODUCT_FAMILIES: {
   },
 ];
 
+/**
+ * Generated images in the media library (a cut-away render of an EHMECC command post, also the
+ * old HQSS cover). They don't show real equipment, so they never appear on the site.
+ */
+export const EXCLUDED_PRODUCT_IMAGES: ReadonlySet<string> = new Set([
+  "/products/hqss.jpg",
+  "/products/ehmecc/gallery/02-EHMECC-and-Command-Post.jpg",
+]);
+
 export type ProductContent = {
   family: ProductFamily;
   name: string;
-  /** Expanded product name, as Weatherhaven publishes it. */
+  /** Expanded product name. Shown under the name only when it spells out an acronym (see showsFullName). */
   fullName: string;
   /** One accurate sentence for cards, menus and meta descriptions. */
   description: string;
@@ -68,12 +77,6 @@ export type ProductContent = {
   sources: string[];
 };
 
-const CONFIGURE_NOTE = {
-  title: "Configured to your requirement",
-  description:
-    "Interior fit-out, environmental control, power and flooring are specified with a Weatherhaven expert for each program.",
-};
-
 export const PRODUCT_CONTENT: Record<string, ProductContent> = {
   mecc: {
     family: "expandable",
@@ -83,13 +86,12 @@ export const PRODUCT_CONTENT: Record<string, ProductContent> = {
       "Weatherhaven's original expandable shelter: a 20-ft ISO container whose insulated wings fold out to nearly triple its floor space.",
     keySpec: "420 ft² from one 20-ft ISO container",
     overview: [
-      "The MECC ships, stacks and lifts like any 20-ft ISO container. On site, two people fold out its insulated wings in about 10 to 15 minutes, nearly tripling the floor space with no special skills or tools.",
-      "It is built for a 15 to 20 year field life and fits out as a command post, clinic, workshop, office or accommodation module, alone or joined into a larger camp.",
+      "The taller EHMECC builds on its design. Each unit is built for a 15 to 20 year field life and works alone or joined with others into a larger camp.",
     ],
     highlights: [
-      { title: "Nearly triples its footprint", description: "From a standard 20-ft ISO container to 420 ft² of insulated floor." },
-      { title: "Two people, about 15 minutes", description: "No special skills or tools to deploy or strike." },
+      { title: "Two people, 10 to 15 minutes", description: "No special skills or tools to deploy or strike." },
       { title: "Moves like cargo", description: "ISO and CSC certified, stacks nine high, lifts by forklift, crane or helicopter." },
+      { title: "Command post to clinic", description: "Fits out as a command post, clinic, workshop, office or accommodation module." },
     ],
     specs: [
       { label: "Packed size", value: "20 ft × 8 ft × 8 ft (8 ft 6 in high option)" },
@@ -103,7 +105,6 @@ export const PRODUCT_CONTENT: Record<string, ProductContent> = {
     configurations: [
       { title: "8 ft and 8 ft 6 in heights", description: "Two container heights to match existing ISO logistics." },
       { title: "Mini MECC", description: "A 10-ft version of the same expanding design (see BMECC)." },
-      CONFIGURE_NOTE,
     ],
     sources: [
       "https://www.weatherhaven.co.uk/mecc/",
@@ -118,11 +119,10 @@ export const PRODUCT_CONTENT: Record<string, ProductContent> = {
       "A 20-ft ISO container that unfolds to nearly triple its floor space and raises its roof to a 12-ft interior, with room for headquarters and large command posts.",
     keySpec: "420 ft² with 12-ft interior height",
     overview: [
-      "The EHMECC takes the MECC's expanding design and lifts the roof, giving 144 inches of interior height across 420 ft² of floor. The extra volume suits headquarters, large command posts and equipment that won't fit under a standard ceiling.",
-      "It deploys in under 10 minutes without tools, even while still mounted on a truck, and moves through the ISO system and by C-130, C-17, C-5 or A400M.",
+      "The EHMECC takes the MECC's expanding design and lifts the roof. The extra volume suits headquarters, large command posts and equipment that won't fit under a standard ceiling.",
     ],
     highlights: [
-      { title: "12-ft interior height", description: "The most deployed volume of any Weatherhaven expanding container." },
+      { title: "4,661 ft³ inside", description: "The most deployed volume of any Weatherhaven expanding container." },
       { title: "Under 10 minutes", description: "No tools, and it can deploy while still truck-mounted." },
       { title: "Air-mobile", description: "C-130, C-17, C-5 and A400M; can be underslung by helicopter." },
     ],
@@ -138,7 +138,6 @@ export const PRODUCT_CONTENT: Record<string, ProductContent> = {
     ],
     configurations: [
       { title: "Headquarters and command posts", description: "Joins with MECC and TRECC units to form a deployable headquarters." },
-      CONFIGURE_NOTE,
     ],
     sources: ["https://www.weatherhaven.co.uk/ehmecc/", "https://www.weatherhaven.com/Military"],
   },
@@ -147,15 +146,12 @@ export const PRODUCT_CONTENT: Record<string, ProductContent> = {
     name: "BMECC",
     fullName: "BMECC 10-ft expandable container",
     description:
-      "A 10-ft ISO version of the MECC that expands to 210 ft² of insulated workspace; two units ship together as one 20-ft container.",
+      "A 10-ft ISO container that expands like the MECC into 210 ft² of insulated workspace.",
     keySpec: "210 ft² from a 10-ft ISO container",
-    overview: [
-      "The BMECC brings the MECC's expanding wings to a 10-ft container. Two units couple to ship as a single 20-ft ISO module, then deploy as separate rooms.",
-      "It is rated from −51°C to +49°C and suits smaller command, medical and workspace roles where a full 20-ft footprint is too much.",
-    ],
+    overview: ["It suits smaller command, medical and workspace roles where a full 20-ft footprint is too much."],
     highlights: [
-      { title: "Two ship as one", description: "Two BMECCs make one 20-ft ISO shipping module with full CSC." },
-      { title: "210 ft² deployed", description: "1,590 ft³ of insulated volume from a 10-ft container." },
+      { title: "Two ship as one", description: "Two units couple into one 20-ft ISO shipping module with full CSC, then deploy as separate rooms." },
+      { title: "1,590 ft³ inside", description: "Insulated volume from a 10-ft container." },
       { title: "−51°C to +49°C", description: "Operating range across arctic and desert theaters." },
     ],
     specs: [
@@ -167,7 +163,7 @@ export const PRODUCT_CONTENT: Record<string, ProductContent> = {
       { label: "Operating temperature", value: "−51°C to +49°C" },
       { label: "Transport", value: "2 units = one 20-ft ISO module; full CSC; stacks 9 high" },
     ],
-    configurations: [CONFIGURE_NOTE],
+    configurations: [],
     sources: ["https://www.weatherhaven.co.uk/bmecc/"],
   },
   trecc: {
@@ -178,16 +174,15 @@ export const PRODUCT_CONTENT: Record<string, ProductContent> = {
       "A patented all-aluminum shelter on a trailer, vehicle or 463L pallet that expands into a command post, workshop, clinic or sanitation unit in under three minutes.",
     keySpec: "Expands in under 3 minutes",
     overview: [
-      "TRECC is an all-aluminum expanding shelter that rides on a trailer, a vehicle or a single 463L pallet. Two people deploy it in under three minutes using 24VDC electric actuators, with a manual backup.",
-      "It was co-developed with US Army DEVCOM and tested to MIL-STD-810G, and is fitted out as a command post, workshop, clinic or off-grid sanitation and kitchen unit.",
+      "TRECC was co-developed with US Army DEVCOM. It is tested to MIL-STD-810G, with safety testing at Aberdeen Test Center, and TRECC-T is at technology readiness level 9.",
     ],
     highlights: [
       { title: "Under 3 minutes", description: "Two personnel; electric actuators with manual backup." },
-      { title: "Rides on what you drive", description: "Light tactical trailer, M1289 JLTV trailer or a single 463L pallet." },
+      { title: "Trailer, vehicle or pallet", description: "Light tactical trailer, M1289 JLTV trailer or a single 463L pallet." },
       { title: "Tested", description: "MIL-STD-810G; safety testing at Aberdeen Test Center; TRL 9 (TRECC-T)." },
     ],
     specs: [
-      { label: "Setup", value: "Under 3 min, 2 personnel; 24VDC actuators, manual backup" },
+      { label: "Setup", value: "Under 3 min, 2 personnel; 24 VDC actuators, manual backup" },
       { label: "Climate", value: "−40°F to +120°F" },
       { label: "Wind rating", value: "55 mph sustained / 75 mph gusts" },
       { label: "TRECC-T (light tactical trailer)", value: "86 ft² (6–8 pers.); 1,620 lb" },
@@ -200,7 +195,7 @@ export const PRODUCT_CONTENT: Record<string, ProductContent> = {
       { title: "TRECC-T", description: "Light tactical trailer. Stowed 114 × 94.5 × 57 in; deployed 181 × 97 × 82 in." },
       { title: "TRECC-M", description: "M1289 JLTV trailer. Stowed 89 × 84 × 57 in; deployed 171 × 72 × 78 in." },
       { title: "TRECC-P", description: "Single 463L pallet. Packed 104 × 84 × 60 in." },
-      { title: "TRECC sanitation", description: "Off-grid field sanitation and kitchen unit; solar and 24VDC power." },
+      { title: "TRECC sanitation", description: "Off-grid field sanitation and kitchen unit; solar and 24 VDC power." },
     ],
     sources: [
       "https://usubc.org/wp-content/uploads/2026/08/Weatherhaven-2026-Capabilities-Statement-1.pdf",
@@ -214,14 +209,11 @@ export const PRODUCT_CONTENT: Record<string, ProductContent> = {
     description:
       "A hard-wall expandable shelter built on a single 463L air-cargo pallet that two people expand into an insulated workspace in under ten minutes.",
     keySpec: "One 463L pallet, up in under 10 min",
-    overview: [
-      "ATEPS packs a hard-wall shelter onto one 463L pallet so it flies on any fixed-wing aircraft with more than 92 inches of clearance. Two people expand it to more than double its width in under ten minutes.",
-      "Its floor carries up to 7,500 lb on D-ring tie-downs, and it lifts by four-point sling or forklift.",
-    ],
+    overview: [],
     highlights: [
-      { title: "Flies on one pallet", description: "Stowed on a single 463L pallet, 84 × 104 in." },
-      { title: "Two people, under 10 min", description: "Expands to 244 × 104 in." },
-      { title: "Heavy-duty floor", description: "Rated up to 7,500 lb with D-ring tie-downs." },
+      { title: "Any fixed-wing aircraft", description: "Fits aircraft with more than 92 in of height clearance." },
+      { title: "84 to 244 in wide", description: "Stowed on the pallet, then expanded to more than double its width." },
+      { title: "7,500 lb floor", description: "D-ring tie-downs; lifts by four-point sling or forklift." },
     ],
     specs: [
       { label: "Stowed footprint", value: "84 × 104 in (one 463L pallet)" },
@@ -233,7 +225,7 @@ export const PRODUCT_CONTENT: Record<string, ProductContent> = {
       { label: "Handling", value: "4-point sling top lift; 4-way forklift pockets" },
       { label: "Air transport", value: "Fixed-wing aircraft with more than 92 in height clearance" },
     ],
-    configurations: [CONFIGURE_NOTE],
+    configurations: [],
     sources: ["https://www.weatherhaven.com/products/expandable-container/ateps"],
   },
   hercon: {
@@ -243,13 +235,10 @@ export const PRODUCT_CONTENT: Record<string, ProductContent> = {
     description:
       "A hard-wall, ISO-standard expandable building for housing, kitchens, offices and clinics that opens to up to six times its shipping footprint.",
     keySpec: "Expands up to 6× its shipping footprint",
-    overview: [
-      "HERCon is a hard-wall building that ships as an ISO container with no extra packaging. Two 4-ft-wide units couple to ship as one 8-ft container, then deploy as two separate rooms.",
-      "A team of six stands it up in minutes with no foundation, for housing, kitchens, offices, clinics and emergency accommodation.",
-    ],
+    overview: [],
     highlights: [
-      { title: "Up to 6× the footprint", description: "Expands far beyond its shipping size." },
-      { title: "Ships as cargo", description: "Two 4-ft units couple into one 8-ft ISO container." },
+      { title: "No extra packaging", description: "Ships as a standard ISO container." },
+      { title: "Two units, one container", description: "Two 4-ft units couple to ship as one 8-ft ISO container, then deploy as separate rooms." },
       { title: "No foundation", description: "A team of six deploys it in minutes." },
     ],
     specs: [
@@ -261,7 +250,6 @@ export const PRODUCT_CONTENT: Record<string, ProductContent> = {
     configurations: [
       { title: "Housing and accommodation", description: "Deploys as self-contained rooms." },
       { title: "Kitchens, offices and clinics", description: "Hard-wall interiors fitted to purpose." },
-      CONFIGURE_NOTE,
     ],
     sources: ["https://www.weatherhaven.com/products/expandable-container/hercon"],
   },
@@ -270,18 +258,16 @@ export const PRODUCT_CONTENT: Record<string, ProductContent> = {
     name: "ISO containers",
     fullName: "Non-expandable ISO containers",
     description:
-      "Fixed-footprint ISO container modules fitted out for life support, medical, morgue and technical roles alongside expandable shelters.",
+      "Standard ISO containers fitted out as life-support, medical, morgue and technical modules.",
     keySpec: "Fitted ISO modules for fixed roles",
-    overview: [
-      "Where a role doesn't need extra floor space, Weatherhaven fits out standard ISO containers as life-support, medical, morgue and technical modules that integrate with the rest of a camp.",
-    ],
+    overview: [],
     highlights: [
-      { title: "Standard logistics", description: "Moves like any ISO container." },
-      { title: "Purpose-fitted", description: "Life support, medical, morgue and technical interiors." },
-      { title: "Camp-ready", description: "Integrates with expandable and soft-wall shelters." },
+      { title: "Standard logistics", description: "Ships, stacks and lifts like any ISO container." },
+      { title: "For fixed roles", description: "Used where a role doesn't need extra floor space." },
+      { title: "Joins the camp", description: "Works alongside expandable and soft-wall shelters." },
     ],
     specs: [],
-    configurations: [CONFIGURE_NOTE],
+    configurations: [],
     sources: [],
   },
   "series-4": {
@@ -289,16 +275,13 @@ export const PRODUCT_CONTENT: Record<string, ProductContent> = {
     name: "Series 4",
     fullName: "Series 4 tensioned fabric shelter",
     description:
-      "Weatherhaven's original all-climate fabric building: a tensioned-arch shelter 8 to 30 ft wide, used on all seven continents.",
+      "Weatherhaven's original all-climate fabric building: a tensioned-arch shelter used on all seven continents.",
     keySpec: "8 to 30 ft wide, any length",
-    overview: [
-      "Series 4 is a tensioned-arch fabric building on an aluminum or galvanized steel frame. It comes in eleven widths from 8 to 30 ft and extends to any length, and goes up without tools or specialist skills.",
-      "Camps on every continent use it for kitchens, accommodation, workshops and command space.",
-    ],
+    overview: [],
     highlights: [
-      { title: "Any length", description: "Eleven widths from 8 to 30 ft, extended in modules." },
+      { title: "Eleven widths, any length", description: "8 to 30 ft wide, extended in modules." },
       { title: "No tools", description: "No specialist skills needed to erect it." },
-      { title: "Every continent", description: "Proven from the tropics to Antarctic research camps." },
+      { title: "Tropics to Antarctica", description: "Kitchens, accommodation, workshops and command space." },
     ],
     specs: [
       { label: "Widths", value: "8, 10, 12, 14, 16, 18, 20, 22, 24, 26 and 30 ft; any length" },
@@ -321,10 +304,7 @@ export const PRODUCT_CONTENT: Record<string, ProductContent> = {
     description:
       "Weatherhaven's most advanced soft-wall shelter, the system behind Canada's HQSS program, scaling from one to four modules.",
     keySpec: "Up to 995 ft², −51°C to +49°C",
-    overview: [
-      "RDMSS scales from a single 245 ft² module to a 995 ft² four-module building that three people put up in under 20 minutes. It is the shelter behind Canada's Headquarters Shelter System (HQSS) program.",
-      "It is rated from −51°C to +49°C and carries a 20 lb/ft² snow load, with up to ten interconnection points for larger camps.",
-    ],
+    overview: [],
     highlights: [
       { title: "1 to 4 modules", description: "From 245 ft² to 995 ft² of floor." },
       { title: "Under 20 minutes", description: "Four-module setup; under 10 minutes for one or two modules." },
@@ -342,8 +322,7 @@ export const PRODUCT_CONTENT: Record<string, ProductContent> = {
     ],
     configurations: [
       { title: "RDMSS-O, -P and -Op", description: "Model variants for different mission profiles." },
-      { title: "Headquarters (HQSS)", description: "The basis of Canada's HQSS acquisition." },
-      CONFIGURE_NOTE,
+      { title: "Larger camps", description: "Up to ten interconnection points join buildings together." },
     ],
     sources: ["https://www.weatherhaven.co.uk/rdmss/", "https://www.weatherhaven.com/products/soft-shelters/rdmss"],
   },
@@ -354,12 +333,9 @@ export const PRODUCT_CONTENT: Record<string, ProductContent> = {
     description:
       "A thermally efficient modular tent system whose standard-length modules join into command posts, kitchens, accommodation and field hospitals.",
     keySpec: "Modules join into camps and hospitals",
-    overview: [
-      "MTS modules share a standard length so they link into larger structures: command posts, kitchens, accommodation and field hospitals. Each packs into bags sized for a four-person lift.",
-      "It performs under over- and under-pressure conditions and comes with a pre-harnessed, code-compliant electrical system, with ports for environmental control units and cabling.",
-    ],
+    overview: [],
     highlights: [
-      { title: "Modular", description: "Standard-length modules join into larger buildings." },
+      { title: "Four-person lift", description: "Each module packs into bags sized for four people to carry." },
       { title: "Pressure-rated", description: "Performs in over- and under-pressure conditions." },
       { title: "Pre-wired", description: "Code-compliant, pre-harnessed electrical system." },
     ],
@@ -385,14 +361,11 @@ export const PRODUCT_CONTENT: Record<string, ProductContent> = {
     description:
       "A 26-ft-wide, extended-height tensioned-fabric shelter for armored-vehicle and helicopter maintenance in the field.",
     keySpec: "26-ft clear span for vehicle maintenance",
-    overview: [
-      "MEX-26 was the subject of Weatherhaven's first Canadian military contract, in 1984. Its aluminum arches are sprung into tension to stand up to high wind and snow over a 26-ft clear span.",
-      "The first-line system fits on one 463L pallet and ten people erect it in three hours or less, staked or on asphalt or concrete, with no foundation.",
-    ],
+    overview: ["MEX-26 was the subject of Weatherhaven's first Canadian military contract, in 1984."],
     highlights: [
-      { title: "26-ft clear span", description: "Room for armored vehicles and helicopters." },
-      { title: "One pallet", description: "First-line system packs to 108 × 88 × 60 in." },
-      { title: "No foundation", description: "Staked, or set on asphalt or concrete." },
+      { title: "26-ft clear span", description: "Aluminum arches sprung into tension for high wind and snow." },
+      { title: "One 463L pallet", description: "The first-line system packs to 108 × 88 × 60 in." },
+      { title: "No foundation", description: "Ten people erect it in three hours or less, staked or on asphalt or concrete." },
     ],
     specs: [
       { label: "Packed", value: "First-line system on one 463L pallet: 108 × 88 × 60 in" },
@@ -400,7 +373,7 @@ export const PRODUCT_CONTENT: Record<string, ProductContent> = {
       { label: "Frame", value: "Aluminum arches sprung into tension for high wind and snow" },
       { label: "Foundation", value: "None; staked, or on asphalt or concrete" },
     ],
-    configurations: [CONFIGURE_NOTE],
+    configurations: [],
     sources: ["https://www.weatherhaven.com/products/soft-shelters/mex-26"],
   },
   "series-1-5-2": {
@@ -409,16 +382,10 @@ export const PRODUCT_CONTENT: Record<string, ProductContent> = {
     fullName: "Series 1.5 and Series 2 tensioned fabric shelters",
     description: "Lighter tensioned-fabric shelters from the same family as Series 4, for expeditionary command and support.",
     keySpec: "Lighter tensioned-fabric shelters",
-    overview: [
-      "Series 1.5 and Series 2 are lighter tensioned-fabric shelters from the Series 4 family, used for expeditionary command and support. Ask a Weatherhaven expert for current sizes and availability.",
-    ],
-    highlights: [
-      { title: "Lighter frame", description: "From the Series 4 family." },
-      { title: "Expeditionary", description: "For command and support roles." },
-      { title: "Talk to an expert", description: "Current sizes and availability on request." },
-    ],
+    overview: [],
+    highlights: [],
     specs: [],
-    configurations: [CONFIGURE_NOTE],
+    configurations: [],
     sources: [],
   },
   "airbeam-lp": {
@@ -426,16 +393,13 @@ export const PRODUCT_CONTENT: Record<string, ProductContent> = {
     name: "Airmax LP",
     fullName: "Airmax LP low-pressure airbeam shelter",
     description:
-      "A field-repairable inflatable shelter that one or two people deploy in 5 to 10 minutes, rated from −30°C to +50°C.",
+      "An inflatable shelter on low-pressure airbeams that one or two people put up in 5 to 10 minutes, with no poles or frame.",
     keySpec: "Up in 5–10 min, −30°C to +50°C",
-    overview: [
-      "Airmax LP replaces poles and frames with low-pressure airbeams. One or two people inflate it in 5 to 10 minutes, and it is field-repairable if a beam is damaged.",
-      "It is rated for 95 km/h winds and 50 kg/m² snow, in widths from 3 to 6 m and lengths in 2 m increments.",
-    ],
+    overview: [],
     highlights: [
-      { title: "5 to 10 minutes", description: "Two people recommended; no tools." },
-      { title: "Weather-rated", description: "95 km/h wind (Beaufort 10) and 50 kg/m² snow." },
-      { title: "Field-repairable", description: "Low-pressure beams can be repaired on site." },
+      { title: "Field-repairable", description: "A damaged beam can be repaired on site." },
+      { title: "95 km/h wind, 50 kg/m² snow", description: "Rated from −30°C to +50°C." },
+      { title: "3 to 6 m wide", description: "Any length, in 2 m increments." },
     ],
     specs: [
       { label: "Deployed (main unit)", value: "600 × 570 × 280 cm" },
@@ -460,20 +424,17 @@ export const PRODUCT_CONTENT: Record<string, ProductContent> = {
     description:
       "An inflatable shelter whose high-pressure airbeams give more rigidity and wind and snow resistance than low-pressure designs.",
     keySpec: "High-pressure beams for wind and snow",
-    overview: [
-      "Airmax HP uses high-pressure airbeams for a stiffer structure that stands up better to wind and snow. A small team sets it up in minutes without tools and strikes it by reverse pumping.",
-    ],
+    overview: [],
     highlights: [
-      { title: "Stiffer structure", description: "High-pressure beams resist wind and snow." },
-      { title: "Minutes, no tools", description: "Small-team setup; reverse pumping to strike." },
-      { title: "Scalable", description: "3 to 6 m wide, lengths in 2 m increments." },
+      { title: "Minutes, no tools", description: "A small team sets it up; reverse pumping strikes it." },
+      { title: "3 to 6 m wide", description: "Any length, in 2 m increments." },
     ],
     specs: [
       { label: "Widths", value: "3, 4, 5 and 6 m; length in 2 m increments" },
       { label: "Height (centre / eaves)", value: "3 / 2 m (3–4 m wide); 3 / 2.5 m (5 m); 4 / 3 m (6 m)" },
       { label: "Setup / strike", value: "Small team, minutes, no tools; reverse pumping to strike" },
     ],
-    configurations: [CONFIGURE_NOTE],
+    configurations: [],
     sources: ["https://www.weatherhaven.co.uk/airmax-hp/"],
   },
   polarhaven: {
@@ -484,11 +445,10 @@ export const PRODUCT_CONTENT: Record<string, ProductContent> = {
       "A modular, insulated tensioned-fabric shelter for long-term polar base camps, in Antarctica since 1988.",
     keySpec: "Antarctic base camps since 1988",
     overview: [
-      "Polarhaven was Weatherhaven's first Antarctic camp shelter, in 1988. It comes in seven widths from 8 to 20 ft at any length, with translucent insulation for solar gain or foil-bubble insulation for maximum warmth.",
-      "A large Polarhaven served as the operations hub for NASA-supported under-ice robotics at Lake Bonney in Antarctica's McMurdo Dry Valleys.",
+      "Polarhaven was Weatherhaven's first Antarctic camp shelter. A large Polarhaven served as the operations hub for NASA-supported under-ice robotics at Lake Bonney in Antarctica's McMurdo Dry Valleys.",
     ],
     highlights: [
-      { title: "Any length", description: "Widths from 8 to 20 ft." },
+      { title: "8 to 20 ft wide, any length", description: "Seven widths." },
       { title: "About 30 minutes", description: "For a 12 × 16 ft unit." },
       { title: "Choice of insulation", description: "Translucent for solar gain, or foil bubble for warmth." },
     ],
@@ -500,7 +460,7 @@ export const PRODUCT_CONTENT: Record<string, ProductContent> = {
       { label: "Materials", value: "Powder-coated aluminum frame; cold-weather nylon cover" },
       { label: "Insulation", value: "Translucent polyester (solar gain) or foil bubble (max thermal)" },
     ],
-    configurations: [CONFIGURE_NOTE],
+    configurations: [],
     sources: ["https://www.weatherhaven.co.uk/polarhaven/", "https://www.weatherhaven.com/products/soft-shelters/polar-shelters"],
   },
   "polar-chief": {
@@ -508,16 +468,13 @@ export const PRODUCT_CONTENT: Record<string, ProductContent> = {
     name: "Polar Chief",
     fullName: "Polar Chief octagonal polar shelter",
     description:
-      "A fully insulated octagonal polar shelter, used by Antarctic programs as a camp kitchen, lab or office, that two people set up in about 20 minutes.",
+      "A fully insulated octagonal shelter that Antarctic programs use as a camp kitchen, lab or office.",
     keySpec: "Comfortable at −50°C",
-    overview: [
-      "Polar Chief is an insulated octagonal shelter on a one-inch aluminum frame with an umbrella hub. Two people set it up in about 20 minutes, and it stays comfortable at −50°C ambient.",
-      "Antarctic programs use it as a camp kitchen, lab or office.",
-    ],
+    overview: [],
     highlights: [
-      { title: "−50°C", description: "Comfortable ambient temperature rating." },
-      { title: "About 20 minutes", description: "Two people, umbrella-hub frame." },
-      { title: "Packs into three bags", description: "220 lb, 42 ft³." },
+      { title: "−50°C ambient", description: "Stays comfortable inside at −50°C (−58°F)." },
+      { title: "Two people, about 20 minutes", description: "One-inch aluminum frame on an umbrella hub." },
+      { title: "Three bags", description: "220 lb and 42 ft³ packed." },
     ],
     specs: [
       { label: "Size", value: "14 ft across / 15.5 ft diagonal" },
@@ -527,7 +484,7 @@ export const PRODUCT_CONTENT: Record<string, ProductContent> = {
       { label: "Comfortable ambient temperature", value: "−50°C (−58°F)" },
       { label: "Construction", value: "1 in aluminum frame, umbrella hub; insulated 420-denier nylon cover" },
     ],
-    configurations: [CONFIGURE_NOTE],
+    configurations: [],
     sources: ["https://www.weatherhaven.co.uk/polar-chief/"],
   },
   endurance: {
@@ -537,14 +494,10 @@ export const PRODUCT_CONTENT: Record<string, ProductContent> = {
     description:
       "A lightweight polar tent that one person sets up from inside in about five minutes, with clamshell ends for medevac or equipment access.",
     keySpec: "One person, about five minutes",
-    overview: [
-      "Endurance is named after Shackleton's ship. One person erects it from the inside in about five minutes, and its clamshell ends open for medevac or equipment access.",
-      "It comes in 16 ft and 21 ft lengths, weighs 77 to 101 lb, and travels by sled, snowmobile or helicopter.",
-    ],
+    overview: ["Endurance is named after Shackleton's ship."],
     highlights: [
-      { title: "One person", description: "Erected from inside in about five minutes." },
-      { title: "Clamshell ends", description: "Open fully for medevac or equipment." },
-      { title: "Light", description: "77 lb (16 ft) or 101 lb (21 ft)." },
+      { title: "77 to 101 lb", description: "16 ft or 21 ft long, both 8 ft wide." },
+      { title: "Sled, snowmobile or helicopter", description: "Packs to 110 in long." },
     ],
     specs: [
       { label: "Sizes", value: "16 ft or 21 ft long × 8 ft wide × 6 ft 6 in high" },
@@ -554,15 +507,23 @@ export const PRODUCT_CONTENT: Record<string, ProductContent> = {
       { label: "Transport", value: "Sled, snowmobile or helicopter" },
       { label: "Construction", value: "Aluminum frame, ripstop nylon cover, thermal liner, ballast skirt" },
     ],
-    configurations: [
-      { title: "16 ft and 21 ft", description: "Two lengths, same 8 ft width." },
-    ],
+    configurations: [],
     sources: ["https://www.weatherhaven.co.uk/endurance/"],
   },
 };
 
 export function getProductContent(slug: string): ProductContent | undefined {
   return PRODUCT_CONTENT[slug];
+}
+
+/**
+ * The expanded name is worth showing only when it spells out an acronym ("TRECC: Tactical
+ * Redeployable…"). For names like Polarhaven or Airmax LP it just repeats the name.
+ */
+export function showsFullName(name: string, fullName: string | undefined): fullName is string {
+  if (!fullName?.trim()) return false;
+  const first = name.trim().split(/\s+/)[0].toLowerCase();
+  return /[A-Z]{2,}/.test(name) && !fullName.toLowerCase().includes(first);
 }
 
 /** Values that marked the old, generic placeholder spec sheet. */

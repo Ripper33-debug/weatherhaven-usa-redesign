@@ -1117,25 +1117,6 @@ body .wh-v2 .wh-marketing-display {
   color: var(--v2-muted);
 }
 
-/* Small sentence-case label used only where it names what follows */
-.v2-kicker {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-size: 0.9rem;
-  font-weight: 560;
-  font-variation-settings: "wdth" 104;
-  color: var(--v2-signal);
-  letter-spacing: 0;
-}
-
-.v2-kicker::before {
-  content: "";
-  width: 18px;
-  height: 2px;
-  background: currentColor;
-}
-
 /* Data values: condensed-width figures for specs and stats */
 .v2-figure {
   font-variation-settings: "wdth" 84;
@@ -1146,18 +1127,6 @@ body .wh-v2 .wh-marketing-display {
 
 .v2-tnum {
   font-variant-numeric: tabular-nums;
-}
-
-/* Chamfered corners (container corner castings) */
-.v2-chamfer {
-  clip-path: polygon(
-    var(--v2-chamfer) 0,
-    100% 0,
-    100% calc(100% - var(--v2-chamfer)),
-    calc(100% - var(--v2-chamfer)) 100%,
-    0 100%,
-    0 var(--v2-chamfer)
-  );
 }
 
 /* Buttons */
@@ -1235,23 +1204,11 @@ body .wh-v2 .wh-marketing-display {
   background: var(--v2-line);
 }
 
-/* Container data plate — the riveted ID plate on a shipping container */
+/* A flat panel with one hairline, for grouped data (identifiers, spec summaries). */
 .v2-plate {
-  --v2-chamfer: 14px;
   position: relative;
-  background:
-    linear-gradient(180deg, rgb(255 255 255 / 0.035), rgb(255 255 255 / 0) 40%),
-    var(--v2-hull);
-  box-shadow: inset 0 0 0 1px var(--v2-line-strong);
-}
-
-.v2-rivet {
-  position: absolute;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #5b6b80, #263243 70%);
-  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.4);
+  background: var(--v2-hull);
+  box-shadow: inset 0 0 0 1px var(--v2-line);
 }
 
 /* Focus */
@@ -1375,14 +1332,12 @@ body .wh-v2 .wh-marketing-display {
   animation: v2-sonar 2.4s cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
 }
 
-/* Technical type, the instrument language of the deployment globe: codes, coordinates, dates and
-   spec labels. Geist Mono is already loaded for the SOF portal, so this costs no extra font. */
+/* Small labels (spec names, breadcrumbs, dates, places): the body face, sentence case, quiet.
+   Monospace is kept for real codes only (.v2-code: CAGE, UEI, NSN, contract and part numbers). */
 .v2-tech {
-  font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
-  font-size: 0.78rem;
+  font-size: 0.8125rem;
   font-weight: 500;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
+  letter-spacing: 0;
   font-variant-numeric: tabular-nums;
 }
 
@@ -1390,36 +1345,6 @@ body .wh-v2 .wh-marketing-display {
   font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
   letter-spacing: 0.01em;
   font-variant-numeric: tabular-nums;
-}
-
-/* Corner brackets for instrument panels (spec tables, the 3D viewer): a thin frame that reads as
-   equipment rather than a card. Sits over whatever background the element has. */
-.v2-ticks {
-  position: relative;
-}
-
-.v2-ticks::before,
-.v2-ticks::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  --tick: 12px;
-  --tick-c: rgb(238 242 246 / 0.55);
-  background:
-    linear-gradient(var(--tick-c), var(--tick-c)) top left / var(--tick) 1px no-repeat,
-    linear-gradient(var(--tick-c), var(--tick-c)) top left / 1px var(--tick) no-repeat,
-    linear-gradient(var(--tick-c), var(--tick-c)) top right / var(--tick) 1px no-repeat,
-    linear-gradient(var(--tick-c), var(--tick-c)) top right / 1px var(--tick) no-repeat;
-}
-
-.v2-ticks::after {
-  background:
-    linear-gradient(var(--tick-c), var(--tick-c)) bottom left / var(--tick) 1px no-repeat,
-    linear-gradient(var(--tick-c), var(--tick-c)) bottom left / 1px var(--tick) no-repeat,
-    linear-gradient(var(--tick-c), var(--tick-c)) bottom right / var(--tick) 1px no-repeat,
-    linear-gradient(var(--tick-c), var(--tick-c)) bottom right / 1px var(--tick) no-repeat;
 }
 
 /* One grade for Weatherhaven's mixed product photography (bright snow shots next to grey overcast

@@ -23,16 +23,15 @@ export function ContactPageSections() {
         </div>
 
         <aside className="space-y-10 lg:pt-2">
-          <div className="v2-plate v2-chamfer px-6 py-7">
+          <div className="v2-plate px-6 py-7">
             <h2 className="text-[1.05rem] font-semibold text-snow">US office</h2>
             <p className="mt-3 text-[0.95rem] text-snow/85">{COMPANY_CONTACT.legalName}</p>
             <p className="text-[0.95rem] text-muted">889 Erie Avenue, North Tonawanda, NY 14120</p>
             <a href={companyPhoneHref(COMPANY_CONTACT.phone)} className="v2-figure mt-5 block text-[1.9rem] text-snow no-underline hover:text-signal">
               {COMPANY_CONTACT.phone}
             </a>
-            <p className="v2-tech mt-2 text-muted">CAGE 0EYW4 &nbsp;/&nbsp; UEI DBETGL9QKYH3</p>
-            <Link href="/government" className="v2-link mt-3 inline-block text-[0.9rem]">
-              Details for government buyers
+            <Link href="/government" className="v2-link mt-4 inline-block text-[0.9rem]">
+              CAGE, UEI and contract vehicles
             </Link>
           </div>
 

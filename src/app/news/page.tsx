@@ -24,8 +24,8 @@ export default async function NewsPage() {
     <>
       <V2PageHeader
         crumbs={[{ href: "/", label: "Home" }, { label: "News" }]}
-        title="News from Weatherhaven."
-        lead="Partnerships, deliveries, product news and show appearances. Releases published on weatherhaven.com open in a new tab."
+        title="News"
+        lead="Partnerships, deliveries, product news and show appearances."
       />
       <div className="bg-ink py-14 sm:py-20">
         <div className="v2-wrap space-y-16">

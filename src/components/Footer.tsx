@@ -26,23 +26,6 @@ export function Footer() {
   const year = new Date().getFullYear();
   return (
     <footer data-global-footer className="border-t border-line bg-ink text-snow">
-      {/* The company's identifiers and sites, as a readout across the top of the footer. */}
-      <div className="border-b border-line">
-        <dl className="v2-wrap v2-tech flex flex-wrap gap-x-10 gap-y-3 py-5 text-muted">
-          {[
-            ["CAGE", PROCUREMENT.cage],
-            ["UEI", PROCUREMENT.uei],
-            ["Quality", "ISO 9001:2015"],
-            ["US office", "North Tonawanda, NY / 43.0° N 78.9° W"],
-            ["Headquarters", "Burnaby, BC / 49.2° N 123.0° W"],
-          ].map(([k, v]) => (
-            <div key={k} className="flex gap-3">
-              <dt>{k}</dt>
-              <dd className="text-snow">{v}</dd>
-            </div>
-          ))}
-        </dl>
-      </div>
       <div className="v2-wrap grid gap-10 py-16 sm:py-20 lg:grid-cols-[1.1fr_2fr] lg:gap-16">
         <div>
           <Image

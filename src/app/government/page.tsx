@@ -39,8 +39,8 @@ export default function GovernmentBuyersPage() {
     <>
       <V2PageHeader
         crumbs={[{ href: "/", label: "Home" }, { label: "Government buyers" }]}
-        title="For government buyers."
-        lead="Weatherhaven Resources, Inc. is Weatherhaven's US company. Its identifiers, registered codes, current contract vehicles and how to request a configuration package are all on this page."
+        title="For government buyers"
+        lead="Weatherhaven Resources, Inc. in North Tonawanda, New York, is Weatherhaven's US company. It holds the SAM.gov registration and the US contract vehicles."
       />
 
       <div className="v2-wrap pb-24">
@@ -51,10 +51,10 @@ export default function GovernmentBuyersPage() {
               Identifiers
             </h2>
             <p className="v2-body mt-4 max-w-[44ch]">
-              For SAM.gov, solicitations and vendor forms. Copy the CAGE code and UEI straight from here.
+              For SAM.gov, solicitations and vendor forms.
             </p>
           </div>
-          <div className="v2-plate v2-chamfer v2-ticks px-6 py-2 sm:px-8">
+          <div className="v2-plate px-6 py-2 sm:px-8">
             <dl>
               {[
                 { k: "Legal name", v: <span className="text-snow">{p.legalName}</span> },
@@ -117,11 +117,11 @@ export default function GovernmentBuyersPage() {
         <section aria-labelledby="record-heading" className="mt-24 border-t border-line pt-12">
           <div className="grid gap-4 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16">
             <h2 id="record-heading" className="v2-h2 text-snow">
-              How agencies buy from us now
+              Current vehicles and recent awards
             </h2>
             <p className="v2-body max-w-[60ch]">
-              Current vehicles and recent awards, from the public award records. Ask about the right route for your
-              program: a new requirement, spares by NSN, or an order under an existing agreement.
+              From the public award records. Ask about the right route for your program: a new requirement, spares
+              by NSN, or an order under an existing agreement.
             </p>
           </div>
           <ul className="mt-10 grid gap-px border border-line bg-line md:grid-cols-2">
@@ -151,7 +151,7 @@ export default function GovernmentBuyersPage() {
         <section aria-labelledby="provide-heading" className="mt-24 grid gap-10 border-t border-line pt-12 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16">
           <div>
             <h2 id="provide-heading" className="v2-h2 text-snow">
-              What we provide for a procurement
+              Support for a procurement
             </h2>
           </div>
           <ul className="border-t border-line">
@@ -184,7 +184,7 @@ export default function GovernmentBuyersPage() {
           <div>
             <h2 className="v2-h2 max-w-[22ch] text-snow">Scoping a requirement or a solicitation?</h2>
             <p className="v2-body mt-4 max-w-[52ch]">
-              The US office answers program and contracting questions, usually within 48 hours. Call{" "}
+              The US office in North Tonawanda answers program and contracting questions. Call{" "}
               <a href={companyPhoneHref(COMPANY_CONTACT.phone)} className="v2-link">
                 {COMPANY_CONTACT.phone}
               </a>

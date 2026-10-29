@@ -15,7 +15,7 @@ export default function ContactPage() {
     <>
       <V2PageHeader
         crumbs={[{ href: "/", label: "Home" }, { label: "Contact" }]}
-        title="Talk to a Weatherhaven expert."
+        title="Talk to a Weatherhaven expert"
         lead="Tell us the mission, the climate and the number of people. A specialist will come back with a starting configuration."
       />
       <ContactPageSections />

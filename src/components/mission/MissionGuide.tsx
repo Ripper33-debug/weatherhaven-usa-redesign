@@ -47,7 +47,8 @@ export type GuideProduct = {
   subtitle: string;
   cover: string;
   blur?: string;
-  representative?: boolean;
+  /** What the photo shows when it isn't this system (no photo of its own yet). */
+  shows?: string;
   specs: { label: string; value: string }[];
 };
 
@@ -237,14 +238,14 @@ function Results({
         <div className="relative aspect-[16/10] @3xl:aspect-auto @3xl:min-h-[26rem]">
           <Image
             src={bestProduct?.cover ?? "/products/ehmecc.jpg"}
-            alt={`Weatherhaven ${best.name}${bestProduct?.representative ? " (representative photo)" : ""}`}
+            alt={bestProduct?.shows ? `Photo of ${bestProduct.shows}` : `Weatherhaven ${best.name}`}
             fill
             sizes="(min-width: 1024px) 40vw, 100vw"
             className="object-cover"
             {...(bestProduct?.blur ? { placeholder: "blur" as const, blurDataURL: bestProduct.blur } : {})}
           />
-          {bestProduct?.representative ? (
-            <p className="absolute bottom-3 left-3 bg-ink/75 px-2.5 py-1 text-[0.8125rem] text-muted backdrop-blur-sm">Representative photo</p>
+          {bestProduct?.shows ? (
+            <p className="absolute bottom-3 left-3 bg-ink/75 px-2.5 py-1 text-[0.8125rem] text-muted backdrop-blur-sm">Photo shows {bestProduct.shows}</p>
           ) : null}
         </div>
         <div className="flex flex-col p-6 sm:p-10">
@@ -252,7 +253,7 @@ function Results({
           <h3 id="best-heading" className="v2-h1 mt-2 text-snow">
             {best.name}
           </h3>
-          {bestProduct ? <p className="mt-2 text-[0.95rem] text-muted">{bestProduct.subtitle}</p> : null}
+          {bestProduct?.subtitle ? <p className="mt-2 text-[0.95rem] text-muted">{bestProduct.subtitle}</p> : null}
           <ul className="mt-7 space-y-3">
             {best.reasons.map((r) => (
               <li key={r} className="flex gap-3 text-[1rem] leading-relaxed text-snow/90">
@@ -361,7 +362,7 @@ function Results({
   );
 }
 
-export const GUIDE_TITLE = "Plan a deployment in five questions.";
+export const GUIDE_TITLE = "Plan a deployment in five questions";
 const GUIDE_LEAD =
   "Answer five questions and watch the camp take shape. You'll see the Weatherhaven systems that fit, with the published specs behind each match, and you can send the plan to an expert.";
 const DETAILED_TITLE = "Describe the full mission requirement.";
@@ -432,7 +433,7 @@ function GuideBody({
 
   const recs = useMemo(() => (isComplete(answers) ? recommend(answers) : []), [answers]);
   const photos = useMemo(
-    () => Object.fromEntries(Object.values(products).map((p) => [p.slug, { src: p.cover, blur: p.blur, representative: p.representative }])),
+    () => Object.fromEntries(Object.values(products).map((p) => [p.slug, { src: p.cover, blur: p.blur, shows: p.shows }])),
     [products],
   );
 

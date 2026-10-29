@@ -3,173 +3,207 @@ import Link from "next/link";
 import { blurProps } from "@/lib/image-blur";
 import { sourceHost, type DeploymentStory } from "@/lib/field-stories";
 
-function Figures({ story, large = false }: { story: DeploymentStory; large?: boolean }) {
+function Where({ story }: { story: DeploymentStory }) {
   return (
-    <dl className={`grid grid-cols-3 ${large ? "gap-6" : "gap-4 sm:gap-6"}`}>
-      {story.figures.map((f) => (
+    <p className="v2-tech text-muted">
+      <span className="text-snow">{story.place}</span>
+      {story.when ? `, ${story.when}` : null}
+    </p>
+  );
+}
+
+function Facts({ story, large = false }: { story: DeploymentStory; large?: boolean }) {
+  if (!story.facts?.length) return null;
+  return (
+    <dl className="grid grid-cols-2 gap-6">
+      {story.facts.map((f) => (
         <div key={f.label} className="min-w-0 border-t border-line-strong pt-4">
           <dt className="sr-only">{f.label}</dt>
-          <dd className={`v2-figure v2-tnum text-snow ${large ? "text-[clamp(1.6rem,3.6vw,3rem)]" : "text-[clamp(1.25rem,2.4vw,1.9rem)]"} leading-none`}>
+          <dd
+            className={`v2-figure v2-tnum leading-none text-snow ${
+              large ? "text-[clamp(2rem,4vw,3.25rem)]" : "text-[clamp(1.5rem,2.6vw,2.1rem)]"
+            }`}
+          >
             {f.value}
           </dd>
-          <dd className="mt-2 text-[0.85rem] leading-snug text-muted">{f.label}</dd>
+          <dd className="mt-2 text-[0.875rem] leading-snug text-muted">{f.label}</dd>
         </div>
       ))}
     </dl>
   );
 }
 
-function Sources({ story }: { story: DeploymentStory }) {
+/** Systems and sources as one quiet footnote block. */
+function Footnote({ story }: { story: DeploymentStory }) {
   return (
-    <p className="text-[0.85rem] leading-relaxed text-muted">
-      <span className="mr-1.5">Sources:</span>
-      {story.sources.map((s, i) => (
-        <span key={s.href}>
-          <a
-            href={s.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            title={s.label}
-            aria-label={`${sourceHost(s.href)}: ${s.label} (opens in a new tab)`}
-            className="text-muted underline decoration-line-strong underline-offset-2 hover:text-snow"
-          >
-            {sourceHost(s.href)}
-          </a>
-          {i < story.sources.length - 1 ? ", " : ""}
-        </span>
-      ))}
-    </p>
+    <div className="space-y-1.5 text-[0.875rem] leading-relaxed text-muted">
+      <p>
+        <span className="mr-1.5">{story.systems.length > 1 ? "Systems:" : "System:"}</span>
+        {story.systems.map((s, i) => (
+          <span key={s.slug}>
+            <Link href={`/configurable-solutions/${s.slug}`} className="v2-link">
+              {s.name}
+            </Link>
+            {i < story.systems.length - 1 ? ", " : ""}
+          </span>
+        ))}
+      </p>
+      {story.sources.length ? (
+        <div>
+          <p>{story.sources.length > 1 ? "Sources" : "Source"}</p>
+          <ul className="mt-1 space-y-1">
+            {story.sources.map((s) => (
+              <li key={s.href}>
+                <a
+                  href={s.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`${s.label}, ${sourceHost(s.href)} (opens in a new tab)`}
+                  className="text-muted underline decoration-line-strong underline-offset-2 hover:text-snow"
+                >
+                  {s.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+    </div>
   );
 }
 
-function Systems({ story }: { story: DeploymentStory }) {
+function Quote({ story }: { story: DeploymentStory }) {
+  if (!story.quote) return null;
   return (
-    <ul className="flex flex-wrap gap-2" aria-label="Weatherhaven systems">
-      {story.systems.map((s) => (
-        <li key={s.name}>
-          <Link
-            href={`/configurable-solutions/${s.slug}`}
-            className="inline-flex h-9 items-center px-3 text-[0.85rem] font-medium text-snow no-underline shadow-[inset_0_0_0_1px_rgb(148_170_196/0.32)] transition-colors hover:bg-white/[0.05] hover:text-signal"
-          >
-            {s.name}
-          </Link>
-        </li>
-      ))}
-    </ul>
+    <figure className="border-l-2 border-signal pl-5">
+      <blockquote className="text-[1.2rem] leading-snug text-snow [font-variation-settings:'wdth'_106]">
+        “{story.quote.text}”
+      </blockquote>
+      <figcaption className="mt-2 text-[0.875rem] text-muted">{story.quote.who}</figcaption>
+    </figure>
   );
 }
 
-function Where({ story }: { story: DeploymentStory }) {
-  return (
-    <p className="v2-tech text-muted">
-      <span className="text-snow">{story.place}</span>
-      <span aria-hidden className="mx-2 text-line-strong">
-        /
-      </span>
-      {story.when}
-    </p>
-  );
-}
-
-/** The opening story: full-width photograph, then the account and its figures. */
+/** The opening story, set in type: a large headline, the account, and its two contract figures. */
 export function LeadStory({ story }: { story: DeploymentStory }) {
-  const photo = story.photo;
   return (
     <article id={story.id} aria-labelledby={`${story.id}-title`} className="scroll-mt-24 border-b border-line">
-      {photo ? (
-        <figure className="relative">
-          <div className="relative h-[62svh] min-h-[22rem] w-full overflow-hidden">
-            <Image src={photo.src} alt={photo.alt} fill priority={false} sizes="100vw" className="object-cover" {...blurProps(photo.src)} />
-            <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-ink via-ink/30 to-transparent" />
-          </div>
-          <figcaption className="v2-wrap -mt-10 relative text-right text-[0.85rem] text-muted">{photo.caption}</figcaption>
-        </figure>
-      ) : null}
-      <div className="v2-wrap grid gap-12 pb-20 pt-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:gap-16 lg:pb-24">
+      <div className="v2-wrap grid gap-12 py-20 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)] lg:gap-20 lg:py-28">
         <div>
           <Where story={story} />
-          <h2 id={`${story.id}-title`} className="v2-h1 mt-4 max-w-[18ch] text-snow">
+          <h2 id={`${story.id}-title`} className="v2-h1 mt-4 max-w-[20ch] text-snow">
             {story.title}
           </h2>
-          <div className="mt-8 space-y-5">
+          <div className="mt-8 max-w-[64ch] space-y-5">
             {story.body.map((p) => (
               <p key={p.slice(0, 32)} className="v2-body text-[1.05rem] text-snow/85">
                 {p}
               </p>
             ))}
           </div>
-          {story.quote ? (
-            <figure className="mt-10 border-l-2 border-signal pl-5">
-              <blockquote className="text-[1.25rem] leading-snug text-snow [font-variation-settings:'wdth'_106]">
-                “{story.quote.text}”
-              </blockquote>
-              <figcaption className="mt-2 text-[0.85rem] text-muted">{story.quote.who}</figcaption>
-            </figure>
-          ) : null}
         </div>
-        <div className="flex flex-col gap-10 lg:pt-14">
-          <Figures story={story} large />
-          <Systems story={story} />
-          <Sources story={story} />
+        <div className="flex flex-col gap-10 lg:pt-16">
+          <Facts story={story} large />
+          <Footnote story={story} />
         </div>
       </div>
     </article>
   );
 }
 
-/** A story with its photograph, or with its figures as the picture when there is no photo. */
-export function FieldStory({ story, flip }: { story: DeploymentStory; flip: boolean }) {
+/**
+ * A story told around its photograph. "wide" runs the photo across the page with the account
+ * below it in two columns; "left" and "right" set the photo beside the account.
+ */
+export function FeatureStory({ story, layout }: { story: DeploymentStory; layout: "wide" | "left" | "right" }) {
   const photo = story.photo;
+  if (layout === "wide" && photo) {
+    return (
+      <article id={story.id} aria-labelledby={`${story.id}-title`} className="scroll-mt-24 border-b border-line">
+        <figure>
+          <div className="relative h-[56svh] min-h-[20rem] w-full overflow-hidden">
+            <Image src={photo.src} alt={photo.alt} fill sizes="100vw" className="object-cover" {...blurProps(photo.src)} />
+          </div>
+          <figcaption className="v2-wrap mt-3 text-[0.875rem] text-muted">{photo.caption}</figcaption>
+        </figure>
+        <div className="v2-wrap grid gap-10 pb-20 pt-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:gap-16 lg:pb-24">
+          <div>
+            <Where story={story} />
+            <h2 id={`${story.id}-title`} className="v2-h2 mt-4 max-w-[22ch] text-snow">
+              {story.title}
+            </h2>
+            <div className="mt-6 space-y-4">
+              {story.body.map((p) => (
+                <p key={p.slice(0, 32)} className="v2-body text-snow/85">
+                  {p}
+                </p>
+              ))}
+            </div>
+          </div>
+          <div className="flex flex-col gap-8 lg:pt-10">
+            <Quote story={story} />
+            <Facts story={story} />
+            <Footnote story={story} />
+          </div>
+        </div>
+      </article>
+    );
+  }
+  const photoRight = layout === "right";
   return (
     <article id={story.id} aria-labelledby={`${story.id}-title`} className="scroll-mt-24 border-b border-line py-20 sm:py-24">
-      <div className="v2-wrap grid gap-10 lg:grid-cols-12 lg:items-center lg:gap-14">
-        <div className={`lg:col-span-7 ${flip ? "lg:order-2" : ""}`}>
-          {photo ? (
-            <figure>
-              <div className="relative aspect-[4/3] overflow-hidden lg:aspect-[16/11]">
-                <Image src={photo.src} alt={photo.alt} fill sizes="(min-width: 1024px) 56vw, 100vw" className="object-cover" {...blurProps(photo.src)} />
-              </div>
-              <figcaption className="mt-3 text-[0.85rem] text-muted">{photo.caption}</figcaption>
-            </figure>
-          ) : (
-            <div className="v2-plate v2-chamfer px-6 py-4 sm:px-10 sm:py-6">
-              <dl className="divide-y divide-line">
-                {story.figures.map((f) => (
-                  <div key={f.label} className="flex flex-col gap-2 py-6 sm:flex-row sm:items-baseline sm:gap-8">
-                    <dt className="sr-only">{f.label}</dt>
-                    <dd className="v2-figure v2-tnum shrink-0 text-[clamp(2.4rem,5vw,4.25rem)] leading-none text-snow sm:min-w-[12rem]">
-                      {f.value}
-                    </dd>
-                    <dd className="text-[0.95rem] leading-snug text-muted">{f.label}</dd>
-                  </div>
-                ))}
-              </dl>
+      <div className="v2-wrap grid gap-10 lg:grid-cols-12 lg:items-start lg:gap-14">
+        {photo ? (
+          <figure className={`lg:col-span-7 ${photoRight ? "lg:order-2" : ""}`}>
+            <div className="relative aspect-[4/3] overflow-hidden lg:aspect-[16/11]">
+              <Image src={photo.src} alt={photo.alt} fill sizes="(min-width: 1024px) 56vw, 100vw" className="object-cover" {...blurProps(photo.src)} />
             </div>
-          )}
-        </div>
-        <div className={`lg:col-span-5 ${flip ? "lg:order-1" : ""}`}>
+            <figcaption className="mt-3 text-[0.875rem] text-muted">{photo.caption}</figcaption>
+          </figure>
+        ) : null}
+        <div className={photo ? `lg:col-span-5 ${photoRight ? "lg:order-1" : ""}` : "lg:col-span-8"}>
           <Where story={story} />
           <h2 id={`${story.id}-title`} className="v2-h2 mt-4 text-snow">
             {story.title}
           </h2>
           <div className="mt-6 space-y-4">
             {story.body.map((p) => (
-              <p key={p.slice(0, 32)} className="v2-body text-[1rem] text-snow/80">
+              <p key={p.slice(0, 32)} className="v2-body text-[1rem] text-snow/85">
                 {p}
               </p>
             ))}
           </div>
-          {photo ? (
+          {story.facts?.length ? (
             <div className="mt-8">
-              <Figures story={story} />
+              <Facts story={story} />
             </div>
           ) : null}
-          {story.attribution ? <p className="mt-6 text-[0.85rem] italic text-muted">{story.attribution}</p> : null}
-          <div className="mt-8 space-y-4">
-            <Systems story={story} />
-            <Sources story={story} />
+          <div className="mt-8">
+            <Footnote story={story} />
           </div>
         </div>
+      </div>
+    </article>
+  );
+}
+
+/** A short account: no photograph, no figures, the number in the text. */
+export function BriefStory({ story }: { story: DeploymentStory }) {
+  return (
+    <article id={story.id} aria-labelledby={`${story.id}-title`} className="scroll-mt-24 border-t border-line pt-6">
+      <Where story={story} />
+      <h3 id={`${story.id}-title`} className="v2-h3 mt-3 max-w-[30ch] text-snow">
+        {story.title}
+      </h3>
+      <div className="mt-4 space-y-3">
+        {story.body.map((p) => (
+          <p key={p.slice(0, 32)} className="text-[0.975rem] leading-relaxed text-snow/80">
+            {p}
+          </p>
+        ))}
+      </div>
+      <div className="mt-5">
+        <Footnote story={story} />
       </div>
     </article>
   );

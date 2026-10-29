@@ -157,7 +157,7 @@ function CatalogBody({ products, blurs = {}, urlFamily: family }: CatalogProps &
 
         {filtered.length === 0 ? (
           <div className="mt-10 border border-line p-8">
-            <p className="v2-h3 text-snow">No system matches every filter.</p>
+            <p className="v2-h3 text-snow">No system matches every filter</p>
             <p className="mt-2 text-muted">
               Remove a filter, or tell a Weatherhaven expert what you need and they will recommend a configuration.
             </p>
