@@ -29,8 +29,8 @@ export function liveWeather(base: ClimatePreset, live: LiveConditions): WeatherK
 }
 
 /** The preset as it looks at the place right now. */
-export function livePreset(base: ClimatePreset, live: LiveConditions, now: Date): ClimatePreset {
-  const sun = sunPosition(now, live.lat, live.lng);
+export function livePreset(base: ClimatePreset, live: LiveConditions): ClimatePreset {
+  const sun = sunPosition(new Date(live.seenAt), live.lat, live.lng);
   const el = sun.elevation;
   // 0 in daylight, 1 once the sun is 10° below the horizon.
   const night = smooth(4, -10, el);
@@ -72,6 +72,6 @@ export function livePreset(base: ClimatePreset, live: LiveConditions, now: Date)
     out.fogNear = base.fogNear * 0.75;
     out.fogFar = base.fogFar * 0.8;
   }
-  out.label = `Right now at ${live.name}`;
+  out.label = `This hour at ${live.name}`;
   return out;
 }

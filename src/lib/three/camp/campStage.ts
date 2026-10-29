@@ -561,7 +561,7 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
   // Real conditions at the chosen place shape the preset (weather, sun, night).
   let live: LiveConditions | null = null;
   let shownSig = "none|";
-  const liveSig = () => (live ? `${live.lat},${live.lng},${live.time},${live.symbol},${Math.round(live.windMs ?? 0)}` : "");
+  const liveSig = () => (live ? `${live.lat},${live.lng},${live.seenAt},${live.symbol},${Math.round(live.windMs ?? 0)}` : "");
 
   const setClimate = (next: ClimateKey) => {
     const sig = `${next}|${next === "none" ? "" : liveSig()}`;
@@ -569,7 +569,7 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
     shownSig = sig;
     // Start from what is on screen, even if the last change is still fading in.
     const from = climateE >= 1 ? shownPreset : mixPreset(climateFrom, climateTo, climateE);
-    const to = live && next !== "none" ? livePreset(CLIMATES[next], live, new Date()) : CLIMATES[next];
+    const to = live && next !== "none" ? livePreset(CLIMATES[next], live) : CLIMATES[next];
     climateFrom = from;
     climateTo = to;
     climateE = 0;

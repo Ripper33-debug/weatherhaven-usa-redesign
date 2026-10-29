@@ -25,7 +25,15 @@ import { V2PageHeader } from "@/components/site/V2PageHeader";
 import { CampScene, type CampSceneApi } from "@/components/mission/CampScene";
 import { PlacePicker } from "@/components/mission/PlacePicker";
 import type { CampFocus } from "@/lib/three/camp/campStage";
-import { climateForPlace, placeFromParams, placeToParams, type GuidePlace, type LiveConditions } from "@/lib/live-site";
+import {
+  climateForPlace,
+  placeFromParams,
+  placePhrase,
+  placeToParams,
+  snapToGrid,
+  type GuidePlace,
+  type LiveConditions,
+} from "@/lib/live-site";
 import { formatCoords } from "@/lib/field-readout";
 
 const MissionSolutionBuilder = dynamic(
@@ -133,6 +141,13 @@ function ProgressRail({
   );
 }
 
+/** "in Alert, Nunavut (polar or extreme cold)", or just the climate when no place was picked. */
+function climatePhrase(climate: string, place: GuidePlace | null): string {
+  const label = labelFor("climate", climate).toLowerCase();
+  if (!place) return label;
+  return climate === "mixed" ? `${placePhrase(place)}, among other climates` : `${placePhrase(place)} (${label})`;
+}
+
 function firstOpenIndex(a: GuideAnswers): number {
   const i = QUESTIONS.findIndex((q) => !a[q.key]);
   return i === -1 ? QUESTIONS.length : i;
@@ -202,7 +217,7 @@ function Results({
           </h2>
           <p className="mt-3 max-w-[60ch] text-[1rem] leading-relaxed text-muted">
             For {labelFor("mission", answers.mission).toLowerCase()}, {labelFor("people", answers.people)} people,{" "}
-            {place ? `in ${place.name}` : labelFor("climate", answers.climate).toLowerCase()}, moved by{" "}
+            {climatePhrase(answers.climate, place)}, moved by{" "}
             {labelFor("transport", answers.transport).toLowerCase()},
             standing for {labelFor("duration", answers.duration).toLowerCase()}.
           </p>
@@ -421,7 +436,8 @@ function GuideBody({
     [products],
   );
 
-  // Live conditions at the chosen place (fetched once per place).
+  // Live conditions at the chosen place (fetched once per place). Map points are read on a
+  // quarter-degree grid, which the weather route insists on so its cache can do its job.
   const placeKey = place ? `${place.id ?? ""}|${place.lat},${place.lng}` : null;
   const [liveFetched, setLiveFetched] = useState<{ key: string; value: LiveConditions | "error" } | null>(null);
   useEffect(() => {
@@ -429,10 +445,12 @@ function GuideBody({
     const ctrl = new AbortController();
     const url = place.id
       ? `/api/site-weather?id=${encodeURIComponent(place.id)}`
-      : `/api/place-weather?lat=${place.lat}&lng=${place.lng}`;
+      : `/api/place-weather?lat=${snapToGrid(place.lat)}&lng=${snapToGrid(place.lng)}`;
     fetch(url, { signal: ctrl.signal })
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
-      .then((c: Omit<LiveConditions, keyof GuidePlace>) => setLiveFetched({ key: placeKey, value: { ...place, ...c } }))
+      .then((c: Omit<LiveConditions, keyof GuidePlace | "seenAt">) =>
+        setLiveFetched({ key: placeKey, value: { ...c, ...place, seenAt: new Date().toISOString() } }),
+      )
       .catch((err: unknown) => {
         if ((err as Error).name !== "AbortError") setLiveFetched({ key: placeKey, value: "error" });
       });
@@ -441,7 +459,10 @@ function GuideBody({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [placeKey]);
   const live: LiveState = !place ? null : liveFetched?.key === placeKey ? liveFetched.value : "loading";
-  const liveForScene = live && typeof live === "object" ? live : null;
+  // While the next place loads, the camp keeps the last real conditions rather than flashing back
+  // to the plain climate.
+  const lastLive = liveFetched && typeof liveFetched.value === "object" ? liveFetched.value : null;
+  const liveForScene = !place ? null : typeof live === "object" ? live : live === "loading" ? lastLive : null;
 
   // After the visitor moves between questions, put focus on the new heading so keyboard and
   // screen-reader users land on it (not on the first visit).
@@ -483,8 +504,8 @@ function GuideBody({
 
   const choose = (key: keyof GuideAnswers, id: string, index: number) => {
     const next = { ...answers, [key]: id } as GuideAnswers;
-    // Picking a climate by hand replaces a place picked earlier.
-    writeUrl(next, key === "climate" ? placeToParams(null) : undefined);
+    // A climate picked by hand keeps the place: it corrects the guess, the place's weather stays.
+    writeUrl(next);
     setFocus(key);
     // A short pause so the choice registers before the next question slides in.
     window.clearTimeout(advanceTimer.current);
@@ -499,7 +520,7 @@ function GuideBody({
 
   /** A real place: sets the climate answer it implies, then moves on once the choice has shown. */
   const pickPlace = (p: GuidePlace) => {
-    const next = { ...answers, climate: climateForPlace(p.lat, p.lng) } as GuideAnswers;
+    const next = { ...answers, climate: climateForPlace(p.lat, p.lng, p.id) } as GuideAnswers;
     writeUrl(next, placeToParams(p));
     setFocus("climate");
     window.clearTimeout(advanceTimer.current);
@@ -517,6 +538,9 @@ function GuideBody({
     window.clearTimeout(advanceTimer.current);
     writeUrl(answers, placeToParams(null));
   };
+
+  /** The visitor is still using the picker (searching again, opening the map): don't move on. */
+  const holdStep = () => window.clearTimeout(advanceTimer.current);
 
   const restart = () => {
     writeUrl({}, placeToParams(null));
@@ -598,7 +622,15 @@ function GuideBody({
               </h2>
               {q.key === "climate" ? (
                 <>
-                  <PlacePicker places={places} value={place} live={live} onPick={pickPlace} onClear={clearPlace} />
+                  <PlacePicker
+                    places={places}
+                    value={place}
+                    live={live}
+                    climateLabel={place && answers.climate ? labelFor("climate", answers.climate) : null}
+                    onPick={pickPlace}
+                    onClear={clearPlace}
+                    onInteract={holdStep}
+                  />
                   <p className="mt-8 text-[0.95rem] text-muted">Or describe the climate:</p>
                 </>
               ) : null}

@@ -293,6 +293,22 @@ export function HomeTreccScene() {
         />
 
         <div className="pointer-events-none relative flex h-full flex-col justify-end lg:justify-center">
+          {/* Phones: the controls sit at the foot of the 3D view, or just above the copy when a short
+              screen pushes the copy up into the view (sticky bottom = whichever is higher), so the
+              headline never runs under them. Desktop: bottom right of the stage. */}
+          <div className="v2-inset-r pointer-events-auto sticky bottom-[calc(40svh+0.5rem)] mb-3 mr-[var(--v2-gutter)] flex flex-col items-end gap-2 self-end lg:absolute lg:bottom-10 lg:mb-0 lg:mr-0">
+            {ready ? (
+              <p aria-live="polite" className="hidden bg-ink/70 px-3 py-1.5 text-[0.8rem] text-snow/90 backdrop-blur-md lg:block">
+                {weatherOn ? `${CLIMATE_NOTE[finish].weather} ` : null}
+                {CLIMATE_NOTE[finish].rating}
+              </p>
+            ) : null}
+            <div className="flex items-center gap-2">
+              {/* Available before the 3D view loads, and without WebGL: AR uses the phone's own viewer. */}
+              <TreccArButton finish={finish} tall />
+              {ready ? <TreccFinishPicker value={finish} onChange={chooseFinish} /> : null}
+            </div>
+          </div>
           <div className="v2-wrap w-full pb-24 md:pb-8 lg:pb-0">
             <div className="pointer-events-auto max-w-[30rem] bg-ink lg:bg-transparent">
               <h2 id="trecc-heading" className="v2-h2 pt-5 text-snow lg:pt-0">
@@ -341,19 +357,6 @@ export function HomeTreccScene() {
           </div>
         </div>
 
-        <div className="v2-inset-r absolute top-[calc(60svh-3.75rem)] flex flex-col items-end gap-2 lg:bottom-10 lg:top-auto">
-          {ready ? (
-            <p aria-live="polite" className="hidden bg-ink/70 px-3 py-1.5 text-[0.8rem] text-snow/90 backdrop-blur-md lg:block">
-              {weatherOn ? `${CLIMATE_NOTE[finish].weather} ` : null}
-              {CLIMATE_NOTE[finish].rating}
-            </p>
-          ) : null}
-          <div className="flex items-center gap-2">
-            {/* Available before the 3D view loads, and without WebGL: AR uses the phone's own viewer. */}
-            <TreccArButton finish={finish} tall />
-            {ready ? <TreccFinishPicker value={finish} onChange={chooseFinish} /> : null}
-          </div>
-        </div>
         <p className="v2-inset-r pointer-events-none absolute bottom-3 hidden text-[0.75rem] text-muted/80 lg:block">
           3D model for illustration. Configuration varies by program.
         </p>

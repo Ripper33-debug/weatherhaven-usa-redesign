@@ -49,10 +49,10 @@ export function isPrecisePin(d: { id: string; label: string; title: string }): b
 
 /**
  * Pins whose coordinates don't match their label in the source map: "Bogota" sits about 600 km
- * from Bogotá, and "Loro" sits on Bogotá. They stay on the map but get no local weather or time
- * until the source is fixed.
+ * from Bogotá and "Loro" sits on Bogotá; "Munich" and "Hamburg" have each other's coordinates.
+ * They stay on the map but get no local weather or time until the source is fixed.
  */
-const MISPLACED = new Set(["colombia-bogota-colombia", "colombia-loro-colombia"]);
+const MISPLACED = new Set(["colombia-bogota-colombia", "colombia-loro-colombia", "gemany-munich-gemany", "gemany-hamburg-gemany"]);
 
 /** Spelling fixes and operators' station names for place labels on the map. */
 const NAME_FIXES: Record<string, string> = {
@@ -69,6 +69,6 @@ const NAME_FIXES: Record<string, string> = {
 
 /** A place pin's name as people would write it ("Svalbard, Norway", "Concordia Station, Antarctica"). */
 export function placeName(d: { label: string; lat: number }): string {
-  const label = cleanLabel(d.label, d.lat);
+  const label = cleanLabel(d.label, d.lat).replace(/\bGemany\b/g, "Germany");
   return NAME_FIXES[label] ?? label;
 }

@@ -1554,7 +1554,7 @@ body .wh-v2 .wh-marketing-display {
 /* Mission builder on phones and tablets: the 3D camp sticks under the header while answering, so
    keyboard focus scrolls controls into view below it rather than behind it. */
 @media (max-width: 1023px) {
-  .v2-under-scene :is(button, a, [tabindex]) {
+  .v2-under-scene :is(button, a, input, [tabindex]) {
     scroll-margin-top: calc(max(38svh, 250px) + 5.5rem);
   }
 }

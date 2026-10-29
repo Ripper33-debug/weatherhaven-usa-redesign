@@ -59,8 +59,15 @@ export async function conditionsAt(lat: number, lng: number): Promise<Conditions
     CALL_LIMIT_MS,
     null,
   );
-  if (result) failedAt.delete(key);
-  else failedAt.set(key, Date.now());
+  failedAt.delete(key);
+  if (!result) {
+    failedAt.set(key, Date.now());
+    // Keep the memo small: drop the oldest entries (a Map keeps insertion order).
+    for (const old of failedAt.keys()) {
+      if (failedAt.size <= 500) break;
+      failedAt.delete(old);
+    }
+  }
   return result;
 }
 

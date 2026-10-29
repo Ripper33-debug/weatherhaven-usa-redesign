@@ -1,5 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { climateForPlace, liveLine, placeAtPoint, placeFromParams, placeToParams, type GuidePlace, type LiveConditions } from "@/lib/live-site";
+import {
+  climateForPlace,
+  liveLine,
+  placeAtPoint,
+  placeFromParams,
+  placePhrase,
+  placeToParams,
+  snapToGrid,
+  type GuidePlace,
+  type LiveConditions,
+} from "@/lib/live-site";
 import { liveWeather, livePreset } from "@/lib/three/camp/live-preset";
 import { CLIMATES } from "@/lib/three/camp/environment";
 
@@ -13,8 +23,8 @@ const live = (over: Partial<LiveConditions>): LiveConditions => ({
   name: "Test",
   lat: 77.47,
   lng: -69.23,
-  tz: "America/Thule",
   time: "2026-10-29T16:00:00Z",
+  seenAt: "2026-10-29T16:05:00Z",
   tempC: -20,
   windMs: 3,
   symbol: "cloudy",
@@ -32,6 +42,34 @@ describe("climateForPlace", () => {
     expect(climateForPlace(56.88, 24.6)).toBe("cold"); // Latvia
     expect(climateForPlace(49.28, -123.12)).toBe("temperate"); // Vancouver
     expect(climateForPlace(35.68, 139.65)).toBe("temperate"); // Tokyo
+    expect(climateForPlace(64.15, -21.94)).toBe("cold"); // Reykjavík: the North Atlantic keeps it out of polar
+    expect(climateForPlace(69.65, 18.96)).toBe("polar"); // Tromsø sits outside that band
+  });
+
+  it("uses the checked climate for documented places the rule gets wrong", () => {
+    expect(climateForPlace(-12.05, -77.04)).toBe("tropical"); // Lima by latitude alone; really a mild coastal desert
+    expect(climateForPlace(-12.05, -77.04, "peru-lima-peru")).toBe("temperate");
+    expect(climateForPlace(34.53, 69.17, "afghanistan-nato-kabul-afghanistan")).toBe("cold");
+    expect(climateForPlace(36.75, 3.06, "algeria-un-algiers-algeria")).toBe("temperate");
+    // An id without a checked value falls back to the rule.
+    expect(climateForPlace(24.71, 46.68, "saudi-arabia-riyadh-saudi-arabia")).toBe("hot");
+  });
+});
+
+describe("place wording and lookup grid", () => {
+  it("refers to named places, nearby points and bare coordinates", () => {
+    expect(placePhrase(PLACES[0])).toBe("in Thule, Greenland");
+    expect(placePhrase(PLACES[0], "at")).toBe("at Thule, Greenland");
+    expect(placePhrase(placeAtPoint(77.1, -68.5, PLACES))).toBe("near Thule, Greenland");
+    expect(placePhrase(placeAtPoint(-40, -120, PLACES))).toBe("at 40.00° S 120.00° W");
+  });
+
+  it("snaps map points to the quarter-degree grid", () => {
+    expect(snapToGrid(77.1)).toBe(77);
+    expect(snapToGrid(77.13)).toBe(77.25);
+    expect(snapToGrid(-68.5)).toBe(-68.5);
+    expect(snapToGrid(-68.38)).toBe(-68.5);
+    expect(snapToGrid(0.1)).toBe(0);
   });
 });
 
@@ -70,18 +108,18 @@ describe("live conditions in the 3D camp", () => {
   it("darkens the camp at night and lights it by day", () => {
     // Riyadh: 21:00 UTC is local midnight, 09:00 UTC is local noon.
     const riyadh = { lat: 24.71, lng: 46.68, symbol: "clearsky_day", windMs: 2 };
-    const nightP = livePreset(CLIMATES.hot, live(riyadh), new Date("2026-10-28T21:00:00Z"));
-    const dayP = livePreset(CLIMATES.hot, live(riyadh), new Date("2026-10-29T09:00:00Z"));
+    const nightP = livePreset(CLIMATES.hot, live({ ...riyadh, seenAt: "2026-10-28T21:00:00Z" }));
+    const dayP = livePreset(CLIMATES.hot, live({ ...riyadh, seenAt: "2026-10-29T09:00:00Z" }));
     expect(nightP.keyIntensity).toBeLessThan(CLIMATES.hot.keyIntensity * 0.4);
     expect(dayP.keyIntensity).toBeGreaterThan(CLIMATES.hot.keyIntensity);
     expect(dayP.sunEl).toBeGreaterThan(40);
     // Noon sun in the south: behind the camera, which looks north (+z is camp azimuth 0).
     expect(Math.min(dayP.sunAz, 360 - dayP.sunAz)).toBeLessThan(15);
-    expect(dayP.label).toBe("Right now at Test");
+    expect(dayP.label).toBe("This hour at Test");
   });
 
   it("says what it's like there in plain words", () => {
-    expect(liveLine(live({ tempC: -30, symbol: "lightsnow", windMs: 8 }), new Date("2026-12-15T12:00:00Z"))).toBe(
+    expect(liveLine(live({ tempC: -30, symbol: "lightsnow", windMs: 8, seenAt: "2026-12-15T12:00:00Z" }))).toBe(
       "−22 °F (−30 °C), light snow, wind 18 mph, dark",
     );
   });

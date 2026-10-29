@@ -8,18 +8,60 @@ import { inferEnvironmentFromCoordinates } from "@/lib/climate-from-coordinates"
 import { describeSky, formatCoords, signedDegrees, toFahrenheit, toMph, type Conditions } from "@/lib/field-readout";
 import { lightAt } from "@/lib/solar";
 
+/** Map points are looked up on this grid (degrees): about 28 km, plenty for the camp's weather. */
+export const PLACE_GRID = 0.25;
+
+/** The grid point the weather for a map point is read at. */
+export const snapToGrid = (v: number) => Math.round(v / PLACE_GRID) * PLACE_GRID;
+
 /** A place picked in the builder: a named place on the deployment map, or a point on the map. */
 export type GuidePlace = { id: string | null; name: string; lat: number; lng: number };
 
-export type LiveConditions = GuidePlace & Conditions & { tz: string | null };
+/** `seenAt`: when the page received the reading; the scene and the text work out daylight for that moment. */
+export type LiveConditions = GuidePlace & Conditions & { seenAt: string };
 
 /**
- * The builder's climate answer for a place: its usual climate, not today's weather. Coarse by
- * design (latitude bands and known dry regions); the visitor can still pick another.
+ * Climates set by hand for documented places the rule below gets wrong (high cities, mild coasts,
+ * places inside its coarse dry-region boxes).
  */
-export function climateForPlace(lat: number, lng: number): ClimateId {
+const PLACE_CLIMATE: Record<string, ClimateId> = {
+  "algeria-un-algiers-algeria": "temperate",
+  "brazil-rio-de-janeiro-brazil": "tropical",
+  "brazil-brasilla-brazil": "tropical",
+  "mozambique-un-maputo-mozambique": "tropical",
+  "somalia-un-burco-somalia": "hot",
+  "burkina-faso-kaya-burkina-faso": "hot",
+  "iceland-reykjav-k": "cold",
+  "greenland-narsarsuaq": "cold",
+  "new-zealand-christchurch-new-zealand": "temperate",
+  "bosnia-herzegovina-un-coalition-mostar-bosnia-herzegovina": "temperate",
+  "switzerland-bern-switzerland": "cold",
+  "macedonia-un-bitola-macedonia": "cold",
+  "macedonia-un-skopje-macedonia": "cold",
+  "united-states-kansas-city-united-states": "cold",
+  "afghanistan-nato-kabul-afghanistan": "cold",
+  "kyrgyzstan-naryn-kyrgyzstan": "cold",
+  "nepal-kolti-nepal": "cold",
+  "peru-puno-peru": "cold",
+  "peru-lima-peru": "temperate",
+  "ecuador-quito-ecuador": "temperate",
+  "mexico-mexico-city-mexico": "temperate",
+};
+
+/**
+ * The builder's climate answer for a place: its usual climate, not today's weather. Documented
+ * places use a checked value; any other point gets a coarse guess from latitude bands and known
+ * dry regions, which the page shows so the visitor can change it.
+ */
+export function climateForPlace(lat: number, lng: number, id?: string | null): ClimateId {
+  if (id && PLACE_CLIMATE[id]) return PLACE_CLIMATE[id];
   const abs = Math.abs(lat);
-  if (abs >= 60) return "polar";
+  if (lat <= -60) return "polar";
+  if (abs >= 60) {
+    // The North Atlantic keeps Iceland and coastal Norway milder than the rest of the band.
+    const atlantic = lat < 72 && lng >= -25 && lng <= 15;
+    return atlantic ? "cold" : "polar";
+  }
   const env = inferEnvironmentFromCoordinates(lat, lng).environment;
   if (env === "desert") return "hot";
   if (env === "tropical") return "tropical";
@@ -54,6 +96,13 @@ export function placeAtPoint(lat: number, lng: number, places: GuidePlace[]): Gu
   return { id: null, name: best ? `Near ${best.name}` : formatCoords(at.lat, at.lng), ...at };
 }
 
+/** How a sentence refers to the place: "in Alert, Nunavut", "near Thule, Greenland", "at 40.00° S 120.00° W". */
+export function placePhrase(p: GuidePlace, preposition: "in" | "at" = "in"): string {
+  if (p.id) return `${preposition} ${p.name}`;
+  if (p.name.startsWith("Near ")) return `near ${p.name.slice(5)}`;
+  return `at ${p.name}`;
+}
+
 /** URL form of a place: a deployment-map pin id, or "lat,lng". */
 export function placeToParams(p: GuidePlace | null): Record<"site" | "at", string | null> {
   if (!p) return { site: null, at: null };
@@ -71,8 +120,9 @@ export function placeFromParams(get: (name: string) => string | null, places: Gu
   return placeAtPoint(lat, lng, places);
 }
 
-/** "−22 °F (−30 °C), light snow, wind 18 mph, dark" */
-export function liveLine(live: LiveConditions, now: Date): string {
+/** "−22 °F (−30 °C), light snow, wind 18 mph, dark" (daylight as of when the reading arrived) */
+export function liveLine(live: LiveConditions): string {
+  const now = new Date(live.seenAt);
   const parts = [`${signedDegrees(toFahrenheit(live.tempC))} °F (${signedDegrees(live.tempC)} °C)`];
   const sky = describeSky(live.symbol);
   if (sky) parts.push(sky.toLowerCase());

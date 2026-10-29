@@ -8,24 +8,37 @@ import type { TreccFinish } from "@/lib/three/treccFinishes";
  * "See it full size": places a real-scale, deployed TRECC in the visitor's surroundings with the
  * phone's own AR viewer, in the finish they picked.
  * - iPhone and iPad: Apple's AR Quick Look opens the USDZ (scaling turned off, so it stays true
- *   size).
+ *   size). In-app browsers that can't open it are asked to use Safari.
  * - Android: Google's Scene Viewer opens the GLB (resizing turned off). Phones without AR get the
- *   3D view instead.
+ *   3D view instead; phones without Scene Viewer come back with #no-ar and are told so.
  * - Anything else (a desktop): a QR code that opens this page on a phone, ready to place it.
  * The models are simplified cuts of the TRECC CAD export, in metres (public/models/ar).
  */
-type Mode = "quicklook" | "sceneviewer" | "qr";
+type Mode = "quicklook" | "sceneviewer" | "safari" | "qr";
+type Notice = "qr" | "safari" | "no-ar";
 const FINISHES: TreccFinish[] = ["green", "tan", "arctic"];
+const NO_AR = "#no-ar";
 
 function detectMode(): Mode {
-  const a = document.createElement("a");
-  if (a.relList?.supports?.("ar")) return "quicklook";
-  if (/android/i.test(navigator.userAgent)) return "sceneviewer";
+  const ua = navigator.userAgent;
+  const ios = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  if (ios) {
+    const a = document.createElement("a");
+    if (a.relList?.supports?.("ar")) return "quicklook";
+    // Other iOS browsers hand Quick Look to the system; app web views (Instagram, LinkedIn) can't.
+    return /CriOS\/|FxiOS\/|EdgiOS\/|GSA\/|DuckDuckGo\//.test(ua) ? "quicklook" : "safari";
+  }
+  if (/android/i.test(ua)) return "sceneviewer";
   return "qr";
 }
 
 // Read once on the client; the server renders as if neither is known.
 const noSubscribe = () => () => undefined;
+const onHashChange = (cb: () => void) => {
+  window.addEventListener("hashchange", cb);
+  return () => window.removeEventListener("hashchange", cb);
+};
+const cameBackWithoutAr = () => window.location.hash === NO_AR;
 const askedFinish = (): TreccFinish | null => {
   const asked = new URLSearchParams(window.location.search).get("ar") as TreccFinish | null;
   return asked && FINISHES.includes(asked) ? asked : null;
@@ -56,7 +69,11 @@ function launchAr(mode: Mode, finish: TreccFinish) {
     a.appendChild(document.createElement("img"));
     a.click();
   } else if (mode === "sceneviewer") {
-    window.location.href = sceneViewerHref(window.location.origin, finish, window.location.href);
+    // Without Scene Viewer, Android opens the fallback: this page (minus ?ar) marked #no-ar.
+    const back = new URL(window.location.href);
+    back.searchParams.delete("ar");
+    back.hash = NO_AR;
+    window.location.href = sceneViewerHref(window.location.origin, finish, back.toString());
   }
 }
 
@@ -107,31 +124,48 @@ export function TreccArButton({ finish, tall = false, className = "" }: { finish
   // A phone that arrived from the desktop QR code (?ar=<finish>) is offered the AR view straight
   // away (AR viewers only open from a tap). The offer is portalled so no section can cover it.
   const asked = useSyncExternalStore(noSubscribe, askedFinish, () => null);
+  const noAr = useSyncExternalStore(onHashChange, cameBackWithoutAr, () => false);
   const [dismissed, setDismissed] = useState(false);
-  const arrived = !dismissed && asked && mode && mode !== "qr" ? asked : null;
+  const arrived = !dismissed && !noAr && asked && (mode === "quicklook" || mode === "sceneviewer") ? asked : null;
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const [notice, setNotice] = useState<Notice>("qr");
   const [qrUrl, setQrUrl] = useState<string | null>(null);
   const titleId = useId();
 
+  const showNotice = useCallback((n: Notice) => {
+    setNotice(n);
+    if (n === "qr") setQrUrl(`${window.location.origin}${window.location.pathname}?ar=${finish}`);
+    if (!dialogRef.current?.open) dialogRef.current?.showModal();
+  }, [finish]);
+
   const open = useCallback(() => {
     if (!mode) return;
-    if (mode === "qr") {
-      setQrUrl(`${window.location.origin}${window.location.pathname}?ar=${finish}`);
-      dialogRef.current?.showModal();
-    } else launchAr(mode, finish);
-  }, [mode, finish]);
+    if (noAr) showNotice("no-ar");
+    else if (mode === "qr" || mode === "safari") showNotice(mode);
+    else launchAr(mode, finish);
+  }, [mode, noAr, finish, showNotice]);
+
+  // Back from Android without Scene Viewer: say so once, and drop the marker from the address.
+  const toldNoAr = useRef(false);
+  useEffect(() => {
+    if (!noAr || toldNoAr.current) return;
+    toldNoAr.current = true;
+    showNotice("no-ar");
+  }, [noAr, showNotice]);
 
   return (
     <>
       <button
         type="button"
         onClick={open}
+        aria-label="See it full size"
         className={`flex items-center gap-2 bg-ink/70 font-medium text-snow backdrop-blur-md transition-colors hover:bg-ink/90 hover:text-signal-soft ${
           tall ? "h-[3.25rem] px-2.5 text-[0.8rem] sm:px-3 sm:text-[0.85rem]" : "h-9 px-3 text-[0.85rem]"
         } ${className}`}
       >
         <ArIcon />
-        See it full size
+        <span className="sm:hidden">Full size</span>
+        <span className="hidden sm:inline">See it full size</span>
       </button>
 
       <dialog
@@ -141,12 +175,15 @@ export function TreccArButton({ finish, tall = false, className = "" }: { finish
           // A click on the backdrop (the dialog element itself) closes it.
           if (e.target === e.currentTarget) e.currentTarget.close();
         }}
+        onClose={() => {
+          if (window.location.hash === NO_AR) window.history.replaceState(null, "", window.location.pathname + window.location.search);
+        }}
         className="m-auto w-[min(26rem,calc(100vw-2rem))] border border-line-strong bg-hull p-0 text-snow backdrop:bg-ink/80 backdrop:backdrop-blur-sm"
       >
         <div className="p-6 sm:p-7">
           <div className="flex items-start justify-between gap-4">
             <h2 id={titleId} className="v2-h3 text-snow">
-              See a TRECC full size
+              {notice === "qr" ? "See a TRECC full size" : notice === "safari" ? "Open this page in Safari" : "AR isn’t available on this phone"}
             </h2>
             <button
               type="button"
@@ -159,15 +196,29 @@ export function TreccArButton({ finish, tall = false, className = "" }: { finish
               </svg>
             </button>
           </div>
-          <p className="v2-body mt-3">
-            Scan this with your phone&rsquo;s camera, then tap to place a deployed TRECC, at its real size, wherever you
-            are standing, and walk around it.
-          </p>
-          <div className="mx-auto mt-6 w-48 sm:w-52">{qrUrl ? <QrCode text={qrUrl} /> : null}</div>
-          <p className="mt-5 text-[0.8rem] leading-relaxed text-muted">
-            Works on iPhone and iPad, and on Android phones with Google&rsquo;s AR. The model is a simplified cut of
-            Weatherhaven&rsquo;s CAD, in the finish you picked.
-          </p>
+          {notice === "qr" ? (
+            <>
+              <p className="v2-body mt-3">
+                Scan this with your phone&rsquo;s camera, then tap to place a deployed TRECC, at its real size, wherever
+                you are standing, and walk around it.
+              </p>
+              <div className="mx-auto mt-6 w-48 sm:w-52">{qrUrl ? <QrCode text={qrUrl} /> : null}</div>
+              <p className="mt-5 text-[0.8rem] leading-relaxed text-muted">
+                Works on iPhone and iPad, and on Android phones with Google&rsquo;s AR. The model is a simplified cut of
+                Weatherhaven&rsquo;s CAD, in the finish you picked.
+              </p>
+            </>
+          ) : notice === "safari" ? (
+            <p className="v2-body mt-3">
+              This browser can&rsquo;t open Apple&rsquo;s AR view. Open this page in Safari (from the share menu, choose
+              Open in Safari), then tap See it full size again.
+            </p>
+          ) : (
+            <p className="v2-body mt-3">
+              This phone can&rsquo;t show AR: it doesn&rsquo;t have Google&rsquo;s 3D viewer. The 3D model on this page
+              shows the same TRECC, and an iPhone or most recent Android phones can place it full size.
+            </p>
+          )}
         </div>
       </dialog>
 

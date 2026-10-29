@@ -8,7 +8,7 @@ import { campPlan } from "@/lib/camp-scene-plan";
 import { publishedFact, QUESTIONS, type GuideAnswers, type QuestionKey } from "@/lib/mission-guide";
 import type { CampFocus, CampStage, TagPos } from "@/lib/three/camp/campStage";
 import { startWhenNear } from "@/lib/start-when-near";
-import { liveLine, type LiveConditions } from "@/lib/live-site";
+import { liveLine, placePhrase, type LiveConditions } from "@/lib/live-site";
 
 type LoadState = "idle" | "loading" | "ready" | "fallback";
 
@@ -289,8 +289,9 @@ export function CampScene({
             </p>
             {live ? (
               <p className="mt-2 max-w-[46ch] text-[0.8rem] leading-snug text-snow/85 sm:text-[0.85rem]">
-                <span className="font-semibold text-snow">Right now at {live.name}: </span>
-                {liveLine(live, new Date())}
+                <span className="font-semibold text-snow">This hour {placePhrase(live, "at")}: </span>
+                {liveLine(live)}
+                <span className="text-snow/60"> (forecast: MET Norway)</span>
               </p>
             ) : null}
             {fact ? (
