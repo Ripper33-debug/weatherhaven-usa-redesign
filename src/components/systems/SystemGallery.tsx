@@ -52,6 +52,8 @@ export function SystemGallery({
             alt={`${name}, photo ${index + 1} of ${count}`}
             fill
             priority={index === 0}
+            // Next 16's `priority` only adds the preload; the first photo is the page's largest paint.
+            fetchPriority={index === 0 ? "high" : undefined}
             sizes="(max-width: 1024px) 100vw, 60vw"
             {...(blurs[current] ? { placeholder: "blur" as const, blurDataURL: blurs[current] } : {})}
             className="object-cover"

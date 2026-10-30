@@ -34,7 +34,16 @@ export default async function SystemsPage() {
         crumbs={[{ href: "/", label: "Home" }, { label: "Systems" }]}
         title="Shelter systems"
         lead="Weatherhaven's expandable containers, soft-wall, inflatable and polar shelters, with their specifications."
-      />
+      >
+        <p className="flex flex-wrap gap-x-6 gap-y-2 text-[0.95rem]">
+          <Link href="/configurable-solutions/compare" className="v2-link">
+            Compare shelter types side by side
+          </Link>
+          <Link href="/tested-and-proven" className="v2-link">
+            Ratings, setup times and test record
+          </Link>
+        </p>
+      </V2PageHeader>
       <Suspense fallback={<SystemsCatalogFallback products={products} blurs={blurs} />}>
         <SystemsCatalog products={products} blurs={blurs} />
       </Suspense>

@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
-import { GeistSans } from "geist/font/sans";
-import { GeistMono } from "geist/font/mono";
+import localFont from "next/font/local";
 import { Archivo, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { AnalyticsProvider } from "@/components/AnalyticsProvider";
@@ -11,7 +10,27 @@ import { SiteEnhancements } from "@/components/site/SiteEnhancements";
 import { SiteChrome } from "@/components/site/SiteChrome";
 import { AuthHashRedirect } from "@/components/auth/AuthHashRedirect";
 import { getSiteUrl } from "@/lib/site-url";
+import { NAV_CAPABILITIES, SYSTEMS_BY_FAMILY } from "@/lib/site-nav";
 
+/*
+ * Geist, Geist Mono and Playfair are the SOF portal and admin faces; the public site renders in
+ * Archivo. Geist Mono (the odd code) and Playfair now load when a page uses them instead of being
+ * preloaded on every page. Geist stays preloaded because the phone action bar renders in it.
+ * Same files and settings as the `geist` package's exports; the const names keep the family names.
+ */
+const GeistSans = localFont({
+  src: "../../node_modules/geist/dist/fonts/geist-sans/Geist-Variable.woff2",
+  variable: "--font-geist-sans",
+  weight: "100 900",
+});
+const GeistMono = localFont({
+  src: "../../node_modules/geist/dist/fonts/geist-mono/GeistMono-Variable.woff2",
+  variable: "--font-geist-mono",
+  adjustFontFallback: false,
+  fallback: ["ui-monospace", "SFMono-Regular", "Roboto Mono", "Menlo", "Monaco", "Liberation Mono", "DejaVu Sans Mono", "Courier New", "monospace"],
+  weight: "100 900",
+  preload: false,
+});
 const geistSans = GeistSans;
 const geistMono = GeistMono;
 
@@ -19,6 +38,7 @@ const playfair = Playfair_Display({
   subsets: ["latin"],
   variable: "--font-serif",
   display: "swap",
+  preload: false,
 });
 
 /** Marketing typeface — one variable family; headlines use its expanded widths. */
@@ -82,7 +102,7 @@ export default function RootLayout({
         <AnalyticsProvider>
           <SiteEnhancements>
             <SiteChrome
-              nav={<Navbar />}
+              nav={<Navbar menuData={{ systems: SYSTEMS_BY_FAMILY, capabilities: NAV_CAPABILITIES }} />}
               footer={<Footer />}
             >
               <main id="main-content" className="min-w-0 flex-1 overflow-x-clip focus:outline-none">

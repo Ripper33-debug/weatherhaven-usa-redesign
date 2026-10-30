@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Product } from "@/lib/products";
 import { PROCUREMENT } from "@/lib/procurement";
-import { buyingRecordsFor, specSheetPath } from "@/lib/product-buying";
+import { buyingRecordsFor, specMailto, specSheetPath } from "@/lib/product-buying";
 import { getSiteUrl } from "@/lib/site-url";
 import { SendSpecsLink } from "@/components/systems/SendSpecsLink";
 
@@ -61,13 +61,16 @@ export function ProductBuying({ product, fullName }: { product: Product; fullNam
           Printable spec sheet
         </Link>
         <SendSpecsLink
-          product={{
-            slug: product.slug,
-            name: product.name,
-            fullName,
-            description: product.description,
-            specs: product.specs.map((s) => ({ label: s.label, value: s.value })),
-          }}
+          href={specMailto(
+            {
+              slug: product.slug,
+              name: product.name,
+              fullName,
+              description: product.description,
+              specs: product.specs.map((s) => ({ label: s.label, value: s.value })),
+            },
+            getSiteUrl(),
+          )}
           fallbackOrigin={getSiteUrl()}
         />
       </p>

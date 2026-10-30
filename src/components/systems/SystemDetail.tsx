@@ -163,13 +163,20 @@ export function SystemDetail({
       ) : null}
 
       {/* Specifications */}
-      <section id="specifications" aria-labelledby="spec-heading" className="scroll-mt-24 border-b border-line py-20 sm:py-24">
+      <section id="specifications" aria-labelledby="spec-heading" className="v2-light scroll-mt-24 py-20 sm:py-24">
         <div className="v2-wrap grid gap-10 lg:grid-cols-[minmax(0,0.75fr)_minmax(0,1.25fr)] lg:gap-16">
           <div>
             <h2 id="spec-heading" className="v2-h2 text-snow">
               Specifications
             </h2>
-            {product.specs.length > 0 ? <p className="mt-4 text-[0.95rem] text-muted">Figures vary with configuration.</p> : null}
+            {product.specs.length > 0 ? (
+              <>
+                <p className="mt-4 text-[0.95rem] text-muted">Figures vary with configuration.</p>
+                <Link href={`/configurable-solutions/compare?a=${product.slug}#two-systems`} className="v2-link mt-4 inline-block text-[0.95rem]">
+                  Compare with another system
+                </Link>
+              </>
+            ) : null}
           </div>
           {product.specs.length > 0 ? (
             <div className="v2-plate px-6 py-2 sm:px-8">

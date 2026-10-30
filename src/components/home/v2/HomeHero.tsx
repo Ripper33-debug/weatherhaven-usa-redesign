@@ -21,6 +21,7 @@ export function HomeHero({ field }: { field: FieldExtremes | null }) {
           alt="A Weatherhaven TRECC on its trailer, hitched to a JLTV on frozen grassland"
           fill
           priority
+          fetchPriority="high"
           sizes="100vw"
           className="object-cover object-[48%_62%] md:object-[62%_45%]"
           {...blurProps(PHOTO)}

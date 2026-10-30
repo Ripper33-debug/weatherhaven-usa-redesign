@@ -43,78 +43,83 @@ export default function GovernmentBuyersPage() {
         lead="Weatherhaven Resources, Inc. in North Tonawanda, New York, is Weatherhaven's US company. It holds the SAM.gov registration and the US contract vehicles."
       />
 
-      <div className="v2-wrap pb-24">
-        {/* Identifiers */}
-        <section aria-labelledby="ids-heading" className="grid gap-10 border-t border-line pt-12 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16">
-          <div>
-            <h2 id="ids-heading" className="v2-h2 text-snow">
-              Identifiers
-            </h2>
-            <p className="v2-body mt-4 max-w-[44ch]">
-              For SAM.gov, solicitations and vendor forms.
-            </p>
-          </div>
-          <div className="v2-plate px-6 py-2 sm:px-8">
-            <dl>
-              {[
-                { k: "Legal name", v: <span className="text-snow">{p.legalName}</span> },
-                { k: "CAGE code", v: <CopyCode value={p.cage} label="CAGE code" /> },
-                { k: "UEI", v: <CopyCode value={p.uei} label="UEI" /> },
-                {
-                  k: "SAM.gov",
-                  v: (
-                    <span className="text-snow">
-                      Registered.{" "}
-                      <span className="text-muted">
-                        Check the current registration at <SourceLink href="https://sam.gov/">SAM.gov</SourceLink>.
+      {/* Identifiers and NAICS codes: a light data band, like the sheet a contracting office files */}
+      <div className="v2-light py-16 sm:py-20">
+        <div className="v2-wrap">
+          {/* Identifiers */}
+          <section aria-labelledby="ids-heading" className="grid gap-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16">
+            <div>
+              <h2 id="ids-heading" className="v2-h2 text-snow">
+                Identifiers
+              </h2>
+              <p className="v2-body mt-4 max-w-[44ch]">
+                For SAM.gov, solicitations and vendor forms.
+              </p>
+            </div>
+            <div className="v2-plate px-6 py-2 sm:px-8">
+              <dl>
+                {[
+                  { k: "Legal name", v: <span className="text-snow">{p.legalName}</span> },
+                  { k: "CAGE code", v: <CopyCode value={p.cage} label="CAGE code" /> },
+                  { k: "UEI", v: <CopyCode value={p.uei} label="UEI" /> },
+                  {
+                    k: "SAM.gov",
+                    v: (
+                      <span className="text-snow">
+                        Registered.{" "}
+                        <span className="text-muted">
+                          Check the current registration at <SourceLink href="https://sam.gov/">SAM.gov</SourceLink>.
+                        </span>
                       </span>
-                    </span>
-                  ),
-                },
-                { k: "US office", v: <span className="text-snow">{COMPANY_CONTACT.headquartersAddress.replace(", United States", "")}</span> },
-                { k: "Parent company", v: <span className="text-snow">{COMPANY_CONTACT.globalLegalName}, Burnaby, BC, Canada</span> },
-                { k: "Quality", v: <span className="text-snow">ISO 9001:2015, Burnaby and Brockville plants</span> },
-                {
-                  k: "Phone",
-                  v: (
-                    <a href={companyPhoneHref(COMPANY_CONTACT.phone)} className="v2-link">
-                      {COMPANY_CONTACT.phone}
-                    </a>
-                  ),
-                },
-              ].map((row) => (
-                <div key={row.k} className="grid gap-1 border-b border-line py-4 last:border-b-0 sm:grid-cols-[11rem_1fr] sm:items-center sm:gap-6">
-                  <dt className="v2-tech text-muted">{row.k}</dt>
-                  <dd className="text-[1rem]">{row.v}</dd>
-                </div>
+                    ),
+                  },
+                  { k: "US office", v: <span className="text-snow">{COMPANY_CONTACT.headquartersAddress.replace(", United States", "")}</span> },
+                  { k: "Parent company", v: <span className="text-snow">{COMPANY_CONTACT.globalLegalName}, Burnaby, BC, Canada</span> },
+                  { k: "Quality", v: <span className="text-snow">ISO 9001:2015, Burnaby and Brockville plants</span> },
+                  {
+                    k: "Phone",
+                    v: (
+                      <a href={companyPhoneHref(COMPANY_CONTACT.phone)} className="v2-link">
+                        {COMPANY_CONTACT.phone}
+                      </a>
+                    ),
+                  },
+                ].map((row) => (
+                  <div key={row.k} className="grid gap-1 border-b border-line py-4 last:border-b-0 sm:grid-cols-[11rem_1fr] sm:items-center sm:gap-6">
+                    <dt className="v2-tech text-muted">{row.k}</dt>
+                    <dd className="text-[1rem]">{row.v}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          </section>
+
+          {/* NAICS */}
+          <section aria-labelledby="naics-heading" className="mt-16 grid gap-10 border-t border-line pt-12 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16">
+            <div>
+              <h2 id="naics-heading" className="v2-h2 text-snow">
+                NAICS codes
+              </h2>
+              <p className="v2-body mt-4 max-w-[44ch]">The codes in Weatherhaven Resources&rsquo; SAM.gov registration.</p>
+            </div>
+            <ul className="grid gap-x-8 sm:grid-cols-2">
+              {p.naics.map((n) => (
+                <li key={n.code} className="grid grid-cols-[4.5rem_1fr] gap-3 border-b border-line py-3">
+                  <span className="v2-code text-[1rem] text-snow">{n.code}</span>
+                  <span className="text-[0.95rem] text-muted">
+                    {n.title}
+                    {"primary" in n && n.primary ? <span className="v2-tech ml-2 text-signal">Primary</span> : null}
+                  </span>
+                </li>
               ))}
-            </dl>
-          </div>
-        </section>
+            </ul>
+          </section>
+        </div>
+      </div>
 
-        {/* NAICS */}
-        <section aria-labelledby="naics-heading" className="mt-24 grid gap-10 border-t border-line pt-12 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16">
-          <div>
-            <h2 id="naics-heading" className="v2-h2 text-snow">
-              NAICS codes
-            </h2>
-            <p className="v2-body mt-4 max-w-[44ch]">The codes in Weatherhaven Resources&rsquo; SAM.gov registration.</p>
-          </div>
-          <ul className="grid gap-x-8 sm:grid-cols-2">
-            {p.naics.map((n) => (
-              <li key={n.code} className="grid grid-cols-[4.5rem_1fr] gap-3 border-b border-line py-3">
-                <span className="v2-code text-[1rem] text-snow">{n.code}</span>
-                <span className="text-[0.95rem] text-muted">
-                  {n.title}
-                  {"primary" in n && n.primary ? <span className="v2-tech ml-2 text-signal">Primary</span> : null}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
-
+      <div className="v2-wrap pb-24 pt-16 sm:pt-20">
         {/* Contract record */}
-        <section aria-labelledby="record-heading" className="mt-24 border-t border-line pt-12">
+        <section aria-labelledby="record-heading">
           <div className="grid gap-4 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16">
             <h2 id="record-heading" className="v2-h2 text-snow">
               Current vehicles and recent awards
@@ -133,7 +138,7 @@ export default function GovernmentBuyersPage() {
                 {r.ids.length ? (
                   <p className="mt-4 flex flex-wrap gap-2">
                     {r.ids.map((id) => (
-                      <span key={id} className="v2-code px-2 py-1 text-[0.85rem] text-snow shadow-[inset_0_0_0_1px_rgb(148_170_196/0.32)]">
+                      <span key={id} className="v2-code px-2 py-1 text-[0.85rem] text-snow shadow-[inset_0_0_0_1px_var(--color-line-strong)]">
                         {id}
                       </span>
                     ))}

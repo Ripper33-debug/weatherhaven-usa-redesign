@@ -29,7 +29,7 @@ export function HomeSystems() {
   const [lead, ...rest] = SYSTEMS_BY_FAMILY;
 
   return (
-    <section aria-labelledby="systems-heading" className="border-t border-line bg-ink py-20 sm:py-28">
+    <section aria-labelledby="systems-heading" className="v2-light py-20 sm:py-28">
       <div className="v2-wrap">
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.8fr)] lg:items-end">
           <h2 id="systems-heading" className="v2-h1 max-w-[21ch] text-snow">

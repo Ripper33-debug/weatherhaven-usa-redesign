@@ -26,7 +26,8 @@ export function SiteEnhancements({ children }: { children: React.ReactNode }) {
   return (
     <>
       {publicSite ? null : <InitialLoadScreen />}
-      <CsrfBootstrap />
+      {/* Public pages fetch the CSRF token only when a form is sent (fetchWithCsrf), not on every page load. */}
+      {publicSite ? null : <CsrfBootstrap />}
       <MarketingPageFlags />
       <PlatformPageFlags />
       {!marketing && !lightPortal && <PlatformEffects />}

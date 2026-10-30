@@ -9,8 +9,8 @@ import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 import { useMenuOpenForRoute } from "@/hooks/useMenuOpenForRoute";
 import { NavAdminLink } from "@/components/navigation/NavAdminLink";
 import { isPublicSitePage } from "@/lib/marketing-pages";
+import type { NAV_CAPABILITIES, SYSTEMS_BY_FAMILY } from "@/lib/site-nav";
 import {
-  NAV_CAPABILITIES,
   NAV_CAPABILITIES_PAGE,
   NAV_CTA,
   NAV_GOV,
@@ -18,8 +18,13 @@ import {
   NAV_PROGRAMS,
   NAV_WHO_WE_SERVE,
   NAV_SOF,
-  SYSTEMS_BY_FAMILY,
-} from "@/lib/site-nav";
+} from "@/lib/site-nav-links";
+
+/**
+ * The menus' catalog data comes in as props from the root layout (a server component), so the
+ * product and capability text behind it isn't bundled into the page JavaScript.
+ */
+export type NavMenuData = { systems: typeof SYSTEMS_BY_FAMILY; capabilities: typeof NAV_CAPABILITIES };
 import { COMPANY_CONTACT, companyPhoneHref } from "@/lib/company-facts";
 
 function Logo({ height = 24, priority = false }: { height?: number; priority?: boolean }) {
@@ -37,10 +42,10 @@ function Logo({ height = 24, priority = false }: { height?: number; priority?: b
   );
 }
 
-function SystemsMenu({ onNavigate }: { onNavigate: () => void }) {
+function SystemsMenu({ onNavigate, systems }: { onNavigate: () => void; systems: NavMenuData["systems"] }) {
   return (
     <div className="v2-wrap grid gap-x-10 gap-y-8 py-10 lg:grid-cols-[repeat(4,minmax(0,1fr))_minmax(13rem,0.9fr)]">
-      {SYSTEMS_BY_FAMILY.map((family) => (
+      {systems.map((family) => (
         <div key={family.id}>
           <Link
             href={`/configurable-solutions?family=${family.id}`}
@@ -88,8 +93,8 @@ function SystemsMenu({ onNavigate }: { onNavigate: () => void }) {
           <Link href="/mission-solution-builder" onClick={onNavigate} className="v2-btn v2-btn-ghost whitespace-nowrap">
             Open mission builder
           </Link>
-          <Link href="/configurable-solutions" onClick={onNavigate} className="v2-link text-[0.9rem]">
-            Compare all systems
+          <Link href="/configurable-solutions/compare" onClick={onNavigate} className="v2-link text-[0.9rem]">
+            Compare systems
           </Link>
         </div>
       </div>
@@ -97,13 +102,13 @@ function SystemsMenu({ onNavigate }: { onNavigate: () => void }) {
   );
 }
 
-function CapabilitiesMenu({ onNavigate }: { onNavigate: () => void }) {
+function CapabilitiesMenu({ onNavigate, capabilities }: { onNavigate: () => void; capabilities: NavMenuData["capabilities"] }) {
   return (
     <div className="v2-wrap grid gap-x-12 gap-y-8 py-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.9fr)]">
       <div>
         <p className="v2-tech text-muted">What a camp needs</p>
         <ul className="mt-4 grid gap-x-6 sm:grid-cols-2">
-          {NAV_CAPABILITIES.map((c) => (
+          {capabilities.map((c) => (
             <li key={c.href}>
               <Link href={c.href} onClick={onNavigate} className="-mx-3 block px-3 py-2 text-[0.95rem] font-medium text-snow no-underline hover:bg-white/[0.04] hover:text-signal">
                 {c.label}
@@ -149,7 +154,7 @@ function CapabilitiesMenu({ onNavigate }: { onNavigate: () => void }) {
 
 type MenuId = "systems" | "capabilities";
 
-export function Navbar() {
+export function Navbar({ menuData }: { menuData: NavMenuData }) {
   const pathname = usePathname();
   const isLogin = pathname === "/login";
   const publicSite = isPublicSitePage(pathname);
@@ -278,8 +283,8 @@ export function Navbar() {
           <nav aria-label="Main" className="hidden flex-1 items-center gap-1 xl:flex">
             {(
               [
-                { id: "systems", label: "Systems", panel: <SystemsMenu onNavigate={() => setMenu(null)} /> },
-                { id: "capabilities", label: "Capabilities", panel: <CapabilitiesMenu onNavigate={() => setMenu(null)} /> },
+                { id: "systems", label: "Systems", panel: <SystemsMenu onNavigate={() => setMenu(null)} systems={menuData.systems} /> },
+                { id: "capabilities", label: "Capabilities", panel: <CapabilitiesMenu onNavigate={() => setMenu(null)} capabilities={menuData.capabilities} /> },
               ] as const
             ).map((m) => (
               <div key={m.id} onBlur={onMenuBlur}>
@@ -406,7 +411,7 @@ export function Navbar() {
               ))}
             </ul>
             <div className="mt-10 grid gap-8 sm:grid-cols-2">
-              {SYSTEMS_BY_FAMILY.map((family) => (
+              {menuData.systems.map((family) => (
                 <div key={family.id}>
                   <p className="text-sm font-semibold text-muted">{family.name}</p>
                   <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1">

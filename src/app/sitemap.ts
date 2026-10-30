@@ -17,6 +17,8 @@ const MARKETING_PATHS = [
   "/deployments/map",
   "/deployments/record",
   "/government",
+  "/tested-and-proven",
+  "/configurable-solutions/compare",
   "/who-we-serve",
   ...BUYER_SEGMENTS.map((s) => `/who-we-serve/${s.slug}`),
   "/resources",

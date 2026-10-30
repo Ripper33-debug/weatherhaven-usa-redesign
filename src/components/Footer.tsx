@@ -11,6 +11,7 @@ const companyLinks = [
   { href: "/who-we-serve", label: "Who we serve" },
   { href: "/deployments", label: "Deployments" },
   { href: "/deployments/record", label: "Track record" },
+  { href: "/tested-and-proven", label: "Tested and proven" },
   { href: "/news", label: "News" },
   { href: "/events", label: "Events and briefings" },
   { href: "/resources", label: "Resources" },
@@ -19,7 +20,7 @@ const companyLinks = [
 const programLinks = [
   NAV_GOV,
   { href: "/mission-solution-builder", label: "Mission builder" },
-  { href: "/configurable-solutions", label: "Compare systems" },
+  { href: "/configurable-solutions/compare", label: "Compare systems" },
   { href: "/sof-solutions", label: "SOF portal" },
   { href: "/sof-solutions/request-access", label: "Request SOF access" },
 ];

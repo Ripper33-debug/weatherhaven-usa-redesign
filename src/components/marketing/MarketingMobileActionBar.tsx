@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { btnMarketingOutline, btnMarketingPrimary } from "@/lib/cta-buttons";
 import { contactUrl } from "@/lib/contact-url";
 import { isMarketingPage, isProductCatalogPath, isPublicSitePage } from "@/lib/marketing-pages";
-import { NAV_CTA } from "@/lib/site-nav";
+import { NAV_CTA } from "@/lib/site-nav-links";
 
 export function MarketingMobileActionBar() {
   const pathname = usePathname();

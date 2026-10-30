@@ -21,7 +21,7 @@ export function CopyCode({ value, label }: { value: string; label: string }) {
         type="button"
         onClick={() => void copy()}
         aria-label={`Copy ${label} ${value}`}
-        className="v2-tech h-8 px-2.5 text-muted shadow-[inset_0_0_0_1px_rgb(148_170_196/0.32)] transition-colors hover:text-snow"
+        className="v2-tech h-8 px-2.5 text-muted shadow-[inset_0_0_0_1px_var(--color-line-strong)] transition-colors hover:text-snow"
       >
         <span aria-live="polite">{copied ? "Copied" : "Copy"}</span>
       </button>

@@ -91,6 +91,9 @@ export function DeploymentGlobe({
         src={`${base}/assets/${view === "map" ? "embed-poster-map.jpg" : "embed-poster.jpg"}`}
         alt=""
         aria-hidden="true"
+        // Embedded further down a page, the still waits its turn instead of being preloaded with the
+        // first screen; on the full-screen map it is the first screen.
+        loading={embed ? "lazy" : undefined}
         // The flat map fits the width on phones, so its still does too; the globe's fills the box.
         className={view === "map" ? "object-contain md:object-cover" : "object-cover"}
         style={{ ...fill, objectPosition: view === "map" ? "50% 50%" : "58% 50%", opacity: ready ? 0 : 1 }}

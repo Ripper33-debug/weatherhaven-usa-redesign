@@ -27,7 +27,7 @@ export default function TrackRecordPage() {
       />
 
       <div className="bg-ink">
-        <section aria-labelledby="contracts-heading" className="border-b border-line py-16 sm:py-20">
+        <section aria-labelledby="contracts-heading" className="v2-light py-16 sm:py-20">
           <div className="v2-wrap">
             <div className="grid gap-4 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16">
               <h2 id="contracts-heading" className="v2-h2 text-snow">
@@ -88,7 +88,7 @@ export default function TrackRecordPage() {
                       {c.ids.length ? (
                         <ul className="flex flex-wrap gap-2 lg:flex-col lg:items-start">
                           {c.ids.map((id) => (
-                            <li key={id} className="v2-code px-2 py-1 text-[0.85rem] text-snow shadow-[inset_0_0_0_1px_rgb(148_170_196/0.32)]">
+                            <li key={id} className="v2-code px-2 py-1 text-[0.85rem] text-snow shadow-[inset_0_0_0_1px_var(--color-line-strong)]">
                               {id}
                             </li>
                           ))}

@@ -10,8 +10,13 @@
   --color-wh-success: #4ade80;
   --color-wh-error: #f87171;
 
-  /* Public site (v2) palette — navy-black night, snow, Weatherhaven signal orange */
   --font-wh: var(--font-archivo), "Archivo", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Public site (v2) palette: navy-black night, snow, Weatherhaven signal orange. Not inline, so the
+   utilities (text-snow, bg-ink, border-line…) read these variables and a section can remap them
+   (see .v2-light). The values are the same everywhere else. */
+@theme {
   --color-ink: #0a0f17;
   --color-hull: #101824;
   --color-hull-2: #172233;
@@ -1211,6 +1216,64 @@ body .wh-v2 .wh-marketing-display {
   box-shadow: inset 0 0 0 1px var(--v2-line);
 }
 
+/* Light data bands: specs, identifiers and registers read like a printed data sheet between the
+   dark photo and film sections. Remaps the palette for everything inside, so components keep their
+   usual classes. Muted text is 6.4:1 on the paper, the darker signal 5:1. */
+.v2-light {
+  --color-ink: #eef1f4;
+  --color-hull: #ffffff;
+  --color-hull-2: #e4e9ee;
+  --color-line: rgb(15 23 34 / 0.13);
+  --color-line-strong: rgb(15 23 34 / 0.26);
+  --color-muted: #4a5868;
+  --color-snow: #0f1722;
+  --color-signal: #a24f0c;
+  --color-signal-soft: #9a4a0b;
+  --color-ice: #2f6f99;
+  --v2-hull: #ffffff;
+  --v2-hull-2: #e4e9ee;
+  --v2-line: rgb(15 23 34 / 0.13);
+  --v2-line-strong: rgb(15 23 34 / 0.26);
+  --v2-muted: #4a5868;
+  --v2-snow: #0f1722;
+  background-color: #eef1f4;
+  color: #0f1722;
+  color-scheme: light;
+}
+
+.v2-light .v2-lead {
+  color: #2a3644;
+}
+
+.v2-light ::selection {
+  background: rgb(241 133 34 / 0.3);
+  color: #0f1722;
+}
+
+.v2-light .v2-link {
+  text-decoration-color: rgb(194 97 15 / 0.75);
+}
+
+.v2-light .v2-link:hover {
+  text-decoration-color: #a24f0c;
+}
+
+.v2-light .v2-btn-ghost:hover {
+  background: rgb(15 23 34 / 0.05);
+  box-shadow: inset 0 0 0 1px rgb(15 23 34 / 0.55);
+}
+
+.v2-light .v2-btn-light {
+  color: #eef1f4;
+  background: #0f1722;
+}
+
+.v2-light .v2-plate {
+  box-shadow:
+    inset 0 0 0 1px var(--v2-line),
+    0 1px 2px rgb(15 23 34 / 0.04);
+}
+
 /* Focus */
 .wh-v2 a:focus-visible,
 .wh-v2 button:focus-visible,
@@ -1222,6 +1285,15 @@ body .wh-v2 .wh-marketing-display {
   outline-offset: 3px;
 }
 
+.wh-v2 .v2-light a:focus-visible,
+.wh-v2 .v2-light button:focus-visible,
+.wh-v2 .v2-light input:focus-visible,
+.wh-v2 .v2-light select:focus-visible,
+.wh-v2 .v2-light textarea:focus-visible,
+.wh-v2 .v2-light [tabindex]:focus-visible {
+  outline-color: #a24f0c;
+}
+
 /* The chamfer clip-path hides an outside outline, so solid buttons get an inset ring. */
 .wh-v2 .v2-btn:focus-visible {
   outline: 2px solid var(--v2-ink);
@@ -1230,6 +1302,9 @@ body .wh-v2 .wh-marketing-display {
 .wh-v2 .v2-btn-ghost:focus-visible {
   outline: 2px solid var(--v2-signal);
   outline-offset: 2px;
+}
+.wh-v2 .v2-light .v2-btn:not(.v2-btn-ghost):focus-visible {
+  outline-color: var(--v2-ink);
 }
 
 /* Inputs on public pages */

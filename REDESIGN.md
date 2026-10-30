@@ -146,6 +146,14 @@ An independent design review of every public page listed what made the site read
 - **Checked:** in Chrome with phone and computer settings: the QR code decodes to the right link, a phone arriving from it gets "Place it", the Android no-AR note and the iOS in-app note appear, and the USDZ is served with the right type. There was no real phone here, so the AR views themselves weren't opened: try it on an iPhone and an Android phone before launch.
 - **Code:** `src/components/three/TreccArButton.tsx`, used by `TreccViewer.tsx` and `HomeTreccScene.tsx`.
 
+## Before the pitch (last round)
+
+- **Tested and proven (`/tested-and-proven`):** published temperature ratings on one scale (RDMSS, BMECC, Polar Chief, TRECC, Airmax LP), wind and snow ratings, setup crew and time for 14 systems, the TRECC test record, field record with third-party sources, and quality certification. Every value is a reference into `product-content.ts`; `src/lib/published-facts.test.ts` fails if one stops matching.
+- **Compare (`/configurable-solutions/compare`):** the four shelter types side by side on packed size, deployed size, setup, transport, ratings, service life and roles, then any two of the 17 systems. Product pages link to it with their own system picked ("Compare with another system").
+- **Light sections:** a `.v2-light` theme (paper #eef1f4, ink text, all text at 4.5:1 or better) on product specifications, the government identifiers and NAICS, the track record's contracts table and the homepage systems band. The colour utilities read CSS variables, so the theme only remaps them; values elsewhere, including the SOF portal and admin, are unchanged.
+- **Phone speed:** Geist Mono and Playfair no longer preload on every page, hero and gallery photos load at high priority, the menu's catalog data comes from the server instead of the page's JavaScript (about 24 KB gzipped less per page), and an unused compare provider that fetched the catalog on every product page is gone. Clean mobile runs: homepage 86–90, MECC 84–90, TRECC 89. SOF and admin pages render pixel-identical.
+- **Checked:** a crawl of all 60 public pages and every internal link and anchor found no broken links, images, console errors or sideways scrolling on phones. Public pages now fetch the CSRF token only when a form is sent, so a room full of people on one office network doesn't trip the API rate limit (10 requests a minute per IP).
+
 ## Full-size AR page (/ar)
 
 - **What it is:** a standalone page that places the deployed TRECC at real size (`ar-scale="fixed"`, on the floor) through Google <model-viewer> 3.5.0, using WebXR, Quick Look on iPhone or Scene Viewer on Android. Desktop visitors get a QR code of the page to open on a phone; phones get a "View in your space" button. Linked from the TRECC page ("See it at full size in AR").
