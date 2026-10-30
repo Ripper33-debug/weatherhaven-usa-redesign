@@ -50,7 +50,7 @@ export function MarketingMobileActionBar() {
         <Link href="/configurable-solutions" className="v2-btn v2-btn-ghost w-full !min-h-11 text-sm">
           Systems
         </Link>
-        <Link href={productSlug ? contactHref : NAV_CTA.href} className="v2-btn w-full !min-h-11 text-sm">
+        <Link href={productSlug ? contactHref : NAV_CTA.href} className="v2-btn w-full whitespace-nowrap !min-h-11 !px-3 text-sm">
           {productSlug ? "Ask about this system" : NAV_CTA.label}
         </Link>
       </div>

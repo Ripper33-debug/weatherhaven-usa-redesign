@@ -1,0 +1,101 @@
+"use client";
+
+import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
+import { useClientMediaQuery } from "@/hooks/useClientMediaQuery";
+
+/**
+ * The homepage film: a 25-second loop cut from Weatherhaven's brand films, which were made from its
+ * own product photography (the TRECC in fog, snow, a sandstorm, at dusk and at night, plus close-ups
+ * of its hardware). Interiors and scenes showing things Weatherhaven may not sell were left out.
+ * The hero says it's an illustrative film.
+ *
+ * The still (its first frame) is the first paint; the film starts downloading only once the page has
+ * loaded, at 720p on phones. Reduced motion starts paused; the button always works.
+ */
+const POSTER = "/hero/film-poster.jpg";
+
+function loadSource(video: HTMLVideoElement) {
+  if (video.getAttribute("src")) return;
+  const small = window.matchMedia("(max-width: 767px)").matches;
+  video.src = small ? "/hero/film-720.mp4" : "/hero/film-1080.mp4";
+}
+
+export function HeroFilm() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [playing, setPlaying] = useState(false);
+  const reduced = useClientMediaQuery("(prefers-reduced-motion: reduce)");
+  // Reduced motion starts paused; after that the visitor's own choice wins.
+  const [userPaused, setUserPaused] = useState<boolean | null>(null);
+  const paused = userPaused ?? reduced;
+  const userPausedRef = useRef(false);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const onPlaying = () => setPlaying(true);
+    video.addEventListener("playing", onPlaying);
+    const start = () => {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || userPausedRef.current) return;
+      loadSource(video);
+      void video.play().catch(() => undefined);
+    };
+    if (document.readyState === "complete") start();
+    else window.addEventListener("load", start, { once: true });
+    return () => {
+      video.removeEventListener("playing", onPlaying);
+      window.removeEventListener("load", start);
+    };
+  }, []);
+
+  const toggle = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (paused || video.paused) {
+      loadSource(video);
+      void video.play().catch(() => undefined);
+      userPausedRef.current = false;
+      setUserPaused(false);
+    } else {
+      video.pause();
+      userPausedRef.current = true;
+      setUserPaused(true);
+    }
+  };
+
+  return (
+    <>
+      <Image
+        src={POSTER}
+        alt=""
+        fill
+        priority
+        fetchPriority="high"
+        sizes="100vw"
+        className="object-cover object-[40%_50%] md:object-[60%_50%]"
+      />
+      <video
+        ref={videoRef}
+        muted
+        loop
+        playsInline
+        preload="none"
+        aria-hidden
+        className={`absolute inset-0 h-full w-full object-cover object-[40%_50%] transition-opacity duration-1000 md:object-[60%_50%] ${
+          playing ? "opacity-100" : "opacity-0"
+        }`}
+      />
+      <button
+        type="button"
+        onClick={toggle}
+        className="absolute right-3 top-20 z-10 flex h-10 items-center gap-2 bg-ink/50 px-3 text-[0.85rem] font-medium text-snow/85 backdrop-blur-sm transition-colors hover:text-snow md:right-[var(--v2-gutter)] md:top-24"
+        aria-label={paused ? "Play the background film" : "Pause the background film"}
+      >
+        <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden>
+          {paused ? <path d="M3 1.5v9l7-4.5z" fill="currentColor" /> : <path d="M3 1.5h2v9H3zM7 1.5h2v9H7z" fill="currentColor" />}
+        </svg>
+        {paused ? "Play film" : "Pause film"}
+      </button>
+    </>
+  );
+}

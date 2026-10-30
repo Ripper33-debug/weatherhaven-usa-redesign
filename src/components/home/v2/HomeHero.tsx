@@ -1,39 +1,28 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { FieldExtremes } from "@/lib/field-readout";
-import { blurProps } from "@/lib/image-blur";
 import { HeroFieldReadout } from "@/components/home/v2/HeroFieldReadout";
-
-const PHOTO = "/products/trecc/gallery/08-TRECC-and-Car.jpg";
+import { HeroFilm } from "@/components/home/v2/HeroFilm";
 
 /**
- * Full-bleed photograph of a TRECC on its trailer behind a JLTV (a Weatherhaven field photo, not a
- * render). The headline sits over the darkened lower left; a one-line weather note from two
- * deployment sites runs along the bottom when the forecast service answered.
+ * Full-bleed film hero (see HeroFilm: an illustrative film made from Weatherhaven's product
+ * photography, labelled as such along the bottom). The headline sits over the darkened lower left;
+ * a one-line weather note from two deployment sites runs along the bottom when the forecast
+ * service answered.
  */
 export function HomeHero({ field }: { field: FieldExtremes | null }) {
   return (
     <section className="relative isolate flex flex-col overflow-hidden bg-ink md:min-h-[100svh] md:justify-end">
-      {/* Phones: the photo is a band above the copy. Wider screens: full bleed behind it. */}
+      {/* Phones: the film is a band above the copy. Wider screens: full bleed behind it. */}
       <div className="relative h-[54svh] min-h-[300px] md:absolute md:inset-0 md:-z-20 md:h-auto">
-        <Image
-          src={PHOTO}
-          alt="A Weatherhaven TRECC on its trailer, hitched to a JLTV on frozen grassland"
-          fill
-          priority
-          fetchPriority="high"
-          sizes="100vw"
-          className="object-cover object-[48%_62%] md:object-[62%_45%]"
-          {...blurProps(PHOTO)}
-        />
+        <HeroFilm />
         <div
           aria-hidden
-          className="absolute inset-0 bg-[linear-gradient(180deg,rgb(10_15_23/0.6)_0%,rgb(10_15_23/0)_24%,rgb(10_15_23/0)_62%,#0a0f17_100%)] md:hidden"
+          className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgb(10_15_23/0.6)_0%,rgb(10_15_23/0)_24%,rgb(10_15_23/0)_62%,#0a0f17_100%)] md:hidden"
         />
       </div>
       <div
         aria-hidden
-        className="absolute inset-0 -z-10 hidden md:block"
+        className="pointer-events-none absolute inset-0 -z-10 hidden md:block"
         style={{
           background:
             "linear-gradient(180deg, rgb(10 15 23 / 0.55) 0%, rgb(10 15 23 / 0) 22%), linear-gradient(90deg, rgb(10 15 23 / 0.9) 0%, rgb(10 15 23 / 0.72) 30%, rgb(10 15 23 / 0.25) 55%, rgb(10 15 23 / 0) 70%), linear-gradient(0deg, rgb(10 15 23 / 0.96) 0%, rgb(10 15 23 / 0.35) 40%, rgb(10 15 23 / 0) 62%)",
@@ -61,7 +50,7 @@ export function HomeHero({ field }: { field: FieldExtremes | null }) {
       <div className="v2-wrap pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] md:pb-6">
         <div className="flex flex-col gap-2 border-t border-line-strong pt-4 text-[0.8125rem] leading-snug text-muted sm:flex-row sm:items-baseline sm:justify-between sm:gap-8">
           {field ? <HeroFieldReadout field={field} /> : <span />}
-          <p className="shrink-0">TRECC and JLTV. Weatherhaven photo.</p>
+          <p className="shrink-0">Illustrative film made from Weatherhaven product photography</p>
         </div>
       </div>
     </section>
