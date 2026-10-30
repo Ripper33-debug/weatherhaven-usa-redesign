@@ -1,6 +1,7 @@
 /**
  * Simplified models of each Weatherhaven system, drawn to the sizes in camp-scene-plan.ts
- * (published dimensions where they exist). Geometry is built once per kind and shared by every
+ * (published dimensions where they exist). Systems with a detailed model in system-models.ts (the
+ * MECC) use it instead and fall back to these if it can't be loaded; the TRECC uses its CAD files. Geometry is built once per kind and shared by every
  * copy in the camp; each copy gets its own materials so it can be scanned in on its own.
  *
  * Long side along x, centred on the origin, standing on y = 0.
@@ -17,6 +18,8 @@ import {
   profileShell,
   roundProfile,
   shoulderProfile,
+  type MatKey,
+  type MatSet,
   type PartGeo,
   type Profile,
 } from "@/lib/three/camp/kit";
@@ -29,6 +32,10 @@ export type MovingPart = {
   path: [number, number, number][];
 };
 
+/** A detailed model's parts for one copy in the camp, posed from packed (0) to deployed (1). */
+export type Rig = { root: THREE.Group; pose: (k: number) => void };
+
+export type Look = { color: THREE.Color; metalness: number; roughness: number };
 export type KindModel = {
   body: PartGeo;
   moving: MovingPart[];
@@ -38,6 +45,13 @@ export type KindModel = {
   style: DeployStyle;
   /** Height for the name tag above the roof. */
   tagY: number;
+  /** Detailed models (system-models.ts): builds this copy's parts on its own materials, instead of `body`. */
+  rig?: (mats: MatSet, shadows: boolean, opts: { interior: boolean }) => Rig;
+  /** Colours the model's own materials give the non-finish keys (trim, frame, dark…). */
+  /** The detailed model's own colour and sheen for each slot except shell and shell2 (they take the finish). */
+  looks?: Partial<Record<MatKey, Look>>;
+  /** Floor height inside, for the example fit-out. */
+  floorY?: number;
 };
 
 const CORNER = 0.18;

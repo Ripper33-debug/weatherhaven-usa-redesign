@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { PRODUCT_CONTENT } from "@/lib/product-content";
 import { pairings, QUESTIONS, rankPartial, recommend, type GuideAnswers, type QuestionKey } from "@/lib/mission-guide";
-import { campPlan, KIND_FOR_SLUG, KIND_SIZE, type CampUnit, type Rect } from "@/lib/camp-scene-plan";
+import { campPlan, KIND_FOR_SLUG, KIND_SIZE, outerSize, type CampUnit, type Rect } from "@/lib/camp-scene-plan";
 
 function* allAnswers(): Generator<Required<GuideAnswers>> {
   const [m, c, p, t, d] = QUESTIONS.map((q) => q.options.map((o) => o.id));
@@ -13,7 +13,8 @@ function* allAnswers(): Generator<Required<GuideAnswers>> {
 }
 
 function footprint(u: CampUnit): Rect {
-  const s = KIND_SIZE[u.kind];
+  // Guy lines and end equipment included (outerSize).
+  const s = outerSize(KIND_SIZE[u.kind]);
   const across = Math.abs(Math.sin(u.rot)) > 0.5;
   const hx = (across ? s.w : s.l) / 2;
   const hz = (across ? s.l : s.w) / 2;

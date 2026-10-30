@@ -82,6 +82,14 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        // System models from public/models/<slug>/ (product-page viewer, /ar/<slug>, the 3D camp).
+        source: "/models/:slug/:name.glb",
+        headers: [
+          { key: "Content-Type", value: "model/gltf-binary" },
+          { key: "Cache-Control", value: "public, max-age=86400" },
+        ],
+      },
+      {
         source: "/assets/draco-ar/:name.wasm",
         headers: [
           { key: "Content-Type", value: "application/wasm" },

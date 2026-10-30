@@ -7,7 +7,8 @@
  * "a camp this size usually adds" pairings. Quantities are illustrative, not a sizing.
  *
  * Sizes are in metres, long side along x. Published dimensions are used where Weatherhaven
- * publishes them; the rest are noted as estimates (see KIND_SIZE).
+ * publishes them; the rest are noted as estimates (see KIND_SIZE). Systems with a detailed model
+ * (the TRECC's CAD files, and those in system-models.ts) use the model's own size.
  */
 import {
   labelFor,
@@ -20,6 +21,7 @@ import {
   type PeopleId,
   type TransportId,
 } from "@/lib/mission-guide";
+import { SYSTEM_MODELS } from "@/lib/system-models";
 
 export type ModelKind =
   | "trecc"
@@ -40,7 +42,21 @@ export type ModelKind =
   | "polar-chief"
   | "endurance";
 
-export type KindSize = { l: number; w: number; h: number; source: string };
+export type KindSize = {
+  l: number;
+  w: number;
+  h: number;
+  /** Clear ground needed beyond each long side for guy lines and stakes. */
+  apron?: number;
+  /** How far equipment on the ends (an ECU, door steps) stands out beyond `l` at each end. */
+  ends?: number;
+  source: string;
+};
+
+/** The ground a unit takes up, guy lines and end equipment included. */
+export function outerSize(s: KindSize): { l: number; w: number } {
+  return { l: s.l + 2 * (s.ends ?? 0), w: s.w + 2 * (s.apron ?? 0) };
+}
 
 const IN = 0.0254;
 const FT = 0.3048;
@@ -48,7 +64,15 @@ const FT = 0.3048;
 /** Outside size of each model as drawn. `source` says where the numbers come from. */
 export const KIND_SIZE: Record<ModelKind, KindSize> = {
   trecc: { l: 181 * IN, w: 97 * IN, h: 2.35, source: "CAD model; TRECC-T deployed 181 × 97 in" },
-  mecc: { l: 20 * FT, w: 243 * IN, h: 8 * FT, source: "20-ft container, 243 in deployed width" },
+  mecc: {
+    l: 20 * FT,
+    w: 253 * IN,
+    h: 2.56,
+    apron: 1.46,
+    ends: 0.6,
+    source:
+      "Detailed model (public/models/mecc): 20-ft container, 253 in deployed width per brochure 1087; guy lines about 1.5 m out each side, the ECU about 0.6 m off one end",
+  },
   ehmecc: { l: 20 * FT, w: 240 * IN, h: 144 * IN + 0.25, source: "240 in deployed width, 144 in interior height (roof thickness estimated)" },
   bmecc: { l: 10 * FT, w: 243 * IN, h: 8 * FT, source: "10-ft container, 243 in deployed width" },
   ateps: { l: 244 * IN, w: 104 * IN, h: 91 * IN, source: "244 × 104 in deployed, 91 in high" },
@@ -85,6 +109,17 @@ export const KIND_FOR_SLUG: Record<string, ModelKind> = {
   "polar-chief": "polar-chief",
   endurance: "endurance",
 };
+
+/** Systems the camp draws as detailed models rather than simplified ones: the TRECC (CAD) and every
+ * system with a model in system-models.ts. */
+export function hasDetailedModel(slug: string): boolean {
+  return slug === "trecc" || !!SYSTEM_MODELS[slug];
+}
+
+/** The same, for a camp kind. */
+export function isDetailedKind(kind: ModelKind): boolean {
+  return Object.entries(KIND_FOR_SLUG).some(([slug, k]) => k === kind && hasDetailedModel(slug));
+}
 
 const PEOPLE_INDEX: Record<PeopleId, number> = { "1-8": 0, "9-25": 1, "26-100": 2, "101-500": 3, "500+": 4 };
 
@@ -177,7 +212,7 @@ function rectOf(units: CampUnit[]): Rect {
   if (units.length === 0) return { minX: -4, maxX: 4, minZ: -4, maxZ: 4 };
   const r = { minX: Infinity, maxX: -Infinity, minZ: Infinity, maxZ: -Infinity };
   for (const u of units) {
-    const s = KIND_SIZE[u.kind];
+    const s = outerSize(KIND_SIZE[u.kind]);
     const across = Math.abs(Math.sin(u.rot)) > 0.5;
     const hx = (across ? s.w : s.l) / 2;
     const hz = (across ? s.l : s.w) / 2;
@@ -210,7 +245,7 @@ export function campPlan(a: GuideAnswers): CampPlan {
         slug: lead.slug,
         name: lead.name,
         kind,
-        x: round2(c * (s.l + gx)),
+        x: round2(c * (outerSize(s).l + gx)),
         z: round2(-r * (s.w + gz)),
         rot: 0,
         role: "main",
@@ -299,7 +334,7 @@ function permanence(duration: DurationId | undefined, units: CampUnit[], b: Rect
   mains.forEach((u, i) => {
     if (i % 3 !== 0) return;
     const s = KIND_SIZE[u.kind];
-    props.push({ id: `gen-${u.id}`, kind: "gen", tier: "rapid", x: round2(u.x - s.l / 2 - 1.4), z: round2(u.z - s.w / 2 + 0.6), rot: 0 });
+    props.push({ id: `gen-${u.id}`, kind: "gen", tier: "rapid", x: round2(u.x - s.l / 2 - (s.ends ?? 0) - 1.4), z: round2(u.z - s.w / 2 + 0.6), rot: 0 });
   });
   if (duration === "rapid") return props;
 
@@ -309,7 +344,9 @@ function permanence(duration: DurationId | undefined, units: CampUnit[], b: Rect
     const inRow = units.filter((u) => u.z === z);
     const r = rectOf(inRow);
     const front = Math.max(...inRow.map((u) => u.z + KIND_SIZE[u.kind].w / 2));
-    props.push({ id: `walk-${z}`, kind: "walk", tier: "months", x: round2((r.minX + r.maxX) / 2), z: round2(front + 1.6), rot: 0, l: round2(r.maxX - r.minX + 2), w: 1.2 });
+    // Keep the duckboards outside any guy lines.
+    const apron = Math.max(0, ...inRow.map((u) => KIND_SIZE[u.kind].apron ?? 0));
+    props.push({ id: `walk-${z}`, kind: "walk", tier: "months", x: round2((r.minX + r.maxX) / 2), z: round2(front + Math.max(1.6, apron + 0.9)), rot: 0, l: round2(r.maxX - r.minX + 2), w: 1.2 });
   }
   props.push({ id: "bladder-0", kind: "bladder", tier: "months", x: round2(b.minX - 3), z: round2(b.minZ - 4), rot: 0 });
   props.push({ id: "bladder-1", kind: "bladder", tier: "months", x: round2(b.minX + 2.5), z: round2(b.minZ - 4.5), rot: 0.2 });

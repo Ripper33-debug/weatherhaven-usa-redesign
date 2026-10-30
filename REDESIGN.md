@@ -155,6 +155,15 @@ An independent design review of every public page listed what made the site read
 - **Phone speed:** Geist Mono and Playfair no longer preload on every page, hero and gallery photos load at high priority, the menu's catalog data comes from the server instead of the page's JavaScript (about 24 KB gzipped less per page), and an unused compare provider that fetched the catalog on every product page is gone. Clean mobile runs: homepage 86–90, MECC 84–90, TRECC 89. SOF and admin pages render pixel-identical.
 - **Checked:** a crawl of all 60 public pages and every internal link and anchor found no broken links, images, console errors or sideways scrolling on phones. Public pages now fetch the CSRF token only when a form is sent, so a room full of people on one office network doesn't trip the API rate limit (10 requests a minute per IP).
 
+## System models (Barry's Blender builds)
+
+- **The list:** `src/lib/system-models.ts` says which systems have a real model, where the files are, how each folds up (hinge nodes, expansions, parts hidden while packed), which materials take the finish colour, and the AR page's copy. Files live in `public/models/<slug>/`; `public/models/README.md` has the steps for adding one, and `node scripts/models/add-model.mjs <slug> <folder>` checks and copies a new delivery.
+- **MECC (first one in):** built by Barry Castelli in Blender from the MECC brochure (1087, 2021) and weatherhaven.com photos; 0.7 MB deployed, Draco. Not engineering CAD; `public/models/mecc/README.md` lists what's estimated.
+  - **Product page:** the MECC page opens on the 3D model (`SystemModelViewer.tsx`, `src/lib/three/systemStage.ts`): packed and deployed with the real fold-down (side walls swing down on their hinges, then the fabric opens out), turn buttons, green, desert tan and arctic white, a still image first and as the fallback. The photos move to "Photos" below, as on the TRECC page.
+  - **AR:** `/ar/mecc`, the same page as the TRECC's (`src/lib/ar-page.ts` swaps in the MECC's wording); linked from the MECC page.
+  - **3D camp:** wherever the mission builder places a MECC it uses this model at its true size (the layout uses its real footprint, guy lines included), arriving as the packed container and unfolding on its real hinges; the interior shows under "Look inside". If the model can't load, the simplified one is used.
+- **To check:** the model deploys to 253 in wide (Barry's brochure source); the site's spec table says 243 in for the 8-ft model. Confirm which is right before launch.
+
 ## Full-size AR page (/ar)
 
 - **What it is:** a standalone page that places the deployed TRECC at real size (`ar-scale="fixed"`, on the floor) through Google <model-viewer> 3.5.0, using WebXR, Quick Look on iPhone or Scene Viewer on Android. Desktop visitors get a QR code of the page to open on a phone; phones get a "View in your space" button. Linked from the TRECC page ("See it at full size in AR").

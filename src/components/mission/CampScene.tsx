@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useClientMediaQuery } from "@/hooks/useClientMediaQuery";
-import { campPlan } from "@/lib/camp-scene-plan";
+import { campPlan, hasDetailedModel, isDetailedKind } from "@/lib/camp-scene-plan";
 import { publishedFact, QUESTIONS, type GuideAnswers, type QuestionKey } from "@/lib/mission-guide";
 import type { CampFocus, CampStage, TagPos } from "@/lib/three/camp/campStage";
 import { startWhenNear } from "@/lib/start-when-near";
@@ -178,6 +178,14 @@ export function CampScene({
 
   const ready = load === "ready";
   const lead = plan.lead;
+  // The lead system may be a detailed model (system-models.ts, or the TRECC's CAD files); say which
+  // parts of the camp are drawn from it and which are simplified.
+  const allDetailed = plan.units.every((u) => isDetailedKind(u.kind));
+  const detailedNote = lead
+    ? allDetailed
+      ? `Detailed ${lead.name} model${plan.units.length > 1 ? "s" : ""}`
+      : `Detailed ${lead.name} model; other systems simplified${compact ? "" : " from published dimensions"}`
+    : "";
   const tags = plan.tags;
   const inside = results && insideOn;
   const showTags = ready && (results && !inside ? tags : tags.slice(0, 1));
@@ -324,9 +332,11 @@ export function CampScene({
             ? lead
               ? `${photos?.[lead.slug]?.shows ? `Photo of ${photos[lead.slug].shows}, from the same family as the ${lead.name}` : `Photo of the ${lead.name}`}. This browser can't show the 3D camp.`
               : "This browser can't show the 3D camp (it needs hardware graphics). The questions and results work the same."
-            : compact
-              ? "Simplified models, illustrative quantities. Grid lines every 5 m."
-              : "Simplified models drawn from published dimensions; quantities are illustrative. Grid lines every 5 m."}
+            : lead && hasDetailedModel(lead.slug)
+              ? `${detailedNote}${compact ? "; illustrative quantities" : "; quantities are illustrative"}. Grid lines every 5 m.`
+              : compact
+                ? "Simplified models, illustrative quantities. Grid lines every 5 m."
+                : "Simplified models drawn from published dimensions; quantities are illustrative. Grid lines every 5 m."}
         </p>
         {ready && !touched ? (
           <p className="shrink-0 text-[0.8125rem] text-snow/80 sm:text-[0.8125rem]">

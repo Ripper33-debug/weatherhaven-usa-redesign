@@ -7,6 +7,8 @@ import { SystemCard } from "@/components/systems/SystemCard";
 import { blurProps } from "@/lib/image-blur";
 import { productCover } from "@/lib/product-covers";
 import { TreccViewer } from "@/components/systems/TreccViewer";
+import { SystemModelViewer } from "@/components/systems/SystemModelViewer";
+import { arHref, systemModel } from "@/lib/system-models";
 import { SizeCompare } from "@/components/systems/SizeCompare";
 import { sizesForSlug } from "@/lib/system-sizes";
 import { HomeDeploySequence } from "@/components/home/v2/HomeDeploySequence";
@@ -35,10 +37,14 @@ export function SystemDetail({
   const hasAbout = overview.length > 0 || configurations.length > 0 || documents.length > 0;
   const contactHref = contactUrl({ system: product.slug, inquiry: "Program Requirement" });
   const sizes = sizesForSlug(product.slug);
-  // The TRECC is the one system with a real 3D model, so its page opens on it; the photos follow.
-  const leadWith3d = product.slug === "trecc";
+  // Systems with a 3D model open on it, and the photos follow: the TRECC on its CAD viewer, the
+  // rest on the registry viewer (src/lib/system-models.ts).
+  const isTrecc = product.slug === "trecc";
+  const hasModel = !isTrecc && !!systemModel(product.slug);
+  const leadWith3d = isTrecc || hasModel;
+  const ar = arHref(product.slug);
   // Field shots first; the hero used to open on a TRECC parked outside a warehouse.
-  const photos = leadWith3d ? [...images].sort((a, b) => Number(/Woods|T_deployed|Multiple/i.test(b)) - Number(/Woods|T_deployed|Multiple/i.test(a))) : images;
+  const photos = isTrecc ? [...images].sort((a, b) => Number(/Woods|T_deployed|Multiple/i.test(b)) - Number(/Woods|T_deployed|Multiple/i.test(a))) : images;
   const gallery = (
     <SystemGallery
       images={photos}
@@ -78,11 +84,7 @@ export function SystemDetail({
           </nav>
 
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] lg:gap-14">
-            {leadWith3d ? (
-              <TreccViewer lead />
-            ) : (
-              gallery
-            )}
+            {isTrecc ? <TreccViewer lead /> : hasModel ? <SystemModelViewer slug={product.slug} name={product.name} lead /> : gallery}
             <div className="flex flex-col">
               <h1 className="v2-h1 text-snow">{product.name}</h1>
               {showsFullName(product.name, product.subtitle) ? (
@@ -91,7 +93,7 @@ export function SystemDetail({
               <p className="v2-lead mt-6">{product.description}</p>
 
               {/* On the TRECC page the callouts under the 3D model carry these facts. */}
-              {!leadWith3d && product.features.length > 0 ? (
+              {!isTrecc && product.features.length > 0 ? (
                 <ul className="mt-8 border-t border-line">
                   {product.features.slice(0, 3).map((f) => (
                     <li key={f.title} className="grid gap-1 border-b border-line py-4 sm:grid-cols-[11rem_1fr] sm:gap-4">
@@ -115,9 +117,9 @@ export function SystemDetail({
                     See specifications
                   </a>
                 )}
-                {/* Real-scale AR page (model-viewer); a plain link, since /ar is a standalone page. */}
-                {leadWith3d ? (
-                  <a href="/ar" className="v2-btn v2-btn-ghost">
+                {/* Real-scale AR page (model-viewer); a plain link, since /ar pages are standalone. */}
+                {ar ? (
+                  <a href={ar} className="v2-btn v2-btn-ghost">
                     See it at full size in AR
                   </a>
                 ) : null}
