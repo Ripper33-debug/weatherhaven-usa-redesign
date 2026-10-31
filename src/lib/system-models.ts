@@ -50,6 +50,12 @@ export type SystemModel = {
    */
   inside?: { src: string; node: string; label: string };
   /**
+   * The whole deployed model with its fit-out, for the AR page's "Furnished" choice. Defaults to
+   * `inside.src` when that is a `-deployed-fitted` file; the MECC, EHMECC and TRECC have merged files
+   * (shell plus fit-out, built with glTF-Transform) because their fit-outs come separately.
+   */
+  furnished?: string;
+  /**
    * Height (metres above the ground) where "Show inside" cuts the shell. Defaults to about
    * two-thirds of the shelter's height, capped at 2.1 m.
    */
@@ -72,6 +78,8 @@ export const SYSTEM_MODELS: Record<string, SystemModel> = {
     compression: "draco",
     source: "Weatherhaven CAD model",
     inside: { src: "/models/trecc/trecc-fitout-command-post.glb", node: "TRECC_fitout", label: "Command post" },
+    // A copy of the AR file with the fit-out added; trecc-open.glb itself stays exactly as copied.
+    furnished: "/assets/models/trecc-open-fitted.glb",
   },
   mecc: {
     slug: "mecc",
@@ -93,6 +101,7 @@ export const SYSTEM_MODELS: Record<string, SystemModel> = {
     },
     finishMaterials: { paint: ["paint", "paint_dark"], fabric: ["fabric", "strap"] },
     inside: { src: "/models/mecc/mecc-fitout-command-post.glb", node: "MECC_fitout", label: "Command post" },
+    furnished: "/models/mecc/mecc-deployed-fitted.glb",
     ar: {
       title: "See the MECC at full size",
       lead: `Place the deployed MECC ${LEAD_HARD}`,
@@ -109,6 +118,7 @@ export const SYSTEM_MODELS: Record<string, SystemModel> = {
     source: builtFrom("EHMECC"),
     finishMaterials: { paint: ["paint", "paint_dark"], fabric: ["fabric", "strap"] },
     inside: { src: "/models/ehmecc/ehmecc-fitout-operating-room.glb", node: "EHMECC_fitout", label: "Operating room" },
+    furnished: "/models/ehmecc/ehmecc-deployed-fitted.glb",
     ar: {
       title: "See the EHMECC at full size",
       lead: `Place the deployed EHMECC ${LEAD_HARD}`,
@@ -292,6 +302,13 @@ const FITOUTS_FOR_MISSION: Record<string, RegExp> = {
 export function fitoutForMission(slug: string, mission: string | null | undefined): string | null {
   const label = SYSTEM_MODELS[slug]?.inside?.label;
   return label && FITOUTS_FOR_MISSION[mission ?? "response"]?.test(label) ? label : null;
+}
+
+/** The furnished model for the AR page, or null when the system has no fit-out. */
+export function furnishedModel(slug: string): string | null {
+  const m = SYSTEM_MODELS[slug];
+  if (!m) return null;
+  return m.furnished ?? (m.inside?.src.endsWith("-deployed-fitted.glb") ? m.inside.src : null);
 }
 
 /** The AR page for a system: the TRECC keeps /ar (links are already out); the rest are /ar/<slug>. */

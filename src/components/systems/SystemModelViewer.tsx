@@ -261,8 +261,9 @@ export function SystemModelViewer({ slug, name, lead = false }: { slug: string; 
         ) : null}
         {ar ? (
           <a
-            href={ar}
-            aria-label="See it full size in AR"
+            // With the fit-out showing, the AR page opens furnished too.
+            href={insideOn ? `${ar}?inside=1` : ar}
+            aria-label={insideOn ? "See it full size in AR, furnished" : "See it full size in AR"}
             className="absolute right-3 top-3 flex h-11 min-w-11 items-center justify-center gap-2 bg-ink/70 px-3 text-[0.85rem] font-medium text-snow no-underline backdrop-blur-md transition-colors hover:bg-ink/85 sm:right-4 sm:top-4"
           >
             <svg aria-hidden viewBox="0 0 20 20" className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round">

@@ -31,7 +31,9 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https:",
       "font-src 'self' data:",
-      "connect-src 'self' https: wss:",
+      // blob: lets model-viewer (the /ar pages) read a model's embedded textures, which three.js
+      // unpacks to blob: URLs; only the page's own scripts can create them.
+      "connect-src 'self' blob: https: wss:",
       "frame-src 'self' https://www.google.com https://www.google.com/maps https://maps.google.com",
       "media-src 'self' blob: https:",
       "object-src 'none'",

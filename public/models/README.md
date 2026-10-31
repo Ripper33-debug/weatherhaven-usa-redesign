@@ -28,5 +28,6 @@ viewer, the full-size AR page (`/ar/<slug>`; the TRECC is `/ar`) and the mission
 - `ateps/`, `ehmecc/`, `endurance/`, `hercon/`, `mex-26/`, `mts/`, `polar-chief/`, `polarhaven/`, `rdmss/`,
   `series-4/`: Barry's full-line models from weatherhaven.com pages and photos (Draco): deployed, packed,
   `-deployed-fitted` (adds a `<MODEL>_fitout` node for "Show inside") and the viewer's stills.
-  The MECC, EHMECC and TRECC fit-outs are separate files (`<slug>-fitout-*.glb`) in the model's coordinates.
+  The MECC, EHMECC and TRECC fit-outs are separate files (`<slug>-fitout-*.glb`) in the model's coordinates;
+  `mecc/` and `ehmecc/` also hold a merged `-deployed-fitted.glb` for the AR page (`scripts/models/merge-fitout.mjs`).
 - `trecc-*.glb`, `ar/`: the TRECC, cut down from Weatherhaven's CAD export (see REDESIGN.md).
