@@ -68,6 +68,8 @@ export function StoryArticle({ story, next }: { story: FlagshipStory; next?: Fla
               alt={story.hero.alt}
               fill
               priority
+              // Next 16's `priority` only preloads; the hero is the page's largest paint.
+              fetchPriority="high"
               sizes="100vw"
               className="object-cover"
               {...blurProps(story.hero.src)}

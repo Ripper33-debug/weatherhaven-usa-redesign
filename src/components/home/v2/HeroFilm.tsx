@@ -11,7 +11,8 @@ import { useClientMediaQuery } from "@/hooks/useClientMediaQuery";
  * The hero says it's an illustrative film.
  *
  * The still (its first frame) is the first paint; the film starts downloading only once the page has
- * loaded, at 720p on phones (about 1 MB; 2.4 MB at 1080p, see scripts/media/build-hero-film.sh).
+ * loaded (on phones, at the first touch or scroll), at 720p on phones (about 1 MB; 2.4 MB at 1080p,
+ * see scripts/media/build-hero-film.sh).
  * Reduced motion, data saver and 2G connections start paused on the still; the button always works.
  */
 const POSTER = "/hero/film-poster.jpg";
@@ -56,11 +57,25 @@ export function HeroFilm() {
       loadSource(video);
       void video.play().catch(() => undefined);
     };
-    if (document.readyState === "complete") start();
-    else window.addEventListener("load", start, { once: true });
+    // Phones wait for the first touch, scroll or key press: the still stays the page's largest paint
+    // (a film that starts by itself on a slow phone became the largest paint, seconds later), and a
+    // visitor who never interacts doesn't download the film. Wider screens start once loaded.
+    const phone = window.matchMedia("(max-width: 767px)").matches;
+    const INTERACTION = ["pointerdown", "touchstart", "scroll", "keydown"] as const;
+    const onInteract = () => {
+      for (const t of INTERACTION) window.removeEventListener(t, onInteract);
+      start();
+    };
+    const arm = () => {
+      if (!phone) return start();
+      for (const t of INTERACTION) window.addEventListener(t, onInteract, { once: true, passive: true });
+    };
+    if (document.readyState === "complete") arm();
+    else window.addEventListener("load", arm, { once: true });
     return () => {
       video.removeEventListener("playing", onPlaying);
-      window.removeEventListener("load", start);
+      window.removeEventListener("load", arm);
+      for (const t of INTERACTION) window.removeEventListener(t, onInteract);
     };
   }, []);
 

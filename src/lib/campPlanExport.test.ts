@@ -19,7 +19,9 @@ const state = {
   contactEmail: "test@example.mil",
 };
 
-const plan = generateCampPlan(state, PRODUCTS);
+const generated = generateCampPlan(state, PRODUCTS);
+if (!generated) throw new Error("generateCampPlan returned no plan for the test state");
+const plan = generated;
 
 describe("campPlanExport", () => {
   it("builds a stable export filename", () => {

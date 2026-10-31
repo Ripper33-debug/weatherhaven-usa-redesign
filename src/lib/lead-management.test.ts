@@ -31,6 +31,7 @@ describe("lead-management", () => {
           message: null,
           contact_method: null,
           phone: null,
+          region: null,
         },
       ],
       accessRequests: [
@@ -45,6 +46,7 @@ describe("lead-management", () => {
           program: null,
           requirements: null,
           reference: null,
+          request_type: null,
         },
       ],
       profiles: [],
@@ -71,6 +73,7 @@ describe("lead-management", () => {
           program: null,
           requirements: null,
           reference: null,
+          request_type: null,
         },
       ],
       profiles: [],

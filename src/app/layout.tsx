@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import localFont from "next/font/local";
-import { Archivo, Playfair_Display } from "next/font/google";
+import { Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { AnalyticsProvider } from "@/components/AnalyticsProvider";
 import { Navbar } from "@/components/Navbar";
@@ -43,12 +43,26 @@ const playfair = Playfair_Display({
   preload: false,
 });
 
-/** Marketing typeface — one variable family; headlines use its expanded widths. */
-const archivo = Archivo({
-  subsets: ["latin"],
-  axes: ["wdth"],
+/**
+ * Marketing typeface: Archivo, self-hosted and trimmed to the weights (400–700) and widths (100–118)
+ * the site uses, 55 KB instead of Google's 90 KB (src/app/fonts/README.md). Headlines use its
+ * expanded widths.
+ */
+const archivo = localFont({
+  src: [{ path: "./fonts/archivo-var.woff2", weight: "400 700", style: "normal" }],
   variable: "--font-archivo",
   display: "swap",
+  declarations: [{ prop: "font-stretch", value: "100% 118%" }],
+  adjustFontFallback: "Arial",
+});
+
+/** Archivo's condensed figures (.v2-figure): a 14 KB static cut, loaded only where figures appear. */
+const archivoFigures = localFont({
+  src: [{ path: "./fonts/archivo-figures.woff2", weight: "600", style: "normal" }],
+  variable: "--font-archivo-figures",
+  display: "swap",
+  preload: false,
+  adjustFontFallback: "Arial",
 });
 
 const siteUrl = getSiteUrl();
@@ -97,7 +111,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${archivo.variable} h-full overflow-x-clip`}
+      className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${archivo.variable} ${archivoFigures.variable} h-full overflow-x-clip`}
     >
       <body className="flex min-h-full min-w-0 flex-col overflow-x-clip font-sans text-zinc-100 antialiased">
         <AuthHashRedirect />

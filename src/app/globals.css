@@ -1124,7 +1124,8 @@ body .wh-v2 .wh-marketing-display {
 
 /* Data values: condensed-width figures for specs and stats */
 .v2-figure {
-  font-variation-settings: "wdth" 84;
+  /* A static condensed cut (width 84, weight 600) of Archivo; see src/app/fonts/README.md. */
+  font-family: var(--font-archivo-figures), var(--font-archivo), "Archivo", ui-sans-serif, system-ui, sans-serif;
   font-variant-numeric: tabular-nums lining-nums;
   font-weight: 600;
   letter-spacing: -0.01em;

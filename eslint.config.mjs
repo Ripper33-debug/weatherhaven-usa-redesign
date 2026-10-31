@@ -19,6 +19,15 @@ const eslintConfig = defineConfig([
     // Reference copies from the globe package, not part of the build.
     "docs/**",
   ]),
+  {
+    // Names starting with an underscore are deliberately unused (e.g. a key dropped with a rest spread).
+    rules: {
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_", destructuredArrayIgnorePattern: "^_", ignoreRestSiblings: true },
+      ],
+    },
+  },
 ]);
 
 export default eslintConfig;

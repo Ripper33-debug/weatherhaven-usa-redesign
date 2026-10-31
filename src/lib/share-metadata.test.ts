@@ -12,7 +12,9 @@ describe("share-metadata", () => {
 
   it("builds OG metadata when image present", () => {
     const meta = shareMetadataFromImage("/products/hqss.jpg", "HQSS");
-    expect(meta.openGraph?.images?.[0]).toMatchObject({ url: "/products/hqss.jpg", alt: "HQSS" });
+    const images = meta.openGraph?.images;
+    const first = Array.isArray(images) ? images[0] : images;
+    expect(first).toMatchObject({ url: "/products/hqss.jpg", alt: "HQSS" });
   });
 
   it("returns empty when no image", () => {

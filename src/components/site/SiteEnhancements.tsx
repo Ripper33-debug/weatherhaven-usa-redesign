@@ -1,17 +1,21 @@
 "use client";
 
 import { useSitePathname } from "@/hooks/useSitePathname";
-import { CustomCursor } from "@/components/CustomCursor";
+import dynamic from "next/dynamic";
 import { PageTransition } from "@/components/PageTransition";
-import { PlatformEffects } from "@/components/effects/PlatformEffects";
-import { ScrollProgress } from "@/components/site/ScrollProgress";
 import { MarketingMobileActionBar } from "@/components/marketing/MarketingMobileActionBar";
 import { MarketingPageFlags } from "@/components/marketing/MarketingPageFlags";
 import { PlatformPageFlags } from "@/components/platform/PlatformPageFlags";
-import { CsrfBootstrap } from "@/components/site/CsrfBootstrap";
-import { InitialLoadScreen } from "@/components/effects/InitialLoadScreen";
 import { isMarketingPage, isPublicSitePage } from "@/lib/marketing-pages";
 import { isLightPortalPath } from "@/lib/route-context";
+
+// Portal and admin-only extras: loaded only on the pages that render them, so public pages don't
+// carry their code.
+const CustomCursor = dynamic(() => import("@/components/CustomCursor").then((m) => m.CustomCursor));
+const PlatformEffects = dynamic(() => import("@/components/effects/PlatformEffects").then((m) => m.PlatformEffects));
+const ScrollProgress = dynamic(() => import("@/components/site/ScrollProgress").then((m) => m.ScrollProgress));
+const CsrfBootstrap = dynamic(() => import("@/components/site/CsrfBootstrap").then((m) => m.CsrfBootstrap));
+const InitialLoadScreen = dynamic(() => import("@/components/effects/InitialLoadScreen").then((m) => m.InitialLoadScreen));
 
 export function SiteEnhancements({ children }: { children: React.ReactNode }) {
   const pathname = useSitePathname();

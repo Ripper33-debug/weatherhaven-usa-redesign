@@ -276,7 +276,7 @@ function Drawing({ p, compact = false }: { p: number; compact?: boolean }) {
           fill="var(--v2-snow)"
           fontSize="34"
           fontWeight="640"
-          style={{ fontVariantNumeric: "tabular-nums", fontVariationSettings: '"wdth" 90' }}
+          style={{ fontVariantNumeric: "tabular-nums", fontFamily: "var(--font-archivo-figures), var(--font-archivo), sans-serif" }}
         >
           {areaFt} ft²
         </text>
