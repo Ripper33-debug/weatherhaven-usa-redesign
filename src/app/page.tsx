@@ -7,7 +7,6 @@ import { HomeDeploymentGlobe } from "@/components/home/v2/HomeDeploymentGlobe";
 import { HomeFactory } from "@/components/home/v2/HomeFactory";
 import { HomeNews } from "@/components/home/v2/HomeNews";
 import { HomeCta } from "@/components/home/v2/HomeCta";
-import { getFieldExtremes } from "@/lib/field-weather";
 
 export const metadata: Metadata = {
   ...pageMeta({
@@ -25,10 +24,9 @@ export const revalidate = 300;
 
 export default async function HomePage() {
   // Live weather for the hero readout (cached for 30 minutes; null hides the readout).
-  const field = await getFieldExtremes();
   return (
     <>
-      <HomeHero field={field} />
+      <HomeHero />
       <HomeTreccScene />
       <HomeSystems />
       <HomeDeploymentGlobe />

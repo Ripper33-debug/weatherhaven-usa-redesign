@@ -1613,3 +1613,13 @@ body .wh-v2 .wh-marketing-display {
     scroll-margin-top: calc(max(38svh, 250px) + 5.5rem);
   }
 }
+
+/* Phone numbers never break across lines. */
+a[href^="tel:"] {
+  white-space: nowrap;
+}
+
+@keyframes v2-readout-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

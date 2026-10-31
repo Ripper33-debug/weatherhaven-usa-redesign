@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { PRODUCT_CONTENT } from "@/lib/product-content";
 import { refHolds, type FactRef } from "@/lib/published-facts";
-import { COMPARE_ROWS, COMPARE_TYPES, comparableSystems } from "@/lib/shelter-compare";
+import { COMPARE_EXTRA_SPECS, COMPARE_ROWS, COMPARE_TYPES, comparableSystems } from "@/lib/shelter-compare";
 import { sideBySide, specRow } from "@/lib/spec-rows";
 import { TRECC_RECORD, climateRows, fieldRecord, parseTemps, testedRefs, treccRecordSource } from "@/lib/tested";
 
@@ -23,6 +23,15 @@ describe("every figure on the tested and compare pages traces to product-content
     expect(broken).toEqual([]);
     const shown = new Set(COMPARE_TYPES.flatMap((t) => t.systems));
     expect(COMPARE_ROWS.flatMap((row) => row.refs).filter((r) => !shown.has(r.slug))).toEqual([]);
+  });
+
+  it("compare's extra spec rows only restate numbers the system publishes", () => {
+    for (const [slug, specs] of Object.entries(COMPARE_EXTRA_SPECS)) {
+      const published = JSON.stringify(PRODUCT_CONTENT[slug]);
+      for (const s of specs) {
+        for (const n of s.value.match(/\d[\d,.]*/g) ?? []) expect(published, `${slug} ${s.label}: ${n}`).toContain(n);
+      }
+    }
   });
 
   it("TRECC record items appear in the TRECC specs or story", () => {

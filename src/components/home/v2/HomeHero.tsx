@@ -1,15 +1,14 @@
 import Link from "next/link";
-import type { FieldExtremes } from "@/lib/field-readout";
-import { HeroFieldReadout } from "@/components/home/v2/HeroFieldReadout";
+import { HeroFieldReadoutLive } from "@/components/home/v2/HeroFieldReadoutLive";
 import { HeroFilm } from "@/components/home/v2/HeroFilm";
 
 /**
  * Full-bleed film hero (see HeroFilm: an illustrative film made from Weatherhaven's product
  * photography, labelled as such along the bottom). The headline sits over the darkened lower left;
- * a one-line weather note from two deployment sites runs along the bottom when the forecast
- * service answered.
+ * a one-line weather note from two deployment sites runs along the bottom once the forecast
+ * service has answered (loaded after the page, see HeroFieldReadoutLive).
  */
-export function HomeHero({ field }: { field: FieldExtremes | null }) {
+export function HomeHero() {
   return (
     <section className="relative isolate flex flex-col overflow-hidden bg-ink md:min-h-[100svh] md:justify-end">
       {/* Phones: the film is a band above the copy. Wider screens: full bleed behind it. */}
@@ -49,7 +48,7 @@ export function HomeHero({ field }: { field: FieldExtremes | null }) {
 
       <div className="v2-wrap pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] md:pb-6">
         <div className="flex flex-col gap-2 border-t border-line-strong pt-4 text-[0.8125rem] leading-snug text-muted sm:flex-row sm:items-baseline sm:justify-between sm:gap-8">
-          {field ? <HeroFieldReadout field={field} /> : <span />}
+          <HeroFieldReadoutLive />
           <p className="shrink-0">Illustrative film made from Weatherhaven product photography</p>
         </div>
       </div>

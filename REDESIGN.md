@@ -171,6 +171,18 @@ An independent design review of every public page listed what made the site read
   - **3D camp:** every system with a model is placed at true size; soft and polar shelters rise out of their packed load. "Look inside" shows the model's own fit-out only when it suits the mission (`fitoutForMission`); otherwise the simplified interior for that mission.
 - **To check with Barry:** RDMSS modelled 20 × 30 ft (published modules are 23.8 ft wide); Polar Chief about 6 m across (published 14 ft); MTS, RDMSS and MEX-26 packed loads are the same pallet; MECC README says the door faces +Z but the file faces −Z; the TRECC fit-out runs about 10 cm past the shell at each end, under the floor.
 
+## Fixes from the full-site review (Oct 31)
+
+A fresh reviewer went through the whole site at desktop and phone widths; these came out of it.
+- **Sign-in on copies without the member database:** `src/middleware.ts` rewrites the sign-in, SOF portal, admin and invite routes to `/sign-in-unavailable` when there are no Supabase keys (as on the preview), instead of a 500. With keys, nothing changes.
+- **Homepage hydration error (#418):** the weather line was baked into the cached homepage and hydrated with weather from another time. It now loads after the page from `/api/field-extremes` (`HeroFieldReadoutLive`).
+- **No 3D graphics** (common on locked-down government laptops): the homepage TRECC section becomes a short 4-step photo strip instead of a pinned scroll, and the mission builder shows a real photo before and after answering.
+- **Contact:** a phone field (required when Phone is the chosen method), 2,000-character messages, and the system as a visible field.
+- **Compare:** the two-system picker comes first, the choice is in the link (`?a=&b=`), and a figure only one system publishes shows "On request" for the other.
+- **Navigation:** "How to buy" (the Government buyers page) is in the top bar; the phone menu has "Who we serve". News drops out of the desktop bar below 1480 px wide so it never overflows.
+- **Systems:** the RDMSS card shows its 3D model; cards using another shelter's photo say so; Medical filter tags corrected (MECC and RDMSS in, Endurance out); "Airmax" naming in the family line; `/ar/trecc` redirects to `/ar`; phone numbers never break across lines.
+- **Still open, for leadership:** the TRECC-T/M floor areas look swapped in Weatherhaven's data (86 ft² vs 181 × 97 in); the hero film reads as AI to a fresh viewer; the public SOF page is still the original template; named units and exercises need clearance; a named US contact for the contact page.
+
 ## Full-size AR page (/ar)
 
 - **What it is:** a standalone page that places the deployed TRECC at real size (`ar-scale="fixed"`, on the floor) through Google <model-viewer> 3.5.0, using WebXR, Quick Look on iPhone or Scene Viewer on Android. Desktop visitors get a QR code of the page to open on a phone; phones get a "View in your space" button. Linked from the TRECC page ("See it at full size in AR").

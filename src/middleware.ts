@@ -66,6 +66,12 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next({ request });
   }
 
+  // A copy of the site with no member database (no Supabase keys, as on the redesign preview):
+  // show a plain page instead of letting the sign-in, portal and admin routes fail with a 500.
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    return NextResponse.rewrite(new URL("/sign-in-unavailable", request.url));
+  }
+
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(

@@ -332,7 +332,7 @@ export function Navbar({ menuData }: { menuData: NavMenuData }) {
                   key={link.href}
                   href={link.href}
                   onMouseEnter={scheduleClose}
-                  className={`flex h-10 items-center whitespace-nowrap px-3 text-[0.95rem] font-medium no-underline transition-colors ${
+                  className={`${"wideOnly" in link ? "hidden min-[1480px]:flex" : "flex"} h-10 items-center whitespace-nowrap px-3 text-[0.95rem] font-medium no-underline transition-colors ${
                     active ? "text-snow" : "text-snow/80 hover:text-snow"
                   }`}
                   aria-current={active ? "page" : undefined}
@@ -398,7 +398,7 @@ export function Navbar({ menuData }: { menuData: NavMenuData }) {
           </div>
           <nav aria-label="Mobile" className="v2-wrap flex-1 pb-10 pt-4">
             <ul className="border-t border-line">
-              {[{ href: "/configurable-solutions", label: "All systems" }, NAV_CAPABILITIES_PAGE, ...NAV_LINKS, NAV_GOV, NAV_SOF].map((l) => (
+              {[{ href: "/configurable-solutions", label: "All systems" }, NAV_CAPABILITIES_PAGE, { href: NAV_WHO_WE_SERVE.href, label: "Who we serve" }, ...NAV_LINKS, NAV_SOF].map((l) => (
                 <li key={l.href} className="border-b border-line">
                   <Link
                     href={l.href}

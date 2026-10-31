@@ -143,12 +143,26 @@ export type ComparableSystem = {
   specs: ProductSpec[];
 };
 
+/**
+ * Figures a system publishes outside its spec table (in its configurations), restated as spec rows so
+ * the side-by-side doesn't say "Not published" for them. Every number here appears in the same
+ * system's product-content entry (checked in published-facts.test.ts).
+ */
+export const COMPARE_EXTRA_SPECS: Record<string, ProductSpec[]> = {
+  trecc: [
+    { label: "Packed size", value: "TRECC-T 114 × 94.5 × 57 in; TRECC-M 89 × 84 × 57 in; TRECC-P 104 × 84 × 60 in" },
+    { label: "Height", value: "Stowed 57 in (TRECC-T, TRECC-M), 60 in (TRECC-P); deployed 82 in (TRECC-T), 78 in (TRECC-M)" },
+    { label: "Weight", value: "1,620 lb (TRECC-T); 2,200 lb (TRECC-M); 2,205 lb tare (TRECC-P)" },
+  ],
+};
+
 /** All 17 systems in catalog order, with their published spec tables. */
 export function comparableSystems(): ComparableSystem[] {
   return FAMILY_ORDER.flatMap((slug) => {
     const p = PRODUCT_CONTENT[slug];
     if (!p) return [];
     const familyName = PRODUCT_FAMILIES.find((f) => f.id === p.family)?.name ?? p.family;
-    return [{ slug, name: p.name, family: p.family, familyName, keySpec: p.keySpec, specs: p.specs }];
+    const specs = [...p.specs, ...(COMPARE_EXTRA_SPECS[slug] ?? [])];
+    return [{ slug, name: p.name, family: p.family, familyName, keySpec: p.keySpec, specs }];
   });
 }

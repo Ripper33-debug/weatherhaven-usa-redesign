@@ -10,7 +10,7 @@ import { trackLead } from "@/lib/track-lead";
 import { fetchWithCsrf } from "@/lib/csrf-client";
 import { filterConfirmationBullets } from "@/lib/form-submit-messages";
 import { FormSubmitEmailWarning } from "@/components/site/FormSubmitFeedback";
-import type { Product } from "@/lib/products";
+import { PRODUCTS, type Product } from "@/lib/products";
 import {
   clearContactPrefill,
   readContactPrefill,
@@ -44,6 +44,9 @@ export const CONTACT_REGIONS = [
 
 const CONTACT_METHODS = ["Email", "Phone", "Secure Message"] as const;
 
+/** Loose phone check: digits with spaces, +, -, dots, brackets and an optional extension. */
+const PHONE_RE = /^\+?[0-9\s().-]{7,25}(\s*(ext\.?|x)\s*[0-9]{1,6})?$/i;
+
 /** Inquiry types that arrange a meeting: they ask who is coming, from where and when. */
 const VISIT_TYPES: readonly string[] = ["Capability Briefing", "Demo Request", "Factory Tour"];
 
@@ -71,6 +74,8 @@ type FormState = {
   contact_method: string;
   phone: string;
   email: string;
+  /** The system the inquiry is about (catalog slug), or "" when the visitor hasn't picked one. */
+  system: string;
   /** Briefing, demo and tour details: sent inside the message, not as separate fields. */
   agency: string;
   base: string;
@@ -78,8 +83,8 @@ type FormState = {
   visitors: string;
 };
 
-/** The server accepts up to 500 characters per field (MAX_FIELD_LENGTH in api-validation.ts). */
-const MESSAGE_MAX = 500;
+/** The server accepts up to 2,000 characters for the message (MESSAGE_MAX_LENGTH in the contact route). */
+const MESSAGE_MAX = 2000;
 
 const initial: FormState = {
   full_name: "",
@@ -93,6 +98,7 @@ const initial: FormState = {
   contact_method: "Email",
   phone: "",
   email: "",
+  system: "",
   agency: "",
   base: "",
   dates: "",
@@ -135,6 +141,7 @@ function urlFormDefaults(
       program: prefill.program ?? "",
       subject: prefill.subject ?? "",
       message: prefill.message ?? "",
+      system: product?.slug ?? "",
     };
   }
 
@@ -145,26 +152,32 @@ function urlFormDefaults(
       : product
         ? "Program Requirement"
         : DEFAULT_INQUIRY;
-  const program = product ? `${product.name} (${product.code})` : "";
+  // The system is its own field now; Program is left for the buyer's own program or unit.
   const subject = product ? `Discussion: ${product.name}` : subjectParam.slice(0, 160);
   const message = deploymentNotes
     ? `Deployment context from planner:\n${deploymentNotes}`
     : "";
   return {
     inquiry_type: inquiry,
-    program,
     subject,
     message,
+    system: product?.slug ?? "",
   };
+}
+
+/** The line that names the system at the top of the message. */
+function systemLine(system: Product | undefined): string {
+  return system ? `System: ${system.name}${system.code && system.code !== system.name ? ` (${system.code})` : ""}` : "";
 }
 
 function ContactEngineeringFormInner({
   urlDefaults,
-  product,
+  catalog,
   planPreview,
 }: {
   urlDefaults: Partial<FormState>;
-  product?: Product;
+  /** The systems the visitor can pick from. */
+  catalog: Product[];
   /** The camp from the mission builder, when the visitor came from there. */
   planPreview?: CampSnapshot | null;
 }) {
@@ -203,10 +216,24 @@ function ContactEngineeringFormInner({
     setForm((f) => ({ ...f, [key]: value }));
   }
 
+  const product = form.system ? findProductInCatalog(catalog, form.system) : undefined;
+
+  /** Changing the system also changes a subject we filled in ("Discussion: <system>"), not one they typed. */
+  function chooseSystem(slug: string) {
+    setForm((f) => {
+      const before = f.system ? findProductInCatalog(catalog, f.system) : undefined;
+      const after = slug ? findProductInCatalog(catalog, slug) : undefined;
+      const autoSubject = !f.subject.trim() || (before && f.subject === `Discussion: ${before.name}`);
+      return { ...f, system: slug, subject: autoSubject ? (after ? `Discussion: ${after.name}` : "") : f.subject };
+    });
+  }
+
   const visit = VISIT_TYPES.includes(form.inquiry_type);
-  // The server takes 500 characters per field; the visit details share the message with the note.
+  // The visit details and the system line share the message with the visitor's note.
   const details = visitDetails(form);
-  const messageMax = Math.max(0, MESSAGE_MAX - (details ? details.length + 2 : 0));
+  const sysLine = systemLine(product);
+  const messageMax = Math.max(0, MESSAGE_MAX - (details ? details.length + 2 : 0) - (sysLine ? sysLine.length + 2 : 0));
+  const phoneNeeded = form.contact_method === "Phone";
 
   function validateStep1() {
     if (!form.organization.trim() || !form.email.trim() || !form.inquiry_type.trim() || !form.region.trim()) {
@@ -233,7 +260,11 @@ function ContactEngineeringFormInner({
       return;
     }
 
-    const message = [form.message.trim(), details].filter(Boolean).join("\n\n");
+    if (phoneNeeded && !PHONE_RE.test(form.phone.trim())) {
+      setError(form.phone.trim() ? "Enter a phone number with digits, spaces, + or -, and an extension if you need one." : "Add a phone number, or choose another contact method.");
+      return;
+    }
+    const message = [sysLine, form.message.trim(), details].filter(Boolean).join("\n\n");
     if (message.length > MESSAGE_MAX) {
       setError(`Shorten the message: with the ${VISIT_LABEL[form.inquiry_type]?.toLowerCase() ?? "details"} it can be up to ${MESSAGE_MAX} characters.`);
       return;
@@ -246,7 +277,7 @@ function ContactEngineeringFormInner({
       inquiry_type: form.inquiry_type,
       program: form.program,
       contact_method: form.contact_method,
-      phone: form.phone,
+      phone: phoneNeeded ? form.phone.trim() : "",
       full_name: form.full_name.trim() || "Not provided",
       role: form.role.trim() || "Not provided",
       subject:
@@ -332,15 +363,6 @@ function ContactEngineeringFormInner({
           </figcaption>
         </figure>
       ) : null}
-      {product && (
-        <div className="border border-signal/30 bg-signal/[0.06] px-4 py-3 text-sm text-muted">
-          <span className="text-white">Inquiry about {product.name}.</span> We&apos;ve filled in what we know; edit
-          anything before you send it.{" "}
-          <Link href={`/configurable-solutions/${product.slug}`} className="text-signal hover:underline">
-            View system
-          </Link>
-        </div>
-      )}
 
       <div className="flex items-center gap-3" aria-label={`Step ${step} of 2`}>
         <span
@@ -416,6 +438,27 @@ function ContactEngineeringFormInner({
               ))}
             </select>
           </label>
+          <div>
+            <label className="block text-[0.875rem] font-medium text-muted">
+              System <span className="font-normal">(optional)</span>
+              <select className={inputClass} value={form.system} onChange={(e) => chooseSystem(e.target.value)}>
+                <option value="">Not sure yet</option>
+                {catalog.map((p) => (
+                  <option key={p.slug} value={p.slug}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {product ? (
+              <p className="mt-1.5 text-xs text-muted">
+                Your message will name the {product.name}.{" "}
+                <Link href={`/configurable-solutions/${product.slug}`} className="text-signal hover:underline">
+                  View the {product.name} page
+                </Link>
+              </p>
+            ) : null}
+          </div>
           <button type="button" onClick={goToStep2} className={"v2-btn w-full"}>
             Continue
           </button>
@@ -506,8 +549,11 @@ function ContactEngineeringFormInner({
                   : "Mission, timeline, environment, or questions for our engineers"
               }
             />
-            <p id="message-count" className="mt-1.5 text-right text-xs text-muted">
-              {form.message.length} of {messageMax} characters
+            <p
+              id="message-count"
+              className={`mt-1.5 text-right text-xs ${form.message.length > messageMax * 0.9 ? "text-signal" : "text-muted"}`}
+            >
+              {form.message.length.toLocaleString("en-US")} of {messageMax.toLocaleString("en-US")} characters
             </p>
           </label>
           <fieldset>
@@ -530,17 +576,31 @@ function ContactEngineeringFormInner({
               ))}
             </div>
           </fieldset>
-          {form.contact_method === "Phone" && (
+          {phoneNeeded ? (
             <label className="block text-[0.875rem] font-medium text-muted">
               Phone number
               <input
+                required
                 type="tel"
+                autoComplete="tel"
+                inputMode="tel"
+                maxLength={40}
                 className={inputClass}
                 value={form.phone}
                 onChange={(e) => patch("phone", e.target.value)}
+                aria-describedby="phone-hint"
               />
+              <span id="phone-hint" className="mt-1.5 block text-xs font-normal">
+                Include the country code if you&apos;re outside the US, and an extension if you have one.
+              </span>
             </label>
-          )}
+          ) : null}
+          {form.contact_method === "Secure Message" ? (
+            <p className="text-sm text-muted">
+              We&apos;ll reply to your email first to agree a secure channel your organization accepts. Say which one in
+              your message if you already know.
+            </p>
+          ) : null}
           <div className="flex flex-col gap-3 sm:flex-row">
             <button type="button" onClick={() => setStep(1)} className={"v2-btn v2-btn-ghost w-full sm:w-auto"}>
               Back
@@ -565,7 +625,7 @@ export function ContactEngineeringFormFallback() {
   // inert: it can't be focused or typed into, since the real form replaces it once scripts run.
   return (
     <div inert>
-      <ContactEngineeringFormInner urlDefaults={urlFormDefaults("", undefined, "", null)} />
+      <ContactEngineeringFormInner urlDefaults={urlFormDefaults("", undefined, "", null)} catalog={PRODUCTS} />
     </div>
   );
 }
@@ -608,7 +668,7 @@ export function ContactEngineeringForm() {
     <ContactEngineeringFormInner
       key={`${handoff}:${resolvedSlug}:${inquiryParam}:${deploymentParam}:${subjectParam}`}
       urlDefaults={urlDefaults}
-      product={product}
+      catalog={catalog}
       planPreview={planPreview}
     />
   );

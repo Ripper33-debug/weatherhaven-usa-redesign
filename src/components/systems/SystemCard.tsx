@@ -3,7 +3,7 @@ import { ViewTransition } from "react";
 import Link from "next/link";
 import type { Product } from "@/lib/products";
 import { EXCLUDED_PRODUCT_IMAGES, getProductContent, showsFullName } from "@/lib/product-content";
-import { productCover } from "@/lib/product-covers";
+import { productCover, productCoverNote } from "@/lib/product-covers";
 
 /** Photo-led system card with the most useful published figures. */
 export function SystemCard({
@@ -19,6 +19,8 @@ export function SystemCard({
   const content = getProductContent(product.slug);
   const specs = product.specs.slice(0, 3);
   const cms = product.coverImageUrl && !EXCLUDED_PRODUCT_IMAGES.has(product.coverImageUrl.trim()) ? product.coverImageUrl : undefined;
+  // Substitute images say so (a related shelter's photo, or the system's 3D model).
+  const coverNote = cms ? null : productCoverNote(product.slug);
   return (
     <article className="group relative flex h-full flex-col bg-ink">
       {/* Shares a name with the product page's main photo, so the card morphs into it on navigation. */}
@@ -32,6 +34,9 @@ export function SystemCard({
             {...(blurDataURL ? { placeholder: "blur" as const, blurDataURL } : {})}
             className="object-cover"
           />
+          {coverNote ? (
+            <p className="absolute bottom-2 left-2 bg-ink/75 px-2 py-1 text-[0.75rem] text-snow/85 backdrop-blur-sm">{coverNote}</p>
+          ) : null}
         </div>
       </ViewTransition>
       <div className="flex flex-1 flex-col pt-5">

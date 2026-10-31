@@ -26,6 +26,11 @@ import {
 import { contactConfirmationEmailText } from "@/lib/shield-email-text";
 import { sendCustomerEmail } from "@/lib/send-customer-email";
 
+/** The message can run longer than the other fields (500); the form shows the same limit. */
+const MESSAGE_MAX_LENGTH = 2000;
+/** Loose phone check: digits with spaces, +, -, dots, brackets and an optional extension. */
+const PHONE_RE = /^\+?[0-9\s().-]{7,25}(\s*(ext\.?|x)\s*[0-9]{1,6})?$/i;
+
 export async function POST(request: Request) {
   const limited = await applyNamedRateLimit(request, "contact");
   if (limited) return limited;
@@ -61,14 +66,20 @@ export async function POST(request: Request) {
     const subjectResult = validateOptionalStringField(body.subject, "Subject");
     if (!subjectResult.ok) return badRequestResponse(subjectResult.error);
 
-    const messageResult = validateOptionalStringField(body.message, "Message");
+    const messageResult = validateOptionalStringField(body.message, "Message", MESSAGE_MAX_LENGTH);
     if (!messageResult.ok) return badRequestResponse(messageResult.error);
 
     const contactMethodResult = validateOptionalStringField(body.contact_method, "Contact method");
     if (!contactMethodResult.ok) return badRequestResponse(contactMethodResult.error);
 
-    const phoneResult = validateOptionalStringField(body.phone, "Phone");
+    const phoneResult = validateOptionalStringField(body.phone, "Phone", 40);
     if (!phoneResult.ok) return badRequestResponse(phoneResult.error);
+    if (phoneResult.value && !PHONE_RE.test(phoneResult.value)) {
+      return badRequestResponse("Phone must be a phone number (digits, spaces, +, -, and an optional extension).");
+    }
+    if (contactMethodResult.value === "Phone" && !phoneResult.value) {
+      return badRequestResponse("Phone is required when the contact method is Phone.");
+    }
 
     const regionResult = validateStringField(body.region, "Region");
     if (!regionResult.ok) return badRequestResponse(regionResult.error);

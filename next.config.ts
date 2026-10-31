@@ -140,6 +140,8 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       { source: "/dashboard", destination: "/sof-solutions/secure", permanent: false },
+      // The TRECC's AR page is /ar (links to it were already out); /ar/<slug> is every other system.
+      { source: "/ar/trecc", destination: "/ar", permanent: true },
       { source: "/sof-solutions/secure/workspace", destination: "/sof-solutions/secure", permanent: false },
       { source: "/sof-solutions/secure/workspace/:path*", destination: "/sof-solutions/secure", permanent: false },
       { source: "/tactical-map", destination: "/sof-solutions/secure/deployment-planner", permanent: false },

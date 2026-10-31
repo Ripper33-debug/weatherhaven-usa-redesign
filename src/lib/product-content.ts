@@ -39,7 +39,7 @@ export const PRODUCT_FAMILIES: {
   {
     id: "inflatable",
     name: "Inflatable shelters",
-    summary: "Airbeam shelters a small team inflates in minutes, with no tools and no frame to assemble.",
+    summary: "Airmax inflatable shelters on airbeams that a small team inflates in minutes, with no tools and no frame to assemble.",
     cover: "/products/airbeam-lp/gallery/09-Airbeam-Low-Pressure-10.jpg",
   },
   {

@@ -6,8 +6,11 @@
 /** Primary navigation for the public site (after the Systems and Capabilities menus). */
 export const NAV_LINKS = [
   { href: "/mission-solution-builder", label: "Mission builder" },
+  // Contracting officers look for this first; it was only inside the Capabilities menu.
+  { href: "/government", label: "How to buy" },
   { href: "/deployments", label: "Deployments" },
-  { href: "/news", label: "News" },
+  // Desktop bar shows News only on wide screens (it's in the footer and on the homepage); see Navbar.
+  { href: "/news", label: "News", wideOnly: true },
 ] as const;
 
 export const NAV_CTA = { href: "/contact?inquiry=Capability%20Briefing", label: "Request a briefing" } as const;

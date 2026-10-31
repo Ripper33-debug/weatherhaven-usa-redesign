@@ -21,6 +21,9 @@ type LoadState = "idle" | "loading" | "ready" | "fallback";
 /** What the page can ask of the scene. */
 export type CampSceneApi = { snapshot: () => string | null };
 
+/** Shown without WebGL before the first answer. */
+const INTRO_PHOTO = "/products/trecc/gallery/09-Trecc-Woods.jpg";
+
 const MISSION_ROOM: Record<string, string> = {
   command: "a command post",
   medical: "a clinic",
@@ -214,10 +217,12 @@ export function CampScene({
       <div aria-hidden className={`absolute inset-0 transition-opacity duration-700 ${ready ? "opacity-0" : "opacity-100"}`}>
         <div className="v2-camp-placeholder absolute inset-0" />
       </div>
-      {/* Without WebGL: a photo of the leading system once there is one. */}
+      {/* Without WebGL (common on locked-down government laptops): a photo of the leading system, or
+          TRECCs in the field before the first answer. */}
       {load === "fallback" ? (
         lead && photos?.[lead.slug] ? (
           <Image
+            key={lead.slug}
             src={photos[lead.slug].src}
             alt={`Weatherhaven ${lead.name}`}
             fill
@@ -225,7 +230,9 @@ export function CampScene({
             className="object-cover"
             {...(photos[lead.slug].blur ? { placeholder: "blur" as const, blurDataURL: photos[lead.slug].blur } : {})}
           />
-        ) : null
+        ) : (
+          <Image src={INTRO_PHOTO} alt="Two Weatherhaven TRECCs set up in a forest clearing" fill sizes="(min-width: 1024px) 55vw, 100vw" className="object-cover" />
+        )
       ) : null}
       <canvas
         ref={canvasRef}
@@ -312,7 +319,9 @@ export function CampScene({
               </p>
             ) : null}
           </>
-        ) : load === "fallback" ? null : (
+        ) : load === "fallback" ? (
+          <p className="max-w-[28ch] text-[0.95rem] leading-snug text-snow sm:text-[1.05rem]">Answer the questions to see which system fits.</p>
+        ) : (
           <p className="max-w-[26ch] text-[0.95rem] leading-snug text-snow/85 sm:text-[1.05rem]">Your camp builds here as you answer.</p>
         )}
       </div>
@@ -336,7 +345,7 @@ export function CampScene({
             : load === "fallback"
             ? lead
               ? `${photos?.[lead.slug]?.shows ? `Photo of ${photos[lead.slug].shows}, from the same family as the ${lead.name}` : `Photo of the ${lead.name}`}. This browser can't show the 3D camp.`
-              : "This browser can't show the 3D camp (it needs hardware graphics). The questions and results work the same."
+              : "Photo of TRECCs in the field. This browser can't show the 3D camp (it needs hardware graphics); the questions and results work the same."
             : lead && hasDetailedModel(lead.slug)
               ? `${detailedNote}${compact ? "; illustrative quantities" : "; quantities are illustrative"}. Grid lines every 5 m.`
               : compact

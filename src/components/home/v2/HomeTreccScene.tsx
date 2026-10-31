@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useClientMediaQuery } from "@/hooks/useClientMediaQuery";
@@ -16,18 +17,22 @@ import { startWhenNear } from "@/lib/start-when-near";
 const STEPS = [
   {
     title: "Rides stowed",
+    photo: { src: "/products/trecc/gallery/08-TRECC-and-Car.jpg", alt: "A stowed TRECC on its trailer behind a JLTV" },
     body: "On a light tactical trailer, an M1289 JLTV trailer or a single 463L pallet. Under 60 in stowed height, so it is CH-47 airlift compatible.",
   },
   {
     title: "Two people, under three minutes",
+    photo: { src: "/products/trecc/gallery/04-TRECC-1.jpg", alt: "A stowed TRECC beside a deployed one" },
     body: "Electric 24 VDC actuators expand it, with a manual backup.",
   },
   {
     title: "A building on arrival",
+    photo: { src: "/products/trecc/gallery/12-TRECC-T_interior_white_light_03.jpg", alt: "Inside a TRECC-T set up with desks and chairs" },
     body: "A command post, workshop, clinic or sanitation unit, rated from −40 °F to +120 °F and 55 mph sustained winds.",
   },
   {
     title: "Tested",
+    photo: { src: "/products/trecc/gallery/06-TRECC-3.jpg", alt: "Two TRECCs in a forest clearing with an armoured vehicle" },
     body: "MIL-STD-810G, with safety testing at Aberdeen Test Center. TRECC-T is at technology readiness level 9.",
   },
 ] as const;
@@ -246,9 +251,13 @@ export function HomeTreccScene() {
     kickRef.current();
   }, []);
 
+  // Without WebGL (common on locked-down government laptops and remote desktops), or if the 3D view
+  // fails: no pinned scroll, just the four steps with photos.
+  if (load === "fallback") return <TreccStepsStatic sectionRef={sectionRef} />;
+
   const ready = load === "ready";
   const active = reduced ? 3 : step;
-  const still = load === "fallback" ? "deployed" : "stowed";
+  const still = "stowed";
 
   return (
     <section
@@ -257,8 +266,9 @@ export function HomeTreccScene() {
       className="relative h-[400svh] border-t border-line bg-ink motion-reduce:h-auto"
     >
       <div className="sticky top-0 h-[100svh] overflow-hidden motion-reduce:relative motion-reduce:min-h-[620px]">
-        {/* Still frame while the model loads, and the fallback without WebGL. Sources are chosen by
-            media query so the server HTML is already right for phones and reduced motion. */}
+        {/* Still frame while the model loads (without WebGL the section switches to TreccStepsStatic).
+            Sources are chosen by media query so the server HTML is already right for phones and
+            reduced motion. */}
         <picture>
           <source media="(prefers-reduced-motion: reduce) and (max-width: 1023px)" srcSet="/models/trecc-poster-deployed-m.jpg" />
           <source media="(prefers-reduced-motion: reduce)" srcSet="/models/trecc-poster-deployed.jpg" />
@@ -267,8 +277,8 @@ export function HomeTreccScene() {
             src={`/models/trecc-poster-${still}.jpg`}
             loading="lazy"
             decoding="async"
-            alt={load === "fallback" ? "Weatherhaven TRECC expandable shelter, deployed" : ""}
-            aria-hidden={load !== "fallback"}
+            alt=""
+            aria-hidden
             className={`absolute inset-x-0 top-0 h-[60svh] w-full object-cover transition-opacity duration-700 lg:inset-0 lg:h-full ${
               ready ? "opacity-0" : "opacity-100"
             }`}
@@ -368,6 +378,47 @@ export function HomeTreccScene() {
         <p className="v2-inset-r pointer-events-none absolute bottom-3 hidden text-[0.8125rem] text-muted lg:block">
           Illustrative model. Configuration varies by program.
         </p>
+      </div>
+    </section>
+  );
+}
+
+/** The section without 3D: heading, the four steps with photos, and the same links. */
+function TreccStepsStatic({ sectionRef }: { sectionRef: React.RefObject<HTMLElement | null> }) {
+  return (
+    <section ref={sectionRef} aria-labelledby="trecc-heading" className="border-t border-line bg-ink py-16 sm:py-20 lg:py-24">
+      <div className="v2-wrap">
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.8fr)] lg:items-end">
+          <h2 id="trecc-heading" className="v2-h2 max-w-[22ch] text-snow">
+            Trailer to command post in under three minutes
+          </h2>
+          <p className="v2-body max-w-[46ch] lg:justify-self-end">
+            TRECC is a patented all-aluminum shelter that rides on a trailer, a vehicle or a 463L pallet.
+          </p>
+        </div>
+        <ol className="mt-10 grid gap-x-6 gap-y-6 sm:grid-cols-2 lg:mt-12 lg:grid-cols-4">
+          {STEPS.map((s, i) => (
+            <li key={s.title} className="grid grid-cols-[7.5rem_1fr] gap-4 sm:block">
+              <div className="relative aspect-[4/3] overflow-hidden bg-[#0c121b]">
+                <Image src={s.photo.src} alt={s.photo.alt} fill sizes="(min-width: 1024px) 22vw, (min-width: 640px) 45vw, 7.5rem" className="object-cover" />
+              </div>
+              <div className="sm:mt-4">
+                <p className="text-[1.05rem] font-semibold text-snow sm:text-[1.1rem]">
+                  <span className="v2-figure mr-2 text-signal">{i + 1}</span>
+                  {s.title}
+                </p>
+                <p className="mt-1 text-[0.9rem] leading-relaxed text-muted sm:text-[0.95rem]">{s.body}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+        <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3">
+          <Link href="/configurable-solutions/trecc" className="v2-link text-[0.95rem]">
+            TRECC specifications
+          </Link>
+          {/* AR uses the phone's own viewer, so it works without WebGL here. */}
+          <TreccArButton finish="green" tall />
+        </div>
       </div>
     </section>
   );

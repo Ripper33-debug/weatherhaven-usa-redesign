@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useId, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import type { ComparableSystem } from "@/lib/shelter-compare";
+import { contactUrl } from "@/lib/contact-url";
 import { sideBySide } from "@/lib/spec-rows";
 import type { ProductSpec } from "@/lib/products";
 
@@ -52,11 +53,18 @@ function SystemSelect({
   );
 }
 
-function Values({ row, specs, who }: { row: string; specs: ProductSpec[]; who: string }) {
+function Values({ row, specs, who, slug }: { row: string; specs: ProductSpec[]; who: string; slug: string }) {
+  // Only one of the two publishes this figure: the US office can supply the other.
   if (specs.length === 0)
     return (
       <p className="text-[0.95rem] text-muted">
-        <span className="sr-only">{who}: </span>Not published
+        <span className="sr-only">{who}: not published; </span>
+        <Link
+          href={contactUrl({ system: slug, inquiry: "Technical Exchange" })}
+          className="text-muted underline decoration-line-strong underline-offset-4 hover:text-signal"
+        >
+          On request
+        </Link>
       </p>
     );
   return (
@@ -73,9 +81,27 @@ function Values({ row, specs, who }: { row: string; specs: ProductSpec[]; who: s
   );
 }
 
-export function SpecComparator({ systems, initial }: { systems: ComparableSystem[]; initial: [string, string] }) {
+export function SpecComparator({
+  systems,
+  initial,
+  syncUrl = false,
+}: {
+  systems: ComparableSystem[];
+  initial: [string, string];
+  /** Keep the pair in the address (?a=&b=) so a comparison can be shared. */
+  syncUrl?: boolean;
+}) {
   const [a, setA] = useState(initial[0]);
   const [b, setB] = useState(initial[1]);
+  const choose = (side: "a" | "b", slug: string) => {
+    if (side === "a") setA(slug);
+    else setB(slug);
+    if (!syncUrl) return;
+    const url = new URL(window.location.href);
+    url.searchParams.set("a", side === "a" ? slug : a);
+    url.searchParams.set("b", side === "b" ? slug : b);
+    window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+  };
   const sa = systems.find((s) => s.slug === a) ?? systems[0];
   const sb = systems.find((s) => s.slug === b) ?? systems[1];
   const rows = useMemo(() => sideBySide(sa.specs, sb.specs), [sa, sb]);
@@ -84,8 +110,8 @@ export function SpecComparator({ systems, initial }: { systems: ComparableSystem
     <div>
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-[11rem_minmax(0,1fr)_minmax(0,1fr)] sm:gap-6">
         <p className="hidden sm:block" aria-hidden />
-        <SystemSelect label="First system" value={sa.slug} onChange={setA} systems={systems} />
-        <SystemSelect label="Second system" value={sb.slug} onChange={setB} systems={systems} />
+        <SystemSelect label="First system" value={sa.slug} onChange={(s) => choose("a", s)} systems={systems} />
+        <SystemSelect label="Second system" value={sb.slug} onChange={(s) => choose("b", s)} systems={systems} />
       </div>
 
       <div className="mt-8 border-t border-line" aria-live="polite">
@@ -111,10 +137,10 @@ export function SpecComparator({ systems, initial }: { systems: ComparableSystem
               >
                 <dt className="col-span-2 text-[0.875rem] font-semibold text-snow sm:col-span-1 sm:font-normal sm:text-muted">{r.row}</dt>
                 <dd className="min-w-0">
-                  <Values row={r.row} specs={r.a} who={sa.name} />
+                  <Values row={r.row} specs={r.a} who={sa.name} slug={sa.slug} />
                 </dd>
                 <dd className="min-w-0">
-                  <Values row={r.row} specs={r.b} who={sb.name} />
+                  <Values row={r.row} specs={r.b} who={sb.name} slug={sb.slug} />
                 </dd>
               </div>
             ))}
@@ -126,12 +152,18 @@ export function SpecComparator({ systems, initial }: { systems: ComparableSystem
 }
 
 /**
- * The comparator with its first system taken from ?a= (product pages link here with their own
- * system). Needs a Suspense boundary; the page renders the plain comparator as the fallback.
+ * The comparator with its pair taken from ?a= and ?b= (product pages link here with ?a= set to
+ * their own system), and kept there as the visitor changes it. Needs a Suspense boundary; the page
+ * renders the plain comparator as the fallback. The pair is read once: the comparator's own changes
+ * to the address don't remount it (that would drop focus from the select being used).
  */
 export function SpecComparatorFromUrl({ systems, initial }: { systems: ComparableSystem[]; initial: [string, string] }) {
-  const a = useSearchParams().get("a");
-  const first = a && systems.some((s) => s.slug === a) ? a : initial[0];
-  const second = first === initial[1] ? initial[0] : initial[1];
-  return <SpecComparator key={first} systems={systems} initial={[first, second]} />;
+  const params = useSearchParams();
+  const [pair] = useState<[string, string]>(() => {
+    const known = (s: string | null) => (s && systems.some((x) => x.slug === s) ? s : null);
+    const first = known(params.get("a")) ?? initial[0];
+    const second = known(params.get("b")) ?? (first === initial[1] ? initial[0] : initial[1]);
+    return [first, second];
+  });
+  return <SpecComparator systems={systems} initial={pair} syncUrl />;
 }

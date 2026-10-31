@@ -364,7 +364,7 @@ function Results({
 
 export const GUIDE_TITLE = "Plan a deployment in five questions";
 const GUIDE_LEAD =
-  "Answer five questions and watch the camp take shape. You'll see the Weatherhaven systems that fit, with the published specs behind each match, and you can send the plan to an expert.";
+  "Answer five questions and see the camp take shape. You'll see the Weatherhaven systems that fit, with the published specs behind each match, and you can send the plan to an expert.";
 const DETAILED_TITLE = "Describe the full mission requirement.";
 const DETAILED_LEAD =
   "Environment, function, mobility, timeline and power in one form. It builds an indicative camp layout and parts list you can send to a Weatherhaven expert. A planning tool, not a quote.";
