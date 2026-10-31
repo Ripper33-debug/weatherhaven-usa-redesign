@@ -1,7 +1,7 @@
 "use client";
 
+import { useSitePathname } from "@/hooks/useSitePathname";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -14,7 +14,7 @@ export function NavAccountLink({
   mobile?: boolean;
   onNavigate?: () => void;
 }) {
-  const pathname = usePathname();
+  const pathname = useSitePathname();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {

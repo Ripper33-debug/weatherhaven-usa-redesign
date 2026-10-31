@@ -1,7 +1,7 @@
 "use client";
 
+import { useSitePathname } from "@/hooks/useSitePathname";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { IconX } from "@tabler/icons-react";
 import { trackEvent } from "@/lib/analytics";
@@ -27,7 +27,7 @@ const btnPrimary =
   "inline-flex w-full min-h-11 items-center justify-center border border-white bg-white px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-black transition hover:bg-zinc-100";
 
 export function ProductCompareOverlay() {
-  const pathname = usePathname();
+  const pathname = useSitePathname();
   const { compareOpen, setCompareOpen, selectedProducts, clearCompare } = useProductCompare();
 
   useEffect(() => {

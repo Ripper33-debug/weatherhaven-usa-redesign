@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { useSitePathname } from "@/hooks/useSitePathname";
 import { useEffect, useState } from "react";
 
 function ScrollProgressInner() {
@@ -31,6 +31,6 @@ function ScrollProgressInner() {
 }
 
 export function ScrollProgress() {
-  const pathname = usePathname();
+  const pathname = useSitePathname();
   return <ScrollProgressInner key={pathname} />;
 }

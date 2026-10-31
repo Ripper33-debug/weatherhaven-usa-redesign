@@ -1,7 +1,7 @@
 "use client";
 
+import { useSitePathname } from "@/hooks/useSitePathname";
 import { useEffect } from "react";
-import { usePathname } from "next/navigation";
 
 const PLATFORM_PREFIXES = ["/sof-solutions/secure", "/account"] as const;
 
@@ -10,7 +10,7 @@ function isPlatformPage(pathname: string): boolean {
 }
 
 export function PlatformPageFlags() {
-  const pathname = usePathname();
+  const pathname = useSitePathname();
   const platform = isPlatformPage(pathname);
 
   useEffect(() => {

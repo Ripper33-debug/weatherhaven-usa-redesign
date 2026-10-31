@@ -1,7 +1,7 @@
 "use client";
 
+import { useSitePathname } from "@/hooks/useSitePathname";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { scheduleIdleTask } from "@/lib/schedule-idle";
 
@@ -23,7 +23,7 @@ export function NavAdminLink({
   mobile?: boolean;
   placement?: "header" | "footer";
 }) {
-  const pathname = usePathname();
+  const pathname = useSitePathname();
   const [mode, setMode] = useState<NavAdminMode>("loading");
 
   useEffect(() => {

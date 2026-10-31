@@ -1,7 +1,7 @@
 "use client";
 
+import { useSitePathname } from "@/hooks/useSitePathname";
 import dynamic from "next/dynamic";
-import { usePathname } from "next/navigation";
 import { isProductCatalogPath } from "@/lib/marketing-pages";
 
 const ProductCompareBar = dynamic(
@@ -15,7 +15,7 @@ const ProductCompareOverlay = dynamic(
 );
 
 export function ProductCompareTools() {
-  const pathname = usePathname();
+  const pathname = useSitePathname();
   if (!isProductCatalogPath(pathname)) return null;
 
   return (

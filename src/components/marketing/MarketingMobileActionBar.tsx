@@ -1,14 +1,14 @@
 "use client";
 
+import { useSitePathname } from "@/hooks/useSitePathname";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { btnMarketingOutline, btnMarketingPrimary } from "@/lib/cta-buttons";
 import { contactUrl } from "@/lib/contact-url";
 import { isMarketingPage, isProductCatalogPath, isPublicSitePage } from "@/lib/marketing-pages";
 import { NAV_CTA } from "@/lib/site-nav-links";
 
 export function MarketingMobileActionBar() {
-  const pathname = usePathname();
+  const pathname = useSitePathname();
   if (!isMarketingPage(pathname) || isProductCatalogPath(pathname)) return null;
   // The full-screen deployment map has its own contact button, and the bar would cover its controls.
   if (pathname === "/deployments/map") return null;

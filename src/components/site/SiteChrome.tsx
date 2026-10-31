@@ -1,7 +1,7 @@
 "use client";
 
+import { useSitePathname } from "@/hooks/useSitePathname";
 import { ViewTransition, useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
 import { isAuthGatePage } from "@/lib/auth-routes";
 import { isAdminPath } from "@/lib/route-context";
 import { SkipToContent } from "@/components/navigation/SkipToContent";
@@ -31,7 +31,7 @@ export function SiteChrome({
   nav: React.ReactNode;
   footer: React.ReactNode;
 }) {
-  const pathname = usePathname();
+  const pathname = useSitePathname();
   const bare = isAuthGatePage(pathname);
   const adminConsole = isAdminPath(pathname);
   // The content studio (/studio) is a full-screen app of its own.

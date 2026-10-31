@@ -1,7 +1,7 @@
 "use client";
 
+import { useSitePathname } from "@/hooks/useSitePathname";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { trackEvent } from "@/lib/analytics";
 import type { Product } from "@/lib/products";
 import { useProductCompare } from "@/contexts/ProductCompareContext";
@@ -10,7 +10,7 @@ import { isMarketingPage, isProductCatalogPath } from "@/lib/marketing-pages";
 import { getProductInfoSheet } from "@/lib/product-info-sheets";
 
 export function ProductCatalogCard({ product }: { product: Product }) {
-  const pathname = usePathname();
+  const pathname = useSitePathname();
   const marketing = isMarketingPage(pathname);
   const catalogPath = isProductCatalogPath(pathname);
   const { isSelected, toggleCompare, selectedSlugs } = useProductCompare();

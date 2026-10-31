@@ -1,10 +1,10 @@
 "use client";
 
+import { useSitePathname } from "@/hooks/useSitePathname";
 import { endSession, initClickTracking, startSession, trackEvent, trackPageView } from "@/lib/analytics";
 import { isMarketingPage } from "@/lib/marketing-pages";
 import { isSofSecurePath } from "@/lib/route-context";
 import { trackLead } from "@/lib/track-lead";
-import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 
 const VIEWED_SECTIONS = new Set<string>();
@@ -87,7 +87,7 @@ function observeAnalyticsSections() {
 }
 
 export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
+  const pathname = useSitePathname();
   const sessionStarted = useRef(false);
   const previousPath = useRef<string | null>(null);
   const trackActivity = !isSofSecurePath(pathname);

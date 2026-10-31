@@ -1,14 +1,14 @@
 "use client";
 
+import { useSitePathname } from "@/hooks/useSitePathname";
 import { useEffect } from "react";
-import { usePathname } from "next/navigation";
 import { initDomEnhancements } from "@/lib/effects/dom-enhancements";
 import { isMarketingPage } from "@/lib/marketing-pages";
 
 const MUTATION_DEBOUNCE_MS = 250;
 
 export function PlatformEffects() {
-  const pathname = usePathname();
+  const pathname = useSitePathname();
   const marketing = isMarketingPage(pathname);
 
   useEffect(() => {

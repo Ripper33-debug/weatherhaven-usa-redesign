@@ -1,7 +1,7 @@
 "use client";
 
+import { useSitePathname } from "@/hooks/useSitePathname";
 import { useEffect, useRef, useState } from "react";
-import { usePathname } from "next/navigation";
 import { prefersReducedMotion } from "@/lib/effects/media";
 
 type Phase = "idle" | "out" | "in";
@@ -13,7 +13,7 @@ export function PageTransition({
   children: React.ReactNode;
   marketing?: boolean;
 }) {
-  const pathname = usePathname();
+  const pathname = useSitePathname();
   const [phase, setPhase] = useState<Phase>("in");
   const [displayChildren, setDisplayChildren] = useState(children);
   const [sweep, setSweep] = useState(false);

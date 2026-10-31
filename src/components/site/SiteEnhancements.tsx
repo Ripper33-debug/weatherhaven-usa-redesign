@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { useSitePathname } from "@/hooks/useSitePathname";
 import { CustomCursor } from "@/components/CustomCursor";
 import { PageTransition } from "@/components/PageTransition";
 import { PlatformEffects } from "@/components/effects/PlatformEffects";
@@ -14,7 +14,7 @@ import { isMarketingPage, isPublicSitePage } from "@/lib/marketing-pages";
 import { isLightPortalPath } from "@/lib/route-context";
 
 export function SiteEnhancements({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
+  const pathname = useSitePathname();
   const marketing = isMarketingPage(pathname);
   const publicSite = isPublicSitePage(pathname);
   const lightPortal = isLightPortalPath(pathname);

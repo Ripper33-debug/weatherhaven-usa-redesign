@@ -1,8 +1,8 @@
 "use client";
 
+import { useSitePathname } from "@/hooks/useSitePathname";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { IconLock, IconMenu2, IconX } from "@tabler/icons-react";
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
@@ -155,7 +155,7 @@ function CapabilitiesMenu({ onNavigate, capabilities }: { onNavigate: () => void
 type MenuId = "systems" | "capabilities";
 
 export function Navbar({ menuData }: { menuData: NavMenuData }) {
-  const pathname = usePathname();
+  const pathname = useSitePathname();
   const isLogin = pathname === "/login";
   const publicSite = isPublicSitePage(pathname);
   const [open, setOpen] = useMenuOpenForRoute();

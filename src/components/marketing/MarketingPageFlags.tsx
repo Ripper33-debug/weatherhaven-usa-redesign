@@ -1,12 +1,12 @@
 "use client";
 
+import { useSitePathname } from "@/hooks/useSitePathname";
 import { useEffect } from "react";
-import { usePathname } from "next/navigation";
 import { isMarketingPage } from "@/lib/marketing-pages";
 
 /** Sets body data attribute so global CSS and effects can respect Shield mode. */
 export function MarketingPageFlags() {
-  const pathname = usePathname();
+  const pathname = useSitePathname();
   const marketing = isMarketingPage(pathname);
 
   useEffect(() => {
