@@ -18,12 +18,13 @@
  */
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { withImageTextures } from "@/lib/three/gltfImageTextures";
 import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import { KIND_FOR_SLUG, KIND_SIZE, type CampPlan, type CampProp, type CampUnit, type ModelKind } from "@/lib/camp-scene-plan";
-import { SYSTEM_MODELS, type SystemModel } from "@/lib/system-models";
+import { SYSTEM_MODELS, fitoutForMission, type SystemModel } from "@/lib/system-models";
 import type { DurationId } from "@/lib/mission-guide";
 import {
   clamp01,
@@ -51,6 +52,21 @@ import { buildInterior } from "@/lib/three/camp/interiors";
 
 export const TRECC_CAMP_MODEL = "/models/trecc-camp.glb";
 export const TRECC_STOWED_MODEL = "/models/trecc-stowed-camp.glb";
+/** Size of each detailed model's packed file (length along the camp's x, height) and how it travels. */
+const PACKED: Partial<Record<ModelKind, { kind: Cargo["kind"]; l: number; h: number }>> = {
+  mecc: { kind: "container", l: 6.23, h: 2.56 },
+  ehmecc: { kind: "container", l: 6.23, h: 2.56 },
+  hercon: { kind: "container", l: 6.22, h: 2.56 },
+  ateps: { kind: "pallet", l: 2.75, h: 2.4 },
+  mts: { kind: "pallet", l: 2.78, h: 1.47 },
+  rdmss: { kind: "pallet", l: 2.78, h: 1.47 },
+  mex26: { kind: "pallet", l: 2.78, h: 1.47 },
+  "series4-26": { kind: "bags", l: 2.48, h: 1.23 },
+  polarhaven: { kind: "bags", l: 2.24, h: 1.08 },
+  "polar-chief": { kind: "bags", l: 2.24, h: 1.08 },
+  endurance: { kind: "bags", l: 3.41, h: 0.84 },
+};
+
 /** Draco decoder for the detailed models (the same files the /ar page uses). */
 export const DRACO_PATH = "/assets/draco-ar/";
 
@@ -66,6 +82,8 @@ export function detailedModelFor(kind: ModelKind): SystemModel | null {
 function slotFor(name: string, sm: SystemModel): MatKey {
   if (sm.finishMaterials?.paint.includes(name)) return "shell";
   if (sm.finishMaterials?.fabric.includes(name)) return "shell2";
+  // Shelters made in their own colours (the polar ones) keep their fabric colour.
+  if (!sm.finishMaterials && /fabric|gore|band/.test(name)) return "shell2";
   if (/light|lamp/.test(name)) return "lit";
   if (/glass/.test(name)) return "glass";
   if (/^(red|yellow|orange)$/.test(name)) return "accent";
@@ -323,7 +341,8 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
   // ---- detailed models (system-models.ts) ----------------------------------------------------
   let draco: DRACOLoader | null = null;
   const loaderFor = (sm: SystemModel) => {
-    const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
+    // Embedded textures (the fit-outs) load through <img>: the CSP refuses fetch() of blob: URLs.
+    const loader = withImageTextures(new GLTFLoader().setMeshoptDecoder(MeshoptDecoder));
     if (sm.compression === "draco") {
       draco ??= new DRACOLoader().setDecoderPath(DRACO_PATH);
       loader.setDRACOLoader(draco);
@@ -331,9 +350,9 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
     return loader;
   };
 
-  const applyLooks = (mats: MatSet, looks: Partial<Record<MatKey, Look>>) => {
+  const applyLooks = (mats: MatSet, looks: Partial<Record<MatKey, Look>>, ownFinish = false) => {
     for (const [k, l] of Object.entries(looks) as [MatKey, Look][]) {
-      if (k === "shell" || k === "shell2" || k === "lit") continue;
+      if (k === "lit" || k === "shell" || (k === "shell2" && !ownFinish)) continue;
       mats[k].color.copy(l.color);
       mats[k].metalness = l.metalness;
       mats[k].roughness = l.roughness;
@@ -366,7 +385,7 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
         lists.set(key, list);
         // Each slot takes the look of the material that covers most of it.
         const tris = (geo.index ? geo.index.count : geo.getAttribute("position").count) / 3;
-        if (key !== "shell" && key !== "shell2" && tris > (weight[key] ?? 0)) {
+        if (tris > (weight[key] ?? 0)) {
           weight[key] = tris;
           looks[key] = { color: mat.color.clone(), metalness: mat.metalness, roughness: mat.roughness };
         }
@@ -381,7 +400,77 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
     return nodes;
   };
 
+  /** Folds for files that follow the MECC's node names (side walls on hinges, expansions beside
+   * them) but have no `articulation` in the registry, e.g. the EHMECC and HERCon. */
+  const deriveFolds = (scene: THREE.Object3D): SystemModel["articulation"] | undefined => {
+    const names = scene.children.map((c) => c.name);
+    const exp = names.filter((n) => /_expansion_[LR]$/.test(n));
+    if (exp.length === 0) return undefined;
+    const walls = names.filter((n) => /_side_wall_[LR]$/.test(n));
+    const unfold = exp.map((node) => {
+      const side = node.endsWith("_L") ? -1 : 1;
+      const wall = scene.children.find((c) => c.name === node.replace("_expansion_", "_side_wall_"));
+      const box = new THREE.Box3().setFromObject(scene.children.find((c) => c.name === node)!);
+      // The hinge line is the wall's, or the expansion's inner edge.
+      return { node, pivotX: wall ? wall.position.x : side < 0 ? box.max.x : box.min.x };
+    });
+    return { hinges: walls.map((node) => ({ node, stowed: 0 })), unfold, hideStowed: names.filter((n) => /_interior$|_site_kit$/.test(n)) };
+  };
+
+  /** A packed file as one PartGeo in the deployed file's frame, and its size. */
+  const loadPackedGeo = async (sm: SystemModel) => {
+    const gltf = await loaderFor(sm).loadAsync(sm.stowed!);
+    const looks: Partial<Record<MatKey, Look>> = {};
+    const lists = new Map<MatKey, THREE.BufferGeometry[]>();
+    for (const { obj, geo } of readNodes(gltf.scene, sm, looks)) {
+      const m = new THREE.Matrix4().compose(obj.position, obj.quaternion, new THREE.Vector3(1, 1, 1));
+      for (const [k, g] of Object.entries(geo) as [MatKey, THREE.BufferGeometry][]) {
+        g.applyMatrix4(m);
+        lists.set(k, [...(lists.get(k) ?? []), g]);
+      }
+    }
+    const geo: PartGeo = {};
+    const box = new THREE.Box3();
+    for (const [k, list] of lists) {
+      geo[k] = list.length === 1 ? list[0] : (mergeGeometries(list, false) ?? list[0]);
+      if (list.length > 1) list.forEach((g) => g.dispose());
+      geo[k]!.computeBoundingBox();
+      box.union(geo[k]!.boundingBox!);
+    }
+    return { geo, looks, size: box.getSize(new THREE.Vector3()) };
+  };
+
   const detailedPromises = new Map<ModelKind, Promise<KindModel>>();
+  /** Fit-outs for "Look inside", one PartGeo per kind, loaded the first time it's asked for. */
+  type Fitout = { geo: PartGeo; position: THREE.Vector3; quaternion: THREE.Quaternion };
+  const fitouts = new Map<ModelKind, Promise<Fitout | null>>();
+  const fitoutFor = (kind: ModelKind, sm: SystemModel): Promise<Fitout | null> => {
+    let f = fitouts.get(kind);
+    if (!f) {
+      const inside = sm.inside!;
+      f = loaderFor(sm)
+        .loadAsync(inside.src)
+        .then((gltf) => {
+          const node = gltf.scene.getObjectByName(inside.node);
+          if (!node) return null;
+          // The node shares the deployed file's coordinates; keep its placement.
+          node.updateWorldMatrix(true, false);
+          const position = new THREE.Vector3();
+          const quaternion = new THREE.Quaternion();
+          node.matrixWorld.decompose(position, quaternion, new THREE.Vector3());
+          const holder = new THREE.Group();
+          holder.add(node);
+          node.position.set(0, 0, 0);
+          node.quaternion.identity();
+          node.scale.set(1, 1, 1);
+          const geo = readNodes(holder, sm, {})[0]?.geo;
+          return geo ? { geo, position, quaternion } : null;
+        })
+        .catch(() => null);
+      fitouts.set(kind, f);
+    }
+    return f;
+  };
   const pickMat = new THREE.MeshBasicMaterial();
   const noRaycast = () => undefined;
   const loadDetailed = (kind: ModelKind, sm: SystemModel): Promise<KindModel> => {
@@ -389,9 +478,11 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
     if (p) return p;
     p = loaderFor(sm)
       .loadAsync(sm.deployed)
-      .then((gltf) => {
+      .then(async (gltf) => {
         const looks: Partial<Record<MatKey, Look>> = {};
-        const art = sm.articulation;
+        const art = sm.articulation ?? deriveFolds(gltf.scene);
+        // Without hinges the packed file stands in for the packed state and the shelter swaps in.
+        const loadGeo = !art && sm.stowed ? await loadPackedGeo(sm).catch(() => null) : null;
         const nodes: DetailedNode[] = readNodes(gltf.scene, sm, looks).map(({ obj, geo }) => {
           const hinge = art?.hinges.find((h) => h.node === obj.name);
           const unfold = art?.unfold.find((u) => u.node === obj.name);
@@ -401,7 +492,8 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
           if (unfold) return { ...base, role: "unfold", pivotX: unfold.pivotX };
           // The interior shows on the copy you can look inside; site kit (cables, earth rods) stays out
           // of the camp, which brings its own generators and would trip over the cables between rows.
-          if (packedOnly) return { ...base, role: /interior/i.test(obj.name) ? "interior" : "hidden" };
+          if (packedOnly || /_site_kit$/i.test(obj.name)) return { ...base, role: /interior/i.test(obj.name) ? "interior" : "hidden" };
+          if (/_interior$/i.test(obj.name)) return { ...base, role: "interior" };
           return { ...base, role: "static" };
         });
         // Size from the parts that stand in the camp (not the site kit's cable run).
@@ -428,6 +520,30 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
           pick.visible = false;
           root.add(pick);
           const steps: ((k: number) => void)[] = [];
+          // Shelters without hinges: the shelter rises and spreads out of its packed load, and the
+          // load sinks away under it once the shelter covers it.
+          const shelter = new THREE.Group();
+          root.add(shelter);
+          if (loadGeo) {
+            const load = meshesFor(loadGeo.geo, mats, castShadows);
+            load.traverse((m) => {
+              if ((m as THREE.Mesh).isMesh) m.raycast = noRaycast;
+            });
+            root.add(load);
+            const from = new THREE.Vector3(
+              THREE.MathUtils.clamp(loadGeo.size.x / Math.max(0.1, box.max.x - box.min.x), 0.08, 1),
+              THREE.MathUtils.clamp(loadGeo.size.y / Math.max(0.1, box.max.y), 0.08, 1),
+              THREE.MathUtils.clamp(loadGeo.size.z / Math.max(0.1, box.max.z - box.min.z), 0.08, 1),
+            );
+            steps.push((k) => {
+              const e = easeInOutCubic(clamp01((k - 0.08) / 0.72));
+              shelter.visible = k > 0.08;
+              shelter.scale.set(lerp(from.x, 1, e), Math.max(0.02, lerp(from.y * 0.4, 1, easeOutCubic(e))), lerp(from.z, 1, e));
+              const f = easeInOutCubic(clamp01((k - 0.55) / 0.4));
+              load.visible = f < 0.999;
+              load.scale.set(1 - 0.3 * f, Math.max(0.001, 1 - f), 1 - 0.3 * f);
+            });
+          }
           for (const n of nodes) {
             if (n.role === "hidden" || (n.role === "interior" && !o.interior)) continue;
             const part = meshesFor(n.geo, mats, castShadows);
@@ -436,7 +552,7 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
             });
             if (n.role === "hinge") {
               part.position.copy(n.position);
-              root.add(part);
+              shelter.add(part);
               const from = n.from ?? 0;
               const to = n.to ?? 0;
               // The walls fold down on their real hinge line first.
@@ -447,7 +563,7 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
               part.position.copy(n.position).sub(pivot.position);
               part.quaternion.copy(n.quaternion);
               pivot.add(part);
-              root.add(pivot);
+              shelter.add(pivot);
               // Then the expansion opens out from the container edge.
               steps.push((k) => {
                 const e = easeInOutCubic(clamp01((k - 0.35) / 0.65));
@@ -457,7 +573,7 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
             } else {
               part.position.copy(n.position);
               part.quaternion.copy(n.quaternion);
-              root.add(part);
+              shelter.add(part);
               if (n.role === "interior") steps.push((k) => (part.visible = k >= 0.999));
             }
           }
@@ -469,13 +585,15 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
           l: size.l,
           w: size.w,
           h,
-          style: art ? "expand" : "scan",
+          style: art || loadGeo ? "expand" : "scan",
           tagY: h + 0.9,
           rig,
           looks,
-          floorY: 0.27,
+          ownFinish: !sm.finishMaterials,
+          floorY: art ? 0.27 : 0.05,
           dispose: () => {
             nodes.forEach((n) => Object.values(n.geo).forEach((g) => g?.dispose()));
+            if (loadGeo) Object.values(loadGeo.geo).forEach((g) => g?.dispose());
             pickGeo.dispose();
           },
         } as KindModel & { dispose: () => void };
@@ -545,14 +663,31 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
       m.traverse((o) => (o.userData.shared = true));
       slot.add(m);
     } else {
-      // A plain 20-ft container until the model arrives.
-      slot.add(container(realLoadMats, shadows, 6.058, 2.438));
+      // A plain container, pallet or bag load until the model arrives.
+      const how = PACKED[kind]?.kind ?? "container";
+      slot.add(how === "container" ? container(realLoadMats, shadows, 6.058, 2.438) : how === "pallet" ? palletShelter(realLoadMats, shadows) : bagsLoad(realLoadMats, shadows));
     }
   };
 
   /** The leading system in the form it travels in. */
   const cargoFor = (plan: CampPlan): Cargo => {
     const kind = plan.units[0]?.kind;
+    const real = kind ? detailedModelFor(kind) : null;
+    const pack = kind ? PACKED[kind] : undefined;
+    if (kind && real?.stowed && pack) {
+      loadPacked(kind, real);
+      return {
+        kind: pack.kind,
+        l: pack.l,
+        h: pack.h,
+        make: () => {
+          const slot = new THREE.Group();
+          fillPacked(slot, kind);
+          if (!packed.get(kind)?.geo) packed.get(kind)?.slots.push(slot);
+          return slot;
+        },
+      };
+    }
     switch (kind) {
       case "trecc":
         void loadStowed();
@@ -632,7 +767,8 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
       for (const [k, c] of Object.entries(treccColors) as [MatKey, THREE.Color][]) if (k !== "shell") s.mats[k].color.copy(c);
       s.mats.shell2.roughness = 0.7;
     }
-    if (model.looks) applyLooks(s.mats, model.looks);
+    if (model.ownFinish) s.keepColors = true;
+    if (model.looks) applyLooks(s.mats, model.looks, model.ownFinish);
     if (model.rig) {
       // Only the camp's first copy gets the interior (it's the one you can look inside).
       const rig = model.rig(s.mats, shadows, { interior: s.unit.role === "main" && /-0$/.test(s.unit.id) });
@@ -1612,14 +1748,34 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
     const s = lead ? structs.get(lead.id) : undefined;
     if (!s || !s.model) return false;
     const model = s.model;
-    const group = buildInterior(plan.mission, { l: model.l, w: model.w, round: lead.kind === "polar-chief" }, s.mats, shadows);
-    group.position.y = model.floorY ?? 0;
-    group.traverse((o) => (o.userData.ownGeometry = true));
+    const real = lead.kind === "trecc" ? SYSTEM_MODELS.trecc : detailedModelFor(lead.kind);
+    let group: THREE.Group;
+    let cut: number;
+    // The TRECC's camp model isn't Barry's file, so its fit-out isn't lined up with it here.
+    if (lead.kind !== "trecc" && real?.inside && model.rig && fitoutForMission(real.slug, plan.mission)) {
+      // The model's own example fit-out (one node of its fitted file), in the model's frame.
+      group = new THREE.Group();
+      group.rotation.y = Math.PI / 2;
+      void fitoutFor(lead.kind, real).then((fit) => {
+        if (!fit || inside?.group !== group) return;
+        const m = meshesFor(fit.geo, s.mats, shadows);
+        m.position.copy(fit.position);
+        m.quaternion.copy(fit.quaternion);
+        group.add(m);
+        renderer.shadowMap.needsUpdate = true;
+        invalidate();
+      });
+      cut = real.cutHeight ?? Math.min(2.1, model.h * 0.66);
+    } else {
+      group = buildInterior(plan.mission, { l: model.l, w: model.w, round: lead.kind === "polar-chief" }, s.mats, shadows);
+      group.position.y = model.floorY ?? 0;
+      group.traverse((o) => (o.userData.ownGeometry = true));
+      // Cut just above the tallest furniture for the mission, and always below the roof.
+      const furniture: Record<string, number> = { command: 1.25, medical: 1.45, maintenance: 1.9, living: 1.75, research: 1.25, response: 0.8 };
+      const top = furniture[plan.mission ?? "response"] ?? 1.3;
+      cut = Math.min(model.h - 0.25, Math.min(2.8, Math.max(top + 0.15, model.h * 0.5)));
+    }
     s.root.add(group);
-    // Cut just above the tallest furniture for the mission, and always below the roof.
-    const furniture: Record<string, number> = { command: 1.25, medical: 1.45, maintenance: 1.9, living: 1.75, research: 1.25, response: 0.8 };
-    const top = furniture[plan.mission ?? "response"] ?? 1.3;
-    const cut = Math.min(model.h - 0.25, Math.min(2.8, Math.max(top + 0.15, model.h * 0.5)));
     inside = { s, group, cut };
     // The people outside would be cut in half; they step out of the drawing for this view.
     if (leadFigures?.id === lead.id) leadFigures.group.visible = false;
@@ -1725,6 +1881,7 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
       for (const p of detailedPromises.values()) void p.then((m) => (m as KindModel & { dispose?: () => void }).dispose?.());
       for (const st of packed.values()) if (st.geo) Object.values(st.geo).forEach((g) => g?.dispose());
       draco?.dispose();
+      for (const f of fitouts.values()) void f.then((fit) => fit && Object.values(fit.geo).forEach((x) => x?.dispose()));
       pickMat.dispose();
       frames.forEach((f) => f.dispose());
       sharedSets.forEach((set) => Object.values(set).forEach((m) => m.dispose()));

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useClientMediaQuery } from "@/hooks/useClientMediaQuery";
 import { campPlan, hasDetailedModel, isDetailedKind } from "@/lib/camp-scene-plan";
+import { fitoutForMission } from "@/lib/system-models";
 import { publishedFact, QUESTIONS, type GuideAnswers, type QuestionKey } from "@/lib/mission-guide";
 import type { CampFocus, CampStage, TagPos } from "@/lib/three/camp/campStage";
 import { startWhenNear } from "@/lib/start-when-near";
@@ -178,6 +179,8 @@ export function CampScene({
 
   const ready = load === "ready";
   const lead = plan.lead;
+  // The lead model's own fit-out when it suits the mission (campStage uses the same test).
+  const leadFitout = lead && lead.slug !== "trecc" ? fitoutForMission(lead.slug, answers.mission) : null;
   // The lead system may be a detailed model (system-models.ts, or the TRECC's CAD files); say which
   // parts of the camp are drawn from it and which are simplified.
   const allDetailed = plan.units.every((u) => isDetailedKind(u.kind));
@@ -327,7 +330,9 @@ export function CampScene({
       <div className="pointer-events-none absolute inset-x-0 bottom-0 flex h-[4.5rem] items-end justify-between gap-4 bg-gradient-to-t from-ink/75 to-transparent px-4 pb-2.5 sm:h-24 sm:px-6 sm:pb-4">
         <p className="max-w-[52ch] text-[0.8125rem] leading-snug text-snow/80 sm:text-[0.8125rem]">
           {inside
-            ? `Example fit-out for ${MISSION_ROOM[answers.mission ?? "response"]}. Each layout is configured for the program.`
+            ? leadFitout
+              ? `Example fit-out: ${leadFitout.toLowerCase()}. Each layout is configured for the program.`
+              : `Example fit-out for ${MISSION_ROOM[answers.mission ?? "response"]}. Each layout is configured for the program.`
             : load === "fallback"
             ? lead
               ? `${photos?.[lead.slug]?.shows ? `Photo of ${photos[lead.slug].shows}, from the same family as the ${lead.name}` : `Photo of the ${lead.name}`}. This browser can't show the 3D camp.`

@@ -43,9 +43,27 @@ export type SystemModel = {
    * plus a 1200 × 900 copy ending in -m for phones. Defaults to /models/<slug>/<slug>-poster-deployed.jpg.
    */
   poster?: string;
+  /**
+   * The example fit-out behind "Show inside": a file whose node `node` is the fit-out, in the same
+   * coordinates as the deployed file (Barry's `-deployed-fitted` files, or the separate fit-out-only
+   * files for the MECC, EHMECC and TRECC). Only that node is added; `label` names the fit-out.
+   */
+  inside?: { src: string; node: string; label: string };
+  /**
+   * Height (metres above the ground) where "Show inside" cuts the shell. Defaults to about
+   * two-thirds of the shelter's height, capped at 2.1 m.
+   */
+  cutHeight?: number;
   /** The AR page's copy. */
   ar?: { title: string; lead: string; facts: string[]; alt: string };
 };
+
+/** Barry's site-sourced models (weatherhaven.com pages and photos, not engineering CAD). */
+const builtFrom = (name: string) => `3D model built from Weatherhaven’s published ${name} specifications and photos`;
+const LEAD_HARD = "in the room you’re standing in, at real scale. Walk around it; walk inside it.";
+const LEAD_SOFT = "in the space you’re standing in, at real scale. Walk around it; walk inside it.";
+/** Military shelters modelled in the green finish: the finish picker recolours these. */
+const SOFT_FINISHES = { paint: ["paint"], fabric: ["fabric", "strap"] };
 
 export const SYSTEM_MODELS: Record<string, SystemModel> = {
   trecc: {
@@ -53,6 +71,7 @@ export const SYSTEM_MODELS: Record<string, SystemModel> = {
     deployed: "/assets/models/trecc-open.glb",
     compression: "draco",
     source: "Weatherhaven CAD model",
+    inside: { src: "/models/trecc/trecc-fitout-command-post.glb", node: "TRECC_fitout", label: "Command post" },
   },
   mecc: {
     slug: "mecc",
@@ -73,11 +92,174 @@ export const SYSTEM_MODELS: Record<string, SystemModel> = {
       hideStowed: ["MECC_interior", "MECC_site_kit"],
     },
     finishMaterials: { paint: ["paint", "paint_dark"], fabric: ["fabric", "strap"] },
+    inside: { src: "/models/mecc/mecc-fitout-command-post.glb", node: "MECC_fitout", label: "Command post" },
     ar: {
       title: "See the MECC at full size",
-      lead: "Place the deployed MECC in the room you’re standing in, at real scale. Walk around it; walk inside it.",
+      lead: `Place the deployed MECC ${LEAD_HARD}`,
       facts: ["20-ft ISO container packed", "420 ft² deployed", "2 people, 10 to 15 minutes"],
       alt: "Weatherhaven MECC expandable container, deployed",
+    },
+  },
+  ehmecc: {
+    slug: "ehmecc",
+    deployed: "/models/ehmecc/ehmecc-deployed.glb",
+    // The raised roof is part of the core, so the packed view is its own file rather than a fold.
+    stowed: "/models/ehmecc/ehmecc-stowed.glb",
+    compression: "draco",
+    source: builtFrom("EHMECC"),
+    finishMaterials: { paint: ["paint", "paint_dark"], fabric: ["fabric", "strap"] },
+    inside: { src: "/models/ehmecc/ehmecc-fitout-operating-room.glb", node: "EHMECC_fitout", label: "Operating room" },
+    ar: {
+      title: "See the EHMECC at full size",
+      lead: `Place the deployed EHMECC ${LEAD_HARD}`,
+      facts: ["20-ft ISO container packed", "420 ft² with a 12-ft ceiling", "Under 10 minutes, no tools"],
+      alt: "Weatherhaven EHMECC expandable container with its roof raised, deployed",
+    },
+  },
+  ateps: {
+    slug: "ateps",
+    deployed: "/models/ateps/ateps-deployed.glb",
+    stowed: "/models/ateps/ateps-stowed.glb",
+    compression: "draco",
+    source: builtFrom("ATEPS"),
+    articulation: {
+      hinges: [
+        { node: "ATEPS_side_wall_L", stowed: 0 },
+        { node: "ATEPS_side_wall_R", stowed: 0 },
+      ],
+      unfold: [
+        { node: "ATEPS_expansion_L", pivotX: -1.067 },
+        { node: "ATEPS_expansion_R", pivotX: 1.067 },
+      ],
+      hideStowed: ["ATEPS_interior"],
+    },
+    // Modelled in grey, so no finish picker (its "green" would show grey).
+    inside: { src: "/models/ateps/ateps-deployed-fitted.glb", node: "ATEPS_fitout", label: "Medical aid station" },
+    ar: {
+      title: "See the ATEPS at full size",
+      lead: `Place the deployed ATEPS ${LEAD_HARD}`,
+      facts: ["One 463L pallet packed", "244 × 104 in deployed", "2 people, under 10 minutes"],
+      alt: "Weatherhaven ATEPS expandable shelter, deployed",
+    },
+  },
+  hercon: {
+    slug: "hercon",
+    deployed: "/models/hercon/hercon-deployed.glb",
+    stowed: "/models/hercon/hercon-stowed.glb",
+    compression: "draco",
+    source: builtFrom("HERCon"),
+    finishMaterials: { paint: ["paint", "paint_dark"], fabric: [] },
+    inside: { src: "/models/hercon/hercon-deployed-fitted.glb", node: "HERCON_fitout", label: "Housing, 8 berths" },
+    ar: {
+      title: "See the HERCon at full size",
+      lead: `Place the deployed HERCon ${LEAD_HARD}`,
+      facts: ["Ships as an ISO container", "Up to 6× its shipping footprint", "Minutes to set up, team of six"],
+      alt: "Weatherhaven HERCon expandable container, deployed",
+    },
+  },
+  "series-4": {
+    slug: "series-4",
+    deployed: "/models/series-4/series-4-deployed.glb",
+    stowed: "/models/series-4/series-4-stowed.glb",
+    compression: "draco",
+    source: builtFrom("Series 4"),
+    finishMaterials: SOFT_FINISHES,
+    inside: { src: "/models/series-4/series-4-deployed-fitted.glb", node: "SERIES4_fitout", label: "Kitchen and dining" },
+    ar: {
+      title: "See the Series 4 at full size",
+      lead: `Place a 16 × 32 ft Series 4 ${LEAD_SOFT}`,
+      facts: ["8 to 30 ft wide, any length", "Shown 16 × 32 ft", "No tools or specialist skills"],
+      alt: "Weatherhaven Series 4 soft-wall shelter, 16 by 32 ft, deployed",
+    },
+  },
+  rdmss: {
+    slug: "rdmss",
+    deployed: "/models/rdmss/rdmss-deployed.glb",
+    stowed: "/models/rdmss/rdmss-stowed.glb",
+    compression: "draco",
+    source: builtFrom("RDMSS"),
+    finishMaterials: { paint: ["paint"], fabric: ["fabric", "strap", "cap"] },
+    inside: { src: "/models/rdmss/rdmss-deployed-fitted.glb", node: "RDMSS_fitout", label: "Command post" },
+    ar: {
+      title: "See the RDMSS at full size",
+      lead: `Place the deployed RDMSS ${LEAD_SOFT}`,
+      facts: ["Up to 995 ft² (4 modules)", "3 people, under 20 minutes", "−51°C to +49°C"],
+      alt: "Weatherhaven RDMSS soft-wall shelter with its solar shade, deployed",
+    },
+  },
+  mts: {
+    slug: "mts",
+    deployed: "/models/mts/mts-deployed.glb",
+    stowed: "/models/mts/mts-stowed.glb",
+    compression: "draco",
+    source: builtFrom("MTS"),
+    finishMaterials: SOFT_FINISHES,
+    inside: { src: "/models/mts/mts-deployed-fitted.glb", node: "MTS_fitout", label: "Dining hall" },
+    ar: {
+      title: "See the MTS at full size",
+      lead: `Place a deployed MTS ${LEAD_SOFT}`,
+      facts: ["Modules join into camps and hospitals", "No tools or specialist training", "Over- and under-pressure capable"],
+      alt: "Weatherhaven MTS modular tent system, deployed",
+    },
+  },
+  "mex-26": {
+    slug: "mex-26",
+    deployed: "/models/mex-26/mex-26-deployed.glb",
+    stowed: "/models/mex-26/mex-26-stowed.glb",
+    compression: "draco",
+    source: builtFrom("MEX-26"),
+    finishMaterials: SOFT_FINISHES,
+    inside: { src: "/models/mex-26/mex-26-deployed-fitted.glb", node: "MEX26_fitout", label: "Vehicle maintenance bay" },
+    ar: {
+      title: "See the MEX-26 at full size",
+      lead: `Place the deployed MEX-26 ${LEAD_SOFT} It’s big: you’ll want a car park or a field.`,
+      facts: ["26-ft clear span", "One 463L pallet packed", "10 people, 3 hours or less"],
+      alt: "Weatherhaven MEX-26 vehicle maintenance shelter, deployed",
+    },
+  },
+  polarhaven: {
+    slug: "polarhaven",
+    deployed: "/models/polarhaven/polarhaven-deployed.glb",
+    stowed: "/models/polarhaven/polarhaven-stowed.glb",
+    compression: "draco",
+    source: builtFrom("Polarhaven"),
+    // Modelled in its polar colours; no military finishes.
+    inside: { src: "/models/polarhaven/polarhaven-deployed-fitted.glb", node: "POLARHAVEN_fitout", label: "Base camp" },
+    ar: {
+      title: "See the Polarhaven at full size",
+      lead: `Place a 14 × 20 ft Polarhaven ${LEAD_SOFT}`,
+      facts: ["8 to 20 ft wide, any length", "About 30 minutes for a 12 × 16 ft unit", "Antarctic base camps since 1988"],
+      alt: "Weatherhaven Polarhaven arch shelter, deployed",
+    },
+  },
+  "polar-chief": {
+    slug: "polar-chief",
+    deployed: "/models/polar-chief/polar-chief-deployed.glb",
+    stowed: "/models/polar-chief/polar-chief-stowed.glb",
+    compression: "draco",
+    source: builtFrom("Polar Chief"),
+    inside: { src: "/models/polar-chief/polar-chief-deployed-fitted.glb", node: "POLARCHIEF_fitout", label: "Kitchen and mess" },
+    ar: {
+      title: "See the Polar Chief at full size",
+      lead: `Place the deployed Polar Chief ${LEAD_SOFT}`,
+      facts: ["14 ft across", "2 people, about 20 minutes", "Comfortable at −50°C"],
+      alt: "Weatherhaven Polar Chief octagonal polar shelter, deployed",
+    },
+  },
+  endurance: {
+    slug: "endurance",
+    deployed: "/models/endurance/endurance-deployed.glb",
+    stowed: "/models/endurance/endurance-stowed.glb",
+    compression: "draco",
+    source: builtFrom("Endurance"),
+    inside: { src: "/models/endurance/endurance-deployed-fitted.glb", node: "ENDURANCE_fitout", label: "Sleeping quarters" },
+    // A low tent: cut at about waist height so the near wall doesn't hide the cots.
+    cutHeight: 0.95,
+    ar: {
+      title: "See the Endurance at full size",
+      lead: `Place a 16-ft Endurance ${LEAD_SOFT}`,
+      facts: ["16 or 21 ft long, 8 ft wide", "1 person, about 5 minutes", "77 lb (16 ft)"],
+      alt: "Weatherhaven Endurance polar tent, 16 ft, deployed",
     },
   },
 };
@@ -90,6 +272,26 @@ export function systemModel(slug: string): SystemModel | undefined {
 export function modelPoster(slug: string): { src: string; small: string } {
   const src = SYSTEM_MODELS[slug]?.poster ?? `/models/${slug}/${slug}-poster-deployed.jpg`;
   return { src, small: src.replace(/\.jpg$/, "-m.jpg") };
+}
+
+/**
+ * Which example fit-outs suit each mission builder mission. The camp's "Look inside" shows the
+ * model's own fit-out only when it suits the mission (no operating room in a command post);
+ * otherwise it draws the mission's simplified interior.
+ */
+const FITOUTS_FOR_MISSION: Record<string, RegExp> = {
+  command: /command post/i,
+  medical: /operating room|aid station/i,
+  maintenance: /maintenance/i,
+  living: /housing|sleeping|base camp|dining|kitchen|mess/i,
+  research: /sleeping|base camp|kitchen|mess/i,
+  response: /housing|sleeping|base camp|dining|kitchen|mess|aid station/i,
+};
+
+/** The fit-out label the camp shows for this system and mission, or null for the simplified interior. */
+export function fitoutForMission(slug: string, mission: string | null | undefined): string | null {
+  const label = SYSTEM_MODELS[slug]?.inside?.label;
+  return label && FITOUTS_FOR_MISSION[mission ?? "response"]?.test(label) ? label : null;
 }
 
 /** The AR page for a system: the TRECC keeps /ar (links are already out); the rest are /ar/<slug>. */

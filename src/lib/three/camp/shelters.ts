@@ -50,6 +50,8 @@ export type KindModel = {
   /** Colours the model's own materials give the non-finish keys (trim, frame, dark…). */
   /** The detailed model's own colour and sheen for each slot except shell and shell2 (they take the finish). */
   looks?: Partial<Record<MatKey, Look>>;
+  /** The model keeps its own fabric colour (shell2) whatever the climate. */
+  ownFinish?: boolean;
   /** Floor height inside, for the example fit-out. */
   floorY?: number;
 };

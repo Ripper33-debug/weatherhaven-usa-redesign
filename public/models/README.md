@@ -14,8 +14,8 @@ viewer, the full-size AR page (`/ar/<slug>`; the TRECC is `/ar`) and the mission
 2. `node scripts/models/add-model.mjs <slug> <folder>`: checks the files, copies them here and prints
    the entry for `SYSTEM_MODELS`.
 3. Fill in the entry: `articulation` (hinge nodes and their packed rotation, expansions and their hinge
-   line, nodes hidden while packed), `finishMaterials`, and the AR page's copy (`ar`), using only
-   published figures.
+   line, nodes hidden while packed), `finishMaterials`, `inside` (the fit-out file, its node and a
+   label), and the AR page's copy (`ar`), using only published figures.
 4. Render the viewer's stills (`<slug>-poster-deployed.jpg` 1600 × 900 and `-m.jpg` 1200 × 900) from
    the product page's viewer.
 5. If the mission builder places that system, check the camp (`src/lib/three/camp/shelters.ts`).
@@ -25,4 +25,8 @@ viewer, the full-size AR page (`/ar/<slug>`; the TRECC is `/ar`) and the mission
 
 - `mecc/`: Barry Castelli's MECC, built in Blender from the MECC brochure (1087, 2021) and weatherhaven.com
   photos. Deployed 0.7 MB, packed 0.2 MB (Draco). Not engineering CAD; see its README for what's estimated.
+- `ateps/`, `ehmecc/`, `endurance/`, `hercon/`, `mex-26/`, `mts/`, `polar-chief/`, `polarhaven/`, `rdmss/`,
+  `series-4/`: Barry's full-line models from weatherhaven.com pages and photos (Draco): deployed, packed,
+  `-deployed-fitted` (adds a `<MODEL>_fitout` node for "Show inside") and the viewer's stills.
+  The MECC, EHMECC and TRECC fit-outs are separate files (`<slug>-fitout-*.glb`) in the model's coordinates.
 - `trecc-*.glb`, `ar/`: the TRECC, cut down from Weatherhaven's CAD export (see REDESIGN.md).

@@ -131,7 +131,7 @@ export function SystemDetail({
         </div>
       </section>
 
-      {leadWith3d ? (
+      {leadWith3d && photos.length > 0 ? (
         <section aria-labelledby="photos-heading" className="border-b border-line py-16 sm:py-20">
           <div className="v2-wrap">
             <h2 id="photos-heading" className="v2-h2 text-snow">

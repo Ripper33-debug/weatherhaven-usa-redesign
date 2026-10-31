@@ -50,7 +50,7 @@ export function arPageHtml(model?: SystemModel): string {
   html = swap(
     html,
     '<p class="small">The paint shown is the green finish; the CAD height is as supplied by Weatherhaven. Motion and placement are illustrative.</p>',
-    `<p class="small">${esc(model.source)}. The paint shown is the green finish; configuration varies by program.</p>`,
+    `<p class="small">${esc(model.source)}. ${model.finishMaterials ? "The paint shown is the green finish; c" : "C"}onfiguration varies by program.</p>`,
   );
   return html;
 }

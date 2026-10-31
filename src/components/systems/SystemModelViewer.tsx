@@ -28,11 +28,20 @@ export function SystemModelViewer({ slug, name, lead = false }: { slug: string; 
   const kickRef = useRef<() => void>(() => undefined);
   const tweenRef = useRef<{ from: number; to: number; start: number; ms: number } | null>(null);
   const deployRef = useRef(1);
+  /** What to do once the running animation ends: cut the shell open, or pack up. */
+  const pendingRef = useRef<"inside" | "pack" | null>(null);
+  const insideRef = useRef(false);
   const reduced = useClientMediaQuery("(prefers-reduced-motion: reduce)");
+  const reducedRef = useRef(reduced);
+  useEffect(() => {
+    reducedRef.current = reduced;
+  }, [reduced]);
   const [load, setLoad] = useState<LoadState>("idle");
   const [finish, setFinish] = useState<TreccFinish>("green");
   const [deployed, setDeployed] = useState(true);
   const [canStow, setCanStow] = useState(false);
+  const [insideOn, setInsideOn] = useState(false);
+  const [insideLoading, setInsideLoading] = useState(false);
 
   useEffect(() => {
     const el = wrapRef.current;
@@ -50,7 +59,19 @@ export function SystemModelViewer({ slug, name, lead = false }: { slug: string; 
         const t = Math.min(1, (performance.now() - tw.start) / tw.ms);
         deployRef.current = tw.from + (tw.to - tw.from) * ease(t);
         stage.setDeploy(deployRef.current);
-        if (t >= 1) tweenRef.current = null;
+        if (t >= 1) {
+          tweenRef.current = null;
+          // Show inside was pressed while packed: cut it open once it has deployed.
+          if (pendingRef.current === "inside" && deployRef.current === 1) {
+            pendingRef.current = null;
+            void stage.setInside(true, !reducedRef.current).then(kick);
+          }
+        }
+      }
+      // Packed was pressed while looking inside: pack once the roof is back on.
+      if (pendingRef.current === "pack" && stage.insideProgress() === 0) {
+        pendingRef.current = null;
+        tweenRef.current = { from: deployRef.current, to: 0, start: performance.now(), ms: DEPLOY_MS };
       }
       stage.render();
       const busy = !!tweenRef.current || stage.isAnimating() || performance.now() - lastMove < 400;
@@ -122,6 +143,22 @@ export function SystemModelViewer({ slug, name, lead = false }: { slug: string; 
       const stage = stageRef.current;
       if (!stage) return;
       const to = next ? 1 : 0;
+      if (!next && insideRef.current) {
+        // Put the roof back on first, then pack.
+        insideRef.current = false;
+        setInsideOn(false);
+        void stage.setInside(false, !reduced).then(() => kickRef.current());
+        if (!reduced) {
+          pendingRef.current = "pack";
+          kickRef.current();
+          return;
+        }
+      }
+      if (!next && pendingRef.current === "inside") {
+        pendingRef.current = null;
+        insideRef.current = false;
+        setInsideOn(false);
+      }
       if (reduced) {
         deployRef.current = to;
         stage.setDeploy(to);
@@ -134,6 +171,47 @@ export function SystemModelViewer({ slug, name, lead = false }: { slug: string; 
     },
     [reduced],
   );
+
+  const toggleInside = useCallback(async () => {
+    const stage = stageRef.current;
+    if (!stage) return;
+    const next = !insideRef.current;
+    insideRef.current = next;
+    setInsideOn(next);
+    if (!next) {
+      if (pendingRef.current === "inside") pendingRef.current = null;
+      await stage.setInside(false, !reduced);
+      kickRef.current();
+      return;
+    }
+    // Packed: deploy first; the fit-out downloads meanwhile.
+    if (deployRef.current < 1 || pendingRef.current === "pack") {
+      pendingRef.current = null;
+      setDeployed(true);
+      if (reduced) {
+        deployRef.current = 1;
+        stage.setDeploy(1);
+      } else {
+        const ms = DEPLOY_MS * Math.max(0.35, 1 - deployRef.current);
+        tweenRef.current = { from: deployRef.current, to: 1, start: performance.now(), ms };
+      }
+      kickRef.current();
+    }
+    setInsideLoading(true);
+    try {
+      await stage.preloadInside();
+    } catch {
+      insideRef.current = false;
+      setInsideOn(false);
+      return;
+    } finally {
+      setInsideLoading(false);
+    }
+    if (!insideRef.current) return;
+    if (tweenRef.current) pendingRef.current = "inside";
+    else await stage.setInside(true, !reduced);
+    kickRef.current();
+  }, [reduced]);
 
   const chooseFinish = useCallback((f: TreccFinish) => {
     setFinish(f);
@@ -184,37 +262,61 @@ export function SystemModelViewer({ slug, name, lead = false }: { slug: string; 
         {ar ? (
           <a
             href={ar}
-            className="absolute right-3 top-3 flex h-10 items-center gap-2 bg-ink/70 px-3 text-[0.85rem] font-medium text-snow no-underline backdrop-blur-md transition-colors hover:bg-ink/85 sm:right-4 sm:top-4"
+            aria-label="See it full size in AR"
+            className="absolute right-3 top-3 flex h-11 min-w-11 items-center justify-center gap-2 bg-ink/70 px-3 text-[0.85rem] font-medium text-snow no-underline backdrop-blur-md transition-colors hover:bg-ink/85 sm:right-4 sm:top-4"
           >
-            <svg aria-hidden viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round">
+            <svg aria-hidden viewBox="0 0 20 20" className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round">
               <path d="M10 2.5 17 6v8l-7 3.5L3 14V6z" />
               <path d="M3 6l7 3.5L17 6M10 9.5v8" />
             </svg>
-            See it full size
+            {/* Phones show the icon only: the same link is a full button beside the copy. */}
+            <span className="hidden sm:inline">See it full size</span>
           </a>
         ) : null}
         {ready ? (
           <>
-            {canStow ? (
-              <div role="group" aria-label="Configuration" className="absolute left-3 top-3 flex bg-ink/70 p-1 backdrop-blur-md sm:left-4 sm:top-4">
-                {[
-                  { v: false, label: "Packed" },
-                  { v: true, label: "Deployed" },
-                ].map((o) => (
-                  <button
-                    key={o.label}
-                    type="button"
-                    aria-pressed={deployed === o.v}
-                    onClick={() => toggle(o.v)}
-                    className={`h-9 px-4 text-[0.85rem] font-medium transition-colors ${
-                      deployed === o.v ? "bg-snow text-ink" : "text-snow/80 hover:text-snow"
-                    }`}
-                  >
-                    {o.label}
-                  </button>
-                ))}
-              </div>
-            ) : null}
+            <div className="absolute left-3 right-16 top-3 flex flex-wrap items-start gap-2 sm:left-4 sm:right-auto sm:top-4">
+              {canStow ? (
+                <div role="group" aria-label="Configuration" className="flex bg-ink/70 p-1 backdrop-blur-md">
+                  {[
+                    { v: false, label: "Packed" },
+                    { v: true, label: "Deployed" },
+                  ].map((o) => (
+                    <button
+                      key={o.label}
+                      type="button"
+                      aria-pressed={deployed === o.v}
+                      onClick={() => toggle(o.v)}
+                      className={`h-9 px-3 text-[0.85rem] font-medium transition-colors sm:px-4 ${
+                        deployed === o.v ? "bg-snow text-ink" : "text-snow/80 hover:text-snow"
+                      }`}
+                    >
+                      {o.label}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+              {model.inside ? (
+                <button
+                  type="button"
+                  aria-pressed={insideOn}
+                  aria-busy={insideLoading}
+                  onClick={() => void toggleInside()}
+                  className={`flex h-11 items-center gap-2 px-3 text-[0.85rem] font-medium backdrop-blur-md transition-colors sm:px-4 ${
+                    insideOn ? "bg-snow text-ink" : "bg-ink/70 text-snow/80 hover:text-snow"
+                  } ${insideLoading ? "animate-pulse" : ""}`}
+                >
+                  <svg aria-hidden viewBox="0 0 20 20" className="hidden h-4 w-4 shrink-0 sm:block" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round">
+                    <path d="M3 8.5 10 4l7 4.5V16H3z" strokeDasharray={insideOn ? "2 2" : undefined} />
+                    <path d="M7 16v-4h6v4" />
+                  </svg>
+                  Show inside
+                </button>
+              ) : null}
+              <span className="sr-only" aria-live="polite">
+                {insideLoading ? "Loading the fit-out" : ""}
+              </span>
+            </div>
             <div role="group" aria-label="Turn the model" className="absolute bottom-3 left-3 flex items-center bg-ink/70 p-1 backdrop-blur-md sm:bottom-4 sm:left-4">
               {[
                 { deg: -45, label: "Turn left", d: "M9.5 4.5 5 9l4.5 4.5M5.5 9H12a4 4 0 0 1 0 8h-1" },
@@ -242,7 +344,9 @@ export function SystemModelViewer({ slug, name, lead = false }: { slug: string; 
           </>
         ) : null}
       </div>
-      <p className="mt-4 min-h-[3em] text-[0.85rem] text-muted">{model.source}. Configuration varies by program.</p>
+      <p className="mt-4 min-h-[3em] text-[0.85rem] text-muted">
+        {insideOn && model.inside ? `Example fit-out: ${model.inside.label}` : model.source}. Configuration varies by program.
+      </p>
     </div>
   );
 }

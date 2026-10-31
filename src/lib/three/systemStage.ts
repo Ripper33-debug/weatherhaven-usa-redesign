@@ -16,6 +16,7 @@ import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import type { SystemModel } from "@/lib/system-models";
 import type { TreccFinish } from "@/lib/three/treccFinishes";
+import { withImageTextures } from "@/lib/three/gltfImageTextures";
 
 /** Same Draco decoder the AR page uses (the newer one; model-viewer and three both read it). */
 const DRACO_PATH = "/assets/draco-ar/";
@@ -40,7 +41,26 @@ export type SystemStage = {
   isAnimating: () => boolean;
   /** Whether the model can show a packed state at all. */
   canStow: boolean;
+  /** Whether the registry lists an example fit-out for "Show inside". */
+  hasInside: boolean;
+  /**
+   * Cuts the shell away above a horizontal line and shows the fit-out, with the camera eased to look
+   * down in. The fit-out file loads on the first call. Assumes the model is deployed.
+   */
+  setInside: (on: boolean, animate?: boolean) => Promise<void>;
+  /** Starts (or reuses) the fit-out download without showing it. */
+  preloadInside: () => Promise<void>;
+  /** 0 = roof on, 1 = fully cut away (eases between). */
+  insideProgress: () => number;
 };
+
+/** Ease in-out cubic, as the deploy toggle uses. */
+const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
+/** How long the cut and the camera move take. */
+const INSIDE_MS = 1300;
+/** Camera height while looking in (degrees above the horizon); within the orbit limits. */
+const INSIDE_ELEVATION = 47;
+const OUTSIDE_ELEVATION = 17;
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 const smooth = (a: number, b: number, v: number) => {
@@ -62,6 +82,8 @@ export async function createSystemStage(
   // The light is fixed; the shadow only changes while the model folds, so redraw it on demand.
   renderer.shadowMap.autoUpdate = false;
   renderer.shadowMap.needsUpdate = true;
+  // "Show inside" clips the shell's materials only (the fit-out's have no planes).
+  renderer.localClippingEnabled = true;
 
   const scene = new THREE.Scene();
   const pmrem = new THREE.PMREMGenerator(renderer);
@@ -85,7 +107,7 @@ export async function createSystemStage(
   scene.add(rim);
 
   // Load the model(s).
-  const loader = new GLTFLoader();
+  const loader = withImageTextures(new GLTFLoader());
   let draco: DRACOLoader | null = null;
   if (model.compression === "draco") {
     draco = new DRACOLoader().setDecoderPath(DRACO_PATH);
@@ -272,6 +294,16 @@ export async function createSystemStage(
   const az = THREE.MathUtils.degToRad(doorSign > 0 ? 36 : 180 + 36);
   const el = THREE.MathUtils.degToRad(17);
   let dist = 10;
+  /** The camera backs off a little while looking in: seen from above, the footprint is taller in frame. */
+  let viewZoom = 1;
+  // Sit the model a little above centre so the ground-level site kit clears the controls along the
+  // bottom (the camera still turns about the model's centre); centred while looking in from above.
+  let viewLift = 0.06;
+  const applyViewOffset = () => {
+    const w = canvas.clientWidth || 1;
+    const h = canvas.clientHeight || 1;
+    camera.setViewOffset(w, h, 0, h * viewLift, w, h);
+  };
   const place = () => {
     camera.position.set(
       target.x + dist * Math.cos(el) * Math.sin(az),
@@ -291,7 +323,8 @@ export async function createSystemStage(
     const vfov = THREE.MathUtils.degToRad(camera.fov);
     const hfov = 2 * Math.atan(Math.tan(vfov / 2) * camera.aspect);
     const fitR = Math.hypot(size.x, size.z, size.y) / 2;
-    dist = (fitR / Math.sin(Math.min(vfov, hfov) / 2)) * 0.82;
+    // A little wider on the phones' 4:3 box, where the controls cover more of the picture.
+    dist = (fitR / Math.sin(Math.min(vfov, hfov) / 2)) * (camera.aspect < 1.5 ? 0.92 : 0.82);
     // There's no zoom, so the near plane can sit well in front of the model; a tight near plane keeps
     // the depth precision that stops close layers (fabric over liner) flickering mid-unfold.
     camera.near = Math.max(0.1, dist * 0.2);
@@ -299,11 +332,9 @@ export async function createSystemStage(
     else {
       // Keep the visitor's angle; only change how far away the camera sits.
       const dir = camera.position.clone().sub(controls.target).normalize();
-      camera.position.copy(controls.target).addScaledVector(dir, dist);
+      camera.position.copy(controls.target).addScaledVector(dir, dist * viewZoom);
     }
-    // Sit the model a little above centre so the ground-level site kit clears the controls along
-    // the bottom; the camera still turns about the model's centre.
-    camera.setViewOffset(w, h, 0, h * 0.06, w, h);
+    applyViewOffset();
     camera.updateProjectionMatrix();
   };
   resize();
@@ -332,6 +363,152 @@ export async function createSystemStage(
   };
   setDeploy(1);
 
+  // ---- inside -----------------------------------------------------------------------
+  // The shell is cut by a horizontal plane that sweeps down from above the roof to the cut height;
+  // the cut-open walls are drawn double-sided so you see their inner faces, not holes.
+  const shellMats: { mat: THREE.Material; side: THREE.Side }[] = [];
+  root.traverse((o) => {
+    const mesh = o as THREE.Mesh;
+    if (!mesh.isMesh) return;
+    for (const mat of Array.isArray(mesh.material) ? mesh.material : [mesh.material]) shellMats.push({ mat, side: mat.side });
+  });
+  const topY = box.max.y + 0.5;
+  const cut = new THREE.Plane(new THREE.Vector3(0, -1, 0), topY);
+  let cutY = model.cutHeight ?? Math.min(size.y * 0.62, 2.1);
+  let shellCut = false;
+  const setShellCut = (on: boolean) => {
+    if (on === shellCut) return;
+    shellCut = on;
+    for (const { mat, side } of shellMats) {
+      mat.clippingPlanes = on ? [cut] : null;
+      mat.clipShadows = on;
+      mat.side = on ? THREE.DoubleSide : side;
+      mat.needsUpdate = true;
+    }
+  };
+
+  // Screens and lights glow while inside is shown (the files carry no emission of their own).
+  const lit: { mat: THREE.MeshStandardMaterial; color: THREE.Color; strength: number }[] = [];
+  const addLit = (mat: THREE.MeshStandardMaterial) => {
+    const name = mat.name.toLowerCase();
+    if (!/^(screen_lit|light|fire)/.test(name) || lit.some((l) => l.mat === mat)) return;
+    const c = mat.color.clone();
+    const peak = Math.max(c.r, c.g, c.b);
+    let color: THREE.Color;
+    if (/exit/.test(name)) color = new THREE.Color(0.1, 1, 0.35);
+    else if (mat.map) color = new THREE.Color(1, 1, 1);
+    else if (peak > 1e-4 && peak < 0.6) color = c.multiplyScalar(1 / peak);
+    else color = new THREE.Color(1, 0.93, 0.8);
+    if (mat.map) mat.emissiveMap = mat.map;
+    mat.emissive.setRGB(0, 0, 0);
+    lit.push({ mat, color, strength: name.startsWith("light") ? 0.9 : 1.5 });
+  };
+  for (const { mat } of shellMats) addLit(mat as THREE.MeshStandardMaterial);
+
+  let fitout: THREE.Object3D | null = null;
+  let fitoutLoad: Promise<void> | null = null;
+  const loadFitout = () => {
+    const spec = model.inside;
+    if (!spec) return Promise.resolve();
+    fitoutLoad ??= (async () => {
+      const l = withImageTextures(new GLTFLoader());
+      const d = new DRACOLoader().setDecoderPath(DRACO_PATH);
+      l.setDRACOLoader(d);
+      l.setMeshoptDecoder(MeshoptDecoder);
+      try {
+        const g = await l.loadAsync(spec.src);
+        const node = g.scene.getObjectByName(spec.node);
+        if (!node) throw new Error(`${spec.src} has no node ${spec.node}`);
+        // Only the fit-out node is kept; it carries its own placement in the deployed file's frame.
+        root.add(node);
+        g.scene.traverse((o) => {
+          const mesh = o as THREE.Mesh;
+          if (!mesh.isMesh) return;
+          mesh.geometry.dispose();
+          (Array.isArray(mesh.material) ? mesh.material : [mesh.material]).forEach((m) => m.dispose());
+        });
+        node.traverse((o) => {
+          const mesh = o as THREE.Mesh;
+          if (!mesh.isMesh) return;
+          mesh.castShadow = shadows;
+          mesh.receiveShadow = false;
+          const mats = (Array.isArray(mesh.material) ? mesh.material : [mesh.material]).map((m) => {
+            const mat = (m as THREE.MeshStandardMaterial).clone();
+            m.dispose();
+            addLit(mat);
+            return mat;
+          });
+          mesh.material = (mats.length === 1 ? mats[0] : mats) as never;
+        });
+        node.visible = false;
+        fitout = node;
+        if (model.cutHeight === undefined) {
+          // Keep the default cut above the fit-out's floor by a head height at most.
+          const fb = new THREE.Box3().setFromObject(node);
+          if (!fb.isEmpty()) cutY = Math.max(cutY, Math.min(fb.min.y + 1.2, size.y * 0.75));
+        }
+      } catch (err) {
+        fitoutLoad = null;
+        throw err;
+      } finally {
+        d.dispose();
+      }
+    })();
+    return fitoutLoad;
+  };
+
+  let insideK = 0;
+  let inside = { from: 0, to: 0, start: 0, ms: 0 };
+  let camFrom = new THREE.Spherical();
+  let camTo = new THREE.Spherical();
+  const orbitTarget = () => controls?.target ?? target;
+  const applyInside = (k: number) => {
+    insideK = k;
+    setShellCut(k > 0.001);
+    if (fitout) fitout.visible = k > 0.001;
+    cut.constant = THREE.MathUtils.lerp(topY, cutY, k);
+    viewLift = 0.06 * (1 - k);
+    applyViewOffset();
+    camera.updateProjectionMatrix();
+    for (const l of lit) {
+      l.mat.emissive.copy(l.color).multiplyScalar(k);
+      l.mat.emissiveIntensity = l.strength;
+    }
+    renderer.shadowMap.needsUpdate = true;
+  };
+  const stepInside = (now: number) => {
+    if (inside.ms === 0 || insideK === inside.to) return;
+    const t = Math.min(1, (now - inside.start) / inside.ms);
+    const e = easeInOut(t);
+    applyInside(THREE.MathUtils.lerp(inside.from, inside.to, e));
+    const s = new THREE.Spherical(
+      THREE.MathUtils.lerp(camFrom.radius, camTo.radius, e),
+      THREE.MathUtils.lerp(camFrom.phi, camTo.phi, e),
+      camFrom.theta,
+    );
+    camera.position.setFromSpherical(s).add(orbitTarget());
+    camera.lookAt(orbitTarget());
+    if (t >= 1) inside.ms = 0;
+  };
+  const setInside = async (on: boolean, animate = true) => {
+    if (!model.inside) return;
+    if (on) await loadFitout();
+    const to = on ? 1 : 0;
+    camFrom = new THREE.Spherical().setFromVector3(camera.position.clone().sub(orbitTarget()));
+    camTo = camFrom.clone();
+    camTo.phi = THREE.MathUtils.degToRad(90 - (on ? INSIDE_ELEVATION : OUTSIDE_ELEVATION));
+    viewZoom = on ? 1.22 : 1;
+    camTo.radius = dist * viewZoom;
+    if (animate) {
+      inside = { from: insideK, to, start: performance.now(), ms: INSIDE_MS * Math.max(0.35, Math.abs(to - insideK)) };
+    } else {
+      inside = { from: to, to, start: 0, ms: 0 };
+      applyInside(to);
+      camera.position.setFromSpherical(camTo).add(orbitTarget());
+      camera.lookAt(orbitTarget());
+    }
+  };
+
   // ---- finish ---------------------------------------------------------------------
   let finishFrom: THREE.Color[] = tinted.map((t) => t.mat.color.clone());
   let finishTo: THREE.Color[] = finishFrom.map((c) => c.clone());
@@ -350,12 +527,17 @@ export async function createSystemStage(
       finishT = Math.min(1, (performance.now() - finishStart) / 600);
       applyColors(1 - (1 - finishT) ** 3);
     }
+    stepInside(performance.now());
     controls?.update();
     renderer.render(scene, camera);
   };
 
   return {
     canStow,
+    hasInside: !!model.inside,
+    setInside,
+    preloadInside: loadFitout,
+    insideProgress: () => insideK,
     setDeploy,
     setFinish: (finish, animate = true) => {
       finishFrom = tinted.map((t) => t.mat.color.clone());
@@ -390,7 +572,7 @@ export async function createSystemStage(
     },
     render,
     resize,
-    isAnimating: () => finishT < 1,
+    isAnimating: () => finishT < 1 || (inside.ms > 0 && insideK !== inside.to),
     dispose: disposeAll,
   };
 }

@@ -7,6 +7,9 @@ import type { TreccFinish } from "@/lib/three/treccFinishes";
 import { TreccFinishPicker } from "@/components/three/TreccFinishPicker";
 import { TreccArButton } from "@/components/three/TreccArButton";
 import { startWhenNear } from "@/lib/start-when-near";
+import { systemModel } from "@/lib/system-models";
+
+const INSIDE_LABEL = systemModel("trecc")?.inside?.label;
 
 type LoadState = "idle" | "loading" | "ready" | "fallback";
 
@@ -52,6 +55,16 @@ export function TreccViewer({ lead = false }: { lead?: boolean } = {}) {
   const [deployed, setDeployed] = useState(true);
   const markerRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const [hot, setHot] = useState<number | null>(null);
+  /** "Show inside": the fit-out appears once a deploy (if one is running) has finished. */
+  const insideRef = useRef(false);
+  const pendingInsideRef = useRef(false);
+  const pendingStowRef = useRef(false);
+  const [insideOn, setInsideOn] = useState(false);
+  const [insideLoading, setInsideLoading] = useState(false);
+  const reducedRef = useRef(reduced);
+  useEffect(() => {
+    reducedRef.current = reduced;
+  }, [reduced]);
 
   useEffect(() => {
     const el = wrapRef.current;
@@ -70,7 +83,17 @@ export function TreccViewer({ lead = false }: { lead?: boolean } = {}) {
         const k = t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
         deployRef.current = tw.from + (tw.to - tw.from) * k;
         stage.setDeploy(deployRef.current);
-        if (t >= 1) tweenRef.current = null;
+        if (t >= 1) {
+          tweenRef.current = null;
+          if (pendingInsideRef.current && deployRef.current === 1) {
+            pendingInsideRef.current = false;
+            void stage.setInside(true, !reducedRef.current).then(kick);
+          }
+        }
+      }
+      if (pendingStowRef.current && stage.insideProgress() === 0) {
+        pendingStowRef.current = false;
+        tweenRef.current = { from: deployRef.current, to: 0, start: performance.now() };
       }
       // render() runs the orbit controls, whose change event calls kick(); that may already
       // have queued the next frame, so only queue one if nothing is pending.
@@ -83,7 +106,7 @@ export function TreccViewer({ lead = false }: { lead?: boolean } = {}) {
     // turned toward the camera.
     const placeMarkers = (stage: TreccStage) => {
       const pts = stage.projectOpen(CALLOUTS.map((c) => c.point));
-      const show = deployRef.current > 0.98;
+      const show = deployRef.current > 0.98 && stage.insideProgress() === 0;
       pts.forEach((p, i) => {
         const el = markerRefs.current[i];
         if (!el) return;
@@ -129,6 +152,9 @@ export function TreccViewer({ lead = false }: { lead?: boolean } = {}) {
         stage.setDeploy(1);
         stage.enableControls(kick);
         stageRef.current = stage;
+        // Test captures drive the stage directly (set only by those scripts).
+        const w = window as unknown as { __CAMP_CAPTURE__?: boolean; __treccStage?: TreccStage };
+        if (w.__CAMP_CAPTURE__) w.__treccStage = stage;
         setLoad("ready");
         kick();
       } catch {
@@ -158,6 +184,19 @@ export function TreccViewer({ lead = false }: { lead?: boolean } = {}) {
       setDeployed(next);
       const stage = stageRef.current;
       if (!stage) return;
+      if (!next && (insideRef.current || pendingInsideRef.current)) {
+        // Put the roof back on first; the frame loop stows once it's on.
+        const wasInside = insideRef.current;
+        insideRef.current = false;
+        pendingInsideRef.current = false;
+        setInsideOn(false);
+        void stage.setInside(false, !reduced).then(() => kickRef.current());
+        if (wasInside && !reduced) {
+          pendingStowRef.current = true;
+          kickRef.current();
+          return;
+        }
+      }
       if (reduced) {
         deployRef.current = next ? 1 : 0;
         stage.setDeploy(deployRef.current);
@@ -168,6 +207,46 @@ export function TreccViewer({ lead = false }: { lead?: boolean } = {}) {
     },
     [reduced],
   );
+
+  const toggleInside = useCallback(async () => {
+    const stage = stageRef.current;
+    if (!stage) return;
+    const next = !insideRef.current;
+    insideRef.current = next;
+    setInsideOn(next);
+    if (!next) {
+      pendingInsideRef.current = false;
+      await stage.setInside(false, !reduced);
+      kickRef.current();
+      return;
+    }
+    // Stowed: deploy first; the fit-out downloads meanwhile.
+    if (deployRef.current < 1 || pendingStowRef.current) {
+      pendingStowRef.current = false;
+      setDeployed(true);
+      if (reduced) {
+        deployRef.current = 1;
+        stage.setDeploy(1);
+      } else {
+        tweenRef.current = { from: deployRef.current, to: 1, start: performance.now() };
+      }
+      kickRef.current();
+    }
+    setInsideLoading(true);
+    try {
+      await stage.preloadInside();
+    } catch {
+      insideRef.current = false;
+      setInsideOn(false);
+      return;
+    } finally {
+      setInsideLoading(false);
+    }
+    if (!insideRef.current) return;
+    if (tweenRef.current) pendingInsideRef.current = true;
+    else await stage.setInside(true, !reduced);
+    kickRef.current();
+  }, [reduced]);
 
   const chooseFinish = useCallback((f: TreccFinish) => {
     setFinish(f);
@@ -225,23 +304,40 @@ export function TreccViewer({ lead = false }: { lead?: boolean } = {}) {
         <TreccArButton finish={finish} className="absolute right-3 top-3 sm:right-4 sm:top-4" />
         {ready ? (
           <>
-            <div role="group" aria-label="Configuration" className="absolute left-3 top-3 flex bg-ink/70 p-1 backdrop-blur-md sm:left-4 sm:top-4">
-              {[
-                { v: false, label: "Stowed" },
-                { v: true, label: "Deployed" },
-              ].map((o) => (
-                <button
-                  key={o.label}
-                  type="button"
-                  aria-pressed={deployed === o.v}
-                  onClick={() => toggle(o.v)}
-                  className={`h-9 px-4 text-[0.85rem] font-medium transition-colors ${
-                    deployed === o.v ? "bg-snow text-ink" : "text-snow/80 hover:text-snow"
-                  }`}
-                >
-                  {o.label}
-                </button>
-              ))}
+            {/* On phones the AR button takes the top right, so "Show inside" wraps under the toggle. */}
+            <div className="absolute left-3 top-3 flex max-w-[calc(100%-10.5rem)] flex-wrap items-start gap-2 sm:left-4 sm:top-4 sm:max-w-none">
+              <div role="group" aria-label="Configuration" className="flex bg-ink/70 p-1 backdrop-blur-md">
+                {[
+                  { v: false, label: "Stowed" },
+                  { v: true, label: "Deployed" },
+                ].map((o) => (
+                  <button
+                    key={o.label}
+                    type="button"
+                    aria-pressed={deployed === o.v}
+                    onClick={() => toggle(o.v)}
+                    className={`h-9 px-3 text-[0.85rem] font-medium transition-colors sm:px-4 ${
+                      deployed === o.v ? "bg-snow text-ink" : "text-snow/80 hover:text-snow"
+                    }`}
+                  >
+                    {o.label}
+                  </button>
+                ))}
+              </div>
+              <button
+                type="button"
+                aria-pressed={insideOn}
+                aria-busy={insideLoading}
+                onClick={() => void toggleInside()}
+                className={`flex h-11 items-center gap-2 px-3 text-[0.85rem] font-medium backdrop-blur-md transition-colors sm:px-4 ${
+                  insideOn ? "bg-snow text-ink" : "bg-ink/70 text-snow/80 hover:text-snow"
+                } ${insideLoading ? "animate-pulse" : ""}`}
+              >
+                Show inside
+              </button>
+              <span className="sr-only" aria-live="polite">
+                {insideLoading ? "Loading the fit-out" : ""}
+              </span>
             </div>
             <div role="group" aria-label="Turn the model" className="absolute bottom-3 left-3 flex items-center bg-ink/70 p-1 backdrop-blur-md sm:bottom-4 sm:left-4">
               {[
@@ -291,7 +387,9 @@ export function TreccViewer({ lead = false }: { lead?: boolean } = {}) {
           </li>
         ))}
       </ol>
-      <p className="mt-4 text-[0.85rem] text-muted">Illustrative model. Configuration varies by program.</p>
+      <p className="mt-4 text-[0.85rem] text-muted">
+        {insideOn && INSIDE_LABEL ? `Example fit-out: ${INSIDE_LABEL}` : "Illustrative model"}. Configuration varies by program.
+      </p>
     </div>
   );
 }

@@ -8,13 +8,22 @@
  */
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.js";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { TRECC_FINISHES, type TreccFinish } from "@/lib/three/treccFinishes";
 import { createWeather, type Weather, type WeatherKind, type WeatherPreset } from "@/lib/three/camp/environment";
+import { SYSTEM_MODELS } from "@/lib/system-models";
+import { withImageTextures } from "@/lib/three/gltfImageTextures";
 
 export { TRECC_FINISHES, type TreccFinish };
+
+/** The example fit-out behind "Show inside" (Barry's file, in the deployed model's coordinates). */
+const INSIDE = SYSTEM_MODELS.trecc?.inside;
+/** Where the shell is cut while looking inside (m above the ground; the roof is at about 2.35 m). */
+const INSIDE_CUT = 1.5;
+const INSIDE_MS = 1300;
 
 export const TRECC_MODELS = {
   stowed: "/models/trecc-stowed.glb",
@@ -55,6 +64,12 @@ export type TreccStage = {
    * canvas in CSS pixels. `front` is false when that face points away from the camera.
    */
   projectOpen: (points: readonly OpenPoint[]) => { x: number; y: number; front: boolean }[];
+  /** Product viewer: cuts the deployed shell away and shows the example fit-out (loaded on first use). */
+  setInside: (on: boolean, animate?: boolean) => Promise<void>;
+  preloadInside: () => Promise<void>;
+  /** 0 = roof on, 1 = cut away. */
+  insideProgress: () => number;
+  hasInside: boolean;
 };
 
 export type OpenPoint = { at: readonly [number, number, number]; normal: readonly [number, number, number] };
@@ -466,8 +481,119 @@ export async function createTreccStage(
   };
   resize();
 
+  // ---- inside (product viewer) ---------------------------------------------------------
+  // A second, horizontal plane cuts the deployed shell above INSIDE_CUT; the cut walls go
+  // double-sided so you see their inner faces. The fit-out's own materials are never clipped.
+  const cut = new THREE.Plane(new THREE.Vector3(0, -1, 0), 3);
+  const openMats: { mat: THREE.Material; side: THREE.Side }[] = [];
+  openRoot.traverse((o) => {
+    const mesh = o as THREE.Mesh;
+    if (!mesh.isMesh) return;
+    for (const mat of Array.isArray(mesh.material) ? mesh.material : [mesh.material]) openMats.push({ mat, side: mat.side });
+  });
+  let shellCut = false;
+  const setShellCut = (on: boolean) => {
+    if (on === shellCut) return;
+    shellCut = on;
+    for (const { mat, side } of openMats) {
+      mat.clippingPlanes = on ? [clipOpen, cut] : [clipOpen];
+      mat.side = on ? THREE.DoubleSide : side;
+      mat.needsUpdate = true;
+    }
+  };
+  const lit: { mat: THREE.MeshStandardMaterial; color: THREE.Color }[] = [];
+  let fitout: THREE.Object3D | null = null;
+  let fitoutLoad: Promise<void> | null = null;
+  const loadFitout = () => {
+    if (!INSIDE) return Promise.resolve();
+    fitoutLoad ??= (async () => {
+      const l = withImageTextures(new GLTFLoader().setMeshoptDecoder(MeshoptDecoder));
+      const d = new DRACOLoader().setDecoderPath("/assets/draco-ar/");
+      l.setDRACOLoader(d);
+      try {
+        const g = await l.loadAsync(INSIDE.src);
+        const node = g.scene.getObjectByName(INSIDE.node);
+        if (!node) throw new Error(`${INSIDE.src} has no node ${INSIDE.node}`);
+        openRoot.add(node);
+        node.traverse((o) => {
+          const mesh = o as THREE.Mesh;
+          if (!mesh.isMesh) return;
+          mesh.castShadow = shadows;
+          mesh.receiveShadow = false;
+          for (const m of Array.isArray(mesh.material) ? mesh.material : [mesh.material]) {
+            const mat = m as THREE.MeshStandardMaterial;
+            if (!/^screen_lit/i.test(mat.name)) continue;
+            const c = mat.color.clone();
+            const peak = Math.max(c.r, c.g, c.b);
+            const color = /exit/i.test(mat.name)
+              ? new THREE.Color(0.1, 1, 0.35)
+              : mat.map || peak < 1e-4 || peak >= 0.6
+                ? new THREE.Color(1, 1, 1)
+                : c.multiplyScalar(1 / peak);
+            if (mat.map) mat.emissiveMap = mat.map;
+            mat.emissiveIntensity = 1.5;
+            lit.push({ mat, color });
+          }
+        });
+        node.visible = false;
+        fitout = node;
+      } catch (err) {
+        fitoutLoad = null;
+        throw err;
+      } finally {
+        d.dispose();
+      }
+    })();
+    return fitoutLoad;
+  };
+  let insideK = 0;
+  let inside = { from: 0, to: 0, start: 0, ms: 0 };
+  let camFrom = new THREE.Spherical();
+  let camTo = new THREE.Spherical();
+  let outsideRadius = 10;
+  const orbitTarget = () => controls?.target ?? target;
+  const applyInside = (k: number) => {
+    insideK = k;
+    setShellCut(k > 0.001);
+    if (fitout) fitout.visible = k > 0.001;
+    cut.constant = lerp(2.9, INSIDE_CUT, k);
+    for (const l of lit) l.mat.emissive.copy(l.color).multiplyScalar(k);
+    renderer.shadowMap.needsUpdate = true;
+  };
+  const stepInside = (now: number) => {
+    if (inside.ms === 0 || insideK === inside.to) return;
+    const t = Math.min(1, (now - inside.start) / inside.ms);
+    const e = t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
+    applyInside(lerp(inside.from, inside.to, e));
+    camera.position
+      .setFromSpherical(new THREE.Spherical(lerp(camFrom.radius, camTo.radius, e), lerp(camFrom.phi, camTo.phi, e), camFrom.theta))
+      .add(orbitTarget());
+    camera.lookAt(orbitTarget());
+    if (t >= 1) inside.ms = 0;
+  };
+  const setInside = async (on: boolean, animate = true) => {
+    if (!INSIDE) return;
+    if (on) await loadFitout();
+    const to = on ? 1 : 0;
+    camFrom = new THREE.Spherical().setFromVector3(camera.position.clone().sub(orbitTarget()));
+    camTo = camFrom.clone();
+    camTo.phi = THREE.MathUtils.degToRad(90 - (on ? 47 : 15));
+    // Back off a little while looking in; come back to the outside distance after.
+    if (on && insideK === 0) outsideRadius = camFrom.radius;
+    camTo.radius = on ? outsideRadius * 1.12 : outsideRadius;
+    if (animate) {
+      inside = { from: insideK, to, start: performance.now(), ms: INSIDE_MS * Math.max(0.35, Math.abs(to - insideK)) };
+    } else {
+      inside = { from: to, to, start: 0, ms: 0 };
+      applyInside(to);
+      camera.position.setFromSpherical(camTo).add(orbitTarget());
+      camera.lookAt(orbitTarget());
+    }
+  };
+
   const render = () => {
     const now = performance.now();
+    stepInside(now);
     if (finishT < 1) {
       finishT = Math.min(1, (now - finishStart) / 600);
       const k = 1 - (1 - finishT) ** 3;
@@ -511,6 +637,10 @@ export async function createTreccStage(
 
   return {
     projectOpen,
+    setInside,
+    preloadInside: loadFitout,
+    insideProgress: () => insideK,
+    hasInside: !!INSIDE,
     setDeploy,
     setCamera,
     setFinish: (finish, animate = true) => {
@@ -552,7 +682,7 @@ export async function createTreccStage(
     },
     render,
     resize,
-    isAnimating: () => finishT < 1 || climateT < 1,
+    isAnimating: () => finishT < 1 || climateT < 1 || (inside.ms > 0 && insideK !== inside.to),
     isAmbient: () => climate && !still && density > 0,
     setStill: (on) => {
       still = on;

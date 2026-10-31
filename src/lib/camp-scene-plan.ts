@@ -6,7 +6,7 @@
  * builder recommends once every question is answered, and the companions are the builder's own
  * "a camp this size usually adds" pairings. Quantities are illustrative, not a sizing.
  *
- * Sizes are in metres, long side along x. Published dimensions are used where Weatherhaven
+ * Sizes are in metres, door-to-back along x (so the long side for most shelters). Published dimensions are used where Weatherhaven
  * publishes them; the rest are noted as estimates (see KIND_SIZE). Systems with a detailed model
  * (the TRECC's CAD files, and those in system-models.ts) use the model's own size.
  */
@@ -73,21 +73,21 @@ export const KIND_SIZE: Record<ModelKind, KindSize> = {
     source:
       "Detailed model (public/models/mecc): 20-ft container, 253 in deployed width per brochure 1087; guy lines about 1.5 m out each side, the ECU about 0.6 m off one end",
   },
-  ehmecc: { l: 20 * FT, w: 240 * IN, h: 144 * IN + 0.25, source: "240 in deployed width, 144 in interior height (roof thickness estimated)" },
+  ehmecc: { l: 7.24, w: 9.34, h: 3.93, source: "Detailed model, guy lines included (public/models/ehmecc): ECU end to door end, wings out" },
   bmecc: { l: 10 * FT, w: 243 * IN, h: 8 * FT, source: "10-ft container, 243 in deployed width" },
-  ateps: { l: 244 * IN, w: 104 * IN, h: 91 * IN, source: "244 × 104 in deployed, 91 in high" },
-  hercon: { l: 24 * FT, w: 8 * FT, h: 8 * FT, source: "Estimated: an 8-ft module opened to 6× a 4-ft unit's footprint" },
+  ateps: { l: 2.76, w: 9.1, h: 2.4, source: "Detailed model, guy lines included (public/models/ateps): 104 in deep, wings and guy lines across" },
+  hercon: { l: 6.26, w: 7.48, h: 2.56, source: "Detailed model, guy lines included (public/models/hercon)" },
   iso: { l: 20 * FT, w: 8 * FT, h: 8.5 * FT, source: "20-ft ISO container (ISO 668)" },
-  "series4-26": { l: 40 * FT, w: 26 * FT, h: 17.33 * FT, source: "26 ft wide, 17 ft 4 in peak; 40 ft length chosen for the drawing" },
+  "series4-26": { l: 10.6, w: 5.6, h: 3.41, source: "Detailed model, guy lines included (public/models/series-4): 16 × 32 ft unit" },
   "series4-12": { l: 32 * FT, w: 12 * FT, h: 7 * FT, source: "12 ft wide, 7 ft peak; 32 ft length chosen for the drawing" },
-  rdmss: { l: 41.8 * FT, w: 23.8 * FT, h: 3.4, source: "4-module 41.8 × 23.8 ft; height estimated" },
-  mts: { l: 8, w: 6, h: 3.3, source: "Estimated; no published dimensions" },
-  mex26: { l: 40 * FT, w: 26 * FT, h: 6.1, source: "26-ft clear span; length and height estimated" },
+  rdmss: { l: 9.98, w: 6.84, h: 3.16, source: "Detailed model, guy lines included (public/models/rdmss)" },
+  mts: { l: 9.98, w: 6.84, h: 3.38, source: "Detailed model, guy lines included (public/models/mts)" },
+  mex26: { l: 11.68, w: 8.66, h: 5.25, source: "Detailed model, guy lines included (public/models/mex-26): 26-ft clear span" },
   "airmax-lp": { l: 6, w: 5.7, h: 2.8, source: "Main unit 600 × 570 × 280 cm" },
   "airmax-hp": { l: 8, w: 6, h: 4, source: "6 m wide, 4 m centre, 3 m eaves; 8 m length chosen" },
-  polarhaven: { l: 16 * FT, w: 12 * FT, h: 7 * FT, source: "12 × 16 ft unit, 7 ft peak" },
-  "polar-chief": { l: 14 * FT, w: 14 * FT, h: 8.5 * FT, source: "Octagon 14 ft across, 8.5 ft centre, 6.3 ft eaves" },
-  endurance: { l: 16 * FT, w: 8 * FT, h: 6.5 * FT, source: "16 × 8 ft, 6 ft 6 in high" },
+  polarhaven: { l: 6.94, w: 5.06, h: 3.44, source: "Detailed model, guy lines included (public/models/polarhaven): 14 × 20 ft unit" },
+  "polar-chief": { l: 9.18, w: 8.52, h: 4.46, source: "Detailed model, guy lines included (public/models/polar-chief): octagon 14 ft across" },
+  endurance: { l: 5.5, w: 5.42, h: 2.18, source: "Detailed model, guy lines included (public/models/endurance): 16-ft tent" },
 };
 
 /** The model drawn for each system the builder can recommend. */
