@@ -16,6 +16,14 @@ import {
   fmtTemp,
 } from "@/lib/tested";
 
+
+/** Column span for a grid's last card (2 columns from md, 3 from xl) so the final row is full. */
+function lastCellSpan(count: number): string {
+  const md = count % 2 === 1 ? "md:col-span-2" : "";
+  const xl = count % 3 === 2 ? "xl:col-span-2" : count % 3 === 1 ? "xl:col-span-3" : "xl:col-span-1";
+  return `${md} ${xl}`.trim();
+}
+
 export const metadata: Metadata = pageMeta({
   title: "Tested and proven",
   description:
@@ -321,8 +329,12 @@ export default function TestedPage() {
                 </div>
               </li>
             ))}
-            {field.notes.map((n) => (
-              <li key={n.place} className="flex flex-col bg-ink p-6 sm:p-7">
+            {field.notes.map((n, i) => (
+              // The grid's last card widens to fill its row, so it never ends on an empty cell.
+              <li
+                key={n.place}
+                className={`flex flex-col bg-ink p-6 sm:p-7 ${i === field.notes.length - 1 ? lastCellSpan(field.stories.length + field.notes.length) : ""}`}
+              >
                 <p className="text-[0.8125rem] text-snow">{n.place}</p>
                 <p className="mt-2 text-[0.95rem] leading-relaxed text-snow/85">{n.text}</p>
                 {n.source ? (

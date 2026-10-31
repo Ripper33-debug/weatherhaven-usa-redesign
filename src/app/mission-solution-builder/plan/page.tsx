@@ -49,12 +49,14 @@ type Props = {
 /** Print: only the sheet, on white, at letter size. The site's header and footer drop out. */
 const PRINT_CSS = `
 @media print {
-  @page { size: letter; margin: 0.5in; }
+  @page { size: letter; margin: 0.45in; }
   html, body { background: #fff !important; }
   [data-global-nav], [data-global-footer], [data-print-hide] { display: none !important; }
   body * { visibility: hidden; }
   #plan-sheet, #plan-sheet * { visibility: visible; }
   #plan-sheet { position: absolute; left: 0; top: 0; box-shadow: none !important; padding: 0 !important; max-width: none !important; width: 100%; }
+  /* A little smaller on paper so the sources and plan link stay on the one page. */
+  #plan-sheet { zoom: 0.9; }
   #plan-sheet a { color: inherit; text-decoration: none; }
 }
 `;

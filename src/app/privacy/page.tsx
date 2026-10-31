@@ -6,6 +6,7 @@ import { company } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description: `How ${company.shortName} collects, uses, and protects information on this website.`,
+  alternates: { canonical: "/privacy" },
 };
 
 export default function PrivacyPolicyPage() {

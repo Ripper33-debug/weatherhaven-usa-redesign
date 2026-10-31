@@ -6,6 +6,7 @@ import { company } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Terms of Use",
   description: `Terms governing use of the ${company.shortName} marketing website and program portals.`,
+  alternates: { canonical: "/terms" },
 };
 
 export default function TermsOfUsePage() {

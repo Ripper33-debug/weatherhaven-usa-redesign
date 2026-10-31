@@ -36,7 +36,8 @@ import {
 import { PRODUCTS } from "@/lib/products";
 
 /** The message can run longer than the other fields (500); the form shows the same limit. */
-const MESSAGE_MAX_LENGTH = 2000;
+/** The visitor's 2,000-character note plus the system line and request details the form adds. */
+const MESSAGE_MAX_LENGTH = 3000;
 /** Loose phone check: digits with spaces, +, -, dots, brackets and an optional extension. */
 const PHONE_RE = /^\+?[0-9\s().-]{7,25}(\s*(ext\.?|x)\s*[0-9]{1,6})?$/i;
 

@@ -103,8 +103,13 @@ type FormState = {
   cad_use: string;
 };
 
-/** The server accepts up to 2,000 characters for the message (MESSAGE_MAX_LENGTH in the contact route). */
-const MESSAGE_MAX = 2000;
+/** The visitor's own note: always 2,000 characters, whatever else travels with it. */
+const NOTE_MAX = 2000;
+/**
+ * The stored message: the note plus the system line and the request details (MESSAGE_MAX_LENGTH in
+ * the contact route allows the same).
+ */
+const MESSAGE_MAX = 3000;
 
 const initial: FormState = {
   full_name: "",
@@ -299,7 +304,8 @@ function ContactEngineeringFormInner({
   // The visit details and the system line share the message with the visitor's note.
   const details = visitDetails(form);
   const sysLine = systemLine(product);
-  const messageMax = Math.max(0, MESSAGE_MAX - (details ? details.length + 2 : 0) - (sysLine ? sysLine.length + 2 : 0));
+  // The counter shows the visitor's own allowance; the system line and details have their own room.
+  const messageMax = NOTE_MAX;
   const phoneNeeded = form.contact_method === "Phone";
   const isCall = form.inquiry_type === ENGINEER_CALL;
   const isCad = form.inquiry_type === CAD_DRAWINGS;
