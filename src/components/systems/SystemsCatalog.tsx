@@ -173,7 +173,7 @@ function CatalogBody({ products, blurs = {}, urlFamily: family }: CatalogProps &
         ) : null}
 
         {groups.map((g) => (
-          <section key={g.id} aria-labelledby={`fam-${g.id}`} className="mt-14 first-of-type:mt-10">
+          <section key={g.id} aria-labelledby={`fam-${g.id}`} className="v2-defer mt-14 first-of-type:mt-10">
             <div className="flex flex-col gap-2 border-b border-line pb-5 sm:flex-row sm:items-end sm:justify-between">
               <h2 id={`fam-${g.id}`} className="v2-h2 text-snow">
                 {g.name}

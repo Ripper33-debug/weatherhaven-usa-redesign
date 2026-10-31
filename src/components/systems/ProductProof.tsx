@@ -13,7 +13,7 @@ export function ProductProof({ slug, name, specs }: { slug: string; name: string
   const { stories, notes } = proofFor(slug, name, specs);
   if (stories.length === 0 && notes.length === 0) return null;
   return (
-    <section aria-labelledby="proof-heading" className="border-b border-line py-20 sm:py-24">
+    <section aria-labelledby="proof-heading" className="v2-defer border-b border-line py-20 sm:py-24">
       <div className="v2-wrap">
         <h2 id="proof-heading" className="v2-h2 text-snow">
           Programs and deployments

@@ -1624,3 +1624,13 @@ a[href^="tel:"] {
   from { opacity: 0; }
   to { opacity: 1; }
 }
+
+/*
+ * Long-page sections below the first screen: the browser skips their style, layout and paint until
+ * they come near the screen, which shortens a phone's first load. `auto` remembers each section's
+ * real height once it has been drawn. Not for sections with sticky children or observed embeds.
+ */
+.v2-defer {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 900px;
+}

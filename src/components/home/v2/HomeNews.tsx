@@ -7,7 +7,7 @@ export async function HomeNews() {
   if (releases.length === 0) return null;
 
   return (
-    <section aria-labelledby="news-heading" className="border-t border-line bg-ink py-20 sm:py-24">
+    <section aria-labelledby="news-heading" className="v2-defer border-t border-line bg-ink py-20 sm:py-24">
       <div className="v2-wrap">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <h2 id="news-heading" className="v2-h2 text-snow">

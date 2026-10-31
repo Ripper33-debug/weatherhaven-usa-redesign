@@ -30,7 +30,7 @@ const programLinks = [
 export function Footer() {
   const year = new Date().getFullYear();
   return (
-    <footer data-global-footer className="border-t border-line bg-ink text-snow">
+    <footer data-global-footer className="v2-defer border-t border-line bg-ink text-snow">
       <div className="v2-wrap grid gap-10 py-16 sm:py-20 lg:grid-cols-[1.1fr_2fr] lg:gap-16">
         <div>
           <Image

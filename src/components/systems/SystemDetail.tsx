@@ -149,7 +149,7 @@ export function SystemDetail({
       </section>
 
       {leadWith3d && photos.length > 0 ? (
-        <section aria-labelledby="photos-heading" className="border-b border-line py-16 sm:py-20">
+        <section aria-labelledby="photos-heading" className="v2-defer border-b border-line py-16 sm:py-20">
           <div className="v2-wrap">
             <h2 id="photos-heading" className="v2-h2 text-snow">
               Photos
@@ -163,7 +163,7 @@ export function SystemDetail({
       {product.slug === "mecc" ? <HomeDeploySequence /> : null}
 
       {sizes.length > 0 ? (
-        <section aria-labelledby="size-heading" className="border-b border-line py-16 sm:py-20">
+        <section aria-labelledby="size-heading" className="v2-defer border-b border-line py-16 sm:py-20">
           <div className="v2-wrap">
             <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.8fr)] lg:items-end">
               <h2 id="size-heading" className="v2-h2 text-snow">
@@ -182,7 +182,7 @@ export function SystemDetail({
       ) : null}
 
       {/* Specifications */}
-      <section id="specifications" aria-labelledby="spec-heading" className="v2-light scroll-mt-24 py-20 sm:py-24">
+      <section id="specifications" aria-labelledby="spec-heading" className="v2-defer v2-light scroll-mt-24 py-20 sm:py-24">
         <div className="v2-wrap grid gap-10 lg:grid-cols-[minmax(0,0.75fr)_minmax(0,1.25fr)] lg:gap-16">
           <div>
             <h2 id="spec-heading" className="v2-h2 text-snow">
@@ -225,7 +225,7 @@ export function SystemDetail({
 
       {/* Background and configurations, only where there is something specific to say */}
       {hasAbout ? (
-        <section className="border-b border-line py-20 sm:py-24">
+        <section className="v2-defer border-b border-line py-20 sm:py-24">
           <div className={`v2-wrap grid gap-14 lg:gap-16 ${overview.length > 0 && (configurations.length > 0 || documents.length > 0) ? "lg:grid-cols-2" : ""}`}>
             {overview.length > 0 ? (
               <div className="max-w-[44rem]">
@@ -276,7 +276,7 @@ export function SystemDetail({
 
       {/* Related */}
       {related.length > 0 ? (
-        <section aria-labelledby="related-heading" className="border-b border-line py-20 sm:py-24">
+        <section aria-labelledby="related-heading" className="v2-defer border-b border-line py-20 sm:py-24">
           <div className="v2-wrap">
             <h2 id="related-heading" className="v2-h2 text-snow">
               Often specified with {product.name}

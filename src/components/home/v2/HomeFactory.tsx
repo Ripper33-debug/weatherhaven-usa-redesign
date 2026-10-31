@@ -17,7 +17,7 @@ const CREDENTIALS = [
 /** Factory photograph band, then who builds and supports the systems. */
 export function HomeFactory() {
   return (
-    <section aria-labelledby="factory-heading" className="border-t border-line bg-hull">
+    <section aria-labelledby="factory-heading" className="v2-defer border-t border-line bg-hull">
       <div className="relative h-[46svh] min-h-[320px] overflow-hidden">
         <Image
           src={PHOTO}

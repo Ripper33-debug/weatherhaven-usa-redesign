@@ -14,7 +14,7 @@ const PHOTO = "/products/ehmecc/gallery/14-NATO_EHMECCs.jpg";
  */
 export function HomeCta({ copy = HOMEPAGE_DEFAULTS }: { copy?: HomepageCopy }) {
   return (
-    <section aria-labelledby="cta-heading" className="relative isolate overflow-hidden border-t border-line bg-ink">
+    <section aria-labelledby="cta-heading" className="v2-defer relative isolate overflow-hidden border-t border-line bg-ink">
       <div className="relative h-[42svh] min-h-[260px] lg:absolute lg:inset-0 lg:h-auto">
         <Image
           src={PHOTO}
