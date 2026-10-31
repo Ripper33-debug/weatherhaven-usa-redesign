@@ -21,13 +21,15 @@ function swap(html: string, from: string, to: string): string {
  * in the page address (?inside=1) and redraws the QR code so a phone opens the same view.
  */
 const FURNISHED_CSS = `
+.nw{white-space:nowrap}
 .fit{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
-.fit>span{font-size:13.5px;font-weight:600;color:#3a4b5c}
-.seg{display:inline-flex;border:1px solid #c9d5e0;border-radius:8px;overflow:hidden;background:#fff}
-.seg button{font:inherit;font-size:14px;font-weight:600;min-height:40px;padding:0 14px;border:0;background:#fff;color:#3a4b5c;cursor:pointer}
-.seg button+button{border-left:1px solid #c9d5e0}
-.seg button[aria-pressed="true"]{background:var(--navy);color:#fff}
-.seg button:focus-visible{outline:2px solid var(--orange);outline-offset:-2px}
+.fit>span{font-size:14px;font-weight:600;color:var(--snow)}
+.seg{display:inline-flex;box-shadow:inset 0 0 0 1px var(--line-strong)}
+.seg button{font:inherit;font-size:14px;font-weight:600;min-height:44px;padding:0 16px;border:0;background:transparent;color:rgb(238 242 246 / .82);cursor:pointer}
+.seg button+button{box-shadow:inset 1px 0 0 var(--line-strong)}
+.seg button:hover{color:var(--snow);background:rgb(238 242 246 / .06)}
+.seg button[aria-pressed="true"]{background:var(--snow);color:var(--ink)}
+.seg button:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
 `;
 
 const FURNISHED_JS = `<script>
@@ -102,7 +104,8 @@ export function arPageHtml(model?: SystemModel): string {
   html = swap(html, "← Back to the TRECC", `← Back to the ${esc(name)}`);
   html = swap(html, 'alt="Weatherhaven TRECC expandable container, deployed"', `alt="${esc(model.ar.alt)}"`);
   html = swap(html, ">Weatherhaven CAD model</p>", ">Weatherhaven 3D model</p>");
-  html = swap(html, "<h1>See the TRECC at full size</h1>", `<h1>${esc(model.ar.title)}</h1>`);
+  // The system name never breaks across lines (MEX-26 split at its hyphen on phones).
+  html = swap(html, "<h1>See the TRECC at full size</h1>", `<h1>${esc(model.ar.title).replace(esc(name), `<span class="nw">${esc(name)}</span>`)}</h1>`);
   html = swap(
     html,
     "<p>Place the deployed TRECC in the room you're standing in, at real scale. Walk around it; walk inside it.</p>",

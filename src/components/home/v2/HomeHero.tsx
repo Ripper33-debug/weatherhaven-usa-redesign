@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { HeroFieldReadoutLive } from "@/components/home/v2/HeroFieldReadoutLive";
+import { HOMEPAGE_DEFAULTS, type HomepageCopy } from "@/sanity/content";
 import { HeroFilm } from "@/components/home/v2/HeroFilm";
 
 /**
@@ -8,7 +9,7 @@ import { HeroFilm } from "@/components/home/v2/HeroFilm";
  * a one-line weather note from two deployment sites runs along the bottom once the forecast
  * service has answered (loaded after the page, see HeroFieldReadoutLive).
  */
-export function HomeHero() {
+export function HomeHero({ copy = HOMEPAGE_DEFAULTS }: { copy?: HomepageCopy }) {
   return (
     <section className="relative isolate flex flex-col overflow-hidden bg-ink md:min-h-[100svh] md:justify-end">
       {/* Phones: the film is a band above the copy. Wider screens: full bleed behind it. */}
@@ -29,12 +30,8 @@ export function HomeHero() {
       />
 
       <div className="v2-wrap relative -mt-6 pb-8 sm:pb-12 md:mt-0 md:pt-32 lg:pb-14">
-        <h1 className="v2-display v2-rise-hero max-w-[20ch] text-snow">Deployable shelters, camps and field hospitals</h1>
-        <p className="v2-lead v2-rise v2-rise-2 mt-6 max-w-[56ch] sm:mt-8">
-          Expandable containers, soft-wall, inflatable and polar shelters that travel as cargo and stand up in
-          minutes. Customers include the US Army, the Air National Guard, NATO and the Canadian Armed Forces, in
-          more than 95 countries since 1981.
-        </p>
+        <h1 className="v2-display v2-rise-hero max-w-[20ch] text-snow">{copy.heroHeadline}</h1>
+        <p className="v2-lead v2-rise v2-rise-2 mt-6 max-w-[56ch] sm:mt-8">{copy.heroLead}</p>
         {/* Phones have the same actions in the fixed bar along the bottom of the screen. */}
         <div className="v2-rise v2-rise-3 mt-9 hidden flex-col gap-3 sm:flex-row sm:items-center md:flex">
           <Link href="/configurable-solutions" className="v2-btn">
@@ -49,7 +46,7 @@ export function HomeHero() {
       <div className="v2-wrap pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] md:pb-6">
         <div className="flex flex-col gap-2 border-t border-line-strong pt-4 text-[0.8125rem] leading-snug text-muted sm:flex-row sm:items-baseline sm:justify-between sm:gap-8">
           <HeroFieldReadoutLive />
-          <p className="shrink-0">Illustrative film made from Weatherhaven product photography</p>
+          <p className="shrink-0">{copy.filmCaption}</p>
         </div>
       </div>
     </section>

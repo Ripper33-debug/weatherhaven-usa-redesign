@@ -4,6 +4,7 @@ import { PRODUCTION_SITE_URL } from "@/lib/site-url";
 import { listPublishedProducts } from "@/app/api/_lib/catalog-products";
 import { isExternalNewsLink, isPlaceholderNewsRelease } from "@/lib/news-releases";
 import { BUYER_SEGMENTS } from "@/lib/buyer-segments";
+import { FLAGSHIP_STORIES } from "@/lib/stories";
 
 const MARKETING_PATHS = [
   "/",
@@ -16,6 +17,9 @@ const MARKETING_PATHS = [
   "/deployments",
   "/deployments/map",
   "/deployments/record",
+  "/stories",
+  ...FLAGSHIP_STORIES.map((s) => `/stories/${s.slug}`),
+  "/about",
   "/government",
   "/tested-and-proven",
   "/configurable-solutions/compare",

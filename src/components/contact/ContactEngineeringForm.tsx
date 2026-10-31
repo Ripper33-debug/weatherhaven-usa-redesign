@@ -21,11 +21,24 @@ import {
 } from "@/lib/contact-prefill";
 import { findProductInCatalog } from "@/lib/published-catalog";
 import { usePublishedCatalog } from "@/lib/use-published-catalog";
+import {
+  CAD_DRAWINGS,
+  CAD_FORMATS,
+  CALL_TIME_ZONES,
+  ENGINEER_CALL,
+  isValidTimeZone,
+  nowIn,
+  validateCadRequest,
+  validateEngineerCall,
+  type CallSlot,
+} from "@/lib/contact-requests";
 
 const INQUIRY_TYPES = [
   "Capability Briefing",
   "Program Requirement",
   "Technical Exchange",
+  ENGINEER_CALL,
+  CAD_DRAWINGS,
   "Demo Request",
   "Factory Tour",
   "Program Availability",
@@ -81,6 +94,13 @@ type FormState = {
   base: string;
   dates: string;
   visitors: string;
+  /** Engineer call: what to discuss, two or three preferred times, and their time zone. */
+  call_topic: string;
+  call_slots: CallSlot[];
+  call_tz: string;
+  /** CAD drawings: formats wanted and what they're for. */
+  cad_formats: string[];
+  cad_use: string;
 };
 
 /** The server accepts up to 2,000 characters for the message (MESSAGE_MAX_LENGTH in the contact route). */
@@ -103,7 +123,33 @@ const initial: FormState = {
   base: "",
   dates: "",
   visitors: "",
+  call_topic: "",
+  call_slots: [
+    { date: "", time: "" },
+    { date: "", time: "" },
+    { date: "", time: "" },
+  ],
+  call_tz: "",
+  cad_formats: [],
+  cad_use: "",
 };
+
+function visitorTimeZone(): string {
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return isValidTimeZone(tz) ? tz : "America/New_York";
+  } catch {
+    return "America/New_York";
+  }
+}
+
+/** The subject we fill in for an inquiry about a system; one the visitor typed is never replaced. */
+function subjectFor(inquiry: string, product: Product | undefined): string {
+  if (!product) return "";
+  if (inquiry === ENGINEER_CALL) return `Engineer call: ${product.name}`;
+  if (inquiry === CAD_DRAWINGS) return `CAD drawings: ${product.name}`;
+  return `Discussion: ${product.name}`;
+}
 
 /** The visit details as a short block for the message, or "" when there are none. */
 function visitDetails(form: FormState): string {
@@ -153,7 +199,7 @@ function urlFormDefaults(
         ? "Program Requirement"
         : DEFAULT_INQUIRY;
   // The system is its own field now; Program is left for the buyer's own program or unit.
-  const subject = product ? `Discussion: ${product.name}` : subjectParam.slice(0, 160);
+  const subject = product ? subjectFor(inquiry, product) : subjectParam.slice(0, 160);
   const message = deploymentNotes
     ? `Deployment context from planner:\n${deploymentNotes}`
     : "";
@@ -182,7 +228,9 @@ function ContactEngineeringFormInner({
   planPreview?: CampSnapshot | null;
 }) {
   const [step, setStep] = useState<1 | 2>(1);
-  const [form, setForm] = useState(() => ({ ...initial, ...urlDefaults }));
+  // A call defaults to the visitor's own time zone (only shown in step 2, so the server-rendered
+  // stand-in never displays the server's zone).
+  const [form, setForm] = useState(() => ({ ...initial, call_tz: visitorTimeZone(), ...urlDefaults }));
   const [submitted, setSubmitted] = useState(false);
   const [submittedName, setSubmittedName] = useState("");
   const [submitWarning, setSubmitWarning] = useState<string | null>(null);
@@ -218,14 +266,33 @@ function ContactEngineeringFormInner({
 
   const product = form.system ? findProductInCatalog(catalog, form.system) : undefined;
 
-  /** Changing the system also changes a subject we filled in ("Discussion: <system>"), not one they typed. */
+  /** Changing the system or the inquiry type also changes a subject we filled in, not one they typed. */
   function chooseSystem(slug: string) {
     setForm((f) => {
       const before = f.system ? findProductInCatalog(catalog, f.system) : undefined;
       const after = slug ? findProductInCatalog(catalog, slug) : undefined;
-      const autoSubject = !f.subject.trim() || (before && f.subject === `Discussion: ${before.name}`);
-      return { ...f, system: slug, subject: autoSubject ? (after ? `Discussion: ${after.name}` : "") : f.subject };
+      const autoSubject = !f.subject.trim() || f.subject === subjectFor(f.inquiry_type, before);
+      return { ...f, system: slug, subject: autoSubject ? subjectFor(f.inquiry_type, after) : f.subject };
     });
+  }
+
+  function chooseInquiry(inquiry: string) {
+    setForm((f) => {
+      const p = f.system ? findProductInCatalog(catalog, f.system) : undefined;
+      const autoSubject = !f.subject.trim() || f.subject === subjectFor(f.inquiry_type, p);
+      return { ...f, inquiry_type: inquiry, subject: autoSubject ? subjectFor(inquiry, p) : f.subject };
+    });
+  }
+
+  function patchSlot(i: number, key: keyof CallSlot, value: string) {
+    setForm((f) => ({ ...f, call_slots: f.call_slots.map((s, j) => (j === i ? { ...s, [key]: value } : s)) }));
+  }
+
+  function toggleFormat(value: string) {
+    setForm((f) => ({
+      ...f,
+      cad_formats: f.cad_formats.includes(value) ? f.cad_formats.filter((x) => x !== value) : [...f.cad_formats, value],
+    }));
   }
 
   const visit = VISIT_TYPES.includes(form.inquiry_type);
@@ -234,6 +301,11 @@ function ContactEngineeringFormInner({
   const sysLine = systemLine(product);
   const messageMax = Math.max(0, MESSAGE_MAX - (details ? details.length + 2 : 0) - (sysLine ? sysLine.length + 2 : 0));
   const phoneNeeded = form.contact_method === "Phone";
+  const isCall = form.inquiry_type === ENGINEER_CALL;
+  const isCad = form.inquiry_type === CAD_DRAWINGS;
+  const zones = CALL_TIME_ZONES.some((z) => z.value === form.call_tz) || !form.call_tz
+    ? CALL_TIME_ZONES
+    : [{ value: form.call_tz, label: form.call_tz }, ...CALL_TIME_ZONES];
 
   function validateStep1() {
     if (!form.organization.trim() || !form.email.trim() || !form.inquiry_type.trim() || !form.region.trim()) {
@@ -242,6 +314,10 @@ function ContactEngineeringFormInner({
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
       setError("Enter a valid email address.");
+      return false;
+    }
+    if (form.inquiry_type === CAD_DRAWINGS && !form.system) {
+      setError("Choose the system you need drawings for.");
       return false;
     }
     setError(null);
@@ -264,6 +340,21 @@ function ContactEngineeringFormInner({
       setError(form.phone.trim() ? "Enter a phone number with digits, spaces, + or -, and an extension if you need one." : "Add a phone number, or choose another contact method.");
       return;
     }
+    // Same checks as the server (src/lib/contact-requests.ts).
+    const call = isCall
+      ? validateEngineerCall({ topic: form.call_topic, slots: form.call_slots, timezone: form.call_tz })
+      : null;
+    if (call && !call.ok) {
+      setError(call.error);
+      return;
+    }
+    const cad = isCad
+      ? validateCadRequest({ system: form.system, formats: form.cad_formats, use: form.cad_use }, catalog.map((p) => p.slug))
+      : null;
+    if (cad && !cad.ok) {
+      setError(cad.error);
+      return;
+    }
     const message = [sysLine, form.message.trim(), details].filter(Boolean).join("\n\n");
     if (message.length > MESSAGE_MAX) {
       setError(`Shorten the message: with the ${VISIT_LABEL[form.inquiry_type]?.toLowerCase() ?? "details"} it can be up to ${MESSAGE_MAX} characters.`);
@@ -283,7 +374,9 @@ function ContactEngineeringFormInner({
       subject:
         form.subject.trim() ||
         (product ? `Discussion: ${product.name}` : `Inquiry: ${form.inquiry_type}`),
-      message: message || "Submitted with the short contact form; details to follow.",
+      message: message || (call || cad ? "" : "Submitted with the short contact form; details to follow."),
+      ...(call?.ok ? { call: call.value } : {}),
+      ...(cad?.ok ? { cad: cad.value } : {}),
     };
 
     setLoading(true);
@@ -429,7 +522,7 @@ function ContactEngineeringFormInner({
               required
               className={inputClass}
               value={form.inquiry_type}
-              onChange={(e) => patch("inquiry_type", e.target.value)}
+              onChange={(e) => chooseInquiry(e.target.value)}
             >
               {INQUIRY_TYPES.map((t) => (
                 <option key={t} value={t}>
@@ -440,7 +533,7 @@ function ContactEngineeringFormInner({
           </label>
           <div>
             <label className="block text-[0.875rem] font-medium text-muted">
-              System <span className="font-normal">(optional)</span>
+              System {isCad ? null : <span className="font-normal">(optional)</span>}
               <select className={inputClass} value={form.system} onChange={(e) => chooseSystem(e.target.value)}>
                 <option value="">Not sure yet</option>
                 {catalog.map((p) => (
@@ -530,6 +623,105 @@ function ContactEngineeringFormInner({
               <input className={inputClass} value={form.program} onChange={(e) => patch("program", e.target.value)} />
             </label>
           )}
+          {isCall ? (
+            <fieldset className="space-y-6 border-t border-line pt-6">
+              <legend className="float-left mb-4 w-full text-[0.95rem] font-semibold text-snow">Call details</legend>
+              <label className="clear-left block text-[0.875rem] font-medium text-muted">
+                What you&apos;d like to discuss
+                <input
+                  required
+                  maxLength={300}
+                  className={inputClass}
+                  value={form.call_topic}
+                  onChange={(e) => patch("call_topic", e.target.value)}
+                  placeholder="Power and climate control for a command post, a site layout…"
+                />
+              </label>
+              <div>
+                <p id="call-times" className="text-[0.875rem] font-medium text-muted">
+                  Preferred times <span className="font-normal">(two or three)</span>
+                </p>
+                <div className="mt-2 space-y-3" role="group" aria-labelledby="call-times">
+                  {form.call_slots.map((slot, i) => (
+                    <div key={i} className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-3">
+                      <label className="block text-xs text-muted">
+                        <span className="sr-only">Preferred time {i + 1}: </span>Date {i === 2 ? "(optional)" : ""}
+                        <input
+                          type="date"
+                          required={i < 2}
+                          min={form.call_tz ? nowIn(form.call_tz, new Date()).date : undefined}
+                          className={inputClass}
+                          value={slot.date}
+                          onChange={(e) => patchSlot(i, "date", e.target.value)}
+                        />
+                      </label>
+                      <label className="block text-xs text-muted">
+                        <span className="sr-only">Preferred time {i + 1}: </span>Time
+                        <input
+                          type="time"
+                          required={i < 2}
+                          step={900}
+                          className={inputClass}
+                          value={slot.time}
+                          onChange={(e) => patchSlot(i, "time", e.target.value)}
+                        />
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <label className="block text-[0.875rem] font-medium text-muted">
+                Time zone
+                <select className={inputClass} value={form.call_tz} onChange={(e) => patch("call_tz", e.target.value)}>
+                  {zones.map((z) => (
+                    <option key={z.value} value={z.value}>
+                      {z.label === z.value ? z.value : `${z.label} (${z.value})`}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <p className="text-sm text-muted">An engineer confirms one of these times by email, or suggests another.</p>
+            </fieldset>
+          ) : null}
+          {isCad ? (
+            <fieldset className="space-y-6 border-t border-line pt-6">
+              <legend className="float-left mb-4 w-full text-[0.95rem] font-semibold text-snow">
+                Drawing request{product ? `: ${product.name}` : ""}
+              </legend>
+              <div className="clear-left" role="group" aria-labelledby="cad-formats">
+                <p id="cad-formats" className="text-[0.875rem] font-medium text-muted">
+                  Formats
+                </p>
+                <div className="mt-3 space-y-3">
+                  {CAD_FORMATS.map((f) => (
+                    <label key={f.value} className="flex items-start gap-3 text-sm text-snow">
+                      <input
+                        type="checkbox"
+                        className="mt-0.5 h-4 w-4"
+                        checked={form.cad_formats.includes(f.value)}
+                        onChange={() => toggleFormat(f.value)}
+                      />
+                      <span>
+                        {f.value} <span className="text-muted">{f.hint}</span>
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <label className="block text-[0.875rem] font-medium text-muted">
+                What the drawings are for
+                <input
+                  required
+                  maxLength={500}
+                  className={inputClass}
+                  value={form.cad_use}
+                  onChange={(e) => patch("cad_use", e.target.value)}
+                  placeholder="Site layout for a 40-bed field hospital, a solicitation package…"
+                />
+              </label>
+              <p className="text-sm text-muted">Detailed technical data is released to authorized programs; export controls may apply.</p>
+            </fieldset>
+          ) : null}
           <label className="block text-[0.875rem] font-medium text-muted">
             Subject
             <input className={inputClass} value={form.subject} onChange={(e) => patch("subject", e.target.value)} />
@@ -606,7 +798,7 @@ function ContactEngineeringFormInner({
               Back
             </button>
             <button type="submit" disabled={loading} className={"v2-btn w-full flex-1 disabled:opacity-60"}>
-              {loading ? "Sending…" : visit ? "Send request" : "Submit inquiry"}
+              {loading ? "Sending…" : isCall ? "Request a call" : isCad ? "Request drawings" : visit ? "Send request" : "Submit inquiry"}
             </button>
           </div>
         </>

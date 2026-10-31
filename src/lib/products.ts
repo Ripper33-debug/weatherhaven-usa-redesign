@@ -44,6 +44,8 @@ export type Product = {
   configurations: { title: string; description: string }[];
   downloads: { name: string; type: string; size: string; href: string }[];
   relatedSlugs: string[];
+  /** Headline figure for cards, from the content studio (Sanity) when set; otherwise product-content.ts. */
+  keySpec?: string;
   /** CMS-uploaded cover photo (Supabase Storage public URL). */
   coverImageUrl?: string;
   /** CMS-uploaded gallery photos (first item may duplicate cover). */

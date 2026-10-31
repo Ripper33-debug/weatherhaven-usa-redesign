@@ -10,6 +10,8 @@ export function AuthHashRedirect() {
   useEffect(() => {
     const hash = window.location.hash;
     if (!hash || !hash.includes("access_token")) return;
+    // The content studio handles its own sign-in.
+    if (window.location.pathname.startsWith("/studio")) return;
     if (window.location.pathname.startsWith("/auth/reset-password")) return;
     window.location.replace(`/auth/reset-password${hash}${window.location.search}`);
   }, []);

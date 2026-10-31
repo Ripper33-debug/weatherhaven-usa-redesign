@@ -69,7 +69,9 @@ export async function middleware(request: NextRequest) {
   // A copy of the site with no member database (no Supabase keys, as on the redesign preview):
   // show a plain page instead of letting the sign-in, portal and admin routes fail with a 500.
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-    return NextResponse.rewrite(new URL("/sign-in-unavailable", request.url));
+    // A redirect, not a rewrite: the page chrome is chosen from the address, so a rewritten
+    // /sof-solutions/login would render one way on the server and another in the browser.
+    return NextResponse.redirect(new URL("/sign-in-unavailable", request.url));
   }
 
   let supabaseResponse = NextResponse.next({ request });

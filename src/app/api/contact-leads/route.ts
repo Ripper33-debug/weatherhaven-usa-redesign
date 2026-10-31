@@ -25,6 +25,15 @@ import {
 } from "@/lib/shield-email";
 import { contactConfirmationEmailText } from "@/lib/shield-email-text";
 import { sendCustomerEmail } from "@/lib/send-customer-email";
+import {
+  CAD_DRAWINGS,
+  ENGINEER_CALL,
+  cadRequestBlock,
+  engineerCallBlock,
+  validateCadRequest,
+  validateEngineerCall,
+} from "@/lib/contact-requests";
+import { PRODUCTS } from "@/lib/products";
 
 /** The message can run longer than the other fields (500); the form shows the same limit. */
 const MESSAGE_MAX_LENGTH = 2000;
@@ -84,11 +93,24 @@ export async function POST(request: Request) {
     const regionResult = validateStringField(body.region, "Region");
     if (!regionResult.ok) return badRequestResponse(regionResult.error);
 
+    // Engineer calls and CAD requests carry their own fields; they're checked here and added to the
+    // stored message as a short block (no new columns).
+    const callResult = inquiryTypeResult.value === ENGINEER_CALL ? validateEngineerCall(body.call) : null;
+    if (callResult && !callResult.ok) return badRequestResponse(callResult.error);
+    const cadResult = inquiryTypeResult.value === CAD_DRAWINGS ? validateCadRequest(body.cad) : null;
+    if (cadResult && !cadResult.ok) return badRequestResponse(cadResult.error);
+    const requestBlock = [
+      callResult?.ok ? engineerCallBlock(callResult.value) : "",
+      cadResult?.ok ? cadRequestBlock(cadResult.value, PRODUCTS.find((p) => p.slug === cadResult.value.system)?.name) : "",
+    ]
+      .filter(Boolean)
+      .join("\n\n");
+
     const full_name = fullNameResult.value || "Not provided";
     const role = roleResult.value || "Not provided";
     const program = programResult.value || null;
     const subject = subjectResult.value || `Inquiry: ${inquiryTypeResult.value}`;
-    const message = messageResult.value || "No additional message provided.";
+    const message = [messageResult.value, requestBlock].filter(Boolean).join("\n\n") || "No additional message provided.";
     const contact_method = contactMethodResult.value || "Email";
     const phone = phoneResult.value || null;
 

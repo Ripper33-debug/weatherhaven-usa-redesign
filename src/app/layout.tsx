@@ -15,13 +15,15 @@ import { NAV_CAPABILITIES, SYSTEMS_BY_FAMILY } from "@/lib/site-nav";
 /*
  * Geist, Geist Mono and Playfair are the SOF portal and admin faces; the public site renders in
  * Archivo. Geist Mono (the odd code) and Playfair now load when a page uses them instead of being
- * preloaded on every page. Geist stays preloaded because the phone action bar renders in it.
+ * preloaded on every page. Geist isn't preloaded either: public pages (and their phone action bar)
+ * render entirely in Archivo, so preloading it cost every phone 68 KB on the critical path.
  * Same files and settings as the `geist` package's exports; the const names keep the family names.
  */
 const GeistSans = localFont({
   src: "../../node_modules/geist/dist/fonts/geist-sans/Geist-Variable.woff2",
   variable: "--font-geist-sans",
   weight: "100 900",
+  preload: false,
 });
 const GeistMono = localFont({
   src: "../../node_modules/geist/dist/fonts/geist-mono/GeistMono-Variable.woff2",

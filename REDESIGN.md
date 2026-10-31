@@ -171,6 +171,17 @@ An independent design review of every public page listed what made the site read
   - **3D camp:** every system with a model is placed at true size; soft and polar shelters rise out of their packed load. "Look inside" shows the model's own fit-out only when it suits the mission (`fitoutForMission`); otherwise the simplified interior for that mission.
 - **To check with Barry:** RDMSS modelled 20 × 30 ft (published modules are 23.8 ft wide); Polar Chief about 6 m across (published 14 ft); MTS, RDMSS and MEX-26 packed loads are the same pallet; MECC README says the door faces +Z but the file faces −Z; the TRECC fit-out runs about 10 cm past the shell at each end, under the floor.
 
+## Content studio (Sanity CMS)
+
+- **What editors can change, at /studio:** the homepage headline, intro, film caption and closing section; every system's full name, description, headline figure, specifications, highlights, overview and configurations (plus who checked the figures and when); the program stories (photos, numbers, timeline, sections, a cleared customer quote, sources); the team on /about; and the news list. Fields left empty keep what the site shows today.
+- **How the site reads it:** `src/sanity/content.ts` maps studio content onto the shapes the site already uses, and every caller falls back to the content in code when the CMS isn't connected, is empty or doesn't answer within 4 seconds (`src/sanity/client.ts`). Pages pick up edits within a minute; the publish webhook (`/api/revalidate/sanity`, secret in `SANITY_REVALIDATE_SECRET`) makes it immediate.
+  - Systems: layered on the catalog in `src/app/api/_lib/catalog-products.ts`.
+  - Stories (`src/lib/stories.ts`) and team (`src/lib/team.ts`): once the studio has any, it's the list.
+  - News (`src/app/api/_lib/news-releases.ts`): the public list comes from the studio once it has items; the old admin's own news list is unchanged.
+  - Homepage copy: `getHomepageCopy()`.
+- **Setting it up:** Weatherhaven creates the Sanity project (dataset `production`) and adds this site's address under API → CORS origins with credentials. Put the project ID in `src/sanity/env.ts` (it isn't secret) or `NEXT_PUBLIC_SANITY_PROJECT_ID` on Vercel. Then load today's content: `SANITY_API_WRITE_TOKEN=… NEXT_PUBLIC_SANITY_PROJECT_ID=… npx vite-node --config vitest.config.ts scripts/cms/import-to-sanity.ts` (`--dry-run` first; delete the token afterwards). `npx sanity schema validate` checks the schema.
+- **Security:** /studio gets its own Content-Security-Policy (the site's plus Sanity's script and font hosts, `next.config.ts`); every other page keeps the strict one. The studio is noindex and editors sign in with their own Sanity accounts.
+
 ## Fixes from the full-site review (Oct 31)
 
 A fresh reviewer went through the whole site at desktop and phone widths; these came out of it.

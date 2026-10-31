@@ -3,6 +3,7 @@ import Link from "next/link";
 import { COMPANY_CONTACT, companyPhoneHref } from "@/lib/company-facts";
 import { blurProps } from "@/lib/image-blur";
 import { NAV_CTA } from "@/lib/site-nav";
+import { HOMEPAGE_DEFAULTS, type HomepageCopy } from "@/sanity/content";
 
 const PHOTO = "/products/ehmecc/gallery/14-NATO_EHMECCs.jpg";
 
@@ -11,7 +12,7 @@ const PHOTO = "/products/ehmecc/gallery/14-NATO_EHMECCs.jpg";
  * sits to the right on wide screens, with the copy over the darkened left side; on phones it
  * becomes a band above the copy.
  */
-export function HomeCta() {
+export function HomeCta({ copy = HOMEPAGE_DEFAULTS }: { copy?: HomepageCopy }) {
   return (
     <section aria-labelledby="cta-heading" className="relative isolate overflow-hidden border-t border-line bg-ink">
       <div className="relative h-[42svh] min-h-[260px] lg:absolute lg:inset-0 lg:h-auto">
@@ -28,12 +29,9 @@ export function HomeCta() {
       </div>
       <div className="v2-wrap relative pb-20 pt-4 sm:pb-24 lg:py-32">
         <h2 id="cta-heading" className="v2-display max-w-[14ch] text-snow">
-          Tell us where you&apos;re deploying
+          {copy.ctaHeading}
         </h2>
-        <p className="v2-lead mt-6 max-w-[44ch]">
-          Share the mission, the climate and the number of people. A Weatherhaven expert will come back with a
-          starting configuration, usually within 48 hours.
-        </p>
+        <p className="v2-lead mt-6 max-w-[44ch]">{copy.ctaText}</p>
         <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
           <Link href={NAV_CTA.href} className="v2-btn">
             {NAV_CTA.label}

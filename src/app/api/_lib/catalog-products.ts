@@ -1,4 +1,5 @@
 import "server-only";
+import { withCmsProducts } from "@/sanity/content";
 
 import { PRODUCTS } from "@/lib/products";
 import type { Product } from "@/lib/products";
@@ -172,7 +173,7 @@ export async function getCatalogProductBySlug(slug: string): Promise<CatalogProd
 }
 
 /** Public catalog — CMS is source of truth when Supabase is seeded; static code is dev/fallback only. */
-export async function listPublishedProducts(): Promise<Product[]> {
+async function listPublishedProductsBase(): Promise<Product[]> {
   if (!hasSupabaseAdminEnv()) {
     return applyStaticCatalogFallback(PRODUCTS);
   }
@@ -185,7 +186,7 @@ export async function listPublishedProducts(): Promise<Product[]> {
   return publishedProductsFromRows(rows);
 }
 
-export async function getPublishedProductBySlug(slug: string): Promise<Product | undefined> {
+async function getPublishedProductBySlugBase(slug: string): Promise<Product | undefined> {
   const canonical = resolveCanonicalProductSlug(slug);
 
   if (!hasSupabaseAdminEnv()) {
@@ -201,6 +202,16 @@ export async function getPublishedProductBySlug(slug: string): Promise<Product |
 
   const row = rows.find((entry) => entry.slug === canonical) ?? null;
   return resolvePublishedProductBySlug(slug, row, PRODUCTS);
+}
+
+/** Public catalog, with edits from the content studio (Sanity) layered on top when it's connected. */
+export async function listPublishedProducts(): Promise<Product[]> {
+  return withCmsProducts(await listPublishedProductsBase());
+}
+
+export async function getPublishedProductBySlug(slug: string): Promise<Product | undefined> {
+  const base = await getPublishedProductBySlugBase(slug);
+  return base ? (await withCmsProducts([base]))[0] : undefined;
 }
 
 export async function insertCatalogProduct(

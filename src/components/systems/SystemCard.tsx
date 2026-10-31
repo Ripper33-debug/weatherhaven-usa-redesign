@@ -46,7 +46,7 @@ export function SystemCard({
           </Link>
         </h3>
         {showsFullName(product.name, product.subtitle) ? <p className="mt-1 text-[0.85rem] text-muted">{product.subtitle}</p> : null}
-        <p className="mt-3 text-[0.95rem] leading-relaxed text-snow/85">{content?.keySpec ?? product.description}</p>
+        <p className="mt-3 text-[0.95rem] leading-relaxed text-snow/85">{product.keySpec ?? content?.keySpec ?? product.description}</p>
         {specs.length > 0 ? (
           <dl className="mt-4 border-t border-line text-[0.85rem]">
             {specs.map((s) => (

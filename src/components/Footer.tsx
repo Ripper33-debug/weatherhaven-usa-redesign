@@ -7,9 +7,11 @@ import { NAV_CTA, NAV_GOV, SYSTEMS_BY_FAMILY } from "@/lib/site-nav";
 import { PROCUREMENT } from "@/lib/procurement";
 
 const companyLinks = [
+  { href: "/about", label: "About Weatherhaven" },
   { href: "/capabilities", label: "Capabilities" },
   { href: "/who-we-serve", label: "Who we serve" },
   { href: "/deployments", label: "Deployments" },
+  { href: "/stories", label: "Program stories" },
   { href: "/deployments/record", label: "Track record" },
   { href: "/tested-and-proven", label: "Tested and proven" },
   { href: "/news", label: "News" },

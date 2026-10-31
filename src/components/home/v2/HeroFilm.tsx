@@ -11,7 +11,8 @@ import { useClientMediaQuery } from "@/hooks/useClientMediaQuery";
  * The hero says it's an illustrative film.
  *
  * The still (its first frame) is the first paint; the film starts downloading only once the page has
- * loaded, at 720p on phones. Reduced motion starts paused; the button always works.
+ * loaded, at 720p on phones (about 1 MB; 2.4 MB at 1080p, see scripts/media/build-hero-film.sh).
+ * Reduced motion, data saver and 2G connections start paused on the still; the button always works.
  */
 const POSTER = "/hero/film-poster.jpg";
 
@@ -21,13 +22,24 @@ function loadSource(video: HTMLVideoElement) {
   video.src = small ? "/hero/film-720.mp4" : "/hero/film-1080.mp4";
 }
 
+/**
+ * Data saver on, or a 2G-class connection: keep the still and don't fetch the film until the
+ * visitor presses Play. (navigator.connection is Chromium-only; elsewhere the film loads as usual.)
+ */
+function slowOrSaving(): boolean {
+  const c = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
+  return !!c && (c.saveData === true || c.effectiveType === "slow-2g" || c.effectiveType === "2g");
+}
+
 export function HeroFilm() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
   const reduced = useClientMediaQuery("(prefers-reduced-motion: reduce)");
   // Reduced motion starts paused; after that the visitor's own choice wins.
   const [userPaused, setUserPaused] = useState<boolean | null>(null);
-  const paused = userPaused ?? reduced;
+  // Set after mount when the connection says to save data (see slowOrSaving).
+  const [saving, setSaving] = useState(false);
+  const paused = userPaused ?? (reduced || saving);
   const userPausedRef = useRef(false);
 
   useEffect(() => {
@@ -37,6 +49,10 @@ export function HeroFilm() {
     video.addEventListener("playing", onPlaying);
     const start = () => {
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || userPausedRef.current) return;
+      if (slowOrSaving()) {
+        setSaving(true);
+        return;
+      }
       loadSource(video);
       void video.play().catch(() => undefined);
     };

@@ -398,7 +398,7 @@ export function Navbar({ menuData }: { menuData: NavMenuData }) {
           </div>
           <nav aria-label="Mobile" className="v2-wrap flex-1 pb-10 pt-4">
             <ul className="border-t border-line">
-              {[{ href: "/configurable-solutions", label: "All systems" }, NAV_CAPABILITIES_PAGE, { href: NAV_WHO_WE_SERVE.href, label: "Who we serve" }, ...NAV_LINKS, NAV_SOF].map((l) => (
+              {[{ href: "/configurable-solutions", label: "All systems" }, NAV_CAPABILITIES_PAGE, { href: NAV_WHO_WE_SERVE.href, label: "Who we serve" }, ...NAV_LINKS, { href: "/about", label: "About" }, NAV_SOF].map((l) => (
                 <li key={l.href} className="border-b border-line">
                   <Link
                     href={l.href}

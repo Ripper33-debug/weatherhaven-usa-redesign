@@ -8,6 +8,7 @@ import {
   type NewsReleaseRow,
 } from "@/lib/news-releases";
 import { createAdminClient } from "@/app/api/_lib/get-admin";
+import { cmsNews } from "@/sanity/content";
 
 function hasSupabaseAdminEnv(): boolean {
   return Boolean(
@@ -57,6 +58,11 @@ export async function listNewsReleases(options?: {
   publishedOnly?: boolean;
   limit?: number;
 }): Promise<NewsReleaseRow[]> {
+  // The public list comes from the content studio once it has news (the admin's own list is unchanged).
+  if (options?.publishedOnly) {
+    const cms = await cmsNews();
+    if (cms) return options.limit ? cms.slice(0, options.limit) : cms;
+  }
   if (!hasSupabaseAdminEnv()) {
     const legacy = legacyRowsAsNews().filter((row) => !isPlaceholderNewsRelease(row));
     if (options?.publishedOnly) {
@@ -105,6 +111,12 @@ export async function listNewsReleases(options?: {
 export async function getNewsReleaseBySlug(slug: string): Promise<NewsReleaseRow | null> {
   const normalized = slug.trim().toLowerCase();
   if (!normalized) return null;
+
+  const cms = await cmsNews();
+  if (cms) {
+    const hit = cms.find((r) => r.slug === normalized);
+    if (hit) return hit;
+  }
 
   if (!hasSupabaseAdminEnv()) {
     return legacyRowsAsNews().find((r) => r.slug === normalized) ?? null;

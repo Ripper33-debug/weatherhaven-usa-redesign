@@ -6,32 +6,38 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="description" content="Place the deployed Weatherhaven TRECC in your space at full size with augmented reality.">
 <title>TRECC at full size | Weatherhaven</title>
-<meta name="theme-color" content="#061A2F">
+<meta name="theme-color" content="#0a0f17">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230D4275'/%3E%3Cpath d='M7 25V12c0-3 2-5 5-5h13v18H19V14h-6v11z' fill='%23fff'/%3E%3C/svg%3E">
 <style>
 /*FONTS*/
-:root{--navy:#0D4275;--navy-900:#061A2F;--orange:#EE8400;--ink:#0f1b26;--f-head:'Barlow Semi Condensed',sans-serif}
+:root{--ink:#0a0f17;--hull:#101824;--hull-2:#172233;--line:rgb(148 170 196 / .16);--line-strong:rgb(148 170 196 / .32);--muted:#93a1b5;--snow:#eef2f6;--signal:#f18522;--navy:var(--ink);--orange:var(--signal);--f:'Archivo',ui-sans-serif,system-ui,sans-serif}
 *{box-sizing:border-box}html,body{margin:0;height:100%}
-body{font-family:'Barlow',system-ui,sans-serif;background:#eef3f7;color:var(--ink);display:flex;flex-direction:column;min-height:100svh}
-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:var(--navy-900);color:#fff}
-header a{color:#fff;text-decoration:none;font-weight:600;font-size:14px;opacity:.85}
+body{font-family:var(--f);font-variation-settings:"wdth" 100;letter-spacing:-.005em;background:var(--ink);color:var(--snow);display:flex;flex-direction:column;min-height:100svh;-webkit-font-smoothing:antialiased}
+header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:var(--ink);color:var(--snow);border-bottom:1px solid var(--line)}
+header a{color:var(--snow);text-decoration:none;font-weight:500;font-size:14px;opacity:.85}
+header a:hover{opacity:1}
 header img{height:22px}header a{white-space:nowrap}@media (max-width:420px){header img{height:17px}header a{font-size:13px}}
 main{flex:1;display:grid;grid-template-rows:1fr auto}
-model-viewer{width:100%;height:100%;min-height:60svh;background:linear-gradient(180deg,#dfe8f0,#f3f6f9);--poster-color:transparent}
+model-viewer{width:100%;height:100%;min-height:60svh;background:radial-gradient(120% 90% at 50% 38%,#24344a 0%,#172233 38%,var(--ink) 100%);--poster-color:transparent}
 model-viewer::part(default-ar-button){display:none}
-.bar{padding:18px 20px 26px;background:#fff;border-top:1px solid #dde5ec;display:grid;gap:14px}
-h1{font-family:var(--f-head);font-size:28px;line-height:1.05;margin:0}
-p{margin:0;font-size:15px;line-height:1.5;color:#3a4b5c}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;height:52px;padding:0 22px;border-radius:8px;background:var(--orange);color:#fff;font-weight:700;font-size:16px;border:0;cursor:pointer;text-decoration:none}
+.bar{padding:22px 20px 30px;background:var(--ink);border-top:1px solid var(--line);display:grid;gap:16px}
+.model-note{font-size:13px;color:var(--muted);margin:0 0 10px}
+h1{font-family:var(--f);font-variation-settings:"wdth" 116;font-weight:620;font-size:30px;line-height:1.02;letter-spacing:-.028em;margin:0;color:var(--snow);text-wrap:balance}
+p{margin:0;font-size:15.5px;line-height:1.55;color:rgb(238 242 246 / .82)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:0 24px;background:var(--signal);color:#1b0e02;font-family:var(--f);font-variation-settings:"wdth" 108;font-weight:600;font-size:16px;border:0;cursor:pointer;text-decoration:none;clip-path:polygon(9px 0,100% 0,100% calc(100% - 9px),calc(100% - 9px) 100%,0 100%,0 9px);touch-action:manipulation}
+.btn:hover{background:#ff9a3e}
+.btn:focus-visible{outline:2px solid var(--snow);outline-offset:3px}
 .btn svg{width:20px;height:20px}
 .btn[hidden]{display:none}
-.qr{display:none;align-items:center;gap:18px}
-.qr img{width:150px;height:150px;border:1px solid #dde5ec;border-radius:8px;background:#fff;padding:6px}
+.qr{display:none;align-items:center;gap:18px;padding-top:16px;border-top:1px solid var(--line)}
+.qr img{width:150px;height:150px;background:#fff;padding:8px}
+.qr b{color:var(--snow);font-weight:600}
 .desk .qr{display:flex}
-.small{font-size:12.5px;color:#6b7b8b}
-.facts{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13.5px;color:#3a4b5c}
-.facts b{color:var(--navy)}
-@media (min-width:900px){main{grid-template-columns:1fr 420px;grid-template-rows:1fr}.bar{border-top:0;border-left:1px solid #dde5ec;align-content:center;padding:40px}h1{font-size:36px}}
+.small{font-size:13px;line-height:1.5;color:var(--muted)}
+.facts{display:flex;flex-direction:column;gap:0;font-size:14.5px;color:var(--snow);border-top:1px solid var(--line)}
+.facts span{padding:9px 0;border-bottom:1px solid var(--line)}
+.facts b{color:var(--snow);font-weight:600}
+@media (min-width:900px){main{grid-template-columns:1fr 440px;grid-template-rows:1fr}.bar{border-top:0;border-left:1px solid var(--line);align-content:center;padding:44px}h1{font-size:40px}}
 </style>
 </head>
 <body>
@@ -41,7 +47,7 @@ p{margin:0;font-size:15px;line-height:1.5;color:#3a4b5c}
     <button slot="ar-button" hidden></button>
   </model-viewer>
   <div class="bar">
-    <div><p class="small" style="letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px">Weatherhaven CAD model</p><h1>See the TRECC at full size</h1></div>
+    <div><p class="model-note">Weatherhaven CAD model</p><h1>See the TRECC at full size</h1></div>
     <p>Place the deployed TRECC in the room you're standing in, at real scale. Walk around it; walk inside it.</p>
     <div class="facts"><span><b>Under 60 in</b> stowed</span><span><b>2 people</b>, under 3 minutes</span><span><b>Trailer, vehicle</b> or one 463L pallet</span></div>
     <button class="btn" id="arbtn" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/></svg>View in your space</button>

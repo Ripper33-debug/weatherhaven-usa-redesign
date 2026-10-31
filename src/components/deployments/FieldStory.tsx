@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { blurProps } from "@/lib/image-blur";
 import { sourceHost, type DeploymentStory } from "@/lib/field-stories";
+import { flagshipStoryFor } from "@/lib/stories";
 
 function Where({ story }: { story: DeploymentStory }) {
   return (
@@ -35,8 +36,16 @@ function Facts({ story, large = false }: { story: DeploymentStory; large?: boole
 
 /** Systems and sources as one quiet footnote block. */
 function Footnote({ story }: { story: DeploymentStory }) {
+  const flagship = flagshipStoryFor(story.id);
   return (
     <div className="space-y-1.5 text-[0.875rem] leading-relaxed text-muted">
+      {flagship ? (
+        <p className="pb-2 text-[0.95rem]">
+          <Link href={`/stories/${flagship.slug}`} className="v2-link">
+            Read the story
+          </Link>
+        </p>
+      ) : null}
       <p>
         <span className="mr-1.5">{story.systems.length > 1 ? "Systems:" : "System:"}</span>
         {story.systems.map((s, i) => (

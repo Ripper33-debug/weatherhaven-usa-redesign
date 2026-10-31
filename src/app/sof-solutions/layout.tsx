@@ -13,14 +13,12 @@ export const metadata: Metadata = {
 
 export default function SofSolutionsLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="sof-solutions-root">
+    <>
       <SofEnhancements />
-      <SofSolutionsChrome
-        nav={<SofNav />}
-        footer={<SofFooter />}
-      >
+      {/* SofSolutionsChrome adds the portal's own wrapper, nav and footer, except on the public page. */}
+      <SofSolutionsChrome nav={<SofNav />} footer={<SofFooter />}>
         {children}
       </SofSolutionsChrome>
-    </div>
+    </>
   );
 }

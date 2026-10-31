@@ -14,6 +14,9 @@ const MARKETING_PREFIXES = [
   "/government",
   "/who-we-serve",
   "/tested-and-proven",
+  "/stories",
+  "/about",
+  "/sign-in-unavailable",
 ] as const;
 
 /** SOF auth/secure paths use workspace chrome, not marketing mobile bar etc. */
@@ -42,10 +45,11 @@ const PUBLIC_EXTRA_PATHS = ["/privacy", "/terms"] as const;
 
 /**
  * Public website pages that use the v2 design language (global nav + footer).
- * Excludes the SOF microsite, which keeps its own immersive chrome.
+ * The public SOF page (/sof-solutions) is one of them; the SOF portal behind it (sign-in, request
+ * access, /sof-solutions/secure) keeps its own chrome.
  */
 export function isPublicSitePage(pathname: string): boolean {
-  if (pathname === "/sof-solutions" || pathname.startsWith("/sof-solutions/")) return false;
+  if (pathname.startsWith("/sof-solutions/")) return false;
   if (PUBLIC_EXTRA_PATHS.some((p) => pathname === p)) return true;
   return isMarketingPage(pathname);
 }

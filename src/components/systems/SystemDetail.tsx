@@ -108,22 +108,39 @@ export function SystemDetail({
                 <Link href={contactHref} className="v2-btn">
                   Ask about {product.name}
                 </Link>
-                {sheet ? (
-                  <a href={sheet.href} target="_blank" rel="noopener noreferrer" className="v2-btn v2-btn-ghost">
-                    Download info sheet{sheet.size && sheet.size !== "—" ? ` (PDF, ${sheet.size})` : " (PDF)"}
-                  </a>
-                ) : (
-                  <a href="#specifications" className="v2-btn v2-btn-ghost">
-                    See specifications
-                  </a>
-                )}
-                {/* Real-scale AR page (model-viewer); a plain link, since /ar pages are standalone. */}
-                {ar ? (
-                  <a href={ar} className="v2-btn v2-btn-ghost">
-                    See it at full size in AR
-                  </a>
-                ) : null}
+                <Link href={contactUrl({ system: product.slug, inquiry: "Engineer Call" })} className="v2-btn v2-btn-ghost">
+                  Talk to an engineer
+                </Link>
               </div>
+              {/* Secondary actions as one compact row of links, so the buttons stay two on phones. */}
+              <nav aria-label={`More for the ${product.name}`} className="mt-6">
+                <ul className="flex flex-wrap gap-x-6 gap-y-3 text-[0.95rem]">
+                  <li>
+                    {sheet ? (
+                      <a href={sheet.href} target="_blank" rel="noopener noreferrer" className="v2-link">
+                        Info sheet{sheet.size && sheet.size !== "—" ? ` (PDF, ${sheet.size})` : " (PDF)"}
+                      </a>
+                    ) : (
+                      <a href="#specifications" className="v2-link">
+                        Specifications
+                      </a>
+                    )}
+                  </li>
+                  <li>
+                    <Link href={contactUrl({ system: product.slug, inquiry: "CAD Drawings" })} className="v2-link">
+                      Request CAD drawings
+                    </Link>
+                  </li>
+                  {/* Real-scale AR page (model-viewer); a plain link, since /ar pages are standalone. */}
+                  {ar ? (
+                    <li>
+                      <a href={ar} className="v2-link">
+                        See it full size in AR
+                      </a>
+                    </li>
+                  ) : null}
+                </ul>
+              </nav>
 
               <ProductBuying product={product} fullName={showsFullName(product.name, product.subtitle) ? product.subtitle : undefined} />
             </div>

@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { blurProps } from "@/lib/image-blur";
 import { proofFor } from "@/lib/product-proof";
+import { flagshipStoryFor } from "@/lib/stories";
 
 /**
  * Programs and deployments that used this system, from the field stories: photo (when the story
@@ -20,6 +21,7 @@ export function ProductProof({ slug, name, specs }: { slug: string; name: string
         <ul className="mt-10 space-y-6">
           {stories.map(({ story, summary, facts }) => {
             const photo = story.photo;
+            const flagship = flagshipStoryFor(story.id);
             return (
               <li key={story.id}>
                 <article
@@ -47,9 +49,15 @@ export function ProductProof({ slug, name, specs }: { slug: string; name: string
                       {story.title}
                     </h3>
                     <p className="mt-3 max-w-[60ch] text-[0.95rem] leading-relaxed text-muted">{summary}</p>
-                    <Link href={`/deployments#${story.id}`} className="v2-link mt-5 self-start text-[0.95rem]">
-                      Read the full account
-                    </Link>
+                    {flagship ? (
+                      <Link href={`/stories/${flagship.slug}`} className="v2-link mt-5 self-start text-[0.95rem]">
+                        Read the story
+                      </Link>
+                    ) : (
+                      <Link href={`/deployments#${story.id}`} className="v2-link mt-5 self-start text-[0.95rem]">
+                        Read the full account
+                      </Link>
+                    )}
                     {facts.length > 0 ? (
                       <dl className="mt-6 grid grid-cols-2 gap-4 border-t border-line pt-5 sm:grid-cols-3">
                         {facts.map((f) => (

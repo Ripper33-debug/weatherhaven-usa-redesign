@@ -24,6 +24,7 @@ import { SizeCompare } from "@/components/systems/SizeCompare";
 import { V2PageHeader } from "@/components/site/V2PageHeader";
 import { CampScene, type CampSceneApi } from "@/components/mission/CampScene";
 import { PlacePicker } from "@/components/mission/PlacePicker";
+import { CampLogistics } from "@/components/mission/CampLogistics";
 import type { CampFocus } from "@/lib/three/camp/campStage";
 import {
   climateForPlace,
@@ -314,6 +315,9 @@ function Results({
           </div>
         </section>
       ) : null}
+
+      {/* How the camp ships and sets up, and the one-page plan */}
+      <CampLogistics answers={answers} place={place} />
 
       {/* Size of the best match */}
       {sizes.length > 0 ? (

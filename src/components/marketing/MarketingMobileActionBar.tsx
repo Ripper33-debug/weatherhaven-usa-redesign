@@ -42,7 +42,8 @@ export function MarketingMobileActionBar() {
   return (
     <div
       className="fixed bottom-0 left-0 right-0 z-[55] border-t border-line bg-ink/95 backdrop-blur-xl md:hidden"
-      style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+      // Renders outside the .wh-v2 wrapper, so it sets the site's face itself (Geist isn't preloaded).
+      style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)", fontFamily: "var(--font-archivo), Archivo, ui-sans-serif, system-ui, sans-serif" }}
       role="navigation"
       aria-label="Quick actions"
     >

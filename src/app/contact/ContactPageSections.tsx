@@ -40,6 +40,8 @@ export function ContactPageSections() {
             <ul className="mt-3 space-y-2 text-[0.95rem]">
               {[
                 { inquiry: "Capability Briefing", label: "Request a capability briefing" },
+                { inquiry: "Engineer Call", label: "Talk to an engineer" },
+                { inquiry: "CAD Drawings", label: "Request CAD drawings" },
                 { inquiry: "Demo Request", label: "Request a demo" },
                 { inquiry: "Factory Tour", label: "Request a factory tour" },
               ].map((m) => (

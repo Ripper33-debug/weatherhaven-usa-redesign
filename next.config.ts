@@ -21,9 +21,15 @@ const securityHeaders = [
   { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), browsing-topics=()" },
   { key: "X-XSS-Protection", value: "1; mode=block" },
-  {
-    key: "Content-Security-Policy",
-    value: [
+  { key: "Content-Security-Policy", value: contentSecurityPolicy() },
+];
+
+/**
+ * The site's Content-Security-Policy. The content studio (/studio) gets the same policy plus the
+ * Sanity hosts it loads its scripts and fonts from; everything else keeps the strict one.
+ */
+function contentSecurityPolicy(studio = false): string {
+  const directives = [
       "default-src 'self'",
       // 'wasm-unsafe-eval' and blob: workers: the Draco decoder behind the /ar page's model-viewer.
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' https://va.vercel-scripts.com",
@@ -40,9 +46,20 @@ const securityHeaders = [
       "base-uri 'self'",
       "form-action 'self'",
       "frame-ancestors 'self' https://nexraft.com https://www.nexraft.com",
-    ].join("; "),
-  },
-];
+    ];
+  if (!studio) return directives.join("; ");
+  return directives
+    .map((d) => {
+      if (d.startsWith("script-src ")) return `${d} https://core.sanity-cdn.com https://*.sanity.io`;
+      if (d.startsWith("font-src ")) return `${d} https://design-system-static.sanity.io https://*.sanity.io`;
+      return d;
+    })
+    .join("; ");
+}
+
+const studioSecurityHeaders = securityHeaders.map((h) =>
+  h.key === "Content-Security-Policy" ? { ...h, value: contentSecurityPolicy(true) } : h,
+);
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
@@ -59,9 +76,13 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        source: "/(.*)",
+        // Everything except the content studio, which gets its own policy below (two CSP headers
+        // on one response would both apply, so the studio must be left out here).
+        source: "/((?!studio(?:/|$)).*)",
         headers: securityHeaders,
       },
+      { source: "/studio", headers: studioSecurityHeaders },
+      { source: "/studio/:path*", headers: studioSecurityHeaders },
       {
         // AR Quick Look on iPhone only opens USDZ files served with their own media type.
         source: "/models/ar/:name.usdz",
@@ -121,6 +142,8 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 86400,
     remotePatterns: [
+      // Photos uploaded in the content studio (Sanity's image CDN).
+      { protocol: "https", hostname: "cdn.sanity.io", pathname: "/images/**" },
       {
         protocol: "https",
         hostname: "eiec269001.blob.core.windows.net",

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getHomepageCopy } from "@/sanity/content";
 import { pageMeta } from "@/lib/page-meta";
 import { HomeHero } from "@/components/home/v2/HomeHero";
 import { HomeTreccScene } from "@/components/home/v2/HomeTreccScene";
@@ -23,16 +24,17 @@ export const metadata: Metadata = {
 export const revalidate = 300;
 
 export default async function HomePage() {
+  const copy = await getHomepageCopy();
   // Live weather for the hero readout (cached for 30 minutes; null hides the readout).
   return (
     <>
-      <HomeHero />
+      <HomeHero copy={copy} />
       <HomeTreccScene />
       <HomeSystems />
       <HomeDeploymentGlobe />
       <HomeFactory />
       <HomeNews />
-      <HomeCta />
+      <HomeCta copy={copy} />
     </>
   );
 }

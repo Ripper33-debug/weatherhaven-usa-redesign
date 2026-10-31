@@ -34,11 +34,14 @@ export function SiteChrome({
   const pathname = usePathname();
   const bare = isAuthGatePage(pathname);
   const adminConsole = isAdminPath(pathname);
-  const sofMicrosite = pathname === "/sof-solutions" || pathname.startsWith("/sof-solutions/");
+  // The content studio (/studio) is a full-screen app of its own.
+  const studio = pathname === "/studio" || pathname.startsWith("/studio/");
+  // The SOF portal pages keep their own nav and footer; the public /sof-solutions page uses the site's.
+  const sofMicrosite = pathname.startsWith("/sof-solutions/");
   const publicSite = isPublicSitePage(pathname);
   const pageFade = usePageFade(pathname);
 
-  if (bare || adminConsole) {
+  if (bare || adminConsole || studio) {
     return (
       <>
         <SkipToContent />
