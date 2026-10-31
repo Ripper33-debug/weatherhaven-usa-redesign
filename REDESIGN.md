@@ -179,6 +179,7 @@ An independent design review of every public page listed what made the site read
   - Stories (`src/lib/stories.ts`) and team (`src/lib/team.ts`): once the studio has any, it's the list.
   - News (`src/app/api/_lib/news-releases.ts`): the public list comes from the studio once it has items; the old admin's own news list is unchanged.
   - Homepage copy: `getHomepageCopy()`.
+- **Connected (Oct 31):** project `w31ge8yv`, dataset `production` (public read). Today's content was imported: the homepage, 17 systems, 3 stories (10 photos uploaded) and 12 news items. An edit in the studio showed on the site within about a minute.
 - **Setting it up:** Weatherhaven creates the Sanity project (dataset `production`) and adds this site's address under API → CORS origins with credentials. Put the project ID in `src/sanity/env.ts` (it isn't secret) or `NEXT_PUBLIC_SANITY_PROJECT_ID` on Vercel. Then load today's content: `SANITY_API_WRITE_TOKEN=… NEXT_PUBLIC_SANITY_PROJECT_ID=… npx vite-node --config vitest.config.ts scripts/cms/import-to-sanity.ts` (`--dry-run` first; delete the token afterwards). `npx sanity schema validate` checks the schema.
 - **Security:** /studio gets its own Content-Security-Policy (the site's plus Sanity's script and font hosts, `next.config.ts`); every other page keeps the strict one. The studio is noindex and editors sign in with their own Sanity accounts.
 
