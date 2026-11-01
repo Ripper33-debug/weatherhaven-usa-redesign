@@ -81,6 +81,7 @@ export default async function AboutPage() {
         alt="Red Polar Chief shelters on snow below a mountain, a helicopter landing beside them"
         caption="Polar Chief shelters in a snow camp."
         position="50% 72%"
+        priority
       >
         <section aria-label="Weatherhaven in numbers" className="bg-gradient-to-t from-ink via-ink/80 to-transparent pb-14 pt-28 sm:pb-16 sm:pt-36">
           <div className="v2-wrap">

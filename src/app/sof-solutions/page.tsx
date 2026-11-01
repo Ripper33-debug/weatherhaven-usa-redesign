@@ -63,7 +63,7 @@ export default function SofSolutionsPage() {
         </div>
       </V2PageHeader>
 
-      {photo ? <PhotoBand src={photo.src} alt={photo.alt} caption={photo.caption} position={photo.position} height="medium" /> : null}
+      {photo ? <PhotoBand src={photo.src} alt={photo.alt} caption={photo.caption} position={photo.position} height="medium" priority /> : null}
 
       <div className="v2-wrap py-20 sm:py-24">
         {systems.length ? (

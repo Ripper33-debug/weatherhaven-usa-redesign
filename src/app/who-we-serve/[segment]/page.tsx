@@ -215,7 +215,7 @@ export default async function BuyerSegmentPage({ params }: Props) {
         lead={s.lead}
         wide
       />
-      {photo ? <PhotoBand src={photo.src} alt={photo.alt} caption={photo.caption} position={photo.position} height="medium" /> : null}
+      {photo ? <PhotoBand src={photo.src} alt={photo.alt} caption={photo.caption} position={photo.position} height="medium" priority /> : null}
       <div className="v2-wrap py-20 sm:py-24">
         {s.portal ? <Portal /> : null}
         {s.record.length ? <OnRecord record={s.record} sites={s.sites} first={!s.portal} /> : null}

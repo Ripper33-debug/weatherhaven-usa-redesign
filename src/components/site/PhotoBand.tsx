@@ -15,6 +15,7 @@ export function PhotoBand({
   position = "50% 50%",
   height = "tall",
   fadeTo = "ink",
+  priority = false,
 }: {
   src: string;
   alt: string;
@@ -25,13 +26,25 @@ export function PhotoBand({
   height?: "tall" | "medium";
   /** The colour the photo fades into at its lower edge (the next section's background). */
   fadeTo?: "ink" | "hull";
+  /** The band sits right under the page header, so it is often the largest first paint: load it early. */
+  priority?: boolean;
 }) {
   const h = height === "tall" ? "h-[62svh] min-h-[380px] sm:h-[72svh]" : "h-[44svh] min-h-[300px]";
   const fade = fadeTo === "hull" ? "from-hull via-hull/35" : "from-ink via-ink/35";
   return (
     <figure className="relative isolate m-0">
       <div className={`v2-parallax relative ${h} overflow-hidden bg-hull`}>
-        <Image src={src} alt={alt} fill sizes="100vw" className="v2-photo object-cover" style={{ objectPosition: position }} {...blurProps(src)} />
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          sizes="100vw"
+          priority={priority}
+          fetchPriority={priority ? "high" : undefined}
+          className="v2-photo object-cover"
+          style={{ objectPosition: position }}
+          {...blurProps(src)}
+        />
       </div>
       <div aria-hidden className={`pointer-events-none absolute inset-0 bg-gradient-to-t ${fade} to-transparent`} />
       {children ? <div className="absolute inset-x-0 bottom-0">{children}</div> : null}

@@ -1772,3 +1772,20 @@ a[href^="tel:"] {
     transform: none;
   }
 }
+
+/* Touch: text links and breadcrumbs get a taller hit area (about 36px) from an invisible
+   pseudo-element, so nothing moves. In the components layer, so a utility like `absolute` wins. */
+@layer components {
+  @media (pointer: coarse) {
+    .v2-link,
+    nav[aria-label="Breadcrumb"] a {
+      position: relative;
+    }
+    .v2-link::after,
+    nav[aria-label="Breadcrumb"] a::after {
+      content: "";
+      position: absolute;
+      inset: -0.4rem -0.2rem;
+    }
+  }
+}
