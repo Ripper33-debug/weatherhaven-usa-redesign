@@ -27,6 +27,22 @@ const programLinks = [
   { href: "/sof-solutions/request-access", label: "Request SOF access" },
 ];
 
+type FooterLink = { href: string; label: string; external?: true };
+type FooterGroup = { title: string; links: FooterLink[] };
+
+const families: FooterGroup[] = SYSTEMS_BY_FAMILY.map((f) => ({
+  title: f.name,
+  links: f.systems.map((s) => ({ href: s.href, label: s.name })),
+}));
+const byId = (id: string) => families[SYSTEMS_BY_FAMILY.findIndex((f) => f.id === id)];
+
+const columns: FooterGroup[][] = [
+  [byId("expandable")],
+  [byId("softwall"), byId("inflatable")],
+  [byId("polar"), { title: "Programs", links: [...programLinks, { href: "https://www.weatherhaven.com", label: "Weatherhaven global site", external: true as const }] }],
+  [{ title: "Company", links: companyLinks }],
+].map((col) => col.filter(Boolean));
+
 export function Footer() {
   const year = new Date().getFullYear();
   return (
@@ -44,7 +60,7 @@ export function Footer() {
             Rapidly deployable shelters, camps and field hospitals for military, medical and polar operations since
             1981.
           </p>
-          <div className="mt-8 space-y-5 text-[0.9rem] leading-relaxed">
+          <div className="mt-8 space-y-5 text-[0.9375rem] leading-relaxed">
             <div>
               <p className="font-semibold text-snow">US office</p>
               <p className="text-muted">{COMPANY_CONTACT.legalName}</p>
@@ -64,60 +80,42 @@ export function Footer() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3 lg:grid-cols-4">
-          {SYSTEMS_BY_FAMILY.map((family) => (
-            <div key={family.id} className={family.id === "expandable" ? "" : ""}>
-              <p className="text-[0.9rem] font-semibold text-snow">{family.name}</p>
-              <ul className="mt-4 space-y-2.5">
-                {family.systems.map((s) => (
-                  <li key={s.slug}>
-                    <Link href={s.href} className="text-[0.9rem] text-muted no-underline transition-colors hover:text-snow">
-                      {s.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+        {/* Four columns of link groups; the shorter groups share a column so no column runs empty. */}
+        <div className="grid grid-cols-2 gap-x-8 gap-y-10 lg:grid-cols-4">
+          {columns.map((col, i) => (
+            <div key={i} className="space-y-10">
+              {col.map((group) => (
+                <div key={group.title}>
+                  <p className="text-[0.9375rem] font-semibold text-snow">{group.title}</p>
+                  <ul className="mt-4 space-y-2.5">
+                    {group.links.map((l) => (
+                      <li key={l.href}>
+                        {"external" in l ? (
+                          <a
+                            href={l.href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="v2-link-sweep text-[0.9375rem] text-muted transition-colors hover:text-snow"
+                          >
+                            {l.label}
+                          </a>
+                        ) : (
+                          <Link href={l.href} className="v2-link-sweep text-[0.9375rem] text-muted transition-colors hover:text-snow">
+                            {l.label}
+                          </Link>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
             </div>
           ))}
-          <div>
-            <p className="text-[0.9rem] font-semibold text-snow">Company</p>
-            <ul className="mt-4 space-y-2.5">
-              {companyLinks.map((l) => (
-                <li key={l.href}>
-                  <Link href={l.href} className="text-[0.9rem] text-muted no-underline transition-colors hover:text-snow">
-                    {l.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <p className="text-[0.9rem] font-semibold text-snow">Programs</p>
-            <ul className="mt-4 space-y-2.5">
-              {programLinks.map((l) => (
-                <li key={l.href}>
-                  <Link href={l.href} className="text-[0.9rem] text-muted no-underline transition-colors hover:text-snow">
-                    {l.label}
-                  </Link>
-                </li>
-              ))}
-              <li>
-                <a
-                  href="https://www.weatherhaven.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[0.9rem] text-muted no-underline transition-colors hover:text-snow"
-                >
-                  Weatherhaven global site
-                </a>
-              </li>
-            </ul>
-          </div>
         </div>
       </div>
 
       <div className="border-t border-line">
-        <div className="v2-wrap flex flex-col gap-6 py-8 text-[0.8rem] leading-relaxed text-muted lg:flex-row lg:items-start lg:justify-between">
+        <div className="v2-wrap flex flex-col gap-6 py-8 text-[0.875rem] leading-relaxed text-muted lg:flex-row lg:items-start lg:justify-between lg:gap-12">
           <div className="space-y-2">
             <p>
               © {year} {company.name} All rights reserved.

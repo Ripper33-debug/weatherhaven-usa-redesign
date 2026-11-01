@@ -111,6 +111,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      data-scroll-behavior="smooth"
       className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${archivo.variable} ${archivoFigures.variable} h-full overflow-x-clip`}
     >
       <body className="flex min-h-full min-w-0 flex-col overflow-x-clip font-sans text-zinc-100 antialiased">

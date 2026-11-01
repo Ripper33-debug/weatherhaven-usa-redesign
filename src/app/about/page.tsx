@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { V2PageHeader } from "@/components/site/V2PageHeader";
+import { PhotoBand } from "@/components/site/PhotoBand";
 import { CopyCode } from "@/components/site/CopyCode";
 import { HomeTimeline } from "@/components/home/v2/HomeTimeline";
 import { COMPANY_CONTACT, companyPhoneHref } from "@/lib/company-facts";
@@ -15,6 +16,8 @@ import { blurProps } from "@/lib/image-blur";
 import { pageMeta } from "@/lib/page-meta";
 
 const PHOTO = "/products/ehmecc/gallery/01-EH-EXTERIOR.jpg";
+/** The opening band: polar work is where the company started. */
+const BAND = "/products/polar-chief/gallery/01-com-PolarChief149.jpg";
 
 export const metadata: Metadata = pageMeta({
   title: "About Weatherhaven",
@@ -72,45 +75,54 @@ export default async function AboutPage() {
         wide
       />
 
-      <div className="bg-ink">
-        {/* The numbers */}
-        <section aria-label="Weatherhaven in numbers" className="border-b border-line py-14 sm:py-16">
-          <dl className="v2-wrap grid grid-cols-2 gap-x-8 gap-y-10 lg:grid-cols-4">
-            {numbers.map((n) => (
-              <div key={n.label} className="min-w-0 border-t border-line-strong pt-4">
-                <dt className="sr-only">{n.label}</dt>
-                <dd className="v2-figure v2-tnum text-[clamp(1.8rem,4vw,3rem)] leading-none text-snow">{n.value}</dd>
-                <dd className="mt-2.5 text-[0.9rem] leading-snug text-muted">
-                  {n.href ? (
-                    <Link href={n.href} className="text-muted underline decoration-line-strong underline-offset-2 hover:text-snow">
-                      {n.label}
-                    </Link>
-                  ) : (
-                    n.label
-                  )}
-                </dd>
-              </div>
-            ))}
-          </dl>
+      {/* The numbers, over the opening photograph */}
+      <PhotoBand
+        src={BAND}
+        alt="Red Polar Chief shelters on snow below a mountain, a helicopter landing beside them"
+        caption="Polar Chief shelters in a snow camp."
+        position="50% 72%"
+      >
+        <section aria-label="Weatherhaven in numbers" className="bg-gradient-to-t from-ink via-ink/80 to-transparent pb-14 pt-28 sm:pb-16 sm:pt-36">
+          <div className="v2-wrap">
+            <dl className="grid grid-cols-2 gap-x-8 gap-y-8 lg:grid-cols-4">
+              {numbers.map((n) => (
+                <div key={n.label} className="min-w-0 border-t border-snow/40 pt-4">
+                  <dt className="sr-only">{n.label}</dt>
+                  <dd className="v2-figure v2-tnum text-[clamp(2rem,4.4vw,3.4rem)] leading-none text-snow">{n.value}</dd>
+                  <dd className="mt-2.5 text-[0.9375rem] leading-snug text-snow/85">
+                    {n.href ? (
+                      <Link href={n.href} className="text-snow/85 underline decoration-snow/40 underline-offset-2 hover:text-snow">
+                        {n.label}
+                      </Link>
+                    ) : (
+                      n.label
+                    )}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </div>
         </section>
+      </PhotoBand>
 
+      <div className="bg-ink">
         {/* What the company does */}
         <section aria-labelledby="what-heading" className="border-b border-line">
-          <div className="v2-wrap grid gap-10 py-16 sm:py-20 lg:grid-cols-12 lg:items-center lg:gap-14">
-            <figure className="lg:col-span-7">
-              <div className="relative aspect-[16/10] overflow-hidden">
+          <div className="v2-wrap grid gap-10 py-20 sm:py-28 lg:grid-cols-12 lg:items-center lg:gap-14">
+            <figure className="v2-reveal lg:col-span-7">
+              <div className="relative aspect-[16/10] overflow-hidden bg-hull">
                 <Image
                   src={PHOTO}
                   alt="Deployed EHMECC expandable containers joined by connecting corridors inside a hall"
                   fill
                   sizes="(min-width: 1024px) 58vw, 100vw"
-                  className="object-cover"
+                  className="v2-photo object-cover"
                   {...blurProps(PHOTO)}
                 />
               </div>
               <figcaption className="mt-3 text-[0.875rem] text-muted">EHMECCs set up indoors and joined into one complex.</figcaption>
             </figure>
-            <div className="lg:col-span-5">
+            <div className="v2-reveal lg:col-span-5">
               <h2 id="what-heading" className="v2-h2 max-w-[18ch] text-snow">
                 One company, from the drawing to the teardown
               </h2>
@@ -134,13 +146,13 @@ export default async function AboutPage() {
         </section>
 
         {/* Plants and the US company */}
-        <section aria-labelledby="where-heading" className="border-b border-line py-16 sm:py-20">
+        <section aria-labelledby="where-heading" className="v2-light py-20 sm:py-28">
           <div className="v2-wrap">
-            <h2 id="where-heading" className="v2-h2 text-snow">
+            <h2 id="where-heading" className="v2-h2 v2-reveal text-snow">
               Where it&rsquo;s built, and who you contract with
             </h2>
-            <div className="mt-10 grid gap-12 lg:grid-cols-2 lg:gap-16">
-              <div className="border-t border-line pt-6">
+            <div className="v2-reveal-stagger mt-12 grid gap-8 lg:grid-cols-2 lg:gap-8">
+              <div className="v2-plate px-6 py-7 sm:px-8 sm:py-8">
                 <h3 className="v2-h3 text-snow">The plants</h3>
                 <p className="mt-3 max-w-[52ch] text-[0.975rem] leading-relaxed text-snow/85">
                   Weatherhaven builds in its own plants in Burnaby, British Columbia, and Brockville, Ontario, both
@@ -169,7 +181,7 @@ export default async function AboutPage() {
                 </a>
               </div>
 
-              <div className="border-t border-line pt-6">
+              <div className="v2-plate px-6 py-7 sm:px-8 sm:py-8">
                 <h3 className="v2-h3 text-snow">Weatherhaven USA</h3>
                 <p className="mt-3 max-w-[52ch] text-[0.975rem] leading-relaxed text-snow/85">
                   {PROCUREMENT.legalName} is the US company: US programs order through it, as a new requirement or under
@@ -210,12 +222,12 @@ export default async function AboutPage() {
         </section>
 
         {team.length > 0 ? (
-          <section aria-labelledby="team-heading" className="border-b border-line py-16 sm:py-20">
+          <section aria-labelledby="team-heading" className="py-20 sm:py-28">
             <div className="v2-wrap">
-              <h2 id="team-heading" className="v2-h2 text-snow">
+              <h2 id="team-heading" className="v2-h2 v2-reveal text-snow">
                 The Weatherhaven USA team
               </h2>
-              <ul className="mt-10 grid gap-x-10 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+              <ul className="v2-reveal-stagger mt-10 grid gap-x-10 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
                 {team.map((p) => (
                   <Person key={p.name} person={p} />
                 ))}
@@ -227,22 +239,37 @@ export default async function AboutPage() {
         <HomeTimeline />
 
         {/* Stories */}
-        <section aria-labelledby="stories-heading" className="border-t border-line py-16 sm:py-20">
-          <div className="v2-wrap grid gap-10 lg:grid-cols-12 lg:gap-14">
-            <div className="lg:col-span-4">
+        <section aria-labelledby="stories-heading" className="border-t border-line py-20 sm:py-28">
+          <div className="v2-wrap">
+            <div className="v2-reveal flex flex-wrap items-end justify-between gap-x-10 gap-y-4">
               <h2 id="stories-heading" className="v2-h2 text-snow">
                 Three programs in depth
               </h2>
-              <Link href="/stories" className="v2-link mt-5 inline-block text-[0.95rem]">
+              <Link href="/stories" className="v2-link text-[0.95rem]">
                 All stories
               </Link>
             </div>
-            <ul className="border-t border-line lg:col-span-8">
+            <ul className={`v2-reveal-stagger mt-12 grid gap-x-8 gap-y-12 ${stories.length % 3 === 0 ? "md:grid-cols-3" : "md:grid-cols-2"}`}>
               {stories.map((s) => (
-                <li key={s.slug} className="border-b border-line">
-                  <Link href={`/stories/${s.slug}`} className="group grid gap-1 py-5 no-underline sm:grid-cols-[1fr_auto] sm:items-baseline sm:gap-6">
-                    <span className="text-[1.1rem] font-semibold text-snow group-hover:text-signal">{s.title}</span>
-                    <span className="text-[0.9rem] text-muted">{s.place}</span>
+                <li key={s.slug}>
+                  <Link href={`/stories/${s.slug}`} className="v2-press group block no-underline">
+                    <span className="v2-media-zoom relative block aspect-[3/2] bg-hull">
+                      <Image
+                        src={s.hero.src}
+                        alt={s.hero.alt}
+                        fill
+                        sizes="(min-width: 768px) 33vw, 100vw"
+                        className="v2-photo object-cover"
+                        {...blurProps(s.hero.src)}
+                      />
+                      {s.hero.model ? (
+                        <span className="absolute bottom-2 left-2 bg-ink/80 px-2 py-1 text-[0.8125rem] text-snow/90">3D model</span>
+                      ) : null}
+                    </span>
+                    <span className="mt-4 block text-[0.9375rem] text-muted">{s.place}</span>
+                    <span className="mt-1.5 block text-[1.2rem] font-semibold leading-snug text-snow transition-colors group-hover:text-signal [font-variation-settings:'wdth'_106]">
+                      {s.title}
+                    </span>
                   </Link>
                 </li>
               ))}
@@ -251,8 +278,8 @@ export default async function AboutPage() {
         </section>
 
         {/* Next step */}
-        <section aria-label="Contact" className="border-t border-line bg-hull py-14 sm:py-16">
-          <div className="v2-wrap flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+        <section aria-label="Contact" className="border-t border-line bg-hull py-20 sm:py-24">
+          <div className="v2-wrap v2-reveal flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <p className="v2-h2 max-w-[22ch] text-snow">Talk to the people who build it</p>
               <p className="mt-4 max-w-[60ch] text-[0.95rem] text-muted">

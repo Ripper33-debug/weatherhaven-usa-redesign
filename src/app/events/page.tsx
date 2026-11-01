@@ -78,7 +78,7 @@ function EventRow({ event }: { event: CompanyEventRow }) {
       <div>
         <h3 className="text-[1.15rem] font-semibold text-snow">{event.title}</h3>
         {event.summary ? <p className="mt-2 text-[0.95rem] leading-relaxed text-muted">{event.summary}</p> : null}
-        {event.location ? <p className="mt-2 text-[0.85rem] text-muted">{event.location.replace(" — ", ", ")}</p> : null}
+        {event.location ? <p className="mt-2 text-[0.875rem] text-muted">{event.location.replace(" — ", ", ")}</p> : null}
       </div>
       <div className="md:text-right">
         {event.registration_url ? (
@@ -103,12 +103,12 @@ export default async function EventsPage() {
         lead="Book a capability briefing at a time that suits your program, or meet the Weatherhaven team at a defense show."
       />
 
-      <section aria-labelledby="book-heading" className="bg-ink py-16 sm:py-20">
+      <section aria-labelledby="book-heading" className="bg-ink py-20 sm:py-28">
         <div className="v2-wrap">
           <h2 id="book-heading" className="v2-h2 text-snow">
             Book a briefing
           </h2>
-          <ul className="mt-10 grid gap-px bg-line md:grid-cols-3">
+          <ul className="v2-reveal-stagger mt-10 grid gap-px bg-line md:grid-cols-3">
             {BRIEFINGS.map((b) => (
               <li key={b.title} className="flex flex-col bg-ink py-6 md:px-6 md:first:pl-0">
                 <h3 className="v2-h3 text-snow">{b.title}</h3>
@@ -122,9 +122,9 @@ export default async function EventsPage() {
         </div>
       </section>
 
-      <section aria-labelledby="upcoming-heading" className="border-t border-line bg-ink py-16 sm:py-20">
+      <section aria-labelledby="upcoming-heading" className="border-t border-line bg-ink py-20 sm:py-24">
         <div className="v2-wrap">
-          <h2 id="upcoming-heading" className="v2-h2 text-snow">
+          <h2 id="upcoming-heading" className="v2-h2 v2-reveal text-snow">
             Upcoming
           </h2>
           {upcoming.length > 0 ? (
@@ -134,7 +134,7 @@ export default async function EventsPage() {
               ))}
             </ul>
           ) : (
-            <p className="v2-body mt-4">
+            <p className="v2-body mt-4 max-w-[64ch]">
               No public sessions are on the calendar right now. New shows and webinars are posted here as they are
               confirmed; in the meantime, a briefing can be booked for any date.
             </p>
@@ -142,19 +142,19 @@ export default async function EventsPage() {
         </div>
       </section>
 
-      <section aria-labelledby="shows-heading" className="border-t border-line bg-hull py-16 sm:py-20">
+      <section aria-labelledby="shows-heading" className="v2-light py-20 sm:py-28">
         <div className="v2-wrap">
-          <h2 id="shows-heading" className="v2-h2 text-snow">
+          <h2 id="shows-heading" className="v2-h2 v2-reveal text-snow">
             On the show floor in 2026
           </h2>
-          <ul className="mt-10 grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
+          <ul className="v2-reveal-stagger mt-12 grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
             {SHOWS_2026.map((s) => (
               <li key={s.name} className="border-t-2 border-signal pt-5">
-                <p className="text-[0.85rem] text-muted">{s.dates}</p>
+                <p className="text-[0.875rem] text-muted">{s.dates}</p>
                 <h3 className="mt-2 text-[1.2rem] font-semibold text-snow [font-variation-settings:'wdth'_108]">{s.name}</h3>
-                <p className="text-[0.9rem] text-snow/80">{s.place}</p>
-                <p className="mt-3 text-[0.9rem] leading-relaxed text-muted">{s.note}</p>
-                <a href={s.url} target="_blank" rel="noopener noreferrer" className="v2-link mt-4 inline-block text-[0.9rem]">
+                <p className="text-[0.95rem] text-snow/80">{s.place}</p>
+                <p className="mt-3 text-[0.95rem] leading-relaxed text-muted">{s.note}</p>
+                <a href={s.url} target="_blank" rel="noopener noreferrer" className="v2-link mt-4 inline-block text-[0.95rem]">
                   Read the announcement<span className="sr-only"> (opens in a new tab)</span>
                 </a>
               </li>
@@ -164,7 +164,7 @@ export default async function EventsPage() {
       </section>
 
       {past.length > 0 ? (
-        <section aria-labelledby="past-heading" className="border-t border-line bg-ink py-16 sm:py-20">
+        <section aria-labelledby="past-heading" className="bg-ink py-20 sm:py-24">
           <div className="v2-wrap">
             <h2 id="past-heading" className="v2-h2 text-snow">
               Past sessions

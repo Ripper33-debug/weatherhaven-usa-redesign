@@ -1,0 +1,129 @@
+/* Polish pass: product styles. Owned by one workstream; keep rules scoped to classes prefixed v2-product- or to data attributes. Respect prefers-reduced-motion. */
+
+/* Product photo viewer: the incoming photo fades in over the outgoing one. */
+@keyframes v2-product-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.v2-product-fade {
+  animation: v2-product-fade 560ms var(--v2-ease-out) both;
+}
+.v2-product-frame:focus-visible {
+  outline: 2px solid var(--color-signal);
+  outline-offset: 3px;
+}
+/* The thumbnail strip scrolls inside itself, with a quiet scrollbar. */
+.v2-product-strip {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line-strong) transparent;
+  scroll-snap-type: x proximity;
+}
+.v2-product-strip > li {
+  scroll-snap-align: center;
+}
+/* Full-screen photos fade up when opened. */
+.v2-product-dialog[open] {
+  opacity: 1;
+  transition:
+    opacity 320ms var(--v2-ease-out),
+    overlay 320ms allow-discrete,
+    display 320ms allow-discrete;
+}
+@starting-style {
+  .v2-product-dialog[open] {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v2-product-fade {
+    animation: none;
+  }
+  .v2-product-dialog[open] {
+    transition: none;
+  }
+}
+
+/* Product spec bar: slides in from under the header (tablet and up) or up from the bottom (phones). */
+.v2-product-bar {
+  transition:
+    transform 460ms var(--v2-ease-out),
+    opacity 260ms ease;
+}
+.v2-product-bar[data-shown="false"] {
+  opacity: 0;
+  pointer-events: none;
+}
+.v2-product-bar-top[data-shown="false"] {
+  transform: translateY(-100%);
+}
+.v2-product-bar-bottom[data-shown="false"] {
+  transform: translateY(100%);
+}
+@media (prefers-reduced-motion: reduce) {
+  .v2-product-bar {
+    transition: none;
+  }
+}
+
+/* System cards give a little when pressed. Uses `scale` rather than `transform`, so it still works
+   on cards that a scroll reveal (.v2-reveal-stagger) has animated into place. */
+.v2-product-card {
+  transition: scale 160ms var(--v2-ease-out);
+}
+.v2-product-card:active {
+  scale: 0.985;
+}
+@media (prefers-reduced-motion: reduce) {
+  .v2-product-card {
+    transition: none;
+  }
+}
+
+/* Size drawings (SizeCompare): colours as variables, so the same drawing reads on the dark page and
+   on a light data band. CSS beats the SVG attributes, which stay as the fallback. */
+.v2-product-drawing {
+  --d-grid: rgb(148 170 196 / 0.09);
+  --d-grid-strong: rgb(148 170 196 / 0.2);
+  --d-ref: rgb(148 170 196 / 0.6);
+  --d-ref-fill: rgb(148 170 196 / 0.06);
+  --d-ref-line: rgb(148 170 196 / 0.22);
+  --d-ground: rgb(148 170 196 / 0.45);
+  --d-packed: rgb(238 242 246 / 0.85);
+  --d-packed-fill: rgb(238 242 246 / 0.16);
+  --d-accent: #f18522;
+  --d-accent-fill: rgb(241 133 34 / 0.22);
+  --d-accent-side: rgb(241 133 34 / 0.14);
+  --d-target: rgb(241 133 34 / 0.55);
+}
+.v2-light .v2-product-drawing {
+  --d-grid: rgb(15 23 34 / 0.06);
+  --d-grid-strong: rgb(15 23 34 / 0.14);
+  --d-ref: rgb(15 23 34 / 0.55);
+  --d-ref-fill: rgb(15 23 34 / 0.04);
+  --d-ref-line: rgb(15 23 34 / 0.16);
+  --d-ground: rgb(15 23 34 / 0.45);
+  --d-packed: rgb(15 23 34 / 0.78);
+  --d-packed-fill: rgb(15 23 34 / 0.08);
+  --d-accent: #c4610f;
+  --d-accent-fill: rgb(214 110 22 / 0.2);
+  --d-accent-side: rgb(214 110 22 / 0.13);
+  --d-target: rgb(196 97 15 / 0.6);
+}
+.v2-product-d-grid { stroke: var(--d-grid); }
+.v2-product-d-grid-strong { stroke: var(--d-grid-strong); }
+.v2-product-d-target { stroke: var(--d-target); }
+.v2-product-d-shape { fill: var(--d-accent-fill); stroke: var(--d-accent); }
+.v2-product-d-packed { fill: var(--d-packed-fill); stroke: var(--d-packed); }
+.v2-product-d-side { fill: var(--d-accent-side); stroke: var(--d-accent); }
+.v2-product-d-ref { fill: var(--d-ref-fill); stroke: var(--d-ref); }
+.v2-product-d-ref-line { stroke: var(--d-ref-line); }
+.v2-product-d-ground { stroke: var(--d-ground); }
+.v2-product-d-ref-key { border-color: var(--d-ref); }
+.v2-product-drawing { --d-packed-cover: rgb(10 15 23 / 0.55); }
+.v2-light .v2-product-drawing { --d-packed-cover: rgb(238 241 244 / 0.72); }
+.v2-product-d-packed-cover { fill: var(--d-packed-cover); stroke: var(--d-packed); }

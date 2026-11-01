@@ -7,11 +7,11 @@ import { COMPANY_CONTACT, companyPhoneHref } from "@/lib/company-facts";
 
 export function ContactPageSections() {
   return (
-    <section className="bg-ink py-14 sm:py-20">
-      <div className="v2-wrap grid gap-12 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,0.85fr)] lg:gap-16">
+    <section className="bg-ink py-16 sm:py-24">
+      <div className="v2-wrap grid gap-14 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,0.85fr)] lg:gap-16">
         <div>
           <h2 className="v2-h2 text-snow">Share your requirement</h2>
-          <p className="v2-body mt-3">
+          <p className="v2-body mt-3 max-w-[60ch]">
             Four fields are enough to start. Program, timeline and site details help us route you to the right
             specialist.
           </p>
@@ -30,29 +30,36 @@ export function ContactPageSections() {
             <a href={companyPhoneHref(COMPANY_CONTACT.phone)} className="v2-figure mt-5 block text-[1.9rem] text-snow no-underline hover:text-signal">
               {COMPANY_CONTACT.phone}
             </a>
-            <Link href="/government" className="v2-link mt-4 inline-block text-[0.9rem]">
+            <Link href="/government" className="v2-link mt-4 inline-block text-[0.95rem]">
               CAGE, UEI and contract vehicles
             </Link>
           </div>
 
-          <div>
-            <h2 className="text-[1.05rem] font-semibold text-snow">Meet the team</h2>
-            <ul className="mt-3 space-y-2 text-[0.95rem]">
+          <nav aria-labelledby="request-types-heading">
+            <h2 id="request-types-heading" className="text-[1.05rem] font-semibold text-snow">
+              Or ask for something specific
+            </h2>
+            <ul className="mt-4 border-t border-line text-[0.95rem]">
               {[
-                { inquiry: "Capability Briefing", label: "Request a capability briefing" },
-                { inquiry: "Engineer Call", label: "Talk to an engineer" },
-                { inquiry: "CAD Drawings", label: "Request CAD drawings" },
-                { inquiry: "Demo Request", label: "Request a demo" },
-                { inquiry: "Factory Tour", label: "Request a factory tour" },
+                { inquiry: "Capability Briefing", label: "A capability briefing", note: "In person or online" },
+                { inquiry: "Engineer Call", label: "A call with an engineer", note: "Pick two or three times" },
+                { inquiry: "CAD Drawings", label: "CAD drawings", note: "In the formats you need" },
+                { inquiry: "Demo Request", label: "A demo", note: "See a system set up" },
+                { inquiry: "Factory Tour", label: "A factory tour", note: "See systems built and tested" },
               ].map((m) => (
-                <li key={m.inquiry}>
-                  <Link href={`/contact?inquiry=${encodeURIComponent(m.inquiry)}`} scroll={false} className="v2-link">
-                    {m.label}
+                <li key={m.inquiry} className="border-b border-line">
+                  <Link
+                    href={`/contact?inquiry=${encodeURIComponent(m.inquiry)}`}
+                    scroll={false}
+                    className="v2-press group flex items-baseline justify-between gap-4 py-3 no-underline"
+                  >
+                    <span className="text-snow transition-colors group-hover:text-signal">{m.label}</span>
+                    <span className="text-right text-[0.875rem] text-muted">{m.note}</span>
                   </Link>
                 </li>
               ))}
             </ul>
-          </div>
+          </nav>
 
           <div>
             <h2 className="text-[1.05rem] font-semibold text-snow">What happens next</h2>

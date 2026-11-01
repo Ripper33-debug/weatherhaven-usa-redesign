@@ -1,0 +1,124 @@
+/* The site's look for the deployment globe, loaded by globe.config.js: Archivo (the site's face)
+   instead of the package's condensed display and monospace faces, sentence case instead of
+   tracked capitals, square controls, and the site's text and line colours. Applies wherever the
+   globe renders (the homepage band, /deployments and the full-screen map). */
+@font-face {
+  font-family: "Archivo Site";
+  src: url("fonts/archivo-var.woff2") format("woff2");
+  font-weight: 400 700;
+  font-stretch: 100% 118%;
+  font-display: swap;
+}
+:root {
+  --font-display: "Archivo Site", "Arial Narrow", sans-serif;
+  --font-body: "Archivo Site", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-data: "Archivo Site", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --fg: #eef2f6;
+  --muted: #a6b2c3;
+  --line: rgb(148 170 196 / 0.16);
+  --line-strong: rgb(148 170 196 / 0.32);
+}
+body {
+  font-size: 15px;
+}
+h1,
+.eyebrow,
+.stats dt,
+.seg button,
+.tbtn,
+.readout,
+.hint,
+.kicker,
+.btn,
+.cta,
+.tag,
+.lw-kicker,
+.lower h2,
+.drawer-head h2 {
+  text-transform: none;
+  letter-spacing: 0;
+}
+/* The site's header already carries the logo and the page names the section. */
+.embed .brand {
+  display: none;
+}
+h1 {
+  font-weight: 620;
+  font-variation-settings: "wdth" 116;
+  font-size: clamp(26px, 2.7vw, 40px);
+  line-height: 1.02;
+  letter-spacing: -0.024em;
+  text-shadow: 0 2px 24px rgb(0 0 0 / 0.55);
+}
+.stats {
+  gap: 8px 32px;
+}
+.stats dd {
+  font-weight: 600;
+  font-variation-settings: "wdth" 100;
+  font-size: 34px;
+  letter-spacing: -0.02em;
+}
+.stats dt {
+  font-size: 14px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.seg,
+.tbtn,
+.ctl,
+.legend,
+.btn,
+.cta,
+.hint {
+  border-radius: 0;
+}
+.seg button {
+  border-radius: 0;
+  padding: 7px 13px;
+  font-size: 14px;
+  font-weight: 500;
+}
+.tbtn {
+  padding: 8px 14px;
+  font-size: 14px;
+  font-weight: 500;
+}
+.tbtn.tour {
+  font-weight: 600;
+}
+.btn,
+.cta {
+  font-size: 14px;
+  font-weight: 500;
+}
+.kicker {
+  font-size: 13px;
+}
+.legend span {
+  font-size: 13.5px;
+}
+.readout {
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+}
+.hint {
+  font-size: 14px;
+}
+.hud.compact .stats dd {
+  font-size: 24px;
+}
+.hud.compact .stats dt {
+  font-size: 13px;
+}
+@media (max-width: 700px) {
+  .stats {
+    gap: 6px 20px;
+  }
+  .stats dd {
+    font-size: 26px;
+  }
+  .stats dt {
+    font-size: 13px;
+  }
+}

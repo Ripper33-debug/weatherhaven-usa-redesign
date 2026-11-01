@@ -127,11 +127,11 @@ function ProgressRail({
                   aria-hidden
                   className={`block h-1 w-full transition-colors ${here ? "bg-signal" : done ? "bg-snow/60" : "bg-line-strong"}`}
                 />
-                <span className={`v2-tnum mt-3 text-[0.85rem] font-semibold ${here ? "text-signal" : done ? "text-snow" : "text-muted"}`}>
+                <span className={`v2-tnum mt-3 text-[0.875rem] font-semibold ${here ? "text-signal" : done ? "text-snow" : "text-muted"}`}>
                   {i + 1}
                   <span className="sr-only sm:not-sr-only sm:ml-2">{q.label}</span>
                 </span>
-                <span className="mt-0.5 hidden w-full truncate text-[0.85rem] text-muted group-enabled:group-hover:text-snow sm:block">
+                <span className="mt-0.5 hidden w-full truncate text-[0.875rem] text-muted group-enabled:group-hover:text-snow sm:block">
                   {done ? (q.key === "climate" && place ? place.name : labelFor(q.key, answers[q.key])) : " "}
                 </span>
               </button>

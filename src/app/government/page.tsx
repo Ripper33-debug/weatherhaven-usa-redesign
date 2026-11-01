@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { V2PageHeader } from "@/components/site/V2PageHeader";
+import { PhotoBand } from "@/components/site/PhotoBand";
 import { CopyCode } from "@/components/site/CopyCode";
 import { COMPANY_CONTACT, companyPhoneHref } from "@/lib/company-facts";
 import { PROCUREMENT } from "@/lib/procurement";
@@ -44,7 +45,7 @@ export default function GovernmentBuyersPage() {
       />
 
       {/* Identifiers and NAICS codes: a light data band, like the sheet a contracting office files */}
-      <div className="v2-light py-16 sm:py-20">
+      <div className="v2-light py-20 sm:py-28">
         <div className="v2-wrap">
           {/* Identifiers */}
           <section aria-labelledby="ids-heading" className="grid gap-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16">
@@ -95,7 +96,7 @@ export default function GovernmentBuyersPage() {
           </section>
 
           {/* NAICS */}
-          <section aria-labelledby="naics-heading" className="mt-16 grid gap-10 border-t border-line pt-12 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16">
+          <section aria-labelledby="naics-heading" className="v2-reveal mt-20 grid gap-10 border-t border-line pt-14 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16">
             <div>
               <h2 id="naics-heading" className="v2-h2 text-snow">
                 NAICS codes
@@ -103,8 +104,11 @@ export default function GovernmentBuyersPage() {
               <p className="v2-body mt-4 max-w-[44ch]">The codes in Weatherhaven Resources&rsquo; SAM.gov registration.</p>
             </div>
             <ul className="grid gap-x-8 sm:grid-cols-2">
-              {p.naics.map((n) => (
-                <li key={n.code} className="grid grid-cols-[4.5rem_1fr] gap-3 border-b border-line py-3">
+              {p.naics.map((n, i) => (
+                <li
+                  key={n.code}
+                  className={`grid grid-cols-[4.5rem_1fr] gap-3 border-b border-line py-3 ${p.naics.length % 2 === 1 && i === p.naics.length - 1 ? "sm:col-span-2" : ""}`}
+                >
                   <span className="v2-code text-[1rem] text-snow">{n.code}</span>
                   <span className="text-[0.95rem] text-muted">
                     {n.title}
@@ -117,10 +121,10 @@ export default function GovernmentBuyersPage() {
         </div>
       </div>
 
-      <div className="v2-wrap pb-24 pt-16 sm:pt-20">
+      <div className="v2-wrap py-20 sm:py-28">
         {/* Contract record */}
         <section aria-labelledby="record-heading">
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16">
+          <div className="v2-reveal grid gap-4 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16">
             <h2 id="record-heading" className="v2-h2 text-snow">
               Current vehicles and recent awards
             </h2>
@@ -129,22 +133,25 @@ export default function GovernmentBuyersPage() {
               by NSN, or an order under an existing agreement.
             </p>
           </div>
-          <ul className="mt-10 grid gap-px border border-line bg-line md:grid-cols-2">
-            {p.record.map((r) => (
-              <li key={r.title} className="flex flex-col bg-ink p-6 sm:p-8">
+          <ul className="v2-reveal-stagger mt-12 grid gap-px border border-line bg-line md:grid-cols-2">
+            {p.record.map((r, i) => (
+              <li
+                key={r.title}
+                className={`flex flex-col bg-ink p-6 sm:p-8 ${p.record.length % 2 === 1 && i === p.record.length - 1 ? "md:col-span-2" : ""}`}
+              >
                 <p className="v2-tech text-muted">{r.buyer}</p>
                 <h3 className="v2-h3 mt-3 text-snow">{r.title}</h3>
                 <p className="mt-3 text-[0.95rem] leading-relaxed text-muted">{r.text}</p>
                 {r.ids.length ? (
                   <p className="mt-4 flex flex-wrap gap-2">
                     {r.ids.map((id) => (
-                      <span key={id} className="v2-code px-2 py-1 text-[0.85rem] text-snow shadow-[inset_0_0_0_1px_var(--color-line-strong)]">
+                      <span key={id} className="v2-code px-2 py-1 text-[0.875rem] text-snow shadow-[inset_0_0_0_1px_var(--color-line-strong)]">
                         {id}
                       </span>
                     ))}
                   </p>
                 ) : null}
-                <p className="mt-auto pt-5 text-[0.85rem] text-muted">
+                <p className="mt-auto pt-5 text-[0.875rem] text-muted">
                   Source: <SourceLink href={r.source.href}>{r.source.label}</SourceLink>
                 </p>
               </li>
@@ -157,15 +164,26 @@ export default function GovernmentBuyersPage() {
             : every contract on public record and every confirmed site, in one table.
           </p>
         </section>
+      </div>
 
+      <PhotoBand
+        src="/products/mecc/gallery/16-MECCs_x5_deployed_01.jpg"
+        alt="Five white MECC expandable containers deployed side by side on a paved lot"
+        caption="Five MECCs deployed side by side."
+        position="50% 42%"
+        height="medium"
+      />
+
+      <div className="v2-wrap pb-24 pt-16 sm:pb-28 sm:pt-20">
         {/* What we provide */}
-        <section aria-labelledby="provide-heading" className="mt-24 grid gap-10 border-t border-line pt-12 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16">
-          <div>
+        <section aria-labelledby="provide-heading" className="grid gap-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16">
+          <div className="v2-reveal">
             <h2 id="provide-heading" className="v2-h2 text-snow">
               Support for a procurement
             </h2>
+            <p className="v2-body mt-4 max-w-[40ch]">What the US office can put together for a contracting team.</p>
           </div>
-          <ul className="border-t border-line">
+          <ul className="v2-reveal-stagger border-t border-line">
             {p.provide.map((item) => (
               <li key={item.title} className="grid gap-1 border-b border-line py-5 sm:grid-cols-[14rem_1fr] sm:gap-6">
                 <p className="font-semibold text-snow">{item.title}</p>
@@ -190,8 +208,8 @@ export default function GovernmentBuyersPage() {
         </section>
       </div>
 
-      <section className="border-t border-line bg-hull py-20">
-        <div className="v2-wrap flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+      <section className="border-t border-line bg-hull py-20 sm:py-24">
+        <div className="v2-wrap v2-reveal flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <h2 className="v2-h2 max-w-[22ch] text-snow">Scoping a requirement or a solicitation?</h2>
             <p className="v2-body mt-4 max-w-[52ch]">

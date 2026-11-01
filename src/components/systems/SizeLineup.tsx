@@ -27,7 +27,7 @@ function Tile({ size }: { size: SystemSize }) {
     <li className="flex flex-col" style={{ width: `calc(max(${W} * var(--ppi), 7.5rem))` }}>
       <div className="flex min-h-[calc(110*var(--ppi))] items-end">
         <svg viewBox={`0 0 ${W} ${H}`} aria-hidden className="block h-auto" style={{ width: `calc(${W} * var(--ppi))` }}>
-          <Shape size={size} dims={D} cx={cx} cy={cy} fill="rgb(241 133 34 / 0.2)" stroke="#f18522" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
+          <Shape size={size} dims={D} cx={cx} cy={cy} fill="rgb(241 133 34 / 0.2)" stroke="#f18522" className="v2-product-d-shape" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
           {P ? (
             <Shape
               size={{ ...size, profile: "box" }}
@@ -36,6 +36,7 @@ function Tile({ size }: { size: SystemSize }) {
               cy={cy}
               fill="rgb(10 15 23 / 0.55)"
               stroke="rgb(238 242 246 / 0.85)"
+              className="v2-product-d-packed-cover"
               strokeWidth="1.25"
               strokeDasharray="4 3"
               vectorEffect="non-scaling-stroke"
@@ -43,13 +44,13 @@ function Tile({ size }: { size: SystemSize }) {
           ) : null}
         </svg>
       </div>
-      <Link href={`/configurable-solutions/${size.slug}`} className="mt-3 text-[0.95rem] font-semibold text-snow no-underline hover:text-signal">
+      <Link href={`/configurable-solutions/${size.slug}`} className="mt-3 text-[0.9375rem] font-semibold text-snow no-underline hover:text-signal">
         {size.name}
       </Link>
-      <p className="v2-tnum text-[0.85rem] text-muted">
+      <p className="v2-tnum text-[0.875rem] text-muted">
         {size.areaPublished ? `${formatFt2(area)} ft² floor` : `≈ ${formatFt2(area)} ft² footprint`}
       </p>
-      <p className="v2-tnum text-[0.85rem] text-muted">{size.packedShort}</p>
+      <p className="v2-tnum text-[0.875rem] text-muted">{size.packedShort}</p>
     </li>
   );
 }
@@ -62,22 +63,22 @@ export function SizeLineup() {
   const isoW = ISO_20FT.l + PAD * 2;
   const isoH = ISO_20FT.w + PAD * 2;
   return (
-    <div className="[--ppi:0.36px] sm:[--ppi:0.46px] lg:[--ppi:0.56px]">
+    <div className="v2-product-drawing [--ppi:0.36px] sm:[--ppi:0.46px] lg:[--ppi:0.56px]">
       <ul className="flex flex-wrap items-end gap-x-8 gap-y-10">
         <li className="flex flex-col" style={{ width: `calc(max(${isoW} * var(--ppi), 7.5rem))` }}>
           <div className="flex min-h-[calc(110*var(--ppi))] items-end">
             <svg viewBox={`0 0 ${isoW} ${isoH}`} aria-hidden className="block h-auto" style={{ width: `calc(${isoW} * var(--ppi))` }}>
-              <rect x={PAD} y={PAD} width={ISO_20FT.l} height={ISO_20FT.w} fill="rgb(148 170 196 / 0.06)" stroke="rgb(148 170 196 / 0.6)" strokeWidth="1.25" vectorEffect="non-scaling-stroke" />
+              <rect x={PAD} y={PAD} width={ISO_20FT.l} height={ISO_20FT.w} fill="rgb(148 170 196 / 0.06)" stroke="rgb(148 170 196 / 0.6)" className="v2-product-d-ref" strokeWidth="1.25" vectorEffect="non-scaling-stroke" />
             </svg>
           </div>
-          <p className="mt-3 text-[0.95rem] font-semibold text-snow">20-ft ISO container</p>
-          <p className="v2-tnum text-[0.85rem] text-muted">20 × 8 ft, for reference</p>
+          <p className="mt-3 text-[0.9375rem] font-semibold text-snow">20-ft ISO container</p>
+          <p className="v2-tnum text-[0.875rem] text-muted">20 × 8 ft, for reference</p>
         </li>
         {sizes.map((s) => (
           <Tile key={s.id} size={s} />
         ))}
       </ul>
-      <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-[0.85rem] text-muted">
+      <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-[0.875rem] text-muted">
         <span className="inline-flex items-center gap-2">
           <span aria-hidden className="h-3 w-5 border border-signal bg-signal/20" />
           Deployed footprint

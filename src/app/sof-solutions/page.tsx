@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { V2PageHeader } from "@/components/site/V2PageHeader";
+import { PhotoBand } from "@/components/site/PhotoBand";
+import { segmentBand } from "@/app/who-we-serve/segment-photos";
 import { briefingHref, buyerSegment } from "@/lib/buyer-segments";
 import { COMPANY_CONTACT, companyPhoneHref } from "@/lib/company-facts";
 import { blurProps } from "@/lib/image-blur";
@@ -41,6 +43,7 @@ const ACCESS_STEPS = [
 export default function SofSolutionsPage() {
   const segment = buyerSegment("special-operations");
   const systems = segment?.systems ?? [];
+  const photo = segmentBand("special-operations");
 
   return (
     <>
@@ -60,13 +63,15 @@ export default function SofSolutionsPage() {
         </div>
       </V2PageHeader>
 
-      <div className="v2-wrap pb-24">
+      {photo ? <PhotoBand src={photo.src} alt={photo.alt} caption={photo.caption} position={photo.position} height="medium" /> : null}
+
+      <div className="v2-wrap py-20 sm:py-24">
         {systems.length ? (
-          <section aria-labelledby="sof-systems-heading" className="pt-16">
-            <h2 id="sof-systems-heading" className="v2-h2 text-snow">
+          <section aria-labelledby="sof-systems-heading">
+            <h2 id="sof-systems-heading" className="v2-h2 v2-reveal text-snow">
               {segment?.systemsHeading ?? "Systems sized for small teams and airlift"}
             </h2>
-            <ul className="mt-10 grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
+            <ul className={`v2-reveal-stagger mt-12 grid gap-x-8 gap-y-14 ${systems.length % 4 === 0 ? "sm:grid-cols-2 lg:grid-cols-4" : systems.length % 3 === 0 ? "md:grid-cols-3" : "sm:grid-cols-2"}`}>
               {systems.map((s) => {
                 const product = PRODUCT_CONTENT[s.slug];
                 if (!product) return null;
@@ -74,14 +79,14 @@ export default function SofSolutionsPage() {
                 const shows = PRODUCT_COVERS[s.slug]?.shows;
                 return (
                   <li key={s.slug}>
-                    <Link href={`/configurable-solutions/${s.slug}`} className="group block no-underline">
-                      <span className="relative block aspect-[16/10] overflow-hidden bg-hull">
+                    <Link href={`/configurable-solutions/${s.slug}`} className="v2-press group block no-underline">
+                      <span className="v2-media-zoom relative block aspect-[16/10] bg-hull">
                         <Image
                           src={cover}
                           alt={shows ? `Photo of ${shows}` : `Weatherhaven ${product.name}`}
                           fill
                           sizes="(min-width: 1024px) 22vw, (min-width: 640px) 45vw, 100vw"
-                          className="object-cover"
+                          className="v2-photo object-cover"
                           {...blurProps(cover)}
                         />
                       </span>
@@ -89,7 +94,7 @@ export default function SofSolutionsPage() {
                       <span className="mt-4 block text-[1.1rem] font-semibold text-snow transition-colors group-hover:text-signal [font-variation-settings:'wdth'_106]">
                         {product.name}
                       </span>
-                      <span className="mt-0.5 block text-[0.875rem] text-muted">{product.keySpec}</span>
+                      <span className="mt-0.5 block text-[0.9375rem] text-muted">{product.keySpec}</span>
                     </Link>
                     <p className="mt-3 text-[0.95rem] leading-relaxed text-snow/85">{s.why}</p>
                   </li>
@@ -99,9 +104,12 @@ export default function SofSolutionsPage() {
           </section>
         ) : null}
 
-        <section aria-labelledby="sof-portal-heading" className="mt-24 border-t border-line pt-12">
+      </div>
+
+      <section aria-labelledby="sof-portal-heading" className="v2-light py-20 sm:py-28">
+        <div className="v2-wrap">
           <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16">
-            <div>
+            <div className="v2-reveal">
               <h2 id="sof-portal-heading" className="v2-h2 text-snow">
                 The SOF portal
               </h2>
@@ -117,7 +125,7 @@ export default function SofSolutionsPage() {
                 ))}
               </dl>
             </div>
-            <div>
+            <div className="v2-reveal">
               <h3 className="v2-h3 text-snow">How access works</h3>
               <ol className="mt-6 border-t border-line">
                 {ACCESS_STEPS.map((step, i) => (
@@ -140,21 +148,23 @@ export default function SofSolutionsPage() {
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section aria-labelledby="sof-support-heading" className="mt-24 border-t border-line pt-12">
+      <section aria-labelledby="sof-support-heading" className="py-20 sm:py-24">
+        <div className="v2-wrap v2-reveal grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-baseline lg:gap-16">
           <h2 id="sof-support-heading" className="v2-h2 text-snow">
             After the operation
           </h2>
-          <p className="v2-body mt-4 max-w-[60ch]">
+          <p className="v2-lead max-w-[52ch]">
             Weatherhaven can install systems, take them down at the end of an operation, refurbish them and store them
             until the next one.
           </p>
-        </section>
-      </div>
+        </div>
+      </section>
 
-      <section className="border-t border-line bg-hull py-20">
-        <div className="v2-wrap flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+      <section className="bg-hull py-20 sm:py-24">
+        <div className="v2-wrap v2-reveal flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <h2 className="v2-h2 max-w-[24ch] text-snow">A briefing for your program</h2>
             <p className="v2-body mt-4 max-w-[52ch]">

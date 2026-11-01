@@ -1,0 +1,305 @@
+/* Polish pass: home styles. Owned by one workstream; keep rules scoped to classes prefixed v2-home- or to data attributes. Respect prefers-reduced-motion. */
+
+/* ------------------------------------------------------------------------------------------------
+   True-scale lineup (HomeLineup). --s is CSS px per image px (the images are 60 px per metre);
+   --strip, the whole line's width, is written inline from the image widths.
+   ------------------------------------------------------------------------------------------------ */
+.v2-home-lineup {
+  --s: 0.42;
+  --v2-home-lineup-gap: 2.25rem;
+  --v2-home-lineup-label: 8.5rem;
+  --pan: max(0px, calc(var(--strip) - 100vw));
+  position: relative;
+}
+@media (min-width: 768px) {
+  .v2-home-lineup {
+    --s: 0.5;
+    --v2-home-lineup-gap: 3rem;
+    --v2-home-lineup-label: 10rem;
+  }
+}
+@media (min-width: 1280px) {
+  .v2-home-lineup {
+    --s: 0.68;
+    --v2-home-lineup-gap: 3.5rem;
+  }
+}
+
+.v2-home-lineup-view {
+  /* Fallback: a row you swipe or scroll sideways, inside the section. */
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line-strong) transparent;
+}
+.v2-home-lineup-strip {
+  position: relative;
+  display: flex;
+  width: max-content;
+  gap: var(--v2-home-lineup-gap);
+  padding-inline: var(--v2-gutter);
+  padding-bottom: 1.25rem;
+  margin: 0;
+  list-style: none;
+}
+.v2-home-lineup-item {
+  width: max(calc(var(--w) * var(--s) * 1px), var(--v2-home-lineup-label));
+  flex: none;
+}
+/* Every picture sits in a box as tall as the tallest one, on its bottom edge, so all the models
+   stand on one line (lineup.ts says how the images are cropped). */
+.v2-home-lineup-stage {
+  display: flex;
+  align-items: flex-end;
+  height: calc(var(--tallest) * var(--s) * 1px);
+}
+.v2-home-lineup-img {
+  display: block;
+  width: calc(var(--w) * var(--s) * 1px);
+  max-width: none;
+  height: auto;
+  transition: transform 700ms var(--v2-ease-out);
+  transform-origin: 50% 85%;
+}
+@media (hover: hover) {
+  .v2-home-lineup-item a:hover .v2-home-lineup-img {
+    transform: translateY(-4px);
+  }
+}
+.v2-home-lineup-item a:focus-visible {
+  outline: 2px solid var(--color-signal);
+  outline-offset: 6px;
+}
+/* The 5 m bar stands on the same line as the footprints' centres (76 image px up). */
+.v2-home-lineup-ruler {
+  position: relative;
+  display: block;
+  width: calc(var(--w) * var(--s) * 1px);
+  height: 1.5px;
+  margin-bottom: calc(76px * var(--s));
+  background: var(--color-snow);
+}
+.v2-home-lineup-ruler::before,
+.v2-home-lineup-ruler::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  width: 1.5px;
+  height: 9px;
+  background: var(--color-snow);
+}
+.v2-home-lineup-ruler::before {
+  left: 0;
+}
+.v2-home-lineup-ruler::after {
+  right: 0;
+}
+.v2-home-lineup-track {
+  display: none;
+  height: 2px;
+  background: var(--color-line);
+}
+.v2-home-lineup-progress {
+  display: block;
+  height: 100%;
+  background: var(--color-signal);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+/* Pinned: the section is as tall as one screen plus the pan, the line moves sideways as it scrolls. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .v2-home-lineup {
+      height: calc(100svh + var(--pan) * 0.62);
+      view-timeline: --v2-home-lineup block;
+    }
+    .v2-home-lineup-pin {
+      position: sticky;
+      top: 0;
+      height: 100svh;
+      min-height: 34rem;
+      overflow: clip;
+    }
+    .v2-home-lineup-view {
+      display: flex;
+      align-items: center;
+      overflow: visible;
+    }
+    .v2-home-lineup-strip {
+      animation: v2-home-pan linear both;
+      animation-timeline: --v2-home-lineup;
+      animation-range: contain 0% contain 100%;
+    }
+    .v2-home-lineup-track {
+      display: block;
+    }
+    .v2-home-lineup-progress {
+      animation: v2-home-grow linear both;
+      animation-timeline: --v2-home-lineup;
+      animation-range: contain 0% contain 100%;
+    }
+    @keyframes v2-home-pan {
+      from {
+        transform: translateX(0);
+      }
+      to {
+        transform: translateX(calc(-1 * var(--pan)));
+      }
+    }
+    @keyframes v2-home-grow {
+      to {
+        transform: scaleX(1);
+      }
+    }
+  }
+}
+
+/* ------------------------------------------------------------------------------------------------
+   Site chrome motion (Navbar, MarketingMobileActionBar). Menus drop down from the bar and lift away;
+   the phone menu opens downward from the bar with its links arriving one after another.
+   ------------------------------------------------------------------------------------------------ */
+@keyframes v2-home-drop {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    /* The negative bottom inset leaves room for the panel's shadow. */
+    clip-path: inset(0 0 -64px 0);
+  }
+}
+@keyframes v2-home-lift {
+  from {
+    clip-path: inset(0 0 -64px 0);
+    opacity: 1;
+  }
+  to {
+    clip-path: inset(0 0 100% 0);
+    opacity: 0.4;
+  }
+}
+@keyframes v2-home-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes v2-home-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes v2-home-fade-out {
+  to {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+.v2-home-menu[data-state="open"][data-enter="drop"] {
+  animation: v2-home-drop 340ms var(--v2-ease-out) both;
+}
+.v2-home-menu[data-state="open"][data-enter="drop"] .v2-home-menu-cols > * {
+  animation: v2-home-rise-in 460ms var(--v2-ease-out) both;
+  animation-delay: 70ms;
+}
+.v2-home-menu[data-state="open"][data-enter="drop"] .v2-home-menu-cols > :nth-child(2) {
+  animation-delay: 105ms;
+}
+.v2-home-menu[data-state="open"][data-enter="drop"] .v2-home-menu-cols > :nth-child(3) {
+  animation-delay: 140ms;
+}
+.v2-home-menu[data-state="open"][data-enter="drop"] .v2-home-menu-cols > :nth-child(4) {
+  animation-delay: 175ms;
+}
+.v2-home-menu[data-state="open"][data-enter="drop"] .v2-home-menu-cols > :nth-child(n + 5) {
+  animation-delay: 210ms;
+}
+.v2-home-menu[data-state="open"][data-enter="swap"] .v2-home-menu-cols {
+  animation: v2-home-fade-in 220ms ease both;
+}
+.v2-home-menu[data-state="closed"] {
+  animation: v2-home-lift 200ms var(--v2-ease-in) both;
+  pointer-events: none;
+}
+
+.v2-home-drawer[data-state="open"] {
+  animation: v2-home-drop 420ms var(--v2-ease-out) both;
+}
+.v2-home-drawer[data-state="open"] .v2-home-drawer-links > li {
+  animation: v2-home-rise-in 480ms var(--v2-ease-out) both;
+  animation-delay: 90ms;
+}
+.v2-home-drawer[data-state="open"] .v2-home-drawer-links > li:nth-child(2) {
+  animation-delay: 120ms;
+}
+.v2-home-drawer[data-state="open"] .v2-home-drawer-links > li:nth-child(3) {
+  animation-delay: 150ms;
+}
+.v2-home-drawer[data-state="open"] .v2-home-drawer-links > li:nth-child(4) {
+  animation-delay: 180ms;
+}
+.v2-home-drawer[data-state="open"] .v2-home-drawer-links > li:nth-child(5) {
+  animation-delay: 210ms;
+}
+.v2-home-drawer[data-state="open"] .v2-home-drawer-links > li:nth-child(6) {
+  animation-delay: 240ms;
+}
+.v2-home-drawer[data-state="open"] .v2-home-drawer-links > li:nth-child(n + 7) {
+  animation-delay: 270ms;
+}
+.v2-home-drawer[data-state="open"] .v2-home-drawer-more {
+  animation: v2-home-fade-in 500ms ease 300ms both;
+}
+.v2-home-drawer[data-state="closed"] {
+  animation: v2-home-fade-out 240ms var(--v2-ease-in) both;
+  pointer-events: none;
+}
+
+/* Phone action bar: slides away while reading down the page or while a form is on screen, back on
+   the way up. */
+.v2-home-actionbar {
+  transition: transform 380ms var(--v2-ease-out), opacity 380ms ease;
+}
+.v2-home-actionbar[data-hidden="true"] {
+  transform: translateY(calc(100% + 1px));
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v2-home-menu,
+  .v2-home-menu *,
+  .v2-home-drawer,
+  .v2-home-drawer * {
+    animation: none !important;
+  }
+  .v2-home-actionbar {
+    transition: none;
+  }
+}
+
+/* ------------------------------------------------------------------------------------------------
+   Systems mosaic (HomeSystems): photo tiles on one row height; spans come from the component.
+   Phones and tablets: two columns of near-square tiles. Wide screens: three columns.
+   ------------------------------------------------------------------------------------------------ */
+.v2-home-mosaic {
+  grid-auto-rows: 44vw;
+}
+@media (min-width: 768px) {
+  .v2-home-mosaic {
+    grid-auto-rows: 34vw;
+  }
+}
+@media (min-width: 1024px) {
+  .v2-home-mosaic {
+    grid-auto-rows: clamp(240px, 23vw, 400px);
+  }
+}

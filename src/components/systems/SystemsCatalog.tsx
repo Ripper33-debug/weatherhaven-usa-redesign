@@ -13,7 +13,7 @@ import {
   type ProductFilterMobility,
 } from "@/lib/products";
 import { PRODUCT_CONTENT, PRODUCT_FAMILIES, type ProductFamily } from "@/lib/product-content";
-import { SystemCard } from "@/components/systems/SystemCard";
+import { lastCardSpan, SystemCard } from "@/components/systems/SystemCard";
 import { FAMILY_ORDER } from "@/lib/site-nav";
 
 type FamilyFilter = ProductFamily | "all";
@@ -172,27 +172,50 @@ function CatalogBody({ products, blurs = {}, urlFamily: family }: CatalogProps &
           </div>
         ) : null}
 
-        {groups.map((g) => (
-          <section key={g.id} aria-labelledby={`fam-${g.id}`} className="v2-defer mt-14 first-of-type:mt-10">
-            <div className="flex flex-col gap-2 border-b border-line pb-5 sm:flex-row sm:items-end sm:justify-between">
-              <h2 id={`fam-${g.id}`} className="v2-h2 text-snow">
-                {g.name}
-              </h2>
-              <p className="max-w-[56ch] text-[0.95rem] leading-relaxed text-muted sm:text-right">{g.summary}</p>
-            </div>
-            <div className="mt-8 grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
-              {g.items.map((p) => (
-                <SystemCard key={p.slug} product={p} blurDataURL={blurs[p.slug]} />
-              ))}
-            </div>
-          </section>
-        ))}
+        {groups.map((g) => {
+          const last = lastCardSpan(g.items.length, 1);
+          return (
+            <section key={g.id} aria-labelledby={`fam-${g.id}`} className="v2-defer mt-14 first-of-type:mt-10">
+              {/* Phones and tablets: the family's name above its cards. Wide screens: in the grid's first cell. */}
+              <div className="flex flex-col gap-2 border-b border-line pb-5 sm:flex-row sm:items-end sm:justify-between lg:hidden">
+                <h2 id={`fam-${g.id}`} className="v2-h2 text-snow">
+                  {g.name}
+                </h2>
+                <p className="max-w-[56ch] text-[0.9375rem] leading-relaxed text-muted sm:text-right">{g.summary}</p>
+              </div>
+              <div className="v2-reveal-stagger mt-8 grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:mt-0 lg:grid-cols-3 lg:border-t lg:border-line lg:pt-8">
+                <div className="hidden lg:block lg:pr-6">
+                  <h2 className="v2-h2 text-snow">
+                    {g.name}
+                  </h2>
+                  <p className="mt-4 max-w-[40ch] text-[1rem] leading-relaxed text-muted">{g.summary}</p>
+                  <p className="v2-tnum mt-6 text-[0.875rem] text-muted">
+                    {g.items.length} {g.items.length === 1 ? "system" : "systems"}
+                  </p>
+                </div>
+                {g.items.map((p, i) => (
+                  <SystemCard
+                    key={p.slug}
+                    product={p}
+                    blurDataURL={blurs[p.slug]}
+                    span={i === g.items.length - 1 ? last : undefined}
+                  />
+                ))}
+              </div>
+            </section>
+          );
+        })}
         {ungrouped.length > 0 ? (
           <section className="mt-14">
             <h2 className="v2-h2 border-b border-line pb-5 text-snow">More systems</h2>
-            <div className="mt-8 grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
-              {ungrouped.map((p) => (
-                <SystemCard key={p.slug} product={p} blurDataURL={blurs[p.slug]} />
+            <div className="v2-reveal-stagger mt-8 grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
+              {ungrouped.map((p, i) => (
+                <SystemCard
+                  key={p.slug}
+                  product={p}
+                  blurDataURL={blurs[p.slug]}
+                  span={i === ungrouped.length - 1 ? lastCardSpan(ungrouped.length) : undefined}
+                />
               ))}
             </div>
           </section>

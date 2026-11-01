@@ -44,7 +44,7 @@ function Logo({ height = 24, priority = false }: { height?: number; priority?: b
 
 function SystemsMenu({ onNavigate, systems }: { onNavigate: () => void; systems: NavMenuData["systems"] }) {
   return (
-    <div className="v2-wrap grid gap-x-10 gap-y-8 py-10 lg:grid-cols-[repeat(4,minmax(0,1fr))_minmax(13rem,0.9fr)]">
+    <div className="v2-home-menu-cols v2-wrap grid gap-x-10 gap-y-8 py-10 lg:grid-cols-[repeat(4,minmax(0,1fr))_minmax(13rem,0.9fr)]">
       {systems.map((family) => (
         <div key={family.id}>
           <Link
@@ -74,7 +74,7 @@ function SystemsMenu({ onNavigate, systems }: { onNavigate: () => void; systems:
                   className="group -mx-3 block px-3 py-2 no-underline transition-colors hover:bg-white/[0.04]"
                 >
                   <span className="block text-[0.95rem] font-medium text-snow group-hover:text-signal">{s.name}</span>
-                  <span className="mt-0.5 block text-[0.8rem] leading-snug text-muted">{s.keySpec}</span>
+                  <span className="mt-0.5 block text-[0.875rem] leading-snug text-muted">{s.keySpec}</span>
                 </Link>
               </li>
             ))}
@@ -85,7 +85,7 @@ function SystemsMenu({ onNavigate, systems }: { onNavigate: () => void; systems:
         <div>
           <p className="v2-tech text-muted">17 systems</p>
           <p className="mt-4 text-[0.95rem] font-semibold text-snow [font-variation-settings:'wdth'_110]">Not sure where to start?</p>
-          <p className="mt-3 text-[0.9rem] leading-relaxed text-muted">
+          <p className="mt-3 text-[0.9375rem] leading-relaxed text-muted">
             Describe the mission, climate and force size, and the mission builder suggests a starting camp layout.
           </p>
         </div>
@@ -104,7 +104,7 @@ function SystemsMenu({ onNavigate, systems }: { onNavigate: () => void; systems:
 
 function CapabilitiesMenu({ onNavigate, capabilities }: { onNavigate: () => void; capabilities: NavMenuData["capabilities"] }) {
   return (
-    <div className="v2-wrap grid gap-x-12 gap-y-8 py-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.9fr)]">
+    <div className="v2-home-menu-cols v2-wrap grid gap-x-12 gap-y-8 py-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.9fr)]">
       <div>
         <p className="v2-tech text-muted">What a camp needs</p>
         <ul className="mt-4 grid gap-x-6 sm:grid-cols-2">
@@ -127,7 +127,7 @@ function CapabilitiesMenu({ onNavigate, capabilities }: { onNavigate: () => void
             <li key={p.href}>
               <Link href={p.href} onClick={onNavigate} className="group -mx-3 block px-3 py-2 no-underline hover:bg-white/[0.04]">
                 <span className="block text-[0.95rem] font-medium text-snow group-hover:text-signal">{p.label}</span>
-                <span className="mt-0.5 block text-[0.85rem] leading-snug text-muted">{p.note}</span>
+                <span className="mt-0.5 block text-[0.875rem] leading-snug text-muted">{p.note}</span>
               </Link>
             </li>
           ))}
@@ -139,7 +139,7 @@ function CapabilitiesMenu({ onNavigate, capabilities }: { onNavigate: () => void
       <div className="v2-plate flex flex-col justify-between px-6 py-6">
         <div>
           <p className="text-[0.95rem] font-semibold text-snow [font-variation-settings:'wdth'_110]">{NAV_GOV.label}</p>
-          <p className="mt-3 text-[0.9rem] leading-relaxed text-muted">
+          <p className="mt-3 text-[0.9375rem] leading-relaxed text-muted">
             CAGE code and UEI, NAICS codes, current Army and DLA contract vehicles, and how to request a
             configuration package.
           </p>
@@ -153,6 +153,29 @@ function CapabilitiesMenu({ onNavigate, capabilities }: { onNavigate: () => void
 }
 
 type MenuId = "systems" | "capabilities";
+
+/** How long a menu or the phone menu stays on screen after closing, for its exit animation. */
+const MENU_EXIT_MS = 200;
+const DRAWER_EXIT_MS = 240;
+
+function reducedMotion() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+/**
+ * Keeps something on screen for `ms` after it closes, so it can animate out (polish-home.css).
+ * Returns whether it should still be rendered.
+ */
+function useLingering(open: boolean, ms: number) {
+  const [shown, setShown] = useState(open);
+  if (open && !shown) setShown(true);
+  useEffect(() => {
+    if (open || !shown) return;
+    const t = window.setTimeout(() => setShown(false), reducedMotion() ? 0 : ms);
+    return () => window.clearTimeout(t);
+  }, [open, shown, ms]);
+  return open || shown;
+}
 
 export function Navbar({ menuData }: { menuData: NavMenuData }) {
   const pathname = useSitePathname();
@@ -180,6 +203,27 @@ export function Navbar({ menuData }: { menuData: NavMenuData }) {
     setMenuPath(pathname);
     setMenu(null);
   }
+
+  // The open menu stays on screen briefly after closing (it lifts away). Opening one from nothing
+  // drops it down from the bar; moving to the other menu, or back while one is closing, swaps the
+  // contents in place.
+  const [shownMenu, setShownMenu] = useState<MenuId | null>(null);
+  const [menuEnter, setMenuEnter] = useState<"drop" | "swap">("drop");
+  const [seenMenu, setSeenMenu] = useState<MenuId | null>(null);
+  if (menu !== seenMenu) {
+    setSeenMenu(menu);
+    if (menu) {
+      setMenuEnter(shownMenu ? "swap" : "drop");
+      setShownMenu(menu);
+    }
+  }
+  useEffect(() => {
+    if (menu || !shownMenu) return;
+    const t = window.setTimeout(() => setShownMenu(null), reducedMotion() ? 0 : MENU_EXIT_MS);
+    return () => window.clearTimeout(t);
+  }, [menu, shownMenu]);
+
+  const drawerShown = useLingering(open, DRAWER_EXIT_MS);
 
   useEffect(() => {
     if (!menu) return;
@@ -249,7 +293,7 @@ export function Navbar({ menuData }: { menuData: NavMenuData }) {
     closeTimer.current = setTimeout(() => setMenu(null), 140);
   }, []);
 
-  const solid = scrolled || !!menu || !publicSite;
+  const solid = scrolled || !!shownMenu || !publicSite;
   const active: Record<MenuId, boolean> = {
     systems: pathname.startsWith("/configurable-solutions"),
     capabilities: pathname.startsWith("/capabilities") || pathname.startsWith("/government") || pathname.startsWith("/who-we-serve"),
@@ -312,13 +356,16 @@ export function Navbar({ menuData }: { menuData: NavMenuData }) {
                     <path d="M1.5 3.5 5 7l3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.5" />
                   </svg>
                 </button>
-                {menu === m.id ? (
+                {shownMenu === m.id ? (
                   <div
                     id={`${m.id}-menu`}
                     role="region"
                     aria-label={m.label}
+                    data-state={menu === m.id ? "open" : "closed"}
+                    data-enter={menuEnter}
+                    inert={menu !== m.id}
                     onMouseEnter={(e) => openMenu(m.id, e.timeStamp)}
-                    className="absolute inset-x-0 top-full max-h-[calc(100svh-72px)] overflow-y-auto overscroll-contain border-t border-line bg-ink shadow-[0_24px_48px_rgb(0_0_0/0.35)]"
+                    className="v2-home-menu absolute inset-x-0 top-full max-h-[calc(100svh-72px)] overflow-y-auto overscroll-contain border-t border-line bg-ink shadow-[0_24px_48px_rgb(0_0_0/0.35)]"
                   >
                     {m.panel}
                   </div>
@@ -373,14 +420,16 @@ export function Navbar({ menuData }: { menuData: NavMenuData }) {
 
       </header>
 
-      {open ? (
+      {drawerShown ? (
         <div
           ref={dialogRef}
           id="mobile-nav"
           role="dialog"
           aria-modal="true"
           aria-label="Site menu"
-          className="wh-v2 fixed inset-0 z-[100] flex flex-col overflow-y-auto bg-ink xl:hidden"
+          data-state={open ? "open" : "closed"}
+          inert={!open}
+          className="v2-home-drawer wh-v2 fixed inset-0 z-[100] flex flex-col overflow-y-auto overscroll-contain bg-ink xl:hidden"
         >
           <div className="v2-wrap flex h-16 shrink-0 items-center justify-between">
             <Link href="/" aria-label="Weatherhaven home" onClick={() => setOpen(false)}>
@@ -397,7 +446,7 @@ export function Navbar({ menuData }: { menuData: NavMenuData }) {
             </button>
           </div>
           <nav aria-label="Mobile" className="v2-wrap flex-1 pb-10 pt-4">
-            <ul className="border-t border-line">
+            <ul className="v2-home-drawer-links border-t border-line">
               {[{ href: "/configurable-solutions", label: "All systems" }, NAV_CAPABILITIES_PAGE, { href: NAV_WHO_WE_SERVE.href, label: "Who we serve" }, ...NAV_LINKS, { href: "/about", label: "About" }, NAV_SOF].map((l) => (
                 <li key={l.href} className="border-b border-line">
                   <Link
@@ -410,10 +459,10 @@ export function Navbar({ menuData }: { menuData: NavMenuData }) {
                 </li>
               ))}
             </ul>
-            <div className="mt-10 grid gap-8 sm:grid-cols-2">
+            <div className="v2-home-drawer-more mt-10 grid gap-8 sm:grid-cols-2">
               {menuData.systems.map((family) => (
                 <div key={family.id}>
-                  <p className="text-sm font-semibold text-muted">{family.name}</p>
+                  <p className="text-[0.9375rem] font-semibold text-muted">{family.name}</p>
                   <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
                     {family.systems.map((s) => (
                       <li key={s.slug}>
@@ -426,7 +475,7 @@ export function Navbar({ menuData }: { menuData: NavMenuData }) {
                 </div>
               ))}
             </div>
-            <div className="mt-10 flex flex-col gap-3">
+            <div className="v2-home-drawer-more mt-10 flex flex-col gap-3">
               <Link href={NAV_CTA.href} onClick={() => setOpen(false)} className="v2-btn w-full">
                 {NAV_CTA.label}
               </Link>

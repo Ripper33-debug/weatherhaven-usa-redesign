@@ -36,7 +36,16 @@ export function PhotoBand({
       <div aria-hidden className={`pointer-events-none absolute inset-0 bg-gradient-to-t ${fade} to-transparent`} />
       {children ? <div className="absolute inset-x-0 bottom-0">{children}</div> : null}
       {caption ? (
-        <figcaption className="v2-wrap absolute inset-x-0 bottom-3 text-right text-[0.8125rem] text-snow/70">{caption}</figcaption>
+        // With content over the photo, phones put the caption under the photo so the two don't collide.
+        <figcaption
+          className={`v2-wrap text-right text-[0.8125rem] ${
+            children
+              ? "relative block pt-2 text-muted sm:absolute sm:inset-x-0 sm:bottom-3 sm:pt-0 sm:text-snow/70"
+              : "absolute inset-x-0 bottom-3 text-snow/70"
+          }`}
+        >
+          {caption}
+        </figcaption>
       ) : null}
     </figure>
   );

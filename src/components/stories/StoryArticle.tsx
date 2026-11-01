@@ -6,6 +6,7 @@ import { arHref } from "@/lib/system-models";
 import { contactUrl } from "@/lib/contact-url";
 import { sourceHost } from "@/lib/field-stories";
 import { SystemModelViewer } from "@/components/systems/SystemModelViewer";
+import { PhotoBand } from "@/components/site/PhotoBand";
 import type { FlagshipStory } from "@/lib/stories";
 
 /**
@@ -14,6 +15,15 @@ import type { FlagshipStory } from "@/lib/stories";
  * title and the photograph (or the 3D model, where there's no field photograph), the hard numbers,
  * a photo set, the quote when there is one, sources, and the systems involved.
  */
+/** Columns that keep a short set of figures or photos on full rows. */
+function fullRowCols(n: number): string {
+  if (n <= 1) return "";
+  if (n === 2) return "sm:grid-cols-2";
+  if (n === 3) return "sm:grid-cols-3";
+  if (n === 4) return "grid-cols-2 lg:grid-cols-4";
+  return n % 3 === 0 ? "sm:grid-cols-2 lg:grid-cols-3" : "sm:grid-cols-2";
+}
+
 export function StoryArticle({ story, next }: { story: FlagshipStory; next?: FlagshipStory }) {
   const systems = story.systems.map((slug) => ({ slug, name: getProductContent(slug)?.name ?? slug, ar: arHref(slug) }));
   const publicSources = story.sources.filter((s) => !s.own);
@@ -70,8 +80,9 @@ export function StoryArticle({ story, next }: { story: FlagshipStory; next?: Fla
               priority
               // Next 16's `priority` only preloads; the hero is the page's largest paint.
               fetchPriority="high"
+              loading="eager"
               sizes="100vw"
-              className="object-cover"
+              className="v2-photo object-cover"
               {...blurProps(story.hero.src)}
             />
           </div>
@@ -79,14 +90,14 @@ export function StoryArticle({ story, next }: { story: FlagshipStory; next?: Fla
         </figure>
       )}
 
-      {/* The numbers */}
-      <section aria-label="Key figures" className="border-b border-line py-14 sm:py-16">
-        <dl className="v2-wrap grid grid-cols-2 gap-x-8 gap-y-10 lg:grid-cols-4">
+      {/* The numbers: a light data band between the photograph and the account */}
+      <section aria-label="Key figures" className="v2-light mt-12 py-14 sm:mt-16 sm:py-20">
+        <dl className={`v2-wrap v2-reveal-stagger grid gap-x-8 gap-y-10 ${fullRowCols(story.numbers.length)}`}>
           {story.numbers.map((n) => (
-            <div key={n.label} className="min-w-0 border-t border-line-strong pt-4">
+            <div key={n.label} className="min-w-0 border-t-2 border-snow pt-4">
               <dt className="sr-only">{n.label}</dt>
-              <dd className="v2-figure v2-tnum text-[clamp(1.6rem,3.6vw,2.9rem)] leading-none text-snow">{n.value}</dd>
-              <dd className="mt-2.5 text-[0.9rem] leading-snug text-muted">{n.label}</dd>
+              <dd className="v2-figure v2-tnum text-[clamp(1.9rem,4vw,3.25rem)] leading-none text-snow [text-wrap:balance]">{n.value}</dd>
+              <dd className="mt-3 max-w-[28ch] text-[0.9375rem] leading-snug text-muted">{n.label}</dd>
             </div>
           ))}
         </dl>
@@ -114,13 +125,13 @@ export function StoryArticle({ story, next }: { story: FlagshipStory; next?: Fla
           </div>
         </aside>
 
-        <div className="order-1 space-y-12 lg:order-2 lg:col-span-7 lg:col-start-6">
+        <div className="order-1 space-y-14 lg:order-2 lg:col-span-7 lg:col-start-6">
           {story.sections.map((s) => (
             <section key={s.heading}>
               <h2 className="v2-h2 max-w-[26ch] text-snow">{s.heading}</h2>
               <div className="mt-5 space-y-4">
                 {s.paragraphs.map((p) => (
-                  <p key={p.slice(0, 40)} className="v2-body max-w-[62ch] text-[1.05rem] text-snow/85">
+                  <p key={p.slice(0, 40)} className="v2-body max-w-[64ch] text-[1.0625rem] leading-[1.7] text-snow/85">
                     {p}
                   </p>
                 ))}
@@ -130,36 +141,36 @@ export function StoryArticle({ story, next }: { story: FlagshipStory; next?: Fla
         </div>
       </div>
 
-      {/* Photo set */}
+      {/* Photo set: the first photograph runs edge to edge, the rest follow on full rows */}
       {widePhoto ? (
-        <section aria-label="Photographs" className="border-t border-line py-16 sm:py-20">
-          <div className="v2-wrap space-y-8">
-            <figure>
-              <div className="relative aspect-[4/3] overflow-hidden sm:aspect-[21/9]">
-                <Image src={widePhoto.src} alt={widePhoto.alt} fill sizes="(min-width: 1440px) 1224px, 100vw" className="object-cover" {...blurProps(widePhoto.src)} />
-              </div>
-              <figcaption className="mt-3 text-[0.875rem] text-muted">{widePhoto.caption}</figcaption>
-            </figure>
-            {restPhotos.length > 0 ? (
-              <div className={`grid gap-8 sm:grid-cols-2 ${restPhotos.length >= 3 ? "lg:grid-cols-3" : ""}`}>
-                {restPhotos.map((p) => (
-                  <figure key={p.src}>
-                    <div className="relative aspect-[4/3] overflow-hidden">
-                      <Image src={p.src} alt={p.alt} fill sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" className="object-cover" {...blurProps(p.src)} />
-                    </div>
-                    <figcaption className="mt-3 text-[0.875rem] text-muted">{p.caption}</figcaption>
-                  </figure>
-                ))}
-              </div>
-            ) : null}
-          </div>
+        <section aria-label="Photographs" className="pb-16 sm:pb-24">
+          <PhotoBand src={widePhoto.src} alt={widePhoto.alt} caption={widePhoto.caption} />
+          {restPhotos.length > 0 ? (
+            <div className={`v2-wrap v2-reveal-stagger mt-10 grid gap-8 sm:mt-14 ${fullRowCols(restPhotos.length)}`}>
+              {restPhotos.map((p) => (
+                <figure key={p.src}>
+                  <div className="relative aspect-[3/2] overflow-hidden bg-hull">
+                    <Image
+                      src={p.src}
+                      alt={p.alt}
+                      fill
+                      sizes={restPhotos.length >= 3 ? "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" : "(min-width: 640px) 50vw, 100vw"}
+                      className="v2-photo object-cover"
+                      {...blurProps(p.src)}
+                    />
+                  </div>
+                  <figcaption className="mt-3 text-[0.875rem] text-muted">{p.caption}</figcaption>
+                </figure>
+              ))}
+            </div>
+          ) : null}
         </section>
       ) : null}
 
       {/* Quote */}
       {story.quote?.text ? (
-        <section aria-label="Quote" className="border-t border-line py-16 sm:py-24">
-          <figure className="v2-wrap">
+        <section aria-label="Quote" className="border-t border-line py-20 sm:py-28">
+          <figure className="v2-wrap v2-reveal">
             <blockquote className="max-w-[30ch] border-l-2 border-signal pl-6 text-[clamp(1.5rem,3.2vw,2.4rem)] leading-[1.2] text-snow [font-variation-settings:'wdth'_106] sm:pl-8">
               “{story.quote.text}”
             </blockquote>
@@ -207,7 +218,7 @@ export function StoryArticle({ story, next }: { story: FlagshipStory; next?: Fla
             </div>
           </div>
 
-          <div className="space-y-6 text-[0.9rem] leading-relaxed text-muted lg:col-span-6 lg:col-start-7">
+          <div className="space-y-6 text-[0.9375rem] leading-relaxed text-muted lg:col-span-6 lg:col-start-7">
             {story.note ? <p className="text-snow/80">{story.note}</p> : null}
             {publicSources.length > 0 ? (
               <div>
@@ -254,10 +265,19 @@ export function StoryArticle({ story, next }: { story: FlagshipStory; next?: Fla
       </section>
 
       {next ? (
-        <nav aria-label="Next story" className="border-t border-line">
-          <Link href={`/stories/${next.slug}`} className="group v2-wrap flex flex-col gap-2 py-12 no-underline sm:py-16">
-            <span className="text-[0.95rem] text-muted">Next story</span>
-            <span className="v2-h2 max-w-[28ch] text-snow group-hover:text-signal">{next.title}</span>
+        <nav aria-label="Next story">
+          <Link href={`/stories/${next.slug}`} className="group relative isolate block no-underline">
+            <div className="v2-parallax relative h-[52svh] min-h-[340px] overflow-hidden bg-hull">
+              <Image src={next.hero.src} alt="" fill sizes="100vw" className="v2-photo object-cover" {...blurProps(next.hero.src)} />
+            </div>
+            <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink via-ink/55 to-ink/10" />
+            <div className="v2-wrap absolute inset-x-0 bottom-0 pb-12 sm:pb-16">
+              <span className="block text-[0.95rem] text-snow/80">
+                Next story<span className="text-snow/50">: </span>
+                {next.place}
+              </span>
+              <span className="v2-h1 mt-3 block max-w-[22ch] text-snow transition-colors group-hover:text-signal-soft">{next.title}</span>
+            </div>
           </Link>
         </nav>
       ) : null}

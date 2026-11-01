@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { V2PageHeader } from "@/components/site/V2PageHeader";
-import { COMPANY_CONTACT } from "@/lib/company-facts";
+import { COMPANY_CONTACT, companyPhoneHref } from "@/lib/company-facts";
 import { pageMeta } from "@/lib/page-meta";
 import { SYSTEMS_BY_FAMILY } from "@/lib/site-nav";
 
@@ -48,13 +48,13 @@ function ResourceList({ items }: { items: Resource[] }) {
               href={r.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="group grid gap-1 py-5 no-underline sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-8"
+              className="v2-press group grid gap-1 py-5 no-underline sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-8"
             >
               <span>
-                <span className="block text-[1.05rem] font-semibold text-snow group-hover:text-signal">{r.title}</span>
-                <span className="mt-1 block text-[0.92rem] text-muted">{r.detail}</span>
+                <span className="block text-[1.05rem] font-semibold text-snow transition-colors group-hover:text-signal">{r.title}</span>
+                <span className="mt-1 block text-[0.95rem] text-muted">{r.detail}</span>
               </span>
-              <span className="text-[0.85rem] text-muted">
+              <span className="text-[0.875rem] text-muted">
                 {r.kind}
                 {external ? `, ${new URL(r.href).hostname.replace(/^www\./, "")}` : ""}
                 <span className="sr-only"> (opens in a new tab)</span>
@@ -75,7 +75,7 @@ export default function ResourcesPage() {
         title="Resources for program teams"
         lead="Spec sheets, certifications and contracting details in one place. Detailed technical data for export-controlled programs is released through a Weatherhaven expert."
       />
-      <div className="bg-ink py-14 sm:py-20">
+      <div className="bg-ink py-20 sm:py-24">
         <div className="v2-wrap grid gap-16 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] lg:gap-20">
           <div className="space-y-16">
             <section aria-labelledby="dl-heading">
@@ -87,7 +87,7 @@ export default function ResourcesPage() {
               </div>
             </section>
 
-            <section aria-labelledby="spec-heading">
+            <section aria-labelledby="spec-heading" className="v2-reveal">
               <h2 id="spec-heading" className="v2-h2 text-snow">
                 Spec sheets
               </h2>
@@ -110,7 +110,7 @@ export default function ResourcesPage() {
               </div>
             </section>
 
-            <section aria-labelledby="co-heading">
+            <section aria-labelledby="co-heading" className="v2-reveal">
               <h2 id="co-heading" className="v2-h2 text-snow">
                 From the Weatherhaven group
               </h2>
@@ -140,13 +140,17 @@ export default function ResourcesPage() {
                 </div>
                 <div>
                   <dt className="text-muted">Phone</dt>
-                  <dd className="text-snow">{COMPANY_CONTACT.phone}</dd>
+                  <dd>
+                    <a href={companyPhoneHref(COMPANY_CONTACT.phone)} className="v2-link">
+                      {COMPANY_CONTACT.phone}
+                    </a>
+                  </dd>
                 </div>
               </dl>
               <Link href="/contact?inquiry=Program%20Requirement" className="v2-btn mt-7 w-full">
                 Request technical data
               </Link>
-              <Link href="/government" className="v2-link mt-4 inline-block text-[0.9rem]">
+              <Link href="/government" className="v2-link mt-4 inline-block text-[0.95rem]">
                 CAGE, UEI, NAICS codes and contract vehicles
               </Link>
             </div>

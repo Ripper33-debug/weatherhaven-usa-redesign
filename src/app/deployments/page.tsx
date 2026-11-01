@@ -60,12 +60,12 @@ export default function DeploymentsPage() {
           <FeatureStory key={s.id} story={s} layout={FEATURE_LAYOUT[s.id] ?? "left"} />
         ))}
 
-        <section aria-labelledby="briefs-heading" className="border-b border-line py-20 sm:py-24">
+        <section aria-labelledby="briefs-heading" className="py-20 sm:py-28">
           <div className="v2-wrap">
-            <h2 id="briefs-heading" className="v2-h2 text-snow">
+            <h2 id="briefs-heading" className="v2-h2 v2-reveal text-snow">
               Kitchens, field hospitals and polar camps
             </h2>
-            <div className="mt-10 grid gap-x-14 gap-y-14 md:grid-cols-2">
+            <div className="v2-reveal-stagger mt-12 grid gap-x-14 gap-y-14 md:grid-cols-2">
               {briefs.map((s) => (
                 <BriefStory key={s.id} story={s} />
               ))}
@@ -73,12 +73,12 @@ export default function DeploymentsPage() {
           </div>
         </section>
 
-        <section id="more-from-the-field" aria-labelledby="notes-heading" className="scroll-mt-24 border-b border-line py-16 sm:py-20">
+        <section id="more-from-the-field" aria-labelledby="notes-heading" className="v2-light scroll-mt-24 py-20 sm:py-24">
           <div className="v2-wrap grid gap-8 lg:grid-cols-[minmax(0,0.6fr)_minmax(0,1.4fr)] lg:gap-16">
-            <h2 id="notes-heading" className="v2-h3 text-snow">
+            <h2 id="notes-heading" className="v2-h2 v2-reveal text-snow">
               More from the field
             </h2>
-            <ul className="divide-y divide-line border-y border-line">
+            <ul className="v2-reveal-stagger divide-y divide-line border-y border-line">
               {FIELD_NOTES.map((n) => (
                 <li key={n.place} className="grid gap-1 py-4 sm:grid-cols-[13rem_1fr] sm:gap-6">
                   <p className="text-[0.95rem] font-semibold text-snow">{n.place}</p>
@@ -106,8 +106,8 @@ export default function DeploymentsPage() {
         </section>
 
         <section aria-labelledby="globe-heading" className="border-b border-line bg-[#03080F]">
-          <div className="v2-wrap flex flex-col gap-4 py-14 sm:flex-row sm:items-end sm:justify-between sm:py-16">
-            <div>
+          <div className="v2-wrap flex flex-col gap-4 py-16 sm:flex-row sm:items-end sm:justify-between sm:py-20">
+            <div className="v2-reveal">
               <h2 id="globe-heading" className="v2-h2 text-snow">
                 Confirmed sites on the map
               </h2>
@@ -129,7 +129,7 @@ export default function DeploymentsPage() {
         </section>
 
         <section className="bg-hull py-20 sm:py-24">
-          <div className="v2-wrap grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+          <div className="v2-wrap v2-reveal grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
             <div>
               <h2 className="v2-h2 max-w-[24ch] text-snow">Need a headquarters, clinic or polar camp of your own?</h2>
               <p className="v2-body mt-4 max-w-[52ch]">

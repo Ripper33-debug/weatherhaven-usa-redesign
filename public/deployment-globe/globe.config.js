@@ -22,3 +22,11 @@ window.GLOBE_CONFIG = {
   //   'antarctica-base-concordia-antarctica': { src: 'photos/concordia.jpg', caption: 'Concordia Station' },
   // },
 };
+
+// The site's look (Archivo, sentence case, square controls): see assets/site-theme.css.
+(function () {
+  var link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = 'assets/site-theme.css';
+  document.head.appendChild(link);
+})();

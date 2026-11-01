@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { V2PageHeader } from "@/components/site/V2PageHeader";
+import { PhotoBand } from "@/components/site/PhotoBand";
 import { pageMeta } from "@/lib/page-meta";
 import { refText, systemHref, systemName, type FactRef } from "@/lib/published-facts";
 import { NAV_CTA } from "@/lib/site-nav";
@@ -76,7 +77,7 @@ function RangeBar({ minC, maxC }: { minC: number; maxC: number | null }) {
 
 function SectionHead({ id, title, children }: { id: string; title: string; children?: React.ReactNode }) {
   return (
-    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] lg:items-end">
+    <div className="v2-reveal grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] lg:items-end">
       <h2 id={id} className="v2-h2 text-snow">
         {title}
       </h2>
@@ -98,7 +99,7 @@ export default function TestedPage() {
       />
 
       {/* Climate ratings */}
-      <section aria-labelledby="climate-heading" className="bg-ink py-16 sm:py-20">
+      <section aria-labelledby="climate-heading" className="bg-ink py-20 sm:py-28">
         <div className="v2-wrap">
           <SectionHead id="climate-heading" title="Temperature ratings">
             <p>Published operating ranges on one scale. Systems not listed don&rsquo;t publish a rating.</p>
@@ -147,7 +148,7 @@ export default function TestedPage() {
               <tr>
                 <td />
                 <td className="pr-6 pt-3">
-                  <span aria-hidden className="relative block h-9 text-[0.75rem] text-muted">
+                  <span aria-hidden className="relative block h-10 text-[0.8125rem] text-muted">
                     {CLIMATE_SCALE.ticksC.map((t) => (
                       <span key={t} className="absolute top-0 -translate-x-1/2 whitespace-nowrap text-center leading-tight" style={{ left: `${pct(t)}%` }}>
                         <span className="block text-snow/80">{fmtTemp(t, "C")}</span>
@@ -160,7 +161,7 @@ export default function TestedPage() {
               </tr>
             </tfoot>
           </table>
-          <p className="mt-6 text-[0.8125rem] text-muted">
+          <p className="mt-6 max-w-[80ch] text-[0.875rem] text-muted">
             Converted figures are rounded to the nearest degree. Polar Chief publishes the outside temperature at which
             it stays comfortable inside, not a range.
           </p>
@@ -168,9 +169,9 @@ export default function TestedPage() {
       </section>
 
       {/* Wind and snow, and setup */}
-      <section aria-labelledby="wind-heading setup-heading" className="border-t border-line bg-ink py-16 sm:py-20">
+      <section aria-labelledby="wind-heading setup-heading" className="v2-light py-20 sm:py-28">
         <div className="v2-wrap grid gap-16 lg:grid-cols-[minmax(0,0.75fr)_minmax(0,1.25fr)] lg:gap-16">
-          <div>
+          <div className="v2-reveal lg:sticky lg:top-28 lg:self-start">
             <h2 id="wind-heading" className="v2-h2 text-snow">
               Wind and snow
             </h2>
@@ -195,7 +196,7 @@ export default function TestedPage() {
             </dl>
           </div>
 
-          <div>
+          <div className="v2-reveal">
             <h2 id="setup-heading" className="v2-h2 text-snow">
               Setup times
             </h2>
@@ -225,11 +226,11 @@ export default function TestedPage() {
                       <SystemLink slug={s.slug} />
                     </th>
                     <td className="text-[0.95rem] leading-snug text-snow sm:py-4 sm:pr-4">
-                      <span className="block text-[0.75rem] text-muted sm:hidden">Crew</span>
+                      <span className="block text-[0.8125rem] text-muted sm:hidden">Crew</span>
                       <Fact r={s.crew} />
                     </td>
                     <td className="text-[0.95rem] leading-snug text-snow sm:py-4 sm:pr-4">
-                      <span className="block text-[0.75rem] text-muted sm:hidden">Time</span>
+                      <span className="block text-[0.8125rem] text-muted sm:hidden">Time</span>
                       <Fact r={s.time} />
                     </td>
                     <td className="col-span-2 text-[0.875rem] leading-snug text-muted sm:py-4">
@@ -244,9 +245,9 @@ export default function TestedPage() {
       </section>
 
       {/* TRECC test record */}
-      <section aria-labelledby="trecc-heading" className="border-t border-line bg-hull py-16 sm:py-20">
+      <section aria-labelledby="trecc-heading" className="bg-ink py-20 sm:py-28">
         <div className="v2-wrap grid gap-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16">
-          <div>
+          <div className="v2-reveal">
             <h2 id="trecc-heading" className="v2-h2 text-snow">
               TRECC test record
             </h2>
@@ -263,7 +264,7 @@ export default function TestedPage() {
               </Link>
             </p>
           </div>
-          <dl className="border-t border-line">
+          <dl className="v2-reveal-stagger border-t border-line">
             {TRECC_RECORD.map((r) => (
               <div key={r.title} className="grid gap-1 border-b border-line py-4 sm:grid-cols-[14rem_1fr] sm:gap-6">
                 <dt className="text-[0.875rem] text-muted">{r.title}</dt>
@@ -276,13 +277,19 @@ export default function TestedPage() {
         </div>
       </section>
 
-      {/* Field record */}
-      <section aria-labelledby="field-heading" className="border-t border-line bg-ink py-16 sm:py-20">
+      {/* Field record, opened by a polar photograph */}
+      <PhotoBand
+        src="/products/polarhaven.jpg"
+        alt="A blue Polarhaven shelter dug into deep snow, a person in cold-weather gear beside it"
+        caption="A Polarhaven on the snow."
+        position="50% 45%"
+      />
+      <section aria-labelledby="field-heading" className="bg-ink pb-20 pt-12 sm:pb-28 sm:pt-16">
         <div className="v2-wrap">
           <SectionHead id="field-heading" title="Where they've worked">
             <p>Polar and high-altitude sites where Weatherhaven shelters have been used, from the organizations that ran them.</p>
           </SectionHead>
-          <ul className="mt-10 grid gap-px border border-line bg-line md:grid-cols-2 xl:grid-cols-3">
+          <ul className="v2-reveal-stagger mt-12 grid gap-px border border-line bg-line md:grid-cols-2 xl:grid-cols-3">
             {field.stories.map((s) => (
               <li key={s.id} className="flex flex-col bg-ink p-6 sm:p-7">
                 <p className="text-[0.8125rem] text-muted">
@@ -296,7 +303,7 @@ export default function TestedPage() {
                       <div key={f.label}>
                         <dt className="sr-only">{f.label}</dt>
                         <dd className="v2-figure text-[1.4rem] leading-none text-snow">{f.value}</dd>
-                        <dd className="mt-1 text-[0.8125rem] text-muted">{f.label}</dd>
+                        <dd className="mt-1 text-[0.875rem] text-muted">{f.label}</dd>
                       </div>
                     ))}
                   </dl>
@@ -312,7 +319,7 @@ export default function TestedPage() {
                     </span>
                   ))}
                 </p>
-                <div className="mt-auto pt-5 text-[0.8125rem] text-muted">
+                <div className="mt-auto pt-5 text-[0.875rem] text-muted">
                   <p>{s.sources.length > 1 ? "Sources" : "Source"}</p>
                   <ul className="mt-1 space-y-1">
                     {s.sources.map((src) => (
@@ -335,10 +342,10 @@ export default function TestedPage() {
                 key={n.place}
                 className={`flex flex-col bg-ink p-6 sm:p-7 ${i === field.notes.length - 1 ? lastCellSpan(field.stories.length + field.notes.length) : ""}`}
               >
-                <p className="text-[0.8125rem] text-snow">{n.place}</p>
+                <p className="text-[0.875rem] font-semibold text-snow">{n.place}</p>
                 <p className="mt-2 text-[0.95rem] leading-relaxed text-snow/85">{n.text}</p>
                 {n.source ? (
-                  <p className="mt-auto pt-5 text-[0.8125rem] text-muted">
+                  <p className="mt-auto pt-5 text-[0.875rem] text-muted">
                     Source:{" "}
                     <a href={n.source.href} target="_blank" rel="noopener noreferrer" className="underline decoration-line-strong underline-offset-2 hover:text-snow">
                       {n.source.label}
@@ -352,9 +359,9 @@ export default function TestedPage() {
       </section>
 
       {/* Quality and certification */}
-      <section aria-labelledby="quality-heading" className="border-t border-line bg-ink py-16 sm:py-20">
+      <section aria-labelledby="quality-heading" className="v2-light py-20 sm:py-28">
         <div className="v2-wrap grid gap-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16">
-          <div>
+          <div className="v2-reveal">
             <h2 id="quality-heading" className="v2-h2 text-snow">
               Quality and certification
             </h2>
@@ -369,7 +376,7 @@ export default function TestedPage() {
               </Link>
             </p>
           </div>
-          <table className="w-full border-collapse text-left">
+          <table className="v2-reveal w-full border-collapse text-left">
             <caption className="sr-only">Published certification and service life by system</caption>
             <thead>
               <tr className="border-b border-line-strong text-[0.8125rem] text-muted">
@@ -403,8 +410,8 @@ export default function TestedPage() {
         </div>
       </section>
 
-      <section className="border-t border-line bg-hull py-20">
-        <div className="v2-wrap flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+      <section className="bg-hull py-20 sm:py-24">
+        <div className="v2-wrap v2-reveal flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <h2 className="v2-h2 max-w-[22ch] text-snow">Need the figures for your site</h2>
             <p className="v2-body mt-4 max-w-[52ch]">

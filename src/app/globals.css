@@ -1,5 +1,8 @@
 @import "tailwindcss";
 @import "./geist-bridge.css";
+@import "./polish-product.css";
+@import "./polish-home.css";
+@import "./polish-pages.css";
 
 @theme inline {
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;

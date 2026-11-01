@@ -27,7 +27,7 @@ function Facts({ story, large = false }: { story: DeploymentStory; large?: boole
           >
             {f.value}
           </dd>
-          <dd className="mt-2 text-[0.875rem] leading-snug text-muted">{f.label}</dd>
+          <dd className="mt-2 text-[0.9375rem] leading-snug text-muted">{f.label}</dd>
         </div>
       ))}
     </dl>
@@ -93,10 +93,13 @@ function Quote({ story }: { story: DeploymentStory }) {
   );
 }
 
-/** The opening story, set in type: a large headline, the account, and its two contract figures. */
+/**
+ * The opening story, set in type on a light band like a printed record: a large headline, the
+ * account, and its two contract figures.
+ */
 export function LeadStory({ story }: { story: DeploymentStory }) {
   return (
-    <article id={story.id} aria-labelledby={`${story.id}-title`} className="scroll-mt-24 border-b border-line">
+    <article id={story.id} aria-labelledby={`${story.id}-title`} className="v2-light scroll-mt-24">
       <div className="v2-wrap grid gap-12 py-20 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)] lg:gap-20 lg:py-28">
         <div>
           <Where story={story} />
@@ -130,13 +133,13 @@ export function FeatureStory({ story, layout }: { story: DeploymentStory; layout
     return (
       <article id={story.id} aria-labelledby={`${story.id}-title`} className="scroll-mt-24 border-b border-line">
         <figure>
-          <div className="relative h-[56svh] min-h-[20rem] w-full overflow-hidden">
-            <Image src={photo.src} alt={photo.alt} fill sizes="100vw" className="object-cover" {...blurProps(photo.src)} />
+          <div className="v2-parallax relative h-[62svh] min-h-[22rem] w-full overflow-hidden bg-hull sm:h-[72svh]">
+            <Image src={photo.src} alt={photo.alt} fill sizes="100vw" className="v2-photo object-cover" {...blurProps(photo.src)} />
           </div>
           <figcaption className="v2-wrap mt-3 text-[0.875rem] text-muted">{photo.caption}</figcaption>
         </figure>
-        <div className="v2-wrap grid gap-10 pb-20 pt-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:gap-16 lg:pb-24">
-          <div>
+        <div className="v2-wrap grid gap-10 pb-20 pt-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:gap-16 lg:pb-28">
+          <div className="v2-reveal">
             <Where story={story} />
             <h2 id={`${story.id}-title`} className="v2-h2 mt-4 max-w-[22ch] text-snow">
               {story.title}
@@ -149,7 +152,7 @@ export function FeatureStory({ story, layout }: { story: DeploymentStory; layout
               ))}
             </div>
           </div>
-          <div className="flex flex-col gap-8 lg:pt-10">
+          <div className="v2-reveal flex flex-col gap-8 lg:pt-10">
             <Quote story={story} />
             <Facts story={story} />
             <Footnote story={story} />
@@ -160,17 +163,17 @@ export function FeatureStory({ story, layout }: { story: DeploymentStory; layout
   }
   const photoRight = layout === "right";
   return (
-    <article id={story.id} aria-labelledby={`${story.id}-title`} className="scroll-mt-24 border-b border-line py-20 sm:py-24">
+    <article id={story.id} aria-labelledby={`${story.id}-title`} className="scroll-mt-24 border-b border-line py-20 sm:py-28">
       <div className="v2-wrap grid gap-10 lg:grid-cols-12 lg:items-start lg:gap-14">
         {photo ? (
-          <figure className={`lg:col-span-7 ${photoRight ? "lg:order-2" : ""}`}>
-            <div className="relative aspect-[4/3] overflow-hidden lg:aspect-[16/11]">
-              <Image src={photo.src} alt={photo.alt} fill sizes="(min-width: 1024px) 56vw, 100vw" className="object-cover" {...blurProps(photo.src)} />
+          <figure className={`v2-reveal lg:col-span-7 ${photoRight ? "lg:order-2" : ""}`}>
+            <div className="relative aspect-[4/3] overflow-hidden bg-hull lg:aspect-[16/11]">
+              <Image src={photo.src} alt={photo.alt} fill sizes="(min-width: 1024px) 56vw, 100vw" className="v2-photo object-cover" {...blurProps(photo.src)} />
             </div>
             <figcaption className="mt-3 text-[0.875rem] text-muted">{photo.caption}</figcaption>
           </figure>
         ) : null}
-        <div className={photo ? `lg:col-span-5 ${photoRight ? "lg:order-1" : ""}` : "lg:col-span-8"}>
+        <div className={`v2-reveal ${photo ? `lg:col-span-5 ${photoRight ? "lg:order-1" : ""}` : "lg:col-span-8"}`}>
           <Where story={story} />
           <h2 id={`${story.id}-title`} className="v2-h2 mt-4 text-snow">
             {story.title}
@@ -206,7 +209,7 @@ export function BriefStory({ story }: { story: DeploymentStory }) {
       </h3>
       <div className="mt-4 space-y-3">
         {story.body.map((p) => (
-          <p key={p.slice(0, 32)} className="text-[0.975rem] leading-relaxed text-snow/80">
+          <p key={p.slice(0, 32)} className="max-w-[60ch] text-[0.975rem] leading-relaxed text-snow/80">
             {p}
           </p>
         ))}

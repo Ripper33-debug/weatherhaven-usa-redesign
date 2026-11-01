@@ -27,10 +27,15 @@ export default async function NewsPage() {
         title="News"
         lead="Partnerships, deliveries, product news and show appearances."
       />
-      <div className="bg-ink py-14 sm:py-20">
-        <div className="v2-wrap space-y-16">
-          {[...byYear.entries()].map(([year, items]) => (
-            <section key={year} aria-labelledby={`y-${year}`} className="grid gap-6 lg:grid-cols-[10rem_minmax(0,1fr)] lg:gap-12">
+      {/* A light register, like a printed press list */}
+      <div className="v2-light py-16 sm:py-24">
+        <div className="v2-wrap space-y-20">
+          {[...byYear.entries()].map(([year, items], i) => (
+            <section
+              key={year}
+              aria-labelledby={`y-${year}`}
+              className={`grid gap-6 lg:grid-cols-[10rem_minmax(0,1fr)] lg:gap-12 ${i > 0 ? "v2-reveal" : ""}`}
+            >
               <h2 id={`y-${year}`} className="v2-figure text-[2.5rem] leading-none text-snow lg:sticky lg:top-28 lg:self-start">
                 {year}
               </h2>
@@ -44,7 +49,7 @@ export default async function NewsPage() {
                         href={href}
                         target={external ? "_blank" : undefined}
                         rel={external ? "noopener noreferrer" : undefined}
-                        className="group grid gap-2 py-6 no-underline md:grid-cols-[11rem_minmax(0,1fr)] md:gap-8"
+                        className="v2-press group grid gap-2 py-6 no-underline md:grid-cols-[11rem_minmax(0,1fr)] md:gap-8"
                       >
                         <time dateTime={item.published_at ?? undefined} className="v2-tech text-muted">
                           {formatNewsDate(item.published_at)}
@@ -57,7 +62,7 @@ export default async function NewsPage() {
                             <span className="mt-2 block max-w-[70ch] text-[0.95rem] leading-relaxed text-muted">{item.summary}</span>
                           ) : null}
                           {external ? (
-                            <span className="mt-3 block text-[0.85rem] text-muted">
+                            <span className="mt-3 block text-[0.875rem] text-muted">
                               {new URL(href).hostname.replace(/^www\./, "")}
                               <span className="sr-only"> (opens in a new tab)</span>
                             </span>

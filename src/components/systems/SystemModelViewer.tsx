@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, ViewTransition } from "react";
 import { useClientMediaQuery } from "@/hooks/useClientMediaQuery";
 import type { SystemStage } from "@/lib/three/systemStage";
 import type { TreccFinish } from "@/lib/three/treccFinishes";
@@ -20,7 +20,18 @@ const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2
  * model's own fold-down, three finishes, and a link to the full-size AR page. The still is the first
  * paint and stays as the fallback when the browser can't draw WebGL on a graphics chip.
  */
-export function SystemModelViewer({ slug, name, lead = false }: { slug: string; name: string; lead?: boolean }) {
+export function SystemModelViewer({
+  slug,
+  name,
+  lead = false,
+  transitionName,
+}: {
+  slug: string;
+  name: string;
+  lead?: boolean;
+  /** Shared-element name for the stage (the catalog card's photo morphs into it). */
+  transitionName?: string;
+}) {
   const model = systemModel(slug);
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -229,12 +240,11 @@ export function SystemModelViewer({ slug, name, lead = false }: { slug: string; 
   const ar = arHref(slug);
   const poster = modelPoster(slug);
 
-  return (
-    <div>
+  const stage = (
       <div
         ref={wrapRef}
         data-model-viewer
-        className="relative aspect-[4/3] overflow-hidden border border-line bg-[radial-gradient(ellipse_at_60%_45%,#172233_0%,#0a0f17_70%)] sm:aspect-[16/9]"
+        className="relative aspect-[4/3] max-h-[80svh] w-full overflow-hidden border border-line bg-[radial-gradient(ellipse_at_60%_45%,#172233_0%,#0a0f17_70%)] sm:aspect-[16/9]"
       >
         {/* The phone still is 4:3, like the box on phones, so the model isn't cropped at the sides. */}
         <picture>
@@ -257,14 +267,14 @@ export function SystemModelViewer({ slug, name, lead = false }: { slug: string; 
           className={`absolute inset-0 h-full w-full cursor-grab touch-none transition-opacity duration-700 active:cursor-grabbing ${ready ? "opacity-100" : "opacity-0"}`}
         />
         {load === "loading" || load === "idle" ? (
-          <p className="absolute bottom-4 left-4 text-[0.85rem] text-muted">Loading the 3D model</p>
+          <p className="absolute bottom-4 left-4 text-[0.875rem] text-muted">Loading the 3D model</p>
         ) : null}
         {ar ? (
           <a
             // With the fit-out showing, the AR page opens furnished too.
             href={insideOn ? `${ar}?inside=1` : ar}
             aria-label={insideOn ? "See it full size in AR, furnished" : "See it full size in AR"}
-            className="absolute right-3 top-3 flex h-11 min-w-11 items-center justify-center gap-2 bg-ink/70 px-3 text-[0.85rem] font-medium text-snow no-underline backdrop-blur-md transition-colors hover:bg-ink/85 sm:right-4 sm:top-4"
+            className="absolute right-3 top-3 flex h-11 min-w-11 items-center justify-center gap-2 bg-ink/70 px-3 text-[0.875rem] font-medium text-snow no-underline backdrop-blur-md transition-colors hover:bg-ink/85 sm:right-4 sm:top-4"
           >
             <svg aria-hidden viewBox="0 0 20 20" className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round">
               <path d="M10 2.5 17 6v8l-7 3.5L3 14V6z" />
@@ -288,7 +298,7 @@ export function SystemModelViewer({ slug, name, lead = false }: { slug: string; 
                       type="button"
                       aria-pressed={deployed === o.v}
                       onClick={() => toggle(o.v)}
-                      className={`h-9 px-3 text-[0.85rem] font-medium transition-colors sm:px-4 ${
+                      className={`h-9 px-3 text-[0.875rem] font-medium transition-colors sm:px-4 ${
                         deployed === o.v ? "bg-snow text-ink" : "text-snow/80 hover:text-snow"
                       }`}
                     >
@@ -303,7 +313,7 @@ export function SystemModelViewer({ slug, name, lead = false }: { slug: string; 
                   aria-pressed={insideOn}
                   aria-busy={insideLoading}
                   onClick={() => void toggleInside()}
-                  className={`flex h-11 items-center gap-2 px-3 text-[0.85rem] font-medium backdrop-blur-md transition-colors sm:px-4 ${
+                  className={`flex h-11 items-center gap-2 px-3 text-[0.875rem] font-medium backdrop-blur-md transition-colors sm:px-4 ${
                     insideOn ? "bg-snow text-ink" : "bg-ink/70 text-snow/80 hover:text-snow"
                   } ${insideLoading ? "animate-pulse" : ""}`}
                 >
@@ -345,7 +355,18 @@ export function SystemModelViewer({ slug, name, lead = false }: { slug: string; 
           </>
         ) : null}
       </div>
-      <p className="mt-4 min-h-[3em] text-[0.85rem] text-muted">
+  );
+
+  return (
+    <div>
+      {transitionName ? (
+        <ViewTransition name={transitionName} share="v2-morph" default="none">
+          {stage}
+        </ViewTransition>
+      ) : (
+        stage
+      )}
+      <p className="mt-4 min-h-[1.5em] text-[0.875rem] text-muted">
         {insideOn && model.inside ? `Example fit-out: ${model.inside.label}` : model.source}. Configuration varies by program.
       </p>
     </div>

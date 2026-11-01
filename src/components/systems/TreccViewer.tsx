@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, ViewTransition } from "react";
 import { useClientMediaQuery } from "@/hooks/useClientMediaQuery";
 import type { OpenPoint, TreccStage } from "@/lib/three/treccStage";
 import type { TreccFinish } from "@/lib/three/treccFinishes";
@@ -41,8 +41,11 @@ const CALLOUTS: { title: string; text: string; point: OpenPoint }[] = [
  * Interactive TRECC on its product page: drag to turn, stowed/deployed, three finishes, and
  * "See it full size" in the phone's AR viewer (shown even when the 3D view can't load).
  */
-/** `lead`: the viewer opens the page, so its still is the first thing to load. */
-export function TreccViewer({ lead = false }: { lead?: boolean } = {}) {
+/**
+ * `lead`: the viewer opens the page, so its still is the first thing to load.
+ * `transitionName`: shared-element name for the stage (the catalog card's photo morphs into it).
+ */
+export function TreccViewer({ lead = false, transitionName }: { lead?: boolean; transitionName?: string } = {}) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const stageRef = useRef<TreccStage | null>(null);
@@ -261,9 +264,8 @@ export function TreccViewer({ lead = false }: { lead?: boolean } = {}) {
 
   const ready = load === "ready";
 
-  return (
-    <div>
-      <div ref={wrapRef} className="relative aspect-[4/3] overflow-hidden border border-line bg-[radial-gradient(ellipse_at_60%_45%,#172233_0%,#0a0f17_70%)] sm:aspect-[16/9]">
+  const stage = (
+      <div ref={wrapRef} className="relative aspect-[4/3] max-h-[80svh] w-full overflow-hidden border border-line bg-[radial-gradient(ellipse_at_60%_45%,#172233_0%,#0a0f17_70%)] sm:aspect-[16/9]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/models/trecc-poster-viewer.jpg"
@@ -299,7 +301,7 @@ export function TreccViewer({ lead = false }: { lead?: boolean } = {}) {
             ))
           : null}
         {load === "loading" || load === "idle" ? (
-          <p className="absolute bottom-4 left-4 text-[0.85rem] text-muted">Loading the 3D model</p>
+          <p className="absolute bottom-4 left-4 text-[0.875rem] text-muted">Loading the 3D model</p>
         ) : null}
         <TreccArButton finish={finish} className="absolute right-3 top-3 sm:right-4 sm:top-4" />
         {ready ? (
@@ -316,7 +318,7 @@ export function TreccViewer({ lead = false }: { lead?: boolean } = {}) {
                     type="button"
                     aria-pressed={deployed === o.v}
                     onClick={() => toggle(o.v)}
-                    className={`h-9 px-3 text-[0.85rem] font-medium transition-colors sm:px-4 ${
+                    className={`h-9 px-3 text-[0.875rem] font-medium transition-colors sm:px-4 ${
                       deployed === o.v ? "bg-snow text-ink" : "text-snow/80 hover:text-snow"
                     }`}
                   >
@@ -329,7 +331,7 @@ export function TreccViewer({ lead = false }: { lead?: boolean } = {}) {
                 aria-pressed={insideOn}
                 aria-busy={insideLoading}
                 onClick={() => void toggleInside()}
-                className={`flex h-11 items-center gap-2 px-3 text-[0.85rem] font-medium backdrop-blur-md transition-colors sm:px-4 ${
+                className={`flex h-11 items-center gap-2 px-3 text-[0.875rem] font-medium backdrop-blur-md transition-colors sm:px-4 ${
                   insideOn ? "bg-snow text-ink" : "bg-ink/70 text-snow/80 hover:text-snow"
                 } ${insideLoading ? "animate-pulse" : ""}`}
               >
@@ -364,7 +366,18 @@ export function TreccViewer({ lead = false }: { lead?: boolean } = {}) {
           </>
         ) : null}
       </div>
-      <ol aria-label="TRECC at a glance" className="mt-5 grid gap-x-8 gap-y-4 sm:grid-cols-3">
+  );
+
+  return (
+    <div>
+      {transitionName ? (
+        <ViewTransition name={transitionName} share="v2-morph" default="none">
+          {stage}
+        </ViewTransition>
+      ) : (
+        stage
+      )}
+      <ol aria-label="TRECC at a glance" className="mt-6 grid gap-x-10 gap-y-5 sm:grid-cols-3">
         {CALLOUTS.map((c, i) => (
           <li
             key={c.title}
@@ -381,13 +394,13 @@ export function TreccViewer({ lead = false }: { lead?: boolean } = {}) {
               {i + 1}
             </span>
             <div>
-              <p className="text-[0.95rem] font-semibold text-snow">{c.title}</p>
-              <p className="mt-0.5 text-[0.9rem] leading-snug text-muted">{c.text}</p>
+              <p className="text-[1rem] font-semibold text-snow">{c.title}</p>
+              <p className="mt-1 text-[0.9375rem] leading-relaxed text-muted">{c.text}</p>
             </div>
           </li>
         ))}
       </ol>
-      <p className="mt-4 text-[0.85rem] text-muted">
+      <p className="mt-5 text-[0.875rem] text-muted">
         {insideOn && INSIDE_LABEL ? `Example fit-out: ${INSIDE_LABEL}` : "Illustrative model"}. Configuration varies by program.
       </p>
     </div>

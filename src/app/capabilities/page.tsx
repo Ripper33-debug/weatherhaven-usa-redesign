@@ -103,7 +103,7 @@ function Related({ slugs, compact = false }: { slugs: string[]; compact?: boolea
   const list = slugs.filter((slug) => PRODUCT_CONTENT[slug]);
   if (compact) {
     return (
-      <p className="text-[0.9rem] text-muted">
+      <p className="text-[0.95rem] text-muted">
         <span className="mr-1.5">Related systems:</span>
         {list.map((slug, i) => (
           <span key={slug}>
@@ -118,16 +118,16 @@ function Related({ slugs, compact = false }: { slugs: string[]; compact?: boolea
   }
   return (
     <div>
-      <p className="text-[0.9rem] font-semibold text-snow">Related systems</p>
-      <ul className="mt-4 grid gap-4 sm:grid-cols-3">
+      <p className="text-[0.95rem] font-semibold text-snow">Related systems</p>
+      <ul className={`mt-4 grid gap-4 ${list.length === 2 ? "sm:grid-cols-2" : "sm:grid-cols-3"}`}>
         {list.map((slug) => (
           <li key={slug}>
-            <Link href={`/configurable-solutions/${slug}`} className="group flex items-center gap-3 no-underline">
-              <span className="relative h-14 w-20 shrink-0 overflow-hidden bg-hull">
-                <Image src={productCover(slug)} alt="" fill sizes="80px" {...blurProps(productCover(slug))} className="object-cover" />
+            <Link href={`/configurable-solutions/${slug}`} className="v2-press group flex items-center gap-3 no-underline">
+              <span className="v2-media-zoom relative h-14 w-20 shrink-0 bg-hull">
+                <Image src={productCover(slug)} alt="" fill sizes="80px" {...blurProps(productCover(slug))} className="v2-photo object-cover" />
               </span>
               <span>
-                <span className="block font-semibold text-snow group-hover:text-signal">{PRODUCT_CONTENT[slug].name}</span>
+                <span className="block font-semibold text-snow transition-colors group-hover:text-signal">{PRODUCT_CONTENT[slug].name}</span>
                 <span className="block text-[0.875rem] leading-snug text-muted">{PRODUCT_CONTENT[slug].keySpec}</span>
               </span>
             </Link>
@@ -140,9 +140,9 @@ function Related({ slugs, compact = false }: { slugs: string[]; compact?: boolea
 
 function Figure({ photo, aspect, sizes }: { photo: Photo; aspect: string; sizes: string }) {
   return (
-    <figure>
+    <figure className="v2-reveal">
       <div className={`relative overflow-hidden bg-hull ${aspect}`}>
-        <Image src={photo.src} alt={photo.alt} fill sizes={sizes} className="object-cover" {...blurProps(photo.src)} />
+        <Image src={photo.src} alt={photo.alt} fill sizes={sizes} className="v2-photo object-cover" {...blurProps(photo.src)} />
       </div>
       <figcaption className="mt-3 text-[0.875rem] text-muted">{photo.caption}</figcaption>
     </figure>
@@ -177,7 +177,7 @@ function Copy({ c, heading = "h2" }: { c: CapabilityCategory; heading?: "h2" | "
 function Area({ c, layout }: { c: CapabilityCategory; layout: "text" | "split" | "wide" }) {
   const d = DETAIL[c.id];
   return (
-    <section id={c.id} aria-labelledby={`${c.id}-h`} className="scroll-mt-28 border-t border-line pt-10">
+    <section id={c.id} aria-labelledby={`${c.id}-h`} className="scroll-mt-28 border-t border-line pt-12">
       {layout === "split" && d.photo ? (
         <div className="grid gap-8 md:grid-cols-2 md:gap-10">
           <div>
@@ -202,7 +202,7 @@ function Area({ c, layout }: { c: CapabilityCategory; layout: "text" | "split" |
 
 function Pair({ items }: { items: CapabilityCategory[] }) {
   return (
-    <div className="grid gap-12 border-t border-line pt-10 md:grid-cols-2 md:gap-10">
+    <div className="grid gap-12 border-t border-line pt-12 md:grid-cols-2 md:gap-10">
       {items.map((c) => {
         const d = DETAIL[c.id];
         return (
@@ -232,7 +232,7 @@ export default function CapabilitiesPage() {
         lead="Climate control, power, flooring and camp layout are planned with the shelters, so a command post, hospital or camp works as soon as it is set up."
         wide
       />
-      <div className="bg-ink py-16 sm:py-20">
+      <div className="bg-ink py-20 sm:py-24">
         <div className="v2-wrap grid gap-12 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-16">
           <nav aria-label="Capabilities" className="hidden lg:block">
             <ol className="sticky top-28 space-y-1 border-l border-line">
@@ -245,7 +245,7 @@ export default function CapabilitiesPage() {
               ))}
             </ol>
           </nav>
-          <div className="space-y-20">
+          <div className="space-y-24">
             {ROWS.map((row) =>
               row.layout === "pair" ? (
                 <Pair key={row.ids.join("-")} items={row.ids.map((id) => BY_ID[id])} />
@@ -257,8 +257,8 @@ export default function CapabilitiesPage() {
         </div>
       </div>
       <HomeTimeline />
-      <section className="border-t border-line bg-hull py-20">
-        <div className="v2-wrap flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+      <section className="border-t border-line bg-hull py-20 sm:py-24">
+        <div className="v2-wrap v2-reveal flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
           <h2 className="v2-h2 max-w-[22ch] text-snow">Planning a camp rather than a single shelter?</h2>
           <div className="flex flex-col gap-3 sm:flex-row">
             <Link href="/mission-solution-builder" className="v2-btn">

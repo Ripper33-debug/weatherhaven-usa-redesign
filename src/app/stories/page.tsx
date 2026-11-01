@@ -26,23 +26,25 @@ export default async function StoriesPage() {
       />
       <div className="bg-ink">
         <ol className="v2-wrap divide-y divide-line">
-          {stories.map((s) => (
-            <li key={s.slug} className="py-14 sm:py-20">
-              <article aria-labelledby={`story-${s.slug}`} className="group relative grid gap-8 lg:grid-cols-12 lg:items-center lg:gap-12">
-                <div className="relative aspect-[16/10] overflow-hidden bg-hull lg:col-span-7">
+          {stories.map((s, i) => (
+            <li key={s.slug} className="py-16 sm:py-24">
+              <article aria-labelledby={`story-${s.slug}`} className={`${i > 0 ? "v2-reveal " : ""}group relative grid gap-8 lg:grid-cols-12 lg:items-center lg:gap-12`}>
+                <div className={`v2-media-zoom relative aspect-[16/10] bg-hull lg:col-span-7 ${i % 2 === 1 ? "lg:order-2" : ""}`}>
                   <Image
                     src={s.hero.src}
                     alt={s.hero.alt}
                     fill
+                    priority={i === 0}
+                    loading={i === 0 ? "eager" : undefined}
                     sizes="(min-width: 1024px) 58vw, 100vw"
-                    className="object-cover transition-transform duration-700 motion-safe:group-hover:scale-[1.02]"
+                    className="v2-photo object-cover"
                     {...blurProps(s.hero.src)}
                   />
                   {s.hero.model ? (
-                    <p className="absolute bottom-2 left-2 bg-ink/75 px-2 py-1 text-[0.75rem] text-snow/85 backdrop-blur-sm">3D model</p>
+                    <p className="absolute bottom-2 left-2 bg-ink/80 px-2 py-1 text-[0.8125rem] text-snow/90">3D model</p>
                   ) : null}
                 </div>
-                <div className="lg:col-span-5">
+                <div className={`lg:col-span-5 ${i % 2 === 1 ? "lg:order-1" : ""}`}>
                   <p className="v2-tech text-muted">
                     <span className="text-snow">{s.place}</span>
                     {s.when ? `, ${s.when}` : null}
@@ -58,11 +60,11 @@ export default async function StoriesPage() {
                       <div key={n.label} className="min-w-0 border-t border-line-strong pt-3">
                         <dt className="sr-only">{n.label}</dt>
                         <dd className="v2-figure v2-tnum text-[1.7rem] leading-none text-snow">{n.value}</dd>
-                        <dd className="mt-2 text-[0.85rem] leading-snug text-muted">{n.label}</dd>
+                        <dd className="mt-2 text-[0.875rem] leading-snug text-muted">{n.label}</dd>
                       </div>
                     ))}
                   </dl>
-                  <p className="mt-7 text-[0.95rem] text-signal">Read the story</p>
+                  <p className="mt-7 text-[0.95rem] font-medium text-signal">Read the story</p>
                 </div>
               </article>
             </li>

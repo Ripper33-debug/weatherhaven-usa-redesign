@@ -27,11 +27,11 @@ function Ref({ r }: { r: FactRef }) {
 /** One shelter type's entries for a row: the systems that publish the figure, or "Not published" once. */
 function Cell({ row, systems }: { row: CompareRow; systems: string[] }) {
   const cells = cellFor(row, systems);
-  if (cells.length === 0) return <span className="block text-[0.9rem] text-muted">Not published</span>;
+  if (cells.length === 0) return <span className="block text-[0.9375rem] text-muted">Not published</span>;
   return (
     <div className="space-y-3">
       {cells.map(({ slug, refs }) => (
-        <div key={slug} className="text-[0.9rem] leading-snug">
+        <div key={slug} className="text-[0.9375rem] leading-snug">
           <Link href={systemHref(slug)} className="font-semibold text-snow no-underline hover:text-signal">
             {systemName(slug)}
           </Link>
@@ -62,7 +62,7 @@ export default function CompareSheltersPage() {
         lead="Put any two of the 17 systems side by side, then see the four kinds of Weatherhaven shelter compared on the figures each publishes."
       />
 
-      <section id="two-systems" aria-labelledby="two-heading" className="scroll-mt-24 bg-ink py-16 sm:py-20">
+      <section id="two-systems" aria-labelledby="two-heading" className="v2-light scroll-mt-24 py-16 sm:py-20">
         <div className="v2-wrap">
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] lg:items-end">
             <h2 id="two-heading" className="v2-h2 text-snow">
@@ -86,9 +86,9 @@ export default function CompareSheltersPage() {
         </div>
       </section>
 
-      <section aria-labelledby="types-heading" className="border-t border-line bg-ink py-16 sm:py-20">
+      <section aria-labelledby="types-heading" className="bg-ink py-16 sm:py-20">
         <div className="v2-wrap">
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] lg:items-end">
+          <div className="v2-reveal grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] lg:items-end">
             <h2 id="types-heading" className="v2-h2 text-snow">
               By shelter type
             </h2>

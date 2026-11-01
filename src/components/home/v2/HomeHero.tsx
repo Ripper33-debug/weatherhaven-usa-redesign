@@ -44,7 +44,7 @@ export function HomeHero({ copy = HOMEPAGE_DEFAULTS }: { copy?: HomepageCopy }) 
       </div>
 
       <div className="v2-wrap pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] md:pb-6">
-        <div className="flex flex-col gap-2 border-t border-line-strong pt-4 text-[0.8125rem] leading-snug text-muted sm:flex-row sm:items-baseline sm:justify-between sm:gap-8">
+        <div className="flex flex-col gap-2 border-t border-line-strong pt-4 text-[0.875rem] leading-snug text-muted sm:flex-row sm:items-baseline sm:justify-between sm:gap-8">
           <HeroFieldReadoutLive />
           <p className="shrink-0">{copy.filmCaption}</p>
         </div>

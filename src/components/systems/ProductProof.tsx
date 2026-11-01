@@ -64,7 +64,7 @@ export function ProductProof({ slug, name, specs }: { slug: string; name: string
                           <div key={f.label} className="min-w-0">
                             <dt className="sr-only">{f.label}</dt>
                             <dd className="v2-figure v2-tnum text-[1.6rem] leading-none text-snow">{f.value}</dd>
-                            <dd className="mt-2 text-[0.85rem] leading-snug text-muted">{f.label}</dd>
+                            <dd className="mt-2 text-[0.875rem] leading-snug text-muted">{f.label}</dd>
                           </div>
                         ))}
                       </dl>

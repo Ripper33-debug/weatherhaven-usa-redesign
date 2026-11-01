@@ -4,7 +4,6 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getNewsReleaseBySlug } from "@/app/api/_lib/news-releases";
 import { V2PageHeader } from "@/components/site/V2PageHeader";
-import { MarketingSection } from "@/components/marketing/MarketingSection";
 import { formatNewsDate, isExternalNewsLink } from "@/lib/news-releases";
 import { shareMetadataFromImage } from "@/lib/share-metadata";
 
@@ -44,8 +43,8 @@ export default async function NewsReleasePage({ params }: Props) {
         wide
       />
 
-      <MarketingSection className="v2-wrap max-w-[860px] py-16 sm:py-20">
-        <p className="text-[0.9rem] text-muted">{formatNewsDate(release.published_at)}</p>
+      <section className="v2-wrap max-w-[860px] py-16 sm:py-24">
+        <p className="text-[0.95rem] text-muted">{formatNewsDate(release.published_at)}</p>
         {release.cover_image_url ? (
           <div className="relative mt-8 aspect-[16/9] w-full overflow-hidden bg-hull">
             <Image
@@ -53,18 +52,18 @@ export default async function NewsReleasePage({ params }: Props) {
               alt=""
               fill
               unoptimized
-              className="object-cover"
+              className="v2-photo object-cover"
               sizes="(max-width: 760px) 100vw, 760px"
               priority
             />
           </div>
         ) : null}
         {release.body ? (
-          <div className="mt-8 whitespace-pre-wrap text-[1.05rem] leading-relaxed text-snow/85">
+          <div className="mt-8 max-w-[66ch] whitespace-pre-wrap text-[1.0625rem] leading-[1.7] text-snow/85">
             {release.body}
           </div>
         ) : release.summary ? (
-          <p className="mt-8 text-[1.05rem] leading-relaxed text-snow/85">{release.summary}</p>
+          <p className="mt-8 max-w-[66ch] text-[1.0625rem] leading-[1.7] text-snow/85">{release.summary}</p>
         ) : null}
 
         <div className="mt-14 border-t border-line pt-10">
@@ -72,7 +71,7 @@ export default async function NewsReleasePage({ params }: Props) {
             All news
           </Link>
         </div>
-      </MarketingSection>
+      </section>
     </div>
   );
 }

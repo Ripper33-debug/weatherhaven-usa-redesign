@@ -27,9 +27,9 @@ export default function TrackRecordPage() {
       />
 
       <div className="bg-ink">
-        <section aria-labelledby="contracts-heading" className="v2-light py-16 sm:py-20">
+        <section aria-labelledby="contracts-heading" className="v2-light py-20 sm:py-28">
           <div className="v2-wrap">
-            <div className="grid gap-4 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16">
+            <div className="v2-reveal grid gap-4 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16">
               <h2 id="contracts-heading" className="v2-h2 text-snow">
                 Contracts on public record
               </h2>
@@ -78,7 +78,7 @@ export default function TrackRecordPage() {
                       {c.story ? (
                         <>
                           {" "}
-                          <Link href={`/deployments#${c.story}`} className="v2-link whitespace-nowrap text-[0.9rem]">
+                          <Link href={`/deployments#${c.story}`} className="v2-link whitespace-nowrap text-[0.95rem]">
                             The story
                           </Link>
                         </>
@@ -88,7 +88,7 @@ export default function TrackRecordPage() {
                       {c.ids.length ? (
                         <ul className="flex flex-wrap gap-2 lg:flex-col lg:items-start">
                           {c.ids.map((id) => (
-                            <li key={id} className="v2-code px-2 py-1 text-[0.85rem] text-snow shadow-[inset_0_0_0_1px_var(--color-line-strong)]">
+                            <li key={id} className="v2-code px-2 py-1 text-[0.875rem] text-snow shadow-[inset_0_0_0_1px_var(--color-line-strong)]">
                               {id}
                             </li>
                           ))}
@@ -127,9 +127,9 @@ export default function TrackRecordPage() {
           </div>
         </section>
 
-        <section aria-labelledby="sites-heading" className="border-b border-line py-16 sm:py-20">
+        <section aria-labelledby="sites-heading" className="border-b border-line py-20 sm:py-28">
           <div className="v2-wrap">
-            <div className="grid gap-4 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16">
+            <div className="v2-reveal grid gap-4 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16">
               <h2 id="sites-heading" className="v2-h2 text-snow">
                 Fielded sites
               </h2>
@@ -149,7 +149,7 @@ export default function TrackRecordPage() {
         </section>
 
         <section className="bg-hull py-20 sm:py-24">
-          <div className="v2-wrap grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+          <div className="v2-wrap v2-reveal grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
             <div>
               <h2 className="v2-h2 max-w-[24ch] text-snow">Past performance for your solicitation</h2>
               <p className="v2-body mt-4 max-w-[52ch]">

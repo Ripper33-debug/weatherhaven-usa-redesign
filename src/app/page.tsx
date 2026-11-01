@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import { getHomepageCopy } from "@/sanity/content";
 import { pageMeta } from "@/lib/page-meta";
 import { HomeHero } from "@/components/home/v2/HomeHero";
+import { HomeNumbers } from "@/components/home/v2/HomeNumbers";
 import { HomeTreccScene } from "@/components/home/v2/HomeTreccScene";
 import { HomeSystems } from "@/components/home/v2/HomeSystems";
+import { HomeLineup } from "@/components/home/v2/HomeLineup";
 import { HomeDeploymentGlobe } from "@/components/home/v2/HomeDeploymentGlobe";
 import { HomeFactory } from "@/components/home/v2/HomeFactory";
 import { HomeNews } from "@/components/home/v2/HomeNews";
@@ -25,12 +27,16 @@ export const revalidate = 300;
 
 export default async function HomePage() {
   const copy = await getHomepageCopy();
-  // Live weather for the hero readout (cached for 30 minutes; null hides the readout).
+  // Rhythm: the film; the company's figures (light); the TRECC in 3D (dark); the systems as a photo
+  // mosaic (dark); the true-scale lineup (light); the map (dark); the plant photograph and
+  // credentials; news (light); then the closing photograph.
   return (
     <>
       <HomeHero copy={copy} />
+      <HomeNumbers />
       <HomeTreccScene />
       <HomeSystems />
+      <HomeLineup />
       <HomeDeploymentGlobe />
       <HomeFactory />
       <HomeNews />

@@ -17,9 +17,6 @@ export function HomeDeploymentGlobe() {
           more than 95 countries in all.
         </p>
         <div className="flex shrink-0 flex-wrap gap-x-6 gap-y-2 text-[0.95rem]">
-          <Link href="/stories" className="v2-link">
-            Three programs in depth
-          </Link>
           <Link href="/deployments" className="v2-link">
             Read the deployment stories
           </Link>

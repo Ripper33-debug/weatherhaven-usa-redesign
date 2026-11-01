@@ -163,8 +163,8 @@ export function SizeCompare({ sizes, heading }: { sizes: SystemSize[]; heading?:
                   touched.current = false;
                   setState(s.packed ? "packed" : "deployed");
                 }}
-                className={`h-10 px-4 text-[0.9rem] font-medium transition-colors ${
-                  i === variant ? "bg-snow text-ink" : "text-snow shadow-[inset_0_0_0_1px_rgb(148_170_196/0.32)] hover:bg-white/[0.05]"
+                className={`h-10 px-4 text-[0.9375rem] font-medium transition-colors ${
+                  i === variant ? "bg-snow text-ink" : "text-snow shadow-[inset_0_0_0_1px_var(--color-line-strong)] hover:bg-snow/[0.06]"
                 }`}
               >
                 {s.name}
@@ -180,7 +180,7 @@ export function SizeCompare({ sizes, heading }: { sizes: SystemSize[]; heading?:
                 type="button"
                 aria-pressed={state === s}
                 onClick={() => choose(s)}
-                className={`h-9 px-4 text-[0.9rem] font-medium capitalize transition-colors ${
+                className={`h-9 px-4 text-[0.9375rem] font-medium capitalize transition-colors ${
                   state === s ? "bg-signal text-ink" : "text-snow/80 hover:text-snow"
                 }`}
               >
@@ -192,7 +192,7 @@ export function SizeCompare({ sizes, heading }: { sizes: SystemSize[]; heading?:
       </div>
 
       <div className="space-y-4 @4xl:col-start-1 @4xl:row-span-2 @4xl:row-start-1">
-        <figure className="v2-plate overflow-hidden p-3 sm:p-5">
+        <figure className="v2-product-drawing v2-plate overflow-hidden p-3 sm:p-5">
           <svg
             viewBox={`0 0 ${sceneW} ${sceneH}`}
             className="block h-auto w-full"
@@ -203,8 +203,8 @@ export function SizeCompare({ sizes, heading }: { sizes: SystemSize[]; heading?:
               {`Floor plan to scale: ${size.name} ${state === "packed" && P ? `packed, ${dimsLabel(P)}` : `deployed, ${dimsLabel(D)}`}, beside a 20-ft ISO container.`}
             </title>
             {/* Grid as plain lines (SVG patterns render unreliably in Safari): 1 ft, heavier every 5 ft */}
-            <path d={gridPath(sceneW, sceneH, 12, 60)} fill="none" stroke="rgb(148 170 196 / 0.09)" strokeWidth="1" vectorEffect="non-scaling-stroke" />
-            <path d={gridPath(sceneW, sceneH, 60)} fill="none" stroke="rgb(148 170 196 / 0.2)" strokeWidth="1" vectorEffect="non-scaling-stroke" />
+            <path d={gridPath(sceneW, sceneH, 12, 60)} fill="none" stroke="rgb(148 170 196 / 0.09)" className="v2-product-d-grid" strokeWidth="1" vectorEffect="non-scaling-stroke" />
+            <path d={gridPath(sceneW, sceneH, 60)} fill="none" stroke="rgb(148 170 196 / 0.2)" className="v2-product-d-grid-strong" strokeWidth="1" vectorEffect="non-scaling-stroke" />
             {/* Deployed outline stays visible as the target */}
             <PlanShape
               size={size}
@@ -213,6 +213,7 @@ export function SizeCompare({ sizes, heading }: { sizes: SystemSize[]; heading?:
               cy={cy}
               fill="none"
               stroke="rgb(241 133 34 / 0.55)"
+              className="v2-product-d-target"
               strokeWidth="1.25"
               strokeDasharray="5 4"
               vectorEffect="non-scaling-stroke"
@@ -224,6 +225,7 @@ export function SizeCompare({ sizes, heading }: { sizes: SystemSize[]; heading?:
                 dims={D}
                 cx={cx}
                 cy={cy}
+                className={state === "packed" && P ? "v2-product-d-packed" : "v2-product-d-shape"}
                 fill={state === "packed" && P ? "rgb(238 242 246 / 0.16)" : "rgb(241 133 34 / 0.22)"}
                 stroke={state === "packed" && P ? "rgb(238 242 246 / 0.85)" : "#f18522"}
                 strokeWidth="1.75"
@@ -239,6 +241,7 @@ export function SizeCompare({ sizes, heading }: { sizes: SystemSize[]; heading?:
               height={ISO_20FT.w}
               fill="rgb(148 170 196 / 0.06)"
               stroke="rgb(148 170 196 / 0.6)"
+              className="v2-product-d-ref"
               strokeWidth="1.25"
               vectorEffect="non-scaling-stroke"
             />
@@ -250,12 +253,13 @@ export function SizeCompare({ sizes, heading }: { sizes: SystemSize[]; heading?:
                 y1={cy - ISO_20FT.w / 2 + 6}
                 y2={cy + ISO_20FT.w / 2 - 6}
                 stroke="rgb(148 170 196 / 0.22)"
+                className="v2-product-d-ref-line"
                 strokeWidth="1"
                 vectorEffect="non-scaling-stroke"
               />
             ))}
           </svg>
-          <figcaption className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 px-1 text-[0.85rem] text-muted">
+          <figcaption className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 px-1 text-[0.875rem] text-muted">
             <span className="inline-flex items-center gap-2">
               <span aria-hidden className="h-2.5 w-4 border border-signal bg-signal/25" />
               {size.name}, {state === "packed" && P ? "packed" : "deployed"}
@@ -267,7 +271,7 @@ export function SizeCompare({ sizes, heading }: { sizes: SystemSize[]; heading?:
               </span>
             ) : null}
             <span className="inline-flex items-center gap-2">
-              <span aria-hidden className="h-2.5 w-4 border border-[rgb(148_170_196/0.6)]" />
+              <span aria-hidden className="h-2.5 w-4 border v2-product-d-ref-key" />
               20-ft ISO container
             </span>
             <span>Grid: 1 ft, heavier lines every 5 ft</span>
@@ -275,15 +279,16 @@ export function SizeCompare({ sizes, heading }: { sizes: SystemSize[]; heading?:
         </figure>
 
         {hasSide ? (
-          <figure className="v2-plate overflow-hidden p-3 sm:p-5">
+          <figure className="v2-product-drawing v2-plate overflow-hidden p-3 sm:p-5">
             <svg viewBox={`0 0 ${sideW} ${ground + 10}`} className="mx-auto block h-auto max-h-[220px] w-full" role="img" aria-labelledby={`${id}-side`}>
               <title id={`${id}-side`}>{`Side view to scale: ${size.name} ${state === "packed" && P ? "packed" : "deployed"} next to a 6-ft person.`}</title>
-              <line x1="0" x2={sideW} y1={ground} y2={ground} stroke="rgb(148 170 196 / 0.45)" strokeWidth="1.25" vectorEffect="non-scaling-stroke" />
+              <line x1="0" x2={sideW} y1={ground} y2={ground} stroke="rgb(148 170 196 / 0.45)" className="v2-product-d-ground" strokeWidth="1.25" vectorEffect="non-scaling-stroke" />
               {P ? (
                 <path
                   d={SidePath(size, P, sideCx, ground, true)}
                   fill="rgb(238 242 246 / 0.16)"
                   stroke="rgb(238 242 246 / 0.85)"
+                  className="v2-product-d-packed"
                   strokeWidth="1.5"
                   vectorEffect="non-scaling-stroke"
                   style={{ opacity: state === "packed" ? 1 : 0, transition }}
@@ -293,6 +298,7 @@ export function SizeCompare({ sizes, heading }: { sizes: SystemSize[]; heading?:
                 d={SidePath(size, D, sideCx, ground, false)}
                 fill="rgb(241 133 34 / 0.14)"
                 stroke="#f18522"
+                className="v2-product-d-side"
                 strokeWidth="1.5"
                 vectorEffect="non-scaling-stroke"
                 style={{
@@ -306,24 +312,25 @@ export function SizeCompare({ sizes, heading }: { sizes: SystemSize[]; heading?:
               />
               <Person x={personX} ground={ground} />
             </svg>
-            <figcaption className="mt-3 px-1 text-[0.85rem] text-muted">Side view, with a 6-ft person for scale</figcaption>
+            <figcaption className="mt-3 px-1 text-[0.875rem] text-muted">Side view, with a 6-ft person for scale</figcaption>
           </figure>
         ) : null}
       </div>
 
-      <div className="flex flex-col @4xl:col-start-2 @4xl:row-start-2">
+      {/* Wide layouts: the figures stay beside the drawings while they scroll past. */}
+      <div className="flex flex-col @4xl:sticky @4xl:top-40 @4xl:col-start-2 @4xl:row-start-2 @4xl:self-start">
         <dl className="border-t border-line @4xl:mt-6">
           <div className="grid grid-cols-[6.5rem_1fr] gap-3 border-b border-line py-3.5">
             <dt className="v2-tech pt-1 text-muted">Packed</dt>
-            <dd className="v2-tnum text-[0.95rem] text-snow">{size.packedNote}</dd>
+            <dd className="v2-tnum text-[0.9375rem] text-snow">{size.packedNote}</dd>
           </div>
           <div className="grid grid-cols-[6.5rem_1fr] gap-3 border-b border-line py-3.5">
             <dt className="v2-tech pt-1 text-muted">Deployed</dt>
-            <dd className="v2-tnum text-[0.95rem] text-snow">{size.deployedNote}</dd>
+            <dd className="v2-tnum text-[0.9375rem] text-snow">{size.deployedNote}</dd>
           </div>
           <div className="grid grid-cols-[6.5rem_1fr] gap-3 border-b border-line py-3.5">
             <dt className="v2-tech pt-1 text-muted">{size.areaPublished ? "Floor" : "Footprint"}</dt>
-            <dd className="v2-tnum text-[0.95rem] text-snow">
+            <dd className="v2-tnum text-[0.9375rem] text-snow">
               {areaLabel}
               {P ? (
                 <span className="block text-muted">
@@ -333,7 +340,7 @@ export function SizeCompare({ sizes, heading }: { sizes: SystemSize[]; heading?:
             </dd>
           </div>
         </dl>
-        <p className="mt-4 text-[0.85rem] leading-relaxed text-muted">
+        <p className="mt-4 text-[0.875rem] leading-relaxed text-muted">
           Drawn to scale from published outside dimensions{size.areaPublished ? "" : "; footprint calculated from them"}.
         </p>
       </div>

@@ -160,7 +160,7 @@ export function TreccArButton({ finish, tall = false, className = "" }: { finish
         onClick={open}
         aria-label="See it full size"
         className={`flex items-center gap-2 bg-ink/70 font-medium text-snow backdrop-blur-md transition-colors hover:bg-ink/90 hover:text-signal-soft ${
-          tall ? "h-[3.25rem] px-2.5 text-[0.85rem] sm:px-3 sm:text-[0.85rem]" : "h-9 px-3 text-[0.85rem]"
+          tall ? "h-[3.25rem] px-2.5 text-[0.875rem] sm:px-3 sm:text-[0.875rem]" : "h-9 px-3 text-[0.875rem]"
         } ${className}`}
       >
         <ArIcon />
@@ -203,7 +203,7 @@ export function TreccArButton({ finish, tall = false, className = "" }: { finish
                 you are standing, and walk around it.
               </p>
               <div className="mx-auto mt-6 w-48 sm:w-52">{qrUrl ? <QrCode text={qrUrl} /> : null}</div>
-              <p className="mt-5 text-[0.85rem] leading-relaxed text-muted">
+              <p className="mt-5 text-[0.875rem] leading-relaxed text-muted">
                 Works on iPhone and iPad, and on Android phones with Google&rsquo;s AR. The model is a simplified cut of
                 Weatherhaven&rsquo;s CAD, in the finish you picked.
               </p>
@@ -226,7 +226,7 @@ export function TreccArButton({ finish, tall = false, className = "" }: { finish
         ? createPortal(
             <div className="fixed inset-x-3 bottom-[calc(5.25rem+env(safe-area-inset-bottom,0px))] z-[60] border border-line-strong bg-hull/95 p-4 shadow-[0_12px_40px_rgb(0_0_0/0.45)] backdrop-blur-md md:bottom-6 md:left-auto md:right-6 md:w-96">
               <p className="text-[0.95rem] font-semibold text-snow">Ready to see the TRECC full size</p>
-              <p className="mt-1 text-[0.85rem] leading-snug text-muted">Point your phone at open floor or ground, then tap.</p>
+              <p className="mt-1 text-[0.875rem] leading-snug text-muted">Point your phone at open floor or ground, then tap.</p>
               <div className="mt-3 flex items-center gap-3">
                 <button
                   type="button"
@@ -238,7 +238,7 @@ export function TreccArButton({ finish, tall = false, className = "" }: { finish
                 >
                   Place it
                 </button>
-                <button type="button" onClick={() => setDismissed(true)} className="h-10 px-3 text-[0.85rem] text-muted hover:text-snow">
+                <button type="button" onClick={() => setDismissed(true)} className="h-10 px-3 text-[0.875rem] text-muted hover:text-snow">
                   Not now
                 </button>
               </div>

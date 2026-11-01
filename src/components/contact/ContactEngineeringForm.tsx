@@ -454,7 +454,7 @@ function ContactEngineeringFormInner({
             className="aspect-[16/10] h-auto w-full object-cover"
           />
           <figcaption className="px-4 py-3 text-sm text-muted">
-            <span className="text-white">Your camp from the mission builder.</span> A link to the plan is included in your
+            <span className="text-snow">Your camp from the mission builder.</span> A link to the plan is included in your
             message, so the expert sees the same camp.{" "}
             <a href={planPreview.link} target="_blank" rel="noopener" className="text-signal hover:underline">
               Open it in 3D (new tab)
@@ -463,19 +463,24 @@ function ContactEngineeringFormInner({
         </figure>
       ) : null}
 
-      <div className="flex items-center gap-3" aria-label={`Step ${step} of 2`}>
-        <span
-          className={`flex h-8 w-8 items-center justify-center text-xs font-medium ${step === 1 ? "bg-snow text-ink" : "border border-white/20 text-muted"}`}
-        >
-          1
-        </span>
-        <span className="h-px flex-1 bg-white/10" aria-hidden />
-        <span
-          className={`flex h-8 w-8 items-center justify-center text-xs font-medium ${step === 2 ? "bg-snow text-ink" : "border border-white/20 text-muted"}`}
-        >
-          2
-        </span>
-      </div>
+      <ol className="flex items-center gap-3 text-[0.875rem]" aria-label={`Step ${step} of 2`}>
+        {[
+          { n: 1, label: "Essentials" },
+          { n: 2, label: "Details, optional" },
+        ].map((s, i) => (
+          <li key={s.n} className={`flex items-center gap-3 ${i === 0 ? "flex-1" : ""}`} aria-current={step === s.n ? "step" : undefined}>
+            <span
+              className={`flex h-8 w-8 shrink-0 items-center justify-center text-[0.8125rem] font-semibold transition-colors duration-300 ${
+                step === s.n ? "bg-snow text-ink" : step > s.n ? "bg-signal text-ink" : "text-muted shadow-[inset_0_0_0_1px_var(--color-line-strong)]"
+              }`}
+            >
+              {s.n}
+            </span>
+            <span className={step === s.n ? "text-snow" : "text-muted"}>{s.label}</span>
+            {i === 0 ? <span className="h-px min-w-6 flex-1 bg-line-strong" aria-hidden /> : null}
+          </li>
+        ))}
+      </ol>
 
       {error && (
         <div className="border border-red-900/50 bg-red-950/30 px-4 py-3 text-sm text-red-200" role="alert">
@@ -550,7 +555,7 @@ function ContactEngineeringFormInner({
               </select>
             </label>
             {product ? (
-              <p className="mt-1.5 text-xs text-muted">
+              <p className="mt-1.5 text-[0.875rem] text-muted">
                 Your message will name the {product.name}.{" "}
                 <Link href={`/configurable-solutions/${product.slug}`} className="text-signal hover:underline">
                   View the {product.name} page
@@ -650,7 +655,7 @@ function ContactEngineeringFormInner({
                 <div className="mt-2 space-y-3" role="group" aria-labelledby="call-times">
                   {form.call_slots.map((slot, i) => (
                     <div key={i} className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-3">
-                      <label className="block text-xs text-muted">
+                      <label className="block text-[0.875rem] text-muted">
                         <span className="sr-only">Preferred time {i + 1}: </span>Date {i === 2 ? "(optional)" : ""}
                         <input
                           type="date"
@@ -661,7 +666,7 @@ function ContactEngineeringFormInner({
                           onChange={(e) => patchSlot(i, "date", e.target.value)}
                         />
                       </label>
-                      <label className="block text-xs text-muted">
+                      <label className="block text-[0.875rem] text-muted">
                         <span className="sr-only">Preferred time {i + 1}: </span>Time
                         <input
                           type="time"
@@ -749,7 +754,7 @@ function ContactEngineeringFormInner({
             />
             <p
               id="message-count"
-              className={`mt-1.5 text-right text-xs ${form.message.length > messageMax * 0.9 ? "text-signal" : "text-muted"}`}
+              className={`mt-1.5 text-right text-[0.8125rem] ${form.message.length > messageMax * 0.9 ? "text-signal" : "text-muted"}`}
             >
               {form.message.length.toLocaleString("en-US")} of {messageMax.toLocaleString("en-US")} characters
             </p>
@@ -760,7 +765,7 @@ function ContactEngineeringFormInner({
             </legend>
             <div className="mt-3 flex flex-wrap gap-6">
               {CONTACT_METHODS.map((method) => (
-                <label key={method} className="flex items-center gap-2 text-sm text-white">
+                <label key={method} className="flex items-center gap-2 text-sm text-snow">
                   <input
                     type="radio"
                     name="contact_method"
@@ -788,7 +793,7 @@ function ContactEngineeringFormInner({
                 onChange={(e) => patch("phone", e.target.value)}
                 aria-describedby="phone-hint"
               />
-              <span id="phone-hint" className="mt-1.5 block text-xs font-normal">
+              <span id="phone-hint" className="mt-1.5 block text-[0.875rem] font-normal">
                 Include the country code if you&apos;re outside the US, and an extension if you have one.
               </span>
             </label>

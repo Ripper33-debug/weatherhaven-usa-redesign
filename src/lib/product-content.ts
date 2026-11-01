@@ -34,13 +34,13 @@ export const PRODUCT_FAMILIES: {
     name: "Soft-wall shelters",
     summary:
       "Tensioned-fabric buildings and modular tentage for camps, headquarters, hospitals and maintenance, at almost any length.",
-    cover: "/products/series-4/gallery/20-Series-4-Truss.jpg",
+    cover: "/products/series-4/gallery/02-com-S4-PrimerCamp.PlacerDome150.jpg",
   },
   {
     id: "inflatable",
     name: "Inflatable shelters",
     summary: "Airmax inflatable shelters on airbeams that a small team inflates in minutes, with no tools and no frame to assemble.",
-    cover: "/products/airbeam-lp/gallery/09-Airbeam-Low-Pressure-10.jpg",
+    cover: "/products/airbeam-lp/gallery/08-Airbeam-Low-Pressure-9.jpg",
   },
   {
     id: "polar",

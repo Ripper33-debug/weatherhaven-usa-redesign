@@ -47,9 +47,9 @@ export default async function SystemsPage() {
       <Suspense fallback={<SystemsCatalogFallback products={products} blurs={blurs} />}>
         <SystemsCatalog products={products} blurs={blurs} />
       </Suspense>
-      <section id="to-scale" aria-labelledby="scale-heading" className="scroll-mt-24 border-t border-line bg-ink py-20 sm:py-24">
+      <section id="to-scale" aria-labelledby="scale-heading" className="v2-light scroll-mt-24 py-20 sm:py-24">
         <div className="v2-wrap">
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.85fr)] lg:items-end">
+          <div className="v2-reveal grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.85fr)] lg:items-end">
             <h2 id="scale-heading" className="v2-h2 max-w-[18ch] text-snow">
               Floor plans compared
             </h2>
@@ -62,7 +62,7 @@ export default async function SystemsPage() {
           </div>
         </div>
       </section>
-      <section className="border-t border-line bg-hull py-20 sm:py-24">
+      <section className="bg-hull py-20 sm:py-24">
         <div className="v2-wrap grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
           <div>
             <h2 className="v2-h2 max-w-[22ch] text-snow">Need a configuration package for a solicitation or J&amp;A?</h2>
