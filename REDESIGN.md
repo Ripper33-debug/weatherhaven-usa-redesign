@@ -171,6 +171,22 @@ An independent design review of every public page listed what made the site read
   - **3D camp:** every system with a model is placed at true size; soft and polar shelters rise out of their packed load. "Look inside" shows the model's own fit-out only when it suits the mission (`fitoutForMission`); otherwise the simplified interior for that mission.
 - **To check with Barry:** RDMSS modelled 20 × 30 ft (published modules are 23.8 ft wide); Polar Chief about 6 m across (published 14 ft); MTS, RDMSS and MEX-26 packed loads are the same pallet; MECC README says the door faces +Z but the file faces −Z; the TRECC fit-out runs about 10 cm past the shell at each end, under the floor.
 
+## Polish pass (Nov 1): look, feel and motion
+
+Same identity (dark ink, Weatherhaven orange, Archivo, the film), with more craft. The rules every page follows:
+
+- **Palette and type:** only the existing tokens (`ink`, `hull`, `snow`, `muted`, `signal`, `.v2-light` for paper bands) and the existing scale (`v2-display`, `v2-h1`, `v2-h2`, `v2-h3`, `v2-lead`, `v2-body`, `v2-small`, `v2-figure`). No new fonts or colours.
+- **Readability:** no sentence smaller than 0.875rem on a public page; 0.8125rem only for short meta (dates, counts, photo credits).
+- **Rhythm:** major sections `py-20 sm:py-28`, minor `py-16 sm:py-20`. Long pages alternate dark sections, full-bleed photo bands (`PhotoBand`) and light data bands (`.v2-light`) instead of one dark run.
+- **Layout:** no half-empty columns; media spans the container or bleeds; grids end on a full row.
+- **Imagery:** photos get `.v2-photo` (the shared grade), 3:2 or 16:9 frames, tuned crops; a caption says what a photo shows when it isn't the system named.
+- **Motion** (all in globals.css, all off for reduced motion):
+  - Route changes: the arriving page rises into place; a system card's photo morphs into the product page's photo or 3D stage (`ViewTransition` name `system-photo-<slug>`, one per page).
+  - One entrance per page: page headers settle in (`v2-rise-hero`, staggered).
+  - Scroll: `.v2-reveal` on section headings and media blocks, `.v2-reveal-stagger` on card grids, `.v2-parallax` on photo bands only. Never on first-screen content.
+  - Touch: `.v2-media-zoom` on card media, `.v2-press` on tappable cards, `.v2-link-sweep` for text links that need it.
+- **Never:** eyebrow labels, all caps, decorative gradients, a rounded-card kit, attention loops, numbered markers that aren't a real sequence.
+
 ## Content studio (Sanity CMS)
 
 - **What editors can change, at /studio:** the homepage headline, intro, film caption and closing section; every system's full name, description, headline figure, specifications, highlights, overview and configurations (plus who checked the figures and when); the program stories (photos, numbers, timeline, sections, a cleared customer quote, sources); the team on /about; and the news list. Fields left empty keep what the site shows today.

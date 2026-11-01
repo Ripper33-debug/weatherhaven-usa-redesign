@@ -44,9 +44,11 @@ export function V2PageHeader({
             </ol>
           </nav>
         ) : null}
-        <h1 className={`v2-h1 text-snow ${wide ? "max-w-[24ch]" : "max-w-[18ch]"}`}>{title}</h1>
-        {lead ? <p className="v2-lead mt-5">{lead}</p> : null}
-        {children ? <div className="mt-8">{children}</div> : null}
+        {/* The page's one entrance moment: title, lead and actions settle in, a beat apart. They start
+            faintly visible (v2-rise-hero), so the first frame already shows them. */}
+        <h1 className={`v2-h1 v2-rise-hero text-snow ${wide ? "max-w-[24ch]" : "max-w-[18ch]"}`}>{title}</h1>
+        {lead ? <p className="v2-lead v2-rise-hero v2-rise-2 mt-5">{lead}</p> : null}
+        {children ? <div className="v2-rise v2-rise-3 mt-8">{children}</div> : null}
       </div>
     </header>
   );
