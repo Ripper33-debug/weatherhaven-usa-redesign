@@ -1,6 +1,6 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { metaDescription, pageMeta } from "@/lib/page-meta";
 import shareCards from "@/lib/share-cards.json";
 
@@ -35,5 +35,17 @@ describe("share cards", () => {
     expect(withPhoto.openGraph?.images).toEqual([{ url: "/products/x.jpg", alt: "X" }]);
     const plain = pageMeta({ title: "X", description: "d", path: "/nowhere" });
     expect(plain.openGraph?.images).toEqual([{ url: "/og-image.jpg", width: 1200, height: 630, alt: "X" }]);
+  });
+});
+
+describe("share image address", () => {
+  afterEach(() => vi.unstubAllEnvs());
+
+  it("loads share images from the deployment's own production address on Vercel", () => {
+    vi.stubEnv("VERCEL_PROJECT_PRODUCTION_URL", "weatherhaven-usa-redesign.vercel.app");
+    const m = pageMeta({ title: "About", description: "d", path: "/about" });
+    expect(m.openGraph?.images).toEqual([
+      { url: "https://weatherhaven-usa-redesign.vercel.app/og/about.jpg", width: 1200, height: 630, alt: "About" },
+    ]);
   });
 });

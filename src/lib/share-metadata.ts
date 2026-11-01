@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getProductImage } from "@/lib/product-images";
 import type { Product } from "@/lib/products";
+import { shareImageUrl } from "@/lib/site-url";
 
 /** Best share/OG image for a catalog product (CMS → CDN → local path). */
 export function resolveProductShareImageUrl(product: Product): string {
@@ -15,8 +16,9 @@ export function shareMetadataFromImage(
   imageUrl: string | null | undefined,
   alt: string,
 ): Pick<Metadata, "openGraph" | "twitter"> {
-  const url = imageUrl?.trim();
-  if (!url) return {};
+  const raw = imageUrl?.trim();
+  if (!raw) return {};
+  const url = shareImageUrl(raw);
 
   return {
     openGraph: {

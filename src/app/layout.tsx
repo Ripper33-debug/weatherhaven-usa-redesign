@@ -9,7 +9,7 @@ import { Footer } from "@/components/Footer";
 import { SiteEnhancements } from "@/components/site/SiteEnhancements";
 import { SiteChrome } from "@/components/site/SiteChrome";
 import { AuthHashRedirect } from "@/components/auth/AuthHashRedirect";
-import { getSiteUrl } from "@/lib/site-url";
+import { getSiteUrl, shareImageUrl } from "@/lib/site-url";
 import { NAV_CAPABILITIES, SYSTEMS_BY_FAMILY } from "@/lib/site-nav";
 
 /*
@@ -87,14 +87,14 @@ export const metadata: Metadata = {
     title: "Weatherhaven USA | Rapidly deployable shelters, camps and field hospitals",
     description:
       "Expandable containers, soft-wall, inflatable and polar shelters that ship as cargo and stand up in minutes.",
-    images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "Weatherhaven expandable shelter at dusk: Ships in a container. Stands up in minutes." }],
+    images: [{ url: shareImageUrl("/og-image.jpg"), width: 1200, height: 630, alt: "Weatherhaven expandable shelter at dusk: Ships in a container. Stands up in minutes." }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Weatherhaven USA | Rapidly deployable shelters, camps and field hospitals",
     description:
       "Expandable containers, soft-wall, inflatable and polar shelters that ship as cargo and stand up in minutes.",
-    images: ["/og-image.jpg"],
+    images: [shareImageUrl("/og-image.jpg")],
   },
 };
 

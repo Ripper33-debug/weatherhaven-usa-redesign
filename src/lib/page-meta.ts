@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import shareCards from "@/lib/share-cards.json";
+import { shareImageUrl } from "@/lib/site-url";
 
 const SITE_NAME = "Weatherhaven USA";
 /** 1200×630 share card: hero photo, wordmark and headline. */
@@ -41,7 +42,7 @@ export function pageMeta({
   // A designed card for this page wins over its raw photo; both beat the homepage card.
   const card = SHARE_CARDS[path];
   const custom = card ? undefined : image?.trim();
-  const img = card || custom || DEFAULT_IMAGE;
+  const img = shareImageUrl(card || custom || DEFAULT_IMAGE);
   return {
     title,
     description,
