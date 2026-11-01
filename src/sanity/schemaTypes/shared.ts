@@ -1,4 +1,5 @@
 import { defineArrayMember, defineField } from "sanity";
+import { LegacyPhotoInput } from "@/sanity/studio/LegacyPhotoInput";
 import { WEATHERHAVEN_PRODUCT_LINES } from "@/lib/weatherhaven-product-lines";
 
 /** The site's systems, for fields that pick one (the slug is what the site's URLs use). */
@@ -14,16 +15,24 @@ export const photoField = (name: string, title: string, opts: { required?: boole
     title,
     type: "object",
     fields: [
-      defineField({ name: "image", title: "Photo", type: "image", options: { hotspot: true } }),
+      defineField({ name: "image", title: "Upload a new photo", type: "image", options: { hotspot: true } }),
       defineField({
         name: "legacySrc",
-        title: "Existing photo on the site",
+        title: "Current photo",
         type: "string",
-        description: "Filled in by the import. Upload a photo above to replace it.",
         readOnly: true,
+        components: { input: LegacyPhotoInput },
+        // Once a photo is uploaded it replaces this one, so this one goes away.
+        hidden: ({ parent }) => !parent?.legacySrc || !!parent?.image,
       }),
-      defineField({ name: "alt", title: "Describe the photo (for screen readers)", type: "string", validation: (r) => r.required() }),
-      defineField({ name: "caption", title: "Caption", type: "string" }),
+      defineField({
+        name: "alt",
+        title: "What the photo shows",
+        type: "string",
+        description: "For people who can't see it, e.g. “Two TRECCs in a forest clearing”.",
+        validation: (r) => r.required(),
+      }),
+      defineField({ name: "caption", title: "Caption", type: "string", description: "Shown under the photo." }),
     ],
     validation: opts.required
       ? (r) => r.custom((v: { image?: unknown; legacySrc?: string } | undefined) => (v?.image || v?.legacySrc ? true : "Add a photo"))

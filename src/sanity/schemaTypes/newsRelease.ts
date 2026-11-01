@@ -1,3 +1,4 @@
+import { DocumentTextIcon } from "@sanity/icons/DocumentText";
 import { defineField, defineType } from "sanity";
 
 /** A news item on /news and the homepage. Link to the full article, or write it here. */
@@ -5,6 +6,7 @@ export const newsRelease = defineType({
   name: "newsRelease",
   title: "News",
   type: "document",
+  icon: DocumentTextIcon,
   fields: [
     defineField({ name: "title", title: "Headline", type: "string", validation: (r) => r.required().max(140) }),
     defineField({ name: "slug", title: "Web address", type: "slug", options: { source: "title" }, validation: (r) => r.required() }),

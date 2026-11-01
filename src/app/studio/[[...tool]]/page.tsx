@@ -1,9 +1,12 @@
+import type { Metadata } from "next";
+import { metadata as studioMetadata } from "next-sanity/studio";
 import { isSanityConfigured } from "@/sanity/env";
 import { StudioClient } from "./StudioClient";
 
 /** The content studio. Needs the Sanity project ID (src/sanity/env.ts); explains itself until then. */
 export const dynamic = "force-static";
-export { metadata, viewport } from "next-sanity/studio";
+export { viewport } from "next-sanity/studio";
+export const metadata: Metadata = { ...studioMetadata, title: { absolute: "Weatherhaven Content" } };
 
 export default function StudioPage() {
   if (!isSanityConfigured()) {
