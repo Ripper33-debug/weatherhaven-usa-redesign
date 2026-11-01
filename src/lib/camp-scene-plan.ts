@@ -84,7 +84,7 @@ export const KIND_SIZE: Record<ModelKind, KindSize> = {
   mts: { l: 9.98, w: 6.84, h: 3.38, source: "Detailed model, guy lines included (public/models/mts)" },
   mex26: { l: 11.68, w: 8.66, h: 5.25, source: "Detailed model, guy lines included (public/models/mex-26): 26-ft clear span" },
   "airmax-lp": { l: 6, w: 5.7, h: 2.8, source: "Main unit 600 × 570 × 280 cm" },
-  "airmax-hp": { l: 8, w: 6, h: 4, source: "6 m wide, 4 m centre, 3 m eaves; 8 m length chosen" },
+  "airmax-hp": { l: 8, w: 6, h: 4, source: "6 m wide, 4 m center, 3 m eaves; 8 m length chosen" },
   polarhaven: { l: 6.94, w: 5.06, h: 3.44, source: "Detailed model, guy lines included (public/models/polarhaven): 14 × 20 ft unit" },
   "polar-chief": { l: 9.18, w: 8.52, h: 4.46, source: "Detailed model, guy lines included (public/models/polar-chief): octagon 14 ft across" },
   endurance: { l: 5.5, w: 5.42, h: 2.18, source: "Detailed model, guy lines included (public/models/endurance): 16-ft tent" },

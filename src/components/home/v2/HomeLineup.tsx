@@ -37,7 +37,7 @@ export function HomeLineup() {
             Twelve systems, one scale
           </h2>
           <p className="v2-body mt-5 max-w-[46ch] lg:mt-0 lg:justify-self-end">
-            Each drawn deployed from its 3D model, at one scale. Soft-wall shelters are shown at one example
+            The twelve with 3D models, each drawn deployed at one scale. Soft-wall shelters are shown at one example
             length; they extend further.
           </p>
         </div>

@@ -68,7 +68,7 @@ export const DEPLOYMENT_STORIES: DeploymentStory[] = [
     ],
     facts: [
       { value: "43", label: "Field trials completed" },
-      { value: "TRL 9", label: "Technology readiness of TRECC-T" },
+      { value: "TRL 9", label: "Technology readiness of TRECC‑T" },
     ],
     systems: [{ slug: "trecc", name: "TRECC" }],
     photo: {
@@ -121,7 +121,7 @@ export const DEPLOYMENT_STORIES: DeploymentStory[] = [
     place: "NATO",
     title: "A NATO headquarters that works within an hour of arriving",
     body: [
-      "For a NATO command, Weatherhaven combined EHMECC, MECC and TRECC systems into a deployable headquarters that had to ship overseas at 24 hours' notice and be operational within an hour of arriving. Its sixteen workstations are networked through floor boxes carrying fibre and ethernet.",
+      "For a NATO command, Weatherhaven combined EHMECC, MECC and TRECC systems into a deployable headquarters that had to ship overseas at 24 hours' notice and be operational within an hour of arriving. Its sixteen workstations are networked through floor boxes carrying fiber and ethernet.",
     ],
     systems: [
       { slug: "ehmecc", name: "EHMECC" },
@@ -186,7 +186,7 @@ export const DEPLOYMENT_STORIES: DeploymentStory[] = [
     title: "100-bed field hospitals for COVID-19",
     body: [
       "In April 2020 Public Services and Procurement Canada contracted Weatherhaven and SNC-Lavalin PAE to design, manage and deploy federal Mobile Health Units of 100 beds each. Canada sent two to Ontario in 2021: the first was handed over to Sunnybrook Health Sciences Centre in Toronto on April 5, the second to Hamilton Health Sciences.",
-      "Each unit has two 10-bed intensive care units, eight 10-bed wards and two 600-litre-per-minute oxygen plants, in shelters derived from the Headquarters Shelter System.",
+      "Each unit has two 10-bed intensive care units, eight 10-bed wards and two 600-liter-per-minute oxygen plants, in shelters derived from the Headquarters Shelter System.",
     ],
     systems: [{ slug: "rdmss", name: "RDMSS" }],
     sources: [
@@ -240,7 +240,7 @@ export const FIELD_NOTES: { place: string; text: string; source?: { label: strin
   },
   {
     place: "Ukraine",
-    text: "110 RDMSS military shelters, 55 two-module and 55 four-module, delivered in ten weeks on two 747 cargo flights.",
+    text: "Weatherhaven reports delivering 110 RDMSS military shelters, 55 two-module and 55 four-module, in ten weeks on two 747 cargo flights.",
   },
 ];
 

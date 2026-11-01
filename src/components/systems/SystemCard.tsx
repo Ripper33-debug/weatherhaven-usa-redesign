@@ -10,8 +10,7 @@ export type CardSpan = { sm?: 2; lg?: 2 | 3 };
 
 /**
  * For n cards in a grid of 2 columns (sm) and 3 (lg), with `lead` cells taken before them on lg,
- * the span the last card needs so neither layout ends on a half-empty row. The wide card lays out
- * side by side: its photo keeps one column's width and its text takes the rest.
+ * the span the last card needs so neither layout ends on a half-empty row.
  */
 export function lastCardSpan(n: number, lead = 0): CardSpan | undefined {
   if (n === 0) return undefined;
@@ -21,19 +20,21 @@ export function lastCardSpan(n: number, lead = 0): CardSpan | undefined {
   return sm || lg ? { sm, lg } : undefined;
 }
 
+// The last card of a family stretches across the rest of its row. It stays a normal card (photo,
+// then text), with a wider photo of the same height as its neighbours'.
 const SPAN_CARD: Record<string, string> = {
-  "sm": "sm:col-span-2 sm:grid sm:grid-cols-2 sm:gap-x-8 lg:col-span-1 lg:flex",
-  "lg2": "lg:col-span-2 lg:grid lg:grid-cols-2 lg:gap-x-8",
-  "lg3": "lg:col-span-3 lg:grid lg:grid-cols-3 lg:gap-x-8",
-  "sm-lg2": "sm:col-span-2 sm:grid sm:grid-cols-2 sm:gap-x-8",
-  "sm-lg3": "sm:col-span-2 sm:grid sm:grid-cols-2 sm:gap-x-8 lg:col-span-3 lg:grid-cols-3",
+  "sm": "sm:col-span-2 lg:col-span-1",
+  "lg2": "lg:col-span-2",
+  "lg3": "lg:col-span-3",
+  "sm-lg2": "sm:col-span-2",
+  "sm-lg3": "sm:col-span-2 lg:col-span-3",
 };
-const SPAN_TEXT: Record<string, string> = {
-  "sm": "sm:pt-0 lg:pt-5",
-  "lg2": "lg:pt-0",
-  "lg3": "lg:col-span-2 lg:pt-0",
-  "sm-lg2": "sm:pt-0",
-  "sm-lg3": "sm:pt-0 lg:col-span-2",
+const SPAN_MEDIA: Record<string, string> = {
+  "sm": "sm:aspect-[8/3] lg:aspect-[4/3]",
+  "lg2": "lg:aspect-[8/3]",
+  "lg3": "lg:aspect-[4/1]",
+  "sm-lg2": "sm:aspect-[8/3]",
+  "sm-lg3": "sm:aspect-[8/3] lg:aspect-[4/1]",
 };
 
 /** Photo-led system card with the most useful published figures. */
@@ -60,12 +61,12 @@ export function SystemCard({
     <article className={`v2-product-card group relative flex h-full flex-col bg-ink ${SPAN_CARD[spanKey] ?? ""}`}>
       {/* Shares a name with the product page's main photo, so the card morphs into it on navigation. */}
       <ViewTransition name={`system-photo-${product.slug}`} share="v2-morph" default="none">
-        <div className="v2-media-zoom relative aspect-[4/3] bg-hull">
+        <div className={`v2-media-zoom relative aspect-[4/3] bg-hull ${SPAN_MEDIA[spanKey] ?? ""}`}>
           <Image
             src={productCover(product.slug, cms)}
             alt={`Weatherhaven ${product.name}`}
             fill
-            sizes={sizes}
+            sizes={spanKey ? "(min-width: 640px) 90vw, 100vw" : sizes}
             {...(blurDataURL ? { placeholder: "blur" as const, blurDataURL } : {})}
             className="object-cover"
           />
@@ -74,7 +75,7 @@ export function SystemCard({
           ) : null}
         </div>
       </ViewTransition>
-      <div className={`flex flex-1 flex-col pt-5 ${SPAN_TEXT[spanKey] ?? ""}`}>
+      <div className={`flex flex-1 flex-col pt-5 ${spanKey ? "max-w-[40rem]" : ""}`}>
         <h3 className="v2-h3 text-snow">
           <Link href={`/configurable-solutions/${product.slug}`} className="no-underline transition-colors duration-300 after:absolute after:inset-0 group-hover:text-signal">
             {product.name}

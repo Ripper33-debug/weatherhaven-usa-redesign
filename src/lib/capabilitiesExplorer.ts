@@ -82,7 +82,7 @@ export const CAPABILITY_CATEGORIES: CapabilityCategory[] = [
   {
     id: "c2",
     label: "Command & Control",
-    headline: "Tactical and joint operations centres in soft-wall or expandable shelters, with blackout and climate control.",
+    headline: "Tactical and joint operations centers in soft-wall or expandable shelters, with blackout and climate control.",
     paragraphs: [
       "Weatherhaven supplies the Canadian Armed Forces' Headquarters Shelter System, its largest program, and built a NATO headquarters that works within an hour of arriving.",
     ],

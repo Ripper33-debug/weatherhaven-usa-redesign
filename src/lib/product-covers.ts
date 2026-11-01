@@ -21,7 +21,7 @@ export const PRODUCT_COVERS: Record<string, { src: string; representative?: bool
   "airbeam-lp": { src: "/products/airbeam-lp/gallery/13-Airbeam-Low-Pressure-14.jpg" },
   "airbeam-hp": { src: "/products/softwall-medical.jpg", representative: true, shows: "an Airmax LP interior" },
   polarhaven: { src: "/products/polarhaven.jpg" },
-  "polar-chief": { src: "/products/polar-chief.jpg" },
+  "polar-chief": { src: "/products/polar-chief/gallery/01-com-PolarChief149.jpg" },
   endurance: { src: "/products/endurance.jpg" },
 };
 

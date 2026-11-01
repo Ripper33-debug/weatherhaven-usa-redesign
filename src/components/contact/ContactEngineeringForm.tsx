@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { getBrowserClient, maybeSignedIn } from "@/lib/supabase/lazy-client";
 import { trackEvent } from "@/lib/analytics";
@@ -241,6 +241,13 @@ function ContactEngineeringFormInner({
   const [submitWarning, setSubmitWarning] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // A new message scrolls into view below the fixed header and takes focus, so it is seen and read out.
+  const errorRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!error) return;
+    errorRef.current?.scrollIntoView({ block: "start", behavior: "smooth" });
+    errorRef.current?.focus({ preventScroll: true });
+  }, [error]);
 
   // Signed-in visitors get their name and email filled in. Anonymous visitors skip the Supabase bundle.
   useEffect(() => {
@@ -314,8 +321,15 @@ function ContactEngineeringFormInner({
     : [{ value: form.call_tz, label: form.call_tz }, ...CALL_TIME_ZONES];
 
   function validateStep1() {
-    if (!form.organization.trim() || !form.email.trim() || !form.inquiry_type.trim() || !form.region.trim()) {
-      setError("Organization, email, region, and inquiry type are required.");
+    const missing = [
+      !form.organization.trim() && "your organization",
+      !form.email.trim() && "an email address",
+      !form.region.trim() && "a region",
+      !form.inquiry_type.trim() && "what you need",
+    ].filter(Boolean) as string[];
+    if (missing.length) {
+      const list = missing.length > 1 ? `${missing.slice(0, -1).join(", ")} and ${missing[missing.length - 1]}` : missing[0];
+      setError(`Add ${list} to continue.`);
       return false;
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
@@ -395,7 +409,7 @@ function ContactEngineeringFormInner({
       });
       const data = (await res.json()) as { success?: boolean; error?: string; warning?: string };
       if (!res.ok || !data.success) {
-        setError(data.error ?? "Submission failed. Please try again.");
+        setError(`${data.error ?? "The request didn't go through."} Try again, or call the US office at 571-444-9964.`);
         return;
       }
       void trackEvent("submit", `Engineering inquiry — ${form.inquiry_type}`);
@@ -408,7 +422,7 @@ function ContactEngineeringFormInner({
       setSubmitWarning(data.warning ?? null);
       setSubmitted(true);
     } catch {
-      setError("Network error. Confirm connectivity and retry.");
+      setError("The request didn't go through: check your connection and try again, or call the US office at 571-444-9964.");
     } finally {
       setLoading(false);
     }
@@ -483,7 +497,12 @@ function ContactEngineeringFormInner({
       </ol>
 
       {error && (
-        <div className="border border-red-900/50 bg-red-950/30 px-4 py-3 text-sm text-red-200" role="alert">
+        <div
+          ref={errorRef}
+          tabIndex={-1}
+          className="scroll-mt-28 border border-red-900/50 bg-red-950/30 px-4 py-3 text-[0.9375rem] text-red-200 outline-none"
+          role="alert"
+        >
           {error}
         </div>
       )}

@@ -431,7 +431,7 @@ export const PRODUCT_CONTENT: Record<string, ProductContent> = {
     ],
     specs: [
       { label: "Widths", value: "3, 4, 5 and 6 m; length in 2 m increments" },
-      { label: "Height (centre / eaves)", value: "3 / 2 m (3–4 m wide); 3 / 2.5 m (5 m); 4 / 3 m (6 m)" },
+      { label: "Height (center / eaves)", value: "3 / 2 m (3–4 m wide); 3 / 2.5 m (5 m); 4 / 3 m (6 m)" },
       { label: "Setup / strike", value: "Small team, minutes, no tools; reverse pumping to strike" },
     ],
     configurations: [],
@@ -478,7 +478,7 @@ export const PRODUCT_CONTENT: Record<string, ProductContent> = {
     ],
     specs: [
       { label: "Size", value: "14 ft across / 15.5 ft diagonal" },
-      { label: "Height", value: "6.3 ft eaves / 8.5 ft centre" },
+      { label: "Height", value: "6.3 ft eaves / 8.5 ft center" },
       { label: "Weight / packed", value: "220 lb; 42 ft³ in 3 bags" },
       { label: "Setup", value: "≈ 20 min, 2 people" },
       { label: "Comfortable ambient temperature", value: "−50°C (−58°F)" },

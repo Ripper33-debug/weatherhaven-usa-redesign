@@ -4,6 +4,11 @@
  * media library (Nov 2026); revisit when new photography arrives.
  */
 const GALLERY_ORDER: Record<string, { lead: string[]; tail?: string[] }> = {
+  // The other lead photo has a dark smudge on the lens, in the sky.
+  "polar-chief": {
+    lead: ["/products/polar-chief/gallery/01-com-PolarChief149.jpg", "/products/polar-chief/gallery/02-Polar-Chief.jpg"],
+    tail: ["/products/polar-chief.jpg"],
+  },
   trecc: {
     lead: [
       "/products/trecc/gallery/08-TRECC-and-Car.jpg",

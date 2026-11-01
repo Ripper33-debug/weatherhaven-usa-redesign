@@ -146,26 +146,26 @@ export const BUYER_SEGMENTS: BuyerSegment[] = [
     label: "NATO, UN and allied forces",
     note: "A deployable NATO headquarters, UN mission sites and shelters for Ukraine",
     title: "NATO, UN and allied forces",
-    lead: "Weatherhaven built a deployable NATO headquarters from EHMECC, MECC and TRECC systems, delivered 110 RDMSS military shelters to Ukraine, and has shelters at confirmed sites on NATO and UN missions.",
+    lead: "Weatherhaven built a deployable NATO headquarters from EHMECC, MECC and TRECC systems, reports delivering 110 RDMSS military shelters to Ukraine, and has shelters at confirmed sites on NATO and UN missions.",
     record: [
       {
         where: "NATO",
         title: "A NATO headquarters that works within an hour of arriving",
-        text: "EHMECC, MECC and TRECC systems combined into a deployable headquarters that had to ship overseas at 24 hours' notice and be operational within an hour of arriving. Its sixteen workstations are networked through floor boxes carrying fibre and ethernet.",
+        text: "EHMECC, MECC and TRECC systems combined into a deployable headquarters that had to ship overseas at 24 hours' notice and be operational within an hour of arriving. Its sixteen workstations are networked through floor boxes carrying fiber and ethernet.",
         story: "nato-headquarters",
       },
       {
         where: "Ukraine",
         title: "110 RDMSS military shelters",
-        text: "55 two-module and 55 four-module RDMSS shelters, delivered in ten weeks on two 747 cargo flights.",
+        text: "Weatherhaven reports delivering 55 two-module and 55 four-module RDMSS shelters in ten weeks, on two 747 cargo flights.",
       },
     ],
     sites: `${SITE_COUNTS.nato} confirmed sites on the deployment map are on NATO missions and ${SITE_COUNTS.un} are on UN missions.`,
     systemsHeading: "Systems in this work",
     systems: [
-      { slug: "ehmecc", why: "Part of the NATO headquarters; 420 ft² with a 12-ft interior height." },
-      { slug: "mecc", why: "Part of the NATO headquarters; 420 ft² from one 20-ft ISO container." },
-      { slug: "trecc", why: "Part of the NATO headquarters; expands in under three minutes." },
+      { slug: "ehmecc", why: "Part of the NATO headquarters that shipped overseas at 24 hours' notice." },
+      { slug: "mecc", why: "Part of the same headquarters, operational within an hour of arriving." },
+      { slug: "trecc", why: "The third system in that headquarters." },
       { slug: "rdmss", why: "The 110 military shelters for Ukraine, in two- and four-module sets." },
     ],
     capability: { href: "/capabilities#c2", label: "Command and control" },
@@ -212,7 +212,7 @@ export const BUYER_SEGMENTS: BuyerSegment[] = [
       {
         where: "Ontario, Canada, 2020–2021",
         title: "100-bed field hospitals for COVID-19",
-        text: "In April 2020 Public Services and Procurement Canada contracted Weatherhaven and SNC-Lavalin PAE to design, manage and deploy federal Mobile Health Units of 100 beds each. Each unit has two 10-bed intensive care units, eight 10-bed wards and two 600-litre-per-minute oxygen plants, in shelters derived from the Headquarters Shelter System.",
+        text: "In April 2020 Public Services and Procurement Canada contracted Weatherhaven and SNC-Lavalin PAE to design, manage and deploy federal Mobile Health Units of 100 beds each. Each unit has two 10-bed intensive care units, eight 10-bed wards and two 600-liter-per-minute oxygen plants, in shelters derived from the Headquarters Shelter System.",
         story: "covid-mobile-health-units",
         source: {
           label: "Public Safety Canada news release, January 22, 2021",

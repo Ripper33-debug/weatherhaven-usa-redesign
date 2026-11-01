@@ -25,6 +25,9 @@ import {
  * product and capability text behind it isn't bundled into the page JavaScript.
  */
 export type NavMenuData = { systems: typeof SYSTEMS_BY_FAMILY; capabilities: typeof NAV_CAPABILITIES };
+
+/** The section you are in: a short orange rule under its name in the bar. */
+const CURRENT_MARK = "after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:bg-signal";
 import { COMPANY_CONTACT, companyPhoneHref } from "@/lib/company-facts";
 
 function Logo({ height = 24, priority = false }: { height?: number; priority?: boolean }) {
@@ -296,7 +299,7 @@ export function Navbar({ menuData }: { menuData: NavMenuData }) {
   const solid = scrolled || !!shownMenu || !publicSite;
   const active: Record<MenuId, boolean> = {
     systems: pathname.startsWith("/configurable-solutions"),
-    capabilities: pathname.startsWith("/capabilities") || pathname.startsWith("/government") || pathname.startsWith("/who-we-serve"),
+    capabilities: pathname.startsWith("/capabilities") || pathname.startsWith("/who-we-serve"),
   };
 
   if (isLogin) {
@@ -341,9 +344,9 @@ export function Navbar({ menuData }: { menuData: NavMenuData }) {
                   aria-controls={`${m.id}-menu`}
                   onClick={(e) => onMenuClick(m.id, e.timeStamp)}
                   onMouseEnter={(e) => openMenu(m.id, e.timeStamp)}
-                  className={`flex h-10 items-center gap-1.5 whitespace-nowrap px-3 text-[0.95rem] font-medium transition-colors ${
+                  className={`relative flex h-10 items-center gap-1.5 whitespace-nowrap px-3 text-[0.95rem] font-medium transition-colors ${
                     menu === m.id || active[m.id] ? "text-snow" : "text-snow/80 hover:text-snow"
-                  }`}
+                  } ${active[m.id] ? CURRENT_MARK : ""}`}
                 >
                   {m.label}
                   <svg
@@ -373,14 +376,15 @@ export function Navbar({ menuData }: { menuData: NavMenuData }) {
               </div>
             ))}
             {NAV_LINKS.map((link) => {
-              const active = pathname.startsWith(link.href);
+              // Program stories sit under Deployments in the breadcrumbs, so they light it here too.
+              const active = pathname.startsWith(link.href) || (link.href === "/deployments" && pathname.startsWith("/stories"));
               return (
                 <Link
                   key={link.href}
                   href={link.href}
                   onMouseEnter={scheduleClose}
-                  className={`${"wideOnly" in link ? "hidden min-[1480px]:flex" : "flex"} h-10 items-center whitespace-nowrap px-3 text-[0.95rem] font-medium no-underline transition-colors ${
-                    active ? "text-snow" : "text-snow/80 hover:text-snow"
+                  className={`${"wideOnly" in link ? "hidden min-[1480px]:flex" : "flex"} relative h-10 items-center whitespace-nowrap px-3 text-[0.95rem] font-medium no-underline transition-colors ${
+                    active ? `text-snow ${CURRENT_MARK}` : "text-snow/80 hover:text-snow"
                   }`}
                   aria-current={active ? "page" : undefined}
                 >

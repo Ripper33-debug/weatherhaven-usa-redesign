@@ -20,7 +20,7 @@ export const HOME_USE_CASES: UseCaseCard[] = [
     desc: "Sheltering troops and command elements wherever they are deployed — on all seven continents.",
     paragraphs: [
       "Weatherhaven portable shelters are built for exceptional performance in remote locations and harsh climates.",
-      "From accommodation and maintenance shops to tactical camps and operations centres, systems are engineered to be repeatedly deployed anywhere in the world.",
+      "From accommodation and maintenance shops to tactical camps and operations centers, systems are engineered to be repeatedly deployed anywhere in the world.",
       "Shelters can be rapidly deployed — from setup to fully operational in as little as 20 minutes for selected configurations.",
     ],
     specs: [

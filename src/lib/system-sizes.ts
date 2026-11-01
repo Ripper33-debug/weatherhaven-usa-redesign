@@ -134,7 +134,7 @@ export const SYSTEM_SIZES: SystemSize[] = [
     profile: "peaked",
     eaves: ft(6.3),
     packedNote: "Three bags, 42 ft³ in all",
-    deployedNote: "14 ft across, 8.5 ft at the centre",
+    deployedNote: "14 ft across, 8.5 ft at the center",
     packedShort: "Packs into three bags",
   },
   {

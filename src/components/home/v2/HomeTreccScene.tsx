@@ -101,6 +101,23 @@ export function HomeTreccScene() {
   // False once a slow device has turned the weather off.
   const [weatherOn, setWeatherOn] = useState(true);
 
+  // Switching to the still swaps the section's markup. If the visitor had tabbed to one of its links
+  // (which scrolls the section into view and starts the check), focus moves to the same link in the
+  // new markup instead of falling back to the top of the page.
+  const refocusRef = useRef<string | null>(null);
+  const fallBack = useCallback(() => {
+    const focused = document.activeElement;
+    refocusRef.current = focused instanceof HTMLElement && sectionRef.current?.contains(focused) ? (focused.textContent ?? "").trim() : null;
+    setLoad("fallback");
+  }, []);
+  useEffect(() => {
+    const label = refocusRef.current;
+    if (load !== "fallback" || !label) return;
+    refocusRef.current = null;
+    const match = [...(sectionRef.current?.querySelectorAll<HTMLElement>("a[href], button") ?? [])].find((el) => (el.textContent ?? "").trim() === label);
+    match?.focus();
+  }, [load]);
+
   // Load three.js and the models once the page has loaded and the visitor starts scrolling
   // toward the section, so they never compete with the hero film for bandwidth.
   useEffect(() => {
@@ -113,13 +130,13 @@ export function HomeTreccScene() {
       const { canUseWebGL } = await import("@/lib/three/camp/webgl-check");
       if (cancelled) return;
       if (!canUseWebGL()) {
-        setLoad("fallback");
+        fallBack();
         return;
       }
       const { createTreccStage } = await import("@/lib/three/treccStage");
       if (cancelled) return;
       if (!canvasRef.current) {
-        setLoad("fallback");
+        fallBack();
         return;
       }
       setLoad("loading");
@@ -138,7 +155,7 @@ export function HomeTreccScene() {
         stageRef.current = stage;
         setLoad("ready");
       } catch {
-        if (!cancelled) setLoad("fallback");
+        if (!cancelled) fallBack();
       }
     };
     const stop = startWhenNear(el, () => void start(), "100% 0px");
@@ -148,7 +165,7 @@ export function HomeTreccScene() {
       stageRef.current?.dispose();
       stageRef.current = null;
     };
-  }, []);
+  }, [fallBack]);
 
   // Scroll → deploy + camera, rendered only while visible and changing.
   useEffect(() => {

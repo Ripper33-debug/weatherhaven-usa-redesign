@@ -64,7 +64,7 @@ export const FLAGSHIP_STORIES: FlagshipStory[] = [
     numbers: [
       { value: "Under 3 min", label: "To expand, with two people" },
       { value: "43", label: "Field trials completed" },
-      { value: "TRL 9", label: "Technology readiness of TRECC-T" },
+      { value: "TRL 9", label: "Technology readiness of TRECC‑T" },
       { value: "−40 to +120 °F", label: "Rated temperature range" },
     ],
     timeline: [
@@ -164,10 +164,10 @@ export const FLAGSHIP_STORIES: FlagshipStory[] = [
       src: "/models/rdmss/rdmss-poster-deployed.jpg",
       alt: "3D model of a deployed RDMSS soft-wall shelter",
       caption:
-        "The RDMSS, the shelter behind HQSS. “Show inside” opens a command post. There are no field photographs of HQSS on this site yet.",
+        "3D model of the RDMSS, the shelter behind HQSS.",
     },
     numbers: [
-      { value: "1,435", label: "Headquarters shelters for the Canadian Armed Forces" },
+      { value: "2017", label: "Contract awarded" },
       { value: "C$168M", label: "Acquisition and in-service support contracts, taxes included" },
       { value: "C$350M", label: "Potential value if every option is exercised" },
       { value: "2042", label: "Support options run to" },
@@ -198,7 +198,7 @@ export const FLAGSHIP_STORIES: FlagshipStory[] = [
       {
         heading: "From command posts to hospital wards",
         paragraphs: [
-          "In 2020, shelters derived from HQSS became Canada's federal Mobile Health Units. Each 100-bed unit has two 10-bed intensive care units, eight 10-bed wards and two 600-litre-per-minute oxygen plants. Canada sent two to Ontario in 2021, to Sunnybrook in Toronto and to Hamilton Health Sciences.",
+          "In 2020, shelters derived from HQSS became Canada's federal Mobile Health Units. Each 100-bed unit has two 10-bed intensive care units, eight 10-bed wards and two 600-liter-per-minute oxygen plants. Canada sent two to Ontario in 2021, to Sunnybrook in Toronto and to Hamilton Health Sciences.",
         ],
       },
       {

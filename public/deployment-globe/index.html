@@ -433,7 +433,7 @@ html[data-quality="1"] .fl-arc.dash,html[data-quality="2"] .fl-arc.dash{display:
         <div class="brand"><img id="logo" alt="Weatherhaven" hidden><p class="eyebrow"><span id="eb-name">Weatherhaven · </span>Global deployment record</p></div>
         <h1>Where Weatherhaven has deployed</h1>
         <dl class="stats">
-          <div><dt>Deployments</dt><dd data-count="142">142</dd></div>
+          <div><dt>Confirmed sites</dt><dd data-count="142">142</dd></div>
           <div><dt>Countries<span class="xl"> &amp; territories</span></dt><dd data-count="86">86</dd></div>
           <div><dt>Continents</dt><dd data-count="7">7</dd></div>
           <div><dt>US commands</dt><dd data-count="6">6</dd></div>
@@ -1319,7 +1319,7 @@ function showLower(p, dur){
   } else {
     const n = document.querySelectorAll('[data-count]');
     $('lw-dot').style.setProperty('--c', 'var(--accent)'); $('lw-cat').textContent = 'Weatherhaven'; $('lw-cmd').textContent = 'Global deployment record';
-    $('lw-head').textContent = `${n[0].dataset.count} deployments on every continent`;
+    $('lw-head').textContent = `${n[0].dataset.count} confirmed sites on every continent`;
     $('lw-loc').textContent = `${n[1].dataset.count} countries & territories · 6 US combatant commands`;
     $('lw-fact').textContent = 'Defence, peacekeeping, scientific and disaster-relief missions, from the Arctic to Antarctica.'; $('lw-fact').hidden = false;
   }
