@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { SystemDetail } from "@/components/systems/SystemDetail";
 import { getProductDetailImages } from "@/lib/product-gallery";
+import { orderProductGallery } from "@/lib/product-gallery-order";
 import { getPublishedProductBySlug, listPublishedProducts } from "@/app/api/_lib/catalog-products";
 import { pageMeta } from "@/lib/page-meta";
 import { productCover } from "@/lib/product-covers";
@@ -47,7 +48,7 @@ export default async function SystemPage({ params }: Props) {
     galleryImageUrls: product.galleryImageUrls,
   });
   const cover = productCover(product.slug, EXCLUDED_PRODUCT_IMAGES.has(product.coverImageUrl?.trim() ?? "") ? undefined : product.coverImageUrl);
-  const images = [cover, ...gallery.filter((src) => src !== cover)];
+  const images = orderProductGallery(product.slug, [cover, ...gallery.filter((src) => src !== cover)]);
   const related = pickProductsFromCatalog(catalog, product.relatedSlugs).slice(0, 3);
 
   return <SystemDetail product={product} images={images} related={related} />;

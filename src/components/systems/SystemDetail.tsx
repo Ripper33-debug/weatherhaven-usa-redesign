@@ -45,7 +45,7 @@ export function SystemDetail({
   const leadWith3d = isTrecc || hasModel;
   const ar = arHref(product.slug);
   // Field shots first; the hero used to open on a TRECC parked outside a warehouse.
-  const photos = isTrecc ? [...images].sort((a, b) => Number(/Woods|T_deployed|Multiple/i.test(b)) - Number(/Woods|T_deployed|Multiple/i.test(a))) : images;
+  const photos = images;
   const blurs = Object.fromEntries(photos.flatMap((src) => (blurProps(src).blurDataURL ? [[src, blurProps(src).blurDataURL as string]] : [])));
   // One element per page carries the card's shared-element name: the 3D stage when the page opens
   // on the model, otherwise the photo viewer.

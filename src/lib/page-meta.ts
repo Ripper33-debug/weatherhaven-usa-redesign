@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
+import shareCards from "@/lib/share-cards.json";
 
 const SITE_NAME = "Weatherhaven USA";
 /** 1200×630 share card: hero photo, wordmark and headline. */
 const DEFAULT_IMAGE = "/og-image.jpg";
+
+/** Per-page 1200×630 cards made by scripts/og/build-share-cards.mjs, keyed by path. */
+const SHARE_CARDS: Record<string, string> = shareCards;
 
 /**
  * Search results show about 155 characters of a description; longer page summaries are cut at a word
@@ -34,8 +38,10 @@ export function pageMeta({
   imageAlt?: string;
 }): Metadata {
   description = metaDescription(description);
-  const custom = image?.trim();
-  const img = custom || DEFAULT_IMAGE;
+  // A designed card for this page wins over its raw photo; both beat the homepage card.
+  const card = SHARE_CARDS[path];
+  const custom = card ? undefined : image?.trim();
+  const img = card || custom || DEFAULT_IMAGE;
   return {
     title,
     description,
@@ -47,7 +53,7 @@ export function pageMeta({
       title: `${title} | ${SITE_NAME}`,
       description,
       url: path,
-      // Only the default card is known to be 1200×630; page photos keep their own size.
+      // Cards are 1200×630; page photos keep their own size.
       images: [custom ? { url: img, alt: imageAlt ?? title } : { url: img, width: 1200, height: 630, alt: imageAlt ?? title }],
     },
     twitter: {

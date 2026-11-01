@@ -114,6 +114,12 @@
       height: calc(100svh + var(--pan) * 0.62);
       view-timeline: --v2-home-lineup block;
     }
+    /* Phones pan faster, so the pinned stretch stays about one and a half screens. */
+    @media (max-width: 767px) {
+      .v2-home-lineup {
+        height: calc(100svh + var(--pan) * 0.4);
+      }
+    }
     .v2-home-lineup-pin {
       position: sticky;
       top: 0;
