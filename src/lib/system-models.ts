@@ -76,6 +76,11 @@ export type SystemModel = {
   deployVideo?: string;
   interiorStill?: string;
   /**
+   * The mission builder's camp copy: about a third of the triangles, no textures (the camp draws in
+   * flat colours) and no animation, since the camp repeats a shelter many times. Defaults to `deployed`.
+   */
+  campModel?: string;
+  /**
    * Height (metres above the ground) where "Show inside" cuts the shell. Defaults to about
    * two-thirds of the shelter's height, capped at 2.1 m.
    */
@@ -116,6 +121,7 @@ export const SYSTEM_MODELS: Record<string, SystemModel> = {
     inside: { src: "/models/mecc/mecc-fitout.glb", node: "MECC_fitout", label: "Command post" },
     furnished: "/models/mecc/mecc-deployed-fitted.glb",
     arModel: "/models/mecc/mecc-ar.glb",
+    campModel: "/models/mecc/mecc-camp.glb",
     ar: {
       title: "See the MECC at full size",
       lead: `Place the deployed MECC ${LEAD_HARD}`,
@@ -137,6 +143,7 @@ export const SYSTEM_MODELS: Record<string, SystemModel> = {
     inside: { src: "/models/ehmecc/ehmecc-fitout.glb", node: "EHMECC_fitout", label: "Operating room" },
     furnished: "/models/ehmecc/ehmecc-deployed-fitted.glb",
     arModel: "/models/ehmecc/ehmecc-ar.glb",
+    campModel: "/models/ehmecc/ehmecc-camp.glb",
     ar: {
       title: "See the EHMECC at full size",
       lead: `Place the deployed EHMECC ${LEAD_HARD}`,
@@ -157,6 +164,7 @@ export const SYSTEM_MODELS: Record<string, SystemModel> = {
     inside: { src: "/models/ateps/ateps-fitout.glb", node: "ATEPS_fitout", label: "Medical aid station" },
     furnished: "/models/ateps/ateps-deployed-fitted.glb",
     arModel: "/models/ateps/ateps-ar.glb",
+    campModel: "/models/ateps/ateps-camp.glb",
     ar: {
       title: "See the ATEPS at full size",
       lead: `Place the deployed ATEPS ${LEAD_HARD}`,
@@ -177,6 +185,7 @@ export const SYSTEM_MODELS: Record<string, SystemModel> = {
     finishMaterials: { paint: ["paint", "paint_dark"], fabric: [] },
     furnished: "/models/hercon/hercon-deployed-fitted.glb",
     arModel: "/models/hercon/hercon-ar.glb",
+    campModel: "/models/hercon/hercon-camp.glb",
     inside: { src: "/models/hercon/hercon-fitout.glb", node: "HERCON_fitout", label: "Housing, 8 berths" },
     ar: {
       title: "See the HERCon at full size",
@@ -196,6 +205,7 @@ export const SYSTEM_MODELS: Record<string, SystemModel> = {
     finishMaterials: SOFT_FINISHES,
     furnished: "/models/series-4/series-4-deployed-fitted.glb",
     arModel: "/models/series-4/series-4-ar.glb",
+    campModel: "/models/series-4/series-4-camp.glb",
     inside: { src: "/models/series-4/series-4-fitout.glb", node: "SERIES4_fitout", label: "Kitchen and dining" },
     ar: {
       title: "See the Series 4 at full size",
@@ -215,6 +225,7 @@ export const SYSTEM_MODELS: Record<string, SystemModel> = {
     finishMaterials: { paint: ["paint", "paint_dark"], fabric: ["fabric", "strap", "cap"] },
     furnished: "/models/rdmss/rdmss-deployed-fitted.glb",
     arModel: "/models/rdmss/rdmss-ar.glb",
+    campModel: "/models/rdmss/rdmss-camp.glb",
     inside: { src: "/models/rdmss/rdmss-fitout.glb", node: "RDMSS_fitout", label: "Command post" },
     ar: {
       title: "See the RDMSS at full size",
@@ -234,6 +245,7 @@ export const SYSTEM_MODELS: Record<string, SystemModel> = {
     finishMaterials: SOFT_FINISHES,
     furnished: "/models/mts/mts-deployed-fitted.glb",
     arModel: "/models/mts/mts-ar.glb",
+    campModel: "/models/mts/mts-camp.glb",
     inside: { src: "/models/mts/mts-fitout.glb", node: "MTS_fitout", label: "Dining hall" },
     ar: {
       title: "See the MTS at full size",
@@ -252,6 +264,7 @@ export const SYSTEM_MODELS: Record<string, SystemModel> = {
     finishMaterials: SOFT_FINISHES,
     furnished: "/models/mex-26/mex-26-deployed-fitted.glb",
     arModel: "/models/mex-26/mex-26-ar.glb",
+    campModel: "/models/mex-26/mex-26-camp.glb",
     inside: { src: "/models/mex-26/mex-26-fitout.glb", node: "MEX26_fitout", label: "Vehicle maintenance bay" },
     ar: {
       title: "See the MEX-26 at full size",
@@ -270,6 +283,7 @@ export const SYSTEM_MODELS: Record<string, SystemModel> = {
     // Modelled in its polar colours; no military finishes.
     furnished: "/models/polarhaven/polarhaven-deployed-fitted.glb",
     arModel: "/models/polarhaven/polarhaven-ar.glb",
+    campModel: "/models/polarhaven/polarhaven-camp.glb",
     inside: { src: "/models/polarhaven/polarhaven-fitout.glb", node: "POLARHAVEN_fitout", label: "Base camp" },
     ar: {
       title: "See the Polarhaven at full size",
@@ -288,6 +302,7 @@ export const SYSTEM_MODELS: Record<string, SystemModel> = {
     source: builtFrom("Polar Chief"),
     furnished: "/models/polar-chief/polar-chief-deployed-fitted.glb",
     arModel: "/models/polar-chief/polar-chief-ar.glb",
+    campModel: "/models/polar-chief/polar-chief-camp.glb",
     inside: { src: "/models/polar-chief/polar-chief-fitout.glb", node: "POLARCHIEF_fitout", label: "Kitchen and mess" },
     ar: {
       title: "See the Polar Chief at full size",
@@ -305,6 +320,7 @@ export const SYSTEM_MODELS: Record<string, SystemModel> = {
     source: builtFrom("Endurance"),
     furnished: "/models/endurance/endurance-deployed-fitted.glb",
     arModel: "/models/endurance/endurance-ar.glb",
+    campModel: "/models/endurance/endurance-camp.glb",
     inside: { src: "/models/endurance/endurance-fitout.glb", node: "ENDURANCE_fitout", label: "Sleeping quarters" },
     // A low tent: cut at about waist height so the near wall doesn't hide the cots.
     cutHeight: 0.95,

@@ -57,7 +57,7 @@ export function HomeLineup() {
                   <Link href={sys.href} className="group block no-underline">
                     <div className="v2-home-lineup-stage">
                       <Image
-                        src={`/hero/lineup/${item.slug}.webp`}
+                        src={`/hero/lineup/${item.slug}-r4.webp`}
                         alt=""
                         width={item.w}
                         height={item.h}

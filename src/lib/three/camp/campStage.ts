@@ -477,7 +477,7 @@ export async function createCampStage(canvas: HTMLCanvasElement, opts: CampStage
     let p = detailedPromises.get(kind);
     if (p) return p;
     p = loaderFor(sm)
-      .loadAsync(sm.deployed)
+      .loadAsync(sm.campModel ?? sm.deployed)
       .then(async (gltf) => {
         const looks: Partial<Record<MatKey, Look>> = {};
         const art = sm.articulation ?? deriveFolds(gltf.scene);

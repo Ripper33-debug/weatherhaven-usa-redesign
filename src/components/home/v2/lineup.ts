@@ -1,7 +1,7 @@
 /**
  * The homepage's true-scale lineup (HomeLineup): each system with a 3D model on this site, rendered
  * deployed from the same three-quarter angle (34° round, 10° up) with one orthographic camera at 60
- * image pixels per metre, under the viewer's sky lighting (public/hero/lineup/*.webp, transparent;
+ * image pixels per metre, under the viewer's sky lighting (public/hero/lineup/<slug>-r4.webp, transparent;
  * guy lines kept, site kit left out). Every image is cropped so the centre of the
  * model's footprint sits the same distance (110 px) above its bottom edge, so lining the images up by their
  * bottom edges stands every model on one line at true relative size.
