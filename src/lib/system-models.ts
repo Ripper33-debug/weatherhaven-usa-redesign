@@ -16,8 +16,16 @@ export type SystemModel = {
   slug: string;
   /** Deployed model, used by the viewer, AR and the camp. */
   deployed: string;
-  /** Packed model, where the deployed file can't fold itself up. */
+  /**
+   * Packed model. The product viewer shows it before a soft shelter's deploy animation (which starts
+   * from bare ground); the mission builder's camp uses it for every system's arrival.
+   */
   stowed?: string;
+  /**
+   * The deploy animation starts from the packed container (MECC, EHMECC, ATEPS, HERCon), so the
+   * product viewer plays it from its first frame and doesn't load the packed file.
+   */
+  packedInClip?: boolean;
   compression: ModelCompression;
   /** Where the model came from, shown under the viewer and on the AR page. */
   source: string;
@@ -56,6 +64,18 @@ export type SystemModel = {
    */
   furnished?: string;
   /**
+   * The AR page's model: the deployed shelter with its animation taken out (Android's Scene Viewer
+   * would loop the deploy). Defaults to `deployed`.
+   */
+  arModel?: string;
+  /**
+   * For browsers that can't run the viewer: a short video of the deploy recorded from the same model,
+   * and a render of the example fit-out (Barry's files). They stand in for "Packed/Deployed" and
+   * "Show inside".
+   */
+  deployVideo?: string;
+  interiorStill?: string;
+  /**
    * Height (metres above the ground) where "Show inside" cuts the shell. Defaults to about
    * two-thirds of the shelter's height, capped at 2.1 m.
    */
@@ -76,6 +96,8 @@ export const SYSTEM_MODELS: Record<string, SystemModel> = {
     slug: "trecc",
     deployed: "/assets/models/trecc-open.glb",
     compression: "draco",
+    deployVideo: "/models/trecc/trecc-deploy.mp4",
+    interiorStill: "/models/trecc/trecc-interior.jpg",
     source: "Weatherhaven CAD model",
     inside: { src: "/models/trecc/trecc-fitout-command-post.glb", node: "TRECC_fitout", label: "Command post" },
     // A copy of the AR file with the fit-out added; trecc-open.glb itself stays exactly as copied.
@@ -83,13 +105,17 @@ export const SYSTEM_MODELS: Record<string, SystemModel> = {
   },
   mecc: {
     slug: "mecc",
-    // Its deploy animation starts from the closed container, so it needs no separate packed file.
     deployed: "/models/mecc/mecc-deployed.glb",
+    stowed: "/models/mecc/mecc-stowed.glb",
+    packedInClip: true,
     compression: "draco",
+    deployVideo: "/models/mecc/mecc-deploy.mp4",
+    interiorStill: "/models/mecc/mecc-interior.jpg",
     source: "3D model built from Weatherhaven’s published MECC drawings, specifications and photos",
     finishMaterials: { paint: ["paint", "paint_dark"], fabric: ["fabric", "strap"] },
     inside: { src: "/models/mecc/mecc-fitout.glb", node: "MECC_fitout", label: "Command post" },
     furnished: "/models/mecc/mecc-deployed-fitted.glb",
+    arModel: "/models/mecc/mecc-ar.glb",
     ar: {
       title: "See the MECC at full size",
       lead: `Place the deployed MECC ${LEAD_HARD}`,
@@ -101,11 +127,16 @@ export const SYSTEM_MODELS: Record<string, SystemModel> = {
     slug: "ehmecc",
     // The deploy animation raises the roof and opens the container from closed.
     deployed: "/models/ehmecc/ehmecc-deployed.glb",
+    stowed: "/models/ehmecc/ehmecc-stowed.glb",
+    packedInClip: true,
     compression: "draco",
+    deployVideo: "/models/ehmecc/ehmecc-deploy.mp4",
+    interiorStill: "/models/ehmecc/ehmecc-interior.jpg",
     source: builtFrom("EHMECC"),
     finishMaterials: { paint: ["paint", "paint_dark"], fabric: ["fabric", "strap"] },
     inside: { src: "/models/ehmecc/ehmecc-fitout.glb", node: "EHMECC_fitout", label: "Operating room" },
     furnished: "/models/ehmecc/ehmecc-deployed-fitted.glb",
+    arModel: "/models/ehmecc/ehmecc-ar.glb",
     ar: {
       title: "See the EHMECC at full size",
       lead: `Place the deployed EHMECC ${LEAD_HARD}`,
@@ -116,11 +147,16 @@ export const SYSTEM_MODELS: Record<string, SystemModel> = {
   ateps: {
     slug: "ateps",
     deployed: "/models/ateps/ateps-deployed.glb",
+    stowed: "/models/ateps/ateps-stowed.glb",
+    packedInClip: true,
     compression: "draco",
+    deployVideo: "/models/ateps/ateps-deploy.mp4",
+    interiorStill: "/models/ateps/ateps-interior.jpg",
     source: builtFrom("ATEPS"),
     // Modelled in grey, so no finish picker (its "green" would show grey).
     inside: { src: "/models/ateps/ateps-fitout.glb", node: "ATEPS_fitout", label: "Medical aid station" },
     furnished: "/models/ateps/ateps-deployed-fitted.glb",
+    arModel: "/models/ateps/ateps-ar.glb",
     ar: {
       title: "See the ATEPS at full size",
       lead: `Place the deployed ATEPS ${LEAD_HARD}`,
@@ -132,10 +168,15 @@ export const SYSTEM_MODELS: Record<string, SystemModel> = {
     slug: "hercon",
     // The deploy animation slides the hard-wall expansions out from the closed container.
     deployed: "/models/hercon/hercon-deployed.glb",
+    stowed: "/models/hercon/hercon-stowed.glb",
+    packedInClip: true,
     compression: "draco",
+    deployVideo: "/models/hercon/hercon-deploy.mp4",
+    interiorStill: "/models/hercon/hercon-interior.jpg",
     source: builtFrom("HERCon"),
     finishMaterials: { paint: ["paint", "paint_dark"], fabric: [] },
     furnished: "/models/hercon/hercon-deployed-fitted.glb",
+    arModel: "/models/hercon/hercon-ar.glb",
     inside: { src: "/models/hercon/hercon-fitout.glb", node: "HERCON_fitout", label: "Housing, 8 berths" },
     ar: {
       title: "See the HERCon at full size",
@@ -149,9 +190,12 @@ export const SYSTEM_MODELS: Record<string, SystemModel> = {
     deployed: "/models/series-4/series-4-deployed.glb",
     stowed: "/models/series-4/series-4-stowed.glb",
     compression: "draco",
+    deployVideo: "/models/series-4/series-4-deploy.mp4",
+    interiorStill: "/models/series-4/series-4-interior.jpg",
     source: builtFrom("Series 4"),
     finishMaterials: SOFT_FINISHES,
     furnished: "/models/series-4/series-4-deployed-fitted.glb",
+    arModel: "/models/series-4/series-4-ar.glb",
     inside: { src: "/models/series-4/series-4-fitout.glb", node: "SERIES4_fitout", label: "Kitchen and dining" },
     ar: {
       title: "See the Series 4 at full size",
@@ -165,9 +209,12 @@ export const SYSTEM_MODELS: Record<string, SystemModel> = {
     deployed: "/models/rdmss/rdmss-deployed.glb",
     stowed: "/models/rdmss/rdmss-stowed.glb",
     compression: "draco",
+    deployVideo: "/models/rdmss/rdmss-deploy.mp4",
+    interiorStill: "/models/rdmss/rdmss-interior.jpg",
     source: builtFrom("RDMSS"),
     finishMaterials: { paint: ["paint", "paint_dark"], fabric: ["fabric", "strap", "cap"] },
     furnished: "/models/rdmss/rdmss-deployed-fitted.glb",
+    arModel: "/models/rdmss/rdmss-ar.glb",
     inside: { src: "/models/rdmss/rdmss-fitout.glb", node: "RDMSS_fitout", label: "Command post" },
     ar: {
       title: "See the RDMSS at full size",
@@ -181,9 +228,12 @@ export const SYSTEM_MODELS: Record<string, SystemModel> = {
     deployed: "/models/mts/mts-deployed.glb",
     stowed: "/models/mts/mts-stowed.glb",
     compression: "draco",
+    deployVideo: "/models/mts/mts-deploy.mp4",
+    interiorStill: "/models/mts/mts-interior.jpg",
     source: builtFrom("MTS"),
     finishMaterials: SOFT_FINISHES,
     furnished: "/models/mts/mts-deployed-fitted.glb",
+    arModel: "/models/mts/mts-ar.glb",
     inside: { src: "/models/mts/mts-fitout.glb", node: "MTS_fitout", label: "Dining hall" },
     ar: {
       title: "See the MTS at full size",
@@ -197,9 +247,11 @@ export const SYSTEM_MODELS: Record<string, SystemModel> = {
     deployed: "/models/mex-26/mex-26-deployed.glb",
     stowed: "/models/mex-26/mex-26-stowed.glb",
     compression: "draco",
+    interiorStill: "/models/mex-26/mex-26-interior.jpg",
     source: builtFrom("MEX-26"),
     finishMaterials: SOFT_FINISHES,
     furnished: "/models/mex-26/mex-26-deployed-fitted.glb",
+    arModel: "/models/mex-26/mex-26-ar.glb",
     inside: { src: "/models/mex-26/mex-26-fitout.glb", node: "MEX26_fitout", label: "Vehicle maintenance bay" },
     ar: {
       title: "See the MEX-26 at full size",
@@ -213,9 +265,11 @@ export const SYSTEM_MODELS: Record<string, SystemModel> = {
     deployed: "/models/polarhaven/polarhaven-deployed.glb",
     stowed: "/models/polarhaven/polarhaven-stowed.glb",
     compression: "draco",
+    interiorStill: "/models/polarhaven/polarhaven-interior.jpg",
     source: builtFrom("Polarhaven"),
     // Modelled in its polar colours; no military finishes.
     furnished: "/models/polarhaven/polarhaven-deployed-fitted.glb",
+    arModel: "/models/polarhaven/polarhaven-ar.glb",
     inside: { src: "/models/polarhaven/polarhaven-fitout.glb", node: "POLARHAVEN_fitout", label: "Base camp" },
     ar: {
       title: "See the Polarhaven at full size",
@@ -229,8 +283,11 @@ export const SYSTEM_MODELS: Record<string, SystemModel> = {
     deployed: "/models/polar-chief/polar-chief-deployed.glb",
     stowed: "/models/polar-chief/polar-chief-stowed.glb",
     compression: "draco",
+    deployVideo: "/models/polar-chief/polar-chief-deploy.mp4",
+    interiorStill: "/models/polar-chief/polar-chief-interior.jpg",
     source: builtFrom("Polar Chief"),
     furnished: "/models/polar-chief/polar-chief-deployed-fitted.glb",
+    arModel: "/models/polar-chief/polar-chief-ar.glb",
     inside: { src: "/models/polar-chief/polar-chief-fitout.glb", node: "POLARCHIEF_fitout", label: "Kitchen and mess" },
     ar: {
       title: "See the Polar Chief at full size",
@@ -244,8 +301,10 @@ export const SYSTEM_MODELS: Record<string, SystemModel> = {
     deployed: "/models/endurance/endurance-deployed.glb",
     stowed: "/models/endurance/endurance-stowed.glb",
     compression: "draco",
+    interiorStill: "/models/endurance/endurance-interior.jpg",
     source: builtFrom("Endurance"),
     furnished: "/models/endurance/endurance-deployed-fitted.glb",
+    arModel: "/models/endurance/endurance-ar.glb",
     inside: { src: "/models/endurance/endurance-fitout.glb", node: "ENDURANCE_fitout", label: "Sleeping quarters" },
     // A low tent: cut at about waist height so the near wall doesn't hide the cots.
     cutHeight: 0.95,

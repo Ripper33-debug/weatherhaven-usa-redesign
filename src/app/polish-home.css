@@ -70,13 +70,13 @@
   outline: 2px solid var(--color-signal);
   outline-offset: 6px;
 }
-/* The 5 m bar stands on the same line as the footprints' centres (76 image px up). */
+/* The 5 m bar stands on the same line as the footprints' centres (110 image px up). */
 .v2-home-lineup-ruler {
   position: relative;
   display: block;
   width: calc(var(--w) * var(--s) * 1px);
   height: 1.5px;
-  margin-bottom: calc(76px * var(--s));
+  margin-bottom: calc(110px * var(--s));
   background: var(--color-snow);
 }
 .v2-home-lineup-ruler::before,

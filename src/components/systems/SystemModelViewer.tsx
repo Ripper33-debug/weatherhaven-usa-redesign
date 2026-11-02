@@ -5,6 +5,7 @@ import { useClientMediaQuery } from "@/hooks/useClientMediaQuery";
 import type { SystemStage } from "@/lib/three/systemStage";
 import type { TreccFinish } from "@/lib/three/treccFinishes";
 import { TreccFinishPicker } from "@/components/three/TreccFinishPicker";
+import { ViewerStillControls } from "@/components/systems/ViewerStillControls";
 import { startWhenNear } from "@/lib/start-when-near";
 import { arHref, modelPoster, systemModel } from "@/lib/system-models";
 
@@ -273,6 +274,9 @@ export function SystemModelViewer({
         />
         {load === "loading" || load === "idle" ? (
           <p className="absolute bottom-4 left-4 text-[0.875rem] text-muted">Loading the 3D model</p>
+        ) : null}
+        {load === "fallback" ? (
+          <ViewerStillControls name={name} video={model.deployVideo} interior={model.interiorStill} insideLabel={model.inside?.label} />
         ) : null}
         {ar ? (
           <a

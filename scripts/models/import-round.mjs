@@ -5,6 +5,8 @@
  *   <slug>-stowed.glb          packed for transport (viewer's packed view)
  *   <slug>-deployed-fitted.glb deployed shell plus fit-out, static (AR page's "Furnished")
  *   <slug>-fitout.glb          the fit-out alone, in the shell's coordinates ("Show inside", camp)
+ *   <slug>-ar.glb              the deployed shelter without its animation, for the AR page (Android's
+ *                              Scene Viewer would loop the deploy in the room)
  *
  * Textures are capped at 1024 px (the 2048 px weathering map is the big one) and kept as JPEG/PNG,
  * so Android's Scene Viewer can still open the AR files; meshes are Draco compressed.
@@ -54,8 +56,9 @@ const io = new NodeIO().registerExtensions(ALL_EXTENSIONS).registerDependencies(
 
 const kb = (p) => `${Math.round(statSync(p).size / 1024)} KB`;
 
-async function convert(src, dest, { fitoutOnly = false } = {}) {
+async function convert(src, dest, { fitoutOnly = false, still = false } = {}) {
   const doc = await io.read(src);
+  if (still) for (const a of doc.getRoot().listAnimations()) a.dispose();
   if (fitoutOnly) {
     // Keep only the <MODEL>_fitout node (and what it uses); everything else is the shell.
     const scene = doc.getRoot().listScenes()[0];
@@ -83,4 +86,5 @@ for (const [name, slug] of Object.entries(MODELS)) {
   await convert(join(dir, `${name}-stowed-web.glb`), join(to, `${slug}-stowed.glb`));
   await convert(join(dir, `${name}-deployed-fitted-web.glb`), join(to, `${slug}-deployed-fitted.glb`));
   await convert(join(dir, `${name}-deployed-fitted-web.glb`), join(to, `${slug}-fitout.glb`), { fitoutOnly: true });
+  await convert(join(dir, `${name}-deployed-web.glb`), join(to, `${slug}-ar.glb`), { still: true });
 }

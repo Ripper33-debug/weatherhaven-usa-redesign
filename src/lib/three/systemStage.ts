@@ -147,7 +147,7 @@ export async function createSystemStage(
   };
 
   // Soft shelters (and models without articulation) show their packed file; containers fold themselves.
-  const swapStowed = !model.articulation && !!model.stowed;
+  const swapStowed = !model.articulation && !model.packedInClip && !!model.stowed;
   let gltf: GLTF;
   let stowedGltf: GLTF | null = null;
   try {

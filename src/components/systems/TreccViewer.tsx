@@ -5,9 +5,10 @@ import { useClientMediaQuery } from "@/hooks/useClientMediaQuery";
 import type { OpenPoint, TreccStage } from "@/lib/three/treccStage";
 import type { TreccFinish } from "@/lib/three/treccFinishes";
 import { TreccFinishPicker } from "@/components/three/TreccFinishPicker";
+import { ViewerStillControls } from "@/components/systems/ViewerStillControls";
 import { TreccArButton } from "@/components/three/TreccArButton";
 import { startWhenNear } from "@/lib/start-when-near";
-import { systemModel } from "@/lib/system-models";
+import { SYSTEM_MODELS, systemModel } from "@/lib/system-models";
 
 const INSIDE_LABEL = systemModel("trecc")?.inside?.label;
 
@@ -302,6 +303,14 @@ export function TreccViewer({ lead = false, transitionName }: { lead?: boolean; 
           : null}
         {load === "loading" || load === "idle" ? (
           <p className="absolute bottom-4 left-4 text-[0.875rem] text-muted">Loading the 3D model</p>
+        ) : null}
+        {load === "fallback" ? (
+          <ViewerStillControls
+            name="TRECC"
+            video={SYSTEM_MODELS.trecc.deployVideo}
+            interior={SYSTEM_MODELS.trecc.interiorStill}
+            insideLabel={SYSTEM_MODELS.trecc.inside?.label}
+          />
         ) : null}
         <TreccArButton finish={finish} className="absolute right-3 top-3 sm:right-4 sm:top-4" />
         {ready ? (

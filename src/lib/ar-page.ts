@@ -90,12 +90,12 @@ export function arPageHtml(model?: SystemModel): string {
   html = html
     .replace("/*FONTS*/", fonts)
     .replace("/*LOGO*/", "/weatherhaven-logo-reverse@2x.png")
-    .replace("/*GLB*/", model?.deployed ?? "/assets/models/trecc-open.glb")
+    .replace("/*GLB*/", model?.arModel ?? model?.deployed ?? "/assets/models/trecc-open.glb")
     .replace("/*DRACO*/", "/assets/draco-ar/")
     .replace("/*QR*/", "/assets/ar/qrcode.js")
     .replace("/*MV*/", "/assets/ar/model-viewer.min.js")
     .replace('href="../#/products/trecc"', `href="/configurable-solutions/${slug}"`);
-  const glb = model?.deployed ?? "/assets/models/trecc-open.glb";
+  const glb = model?.arModel ?? model?.deployed ?? "/assets/models/trecc-open.glb";
   if (!model || !model.ar) return withFurnished(html, SYSTEM_MODELS.trecc, glb);
 
   const name = model.ar.title.replace(/^See the /, "").replace(/ at full size$/, "");
