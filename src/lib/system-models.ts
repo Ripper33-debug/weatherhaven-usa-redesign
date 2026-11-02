@@ -69,7 +69,7 @@ const builtFrom = (name: string) => `3D model built from Weatherhaven’s publis
 const LEAD_HARD = "in the room you’re standing in, at real scale. Walk around it; walk inside it.";
 const LEAD_SOFT = "in the space you’re standing in, at real scale. Walk around it; walk inside it.";
 /** Military shelters modelled in the green finish: the finish picker recolours these. */
-const SOFT_FINISHES = { paint: ["paint"], fabric: ["fabric", "strap"] };
+const SOFT_FINISHES = { paint: ["paint", "frame"], fabric: ["fabric", "strap", "hem", "fabric_end"] };
 
 export const SYSTEM_MODELS: Record<string, SystemModel> = {
   trecc: {
@@ -83,24 +83,12 @@ export const SYSTEM_MODELS: Record<string, SystemModel> = {
   },
   mecc: {
     slug: "mecc",
+    // Its deploy animation starts from the closed container, so it needs no separate packed file.
     deployed: "/models/mecc/mecc-deployed.glb",
-    stowed: "/models/mecc/mecc-stowed.glb",
     compression: "draco",
     source: "3D model built from Weatherhaven’s published MECC drawings, specifications and photos",
-    articulation: {
-      // The file holds the walls folded down (deployed); 0 folds them back up flush with the container.
-      hinges: [
-        { node: "MECC_side_wall_L", stowed: 0 },
-        { node: "MECC_side_wall_R", stowed: 0 },
-      ],
-      unfold: [
-        { node: "MECC_expansion_L", pivotX: -1.219 },
-        { node: "MECC_expansion_R", pivotX: 1.219 },
-      ],
-      hideStowed: ["MECC_interior", "MECC_site_kit"],
-    },
     finishMaterials: { paint: ["paint", "paint_dark"], fabric: ["fabric", "strap"] },
-    inside: { src: "/models/mecc/mecc-fitout-command-post.glb", node: "MECC_fitout", label: "Command post" },
+    inside: { src: "/models/mecc/mecc-fitout.glb", node: "MECC_fitout", label: "Command post" },
     furnished: "/models/mecc/mecc-deployed-fitted.glb",
     ar: {
       title: "See the MECC at full size",
@@ -111,13 +99,12 @@ export const SYSTEM_MODELS: Record<string, SystemModel> = {
   },
   ehmecc: {
     slug: "ehmecc",
+    // The deploy animation raises the roof and opens the container from closed.
     deployed: "/models/ehmecc/ehmecc-deployed.glb",
-    // The raised roof is part of the core, so the packed view is its own file rather than a fold.
-    stowed: "/models/ehmecc/ehmecc-stowed.glb",
     compression: "draco",
     source: builtFrom("EHMECC"),
     finishMaterials: { paint: ["paint", "paint_dark"], fabric: ["fabric", "strap"] },
-    inside: { src: "/models/ehmecc/ehmecc-fitout-operating-room.glb", node: "EHMECC_fitout", label: "Operating room" },
+    inside: { src: "/models/ehmecc/ehmecc-fitout.glb", node: "EHMECC_fitout", label: "Operating room" },
     furnished: "/models/ehmecc/ehmecc-deployed-fitted.glb",
     ar: {
       title: "See the EHMECC at full size",
@@ -129,22 +116,11 @@ export const SYSTEM_MODELS: Record<string, SystemModel> = {
   ateps: {
     slug: "ateps",
     deployed: "/models/ateps/ateps-deployed.glb",
-    stowed: "/models/ateps/ateps-stowed.glb",
     compression: "draco",
     source: builtFrom("ATEPS"),
-    articulation: {
-      hinges: [
-        { node: "ATEPS_side_wall_L", stowed: 0 },
-        { node: "ATEPS_side_wall_R", stowed: 0 },
-      ],
-      unfold: [
-        { node: "ATEPS_expansion_L", pivotX: -1.067 },
-        { node: "ATEPS_expansion_R", pivotX: 1.067 },
-      ],
-      hideStowed: ["ATEPS_interior"],
-    },
     // Modelled in grey, so no finish picker (its "green" would show grey).
-    inside: { src: "/models/ateps/ateps-deployed-fitted.glb", node: "ATEPS_fitout", label: "Medical aid station" },
+    inside: { src: "/models/ateps/ateps-fitout.glb", node: "ATEPS_fitout", label: "Medical aid station" },
+    furnished: "/models/ateps/ateps-deployed-fitted.glb",
     ar: {
       title: "See the ATEPS at full size",
       lead: `Place the deployed ATEPS ${LEAD_HARD}`,
@@ -154,12 +130,13 @@ export const SYSTEM_MODELS: Record<string, SystemModel> = {
   },
   hercon: {
     slug: "hercon",
+    // The deploy animation slides the hard-wall expansions out from the closed container.
     deployed: "/models/hercon/hercon-deployed.glb",
-    stowed: "/models/hercon/hercon-stowed.glb",
     compression: "draco",
     source: builtFrom("HERCon"),
     finishMaterials: { paint: ["paint", "paint_dark"], fabric: [] },
-    inside: { src: "/models/hercon/hercon-deployed-fitted.glb", node: "HERCON_fitout", label: "Housing, 8 berths" },
+    furnished: "/models/hercon/hercon-deployed-fitted.glb",
+    inside: { src: "/models/hercon/hercon-fitout.glb", node: "HERCON_fitout", label: "Housing, 8 berths" },
     ar: {
       title: "See the HERCon at full size",
       lead: `Place the deployed HERCon ${LEAD_HARD}`,
@@ -174,7 +151,8 @@ export const SYSTEM_MODELS: Record<string, SystemModel> = {
     compression: "draco",
     source: builtFrom("Series 4"),
     finishMaterials: SOFT_FINISHES,
-    inside: { src: "/models/series-4/series-4-deployed-fitted.glb", node: "SERIES4_fitout", label: "Kitchen and dining" },
+    furnished: "/models/series-4/series-4-deployed-fitted.glb",
+    inside: { src: "/models/series-4/series-4-fitout.glb", node: "SERIES4_fitout", label: "Kitchen and dining" },
     ar: {
       title: "See the Series 4 at full size",
       lead: `Place a 16 × 32 ft Series 4 ${LEAD_SOFT}`,
@@ -188,8 +166,9 @@ export const SYSTEM_MODELS: Record<string, SystemModel> = {
     stowed: "/models/rdmss/rdmss-stowed.glb",
     compression: "draco",
     source: builtFrom("RDMSS"),
-    finishMaterials: { paint: ["paint"], fabric: ["fabric", "strap", "cap"] },
-    inside: { src: "/models/rdmss/rdmss-deployed-fitted.glb", node: "RDMSS_fitout", label: "Command post" },
+    finishMaterials: { paint: ["paint", "paint_dark"], fabric: ["fabric", "strap", "cap"] },
+    furnished: "/models/rdmss/rdmss-deployed-fitted.glb",
+    inside: { src: "/models/rdmss/rdmss-fitout.glb", node: "RDMSS_fitout", label: "Command post" },
     ar: {
       title: "See the RDMSS at full size",
       lead: `Place the deployed RDMSS ${LEAD_SOFT}`,
@@ -204,7 +183,8 @@ export const SYSTEM_MODELS: Record<string, SystemModel> = {
     compression: "draco",
     source: builtFrom("MTS"),
     finishMaterials: SOFT_FINISHES,
-    inside: { src: "/models/mts/mts-deployed-fitted.glb", node: "MTS_fitout", label: "Dining hall" },
+    furnished: "/models/mts/mts-deployed-fitted.glb",
+    inside: { src: "/models/mts/mts-fitout.glb", node: "MTS_fitout", label: "Dining hall" },
     ar: {
       title: "See the MTS at full size",
       lead: `Place a deployed MTS ${LEAD_SOFT}`,
@@ -219,7 +199,8 @@ export const SYSTEM_MODELS: Record<string, SystemModel> = {
     compression: "draco",
     source: builtFrom("MEX-26"),
     finishMaterials: SOFT_FINISHES,
-    inside: { src: "/models/mex-26/mex-26-deployed-fitted.glb", node: "MEX26_fitout", label: "Vehicle maintenance bay" },
+    furnished: "/models/mex-26/mex-26-deployed-fitted.glb",
+    inside: { src: "/models/mex-26/mex-26-fitout.glb", node: "MEX26_fitout", label: "Vehicle maintenance bay" },
     ar: {
       title: "See the MEX-26 at full size",
       lead: `Place the deployed MEX-26 ${LEAD_SOFT} It’s big: you’ll want a car park or a field.`,
@@ -234,7 +215,8 @@ export const SYSTEM_MODELS: Record<string, SystemModel> = {
     compression: "draco",
     source: builtFrom("Polarhaven"),
     // Modelled in its polar colours; no military finishes.
-    inside: { src: "/models/polarhaven/polarhaven-deployed-fitted.glb", node: "POLARHAVEN_fitout", label: "Base camp" },
+    furnished: "/models/polarhaven/polarhaven-deployed-fitted.glb",
+    inside: { src: "/models/polarhaven/polarhaven-fitout.glb", node: "POLARHAVEN_fitout", label: "Base camp" },
     ar: {
       title: "See the Polarhaven at full size",
       lead: `Place a 14 × 20 ft Polarhaven ${LEAD_SOFT}`,
@@ -248,7 +230,8 @@ export const SYSTEM_MODELS: Record<string, SystemModel> = {
     stowed: "/models/polar-chief/polar-chief-stowed.glb",
     compression: "draco",
     source: builtFrom("Polar Chief"),
-    inside: { src: "/models/polar-chief/polar-chief-deployed-fitted.glb", node: "POLARCHIEF_fitout", label: "Kitchen and mess" },
+    furnished: "/models/polar-chief/polar-chief-deployed-fitted.glb",
+    inside: { src: "/models/polar-chief/polar-chief-fitout.glb", node: "POLARCHIEF_fitout", label: "Kitchen and mess" },
     ar: {
       title: "See the Polar Chief at full size",
       lead: `Place the deployed Polar Chief ${LEAD_SOFT}`,
@@ -262,7 +245,8 @@ export const SYSTEM_MODELS: Record<string, SystemModel> = {
     stowed: "/models/endurance/endurance-stowed.glb",
     compression: "draco",
     source: builtFrom("Endurance"),
-    inside: { src: "/models/endurance/endurance-deployed-fitted.glb", node: "ENDURANCE_fitout", label: "Sleeping quarters" },
+    furnished: "/models/endurance/endurance-deployed-fitted.glb",
+    inside: { src: "/models/endurance/endurance-fitout.glb", node: "ENDURANCE_fitout", label: "Sleeping quarters" },
     // A low tent: cut at about waist height so the near wall doesn't hide the cots.
     cutHeight: 0.95,
     ar: {

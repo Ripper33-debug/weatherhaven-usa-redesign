@@ -11,6 +11,7 @@ import { arHref, modelPoster, systemModel } from "@/lib/system-models";
 type LoadState = "idle" | "loading" | "ready" | "fallback";
 
 /** How long the fold-down takes, and the ease (in-out cubic, like the TRECC viewer). */
+/** A full packed ↔ deployed run, until the stage says how long its model's own animation takes. */
 const DEPLOY_MS = 2600;
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
 
@@ -38,6 +39,7 @@ export function SystemModelViewer({
   const stageRef = useRef<SystemStage | null>(null);
   const kickRef = useRef<() => void>(() => undefined);
   const tweenRef = useRef<{ from: number; to: number; start: number; ms: number } | null>(null);
+  const deployMsRef = useRef(DEPLOY_MS);
   const deployRef = useRef(1);
   /** What to do once the running animation ends: cut the shell open, or pack up. */
   const pendingRef = useRef<"inside" | "pack" | null>(null);
@@ -82,7 +84,7 @@ export function SystemModelViewer({
       // Packed was pressed while looking inside: pack once the roof is back on.
       if (pendingRef.current === "pack" && stage.insideProgress() === 0) {
         pendingRef.current = null;
-        tweenRef.current = { from: deployRef.current, to: 0, start: performance.now(), ms: DEPLOY_MS };
+        tweenRef.current = { from: deployRef.current, to: 0, start: performance.now(), ms: deployMsRef.current };
       }
       stage.render();
       const busy = !!tweenRef.current || stage.isAnimating() || performance.now() - lastMove < 400;
@@ -113,13 +115,16 @@ export function SystemModelViewer({
       try {
         const { createSystemStage } = await import("@/lib/three/systemStage");
         if (cancelled || !canvasRef.current) return;
-        const stage = await createSystemStage(canvasRef.current, model, { maxDpr: 1.75 });
+        // Poster captures render sharper than visitors' screens need.
+        const capture = !!(window as unknown as { __CAMP_CAPTURE__?: boolean }).__CAMP_CAPTURE__;
+        const stage = await createSystemStage(canvasRef.current, model, { maxDpr: capture ? 3 : 1.75 });
         if (cancelled) {
           stage.dispose();
           return;
         }
         stage.enableControls(kick);
         stageRef.current = stage;
+        deployMsRef.current = stage.deployMs;
         // Test and poster captures drive the stage directly (set only by those scripts).
         const w = window as unknown as { __CAMP_CAPTURE__?: boolean; __systemStage?: SystemStage };
         if (w.__CAMP_CAPTURE__) w.__systemStage = stage;
@@ -175,7 +180,7 @@ export function SystemModelViewer({
         stage.setDeploy(to);
       } else {
         // A partial reversal takes its share of the full time.
-        const ms = DEPLOY_MS * Math.max(0.35, Math.abs(to - deployRef.current));
+        const ms = deployMsRef.current * Math.max(0.35, Math.abs(to - deployRef.current));
         tweenRef.current = { from: deployRef.current, to, start: performance.now(), ms };
       }
       kickRef.current();
@@ -203,7 +208,7 @@ export function SystemModelViewer({
         deployRef.current = 1;
         stage.setDeploy(1);
       } else {
-        const ms = DEPLOY_MS * Math.max(0.35, 1 - deployRef.current);
+        const ms = deployMsRef.current * Math.max(0.35, 1 - deployRef.current);
         tweenRef.current = { from: deployRef.current, to: 1, start: performance.now(), ms };
       }
       kickRef.current();

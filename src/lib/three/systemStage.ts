@@ -2,17 +2,21 @@
  * Framework-free three.js stage for any system with a model in the registry (src/lib/system-models.ts):
  * the product page's 3D viewer for everything except the TRECC (which keeps treccStage).
  *
- * One deployed model folds itself up for the stowed view, driven by the registry's `articulation`:
- * hinge nodes rotate back to their stowed angle (the MECC's side walls swing up), unfold nodes
- * shrink to their hinge line (the fabric expansions), and nodes hidden while packed (interior, site
- * kit) appear once it's deployed. A model without articulation but with a separate stowed file swaps
- * between the two. Lighting, ground and grid match the TRECC stage so the pages look alike.
+ * Packed ↔ deployed plays the model's own deploy animation (the glTF clip in Barry's files): a
+ * container's clip starts from the closed container, so scrubbing it is the whole story; a soft
+ * shelter's clip builds it up from bare ground, so the packed view is its own file (crates, bags),
+ * which gives way to the clip. Models without a clip fall back to the registry's `articulation`
+ * (hinge nodes rotate, unfold nodes open out from a hinge line) or a plain swap to the stowed file.
+ *
+ * Lit by the sky file the models were colour-checked under (public/models/env, from Barry's web kit)
+ * with neutral tone mapping, plus a sun for the contact shadow, on the site's dark ground and grid.
  */
 import * as THREE from "three";
 import { GLTFLoader, type GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.js";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
+import { HDRLoader } from "three/examples/jsm/loaders/HDRLoader.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import type { SystemModel } from "@/lib/system-models";
 import type { TreccFinish } from "@/lib/three/treccFinishes";
@@ -20,6 +24,10 @@ import { withImageTextures } from "@/lib/three/gltfImageTextures";
 
 /** Same Draco decoder the AR page uses (the newer one; model-viewer and three both read it). */
 const DRACO_PATH = "/assets/draco-ar/";
+/** Outdoor sky the models were colour-checked under, cut down to 256 × 128 for lighting only. */
+const SKY_HDR = "/models/env/desert-sky-256.hdr";
+/** Share of the deploy toggle spent on the packed file before a soft shelter's clip takes over. */
+const PACKED_SHARE = 0.16;
 
 /** Finish colours (linear RGB). Green keeps the model's own colours. */
 const FINISH_COLORS: Record<Exclude<TreccFinish, "green">, { paint: [number, number, number]; fabric: [number, number, number] }> = {
@@ -41,6 +49,8 @@ export type SystemStage = {
   isAnimating: () => boolean;
   /** Whether the model can show a packed state at all. */
   canStow: boolean;
+  /** How long a full packed ↔ deployed run should take (the clip's own pace when there is one). */
+  deployMs: number;
   /** Whether the registry lists an example fit-out for "Show inside". */
   hasInside: boolean;
   /**
@@ -75,7 +85,8 @@ export async function createSystemStage(
 ): Promise<SystemStage> {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: "high-performance" });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, maxDpr));
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  // Neutral, as the models were colour-checked: ACES would shift the CARC greens toward olive.
+  renderer.toneMapping = THREE.NeutralToneMapping;
   renderer.toneMappingExposure = 1.0;
   renderer.shadowMap.enabled = shadows;
   renderer.shadowMap.type = THREE.PCFShadowMap;
@@ -87,23 +98,22 @@ export async function createSystemStage(
 
   const scene = new THREE.Scene();
   const pmrem = new THREE.PMREMGenerator(renderer);
-  const room = new RoomEnvironment();
-  const envTex = pmrem.fromScene(room, 0.04).texture;
-  room.dispose();
-  scene.environment = envTex;
-  scene.environmentIntensity = 0.42;
+  let envTex: THREE.Texture | null = null;
+  // Fetched alongside the model; applied once both are in (see below).
+  const hdrLoad = new HDRLoader().loadAsync(SKY_HDR).catch(() => null);
 
-  // Lighting as on the TRECC stage: warm key, cool sky fill, orange rim from behind.
-  const key = new THREE.DirectionalLight(0xfff4e6, 2.3);
+  // The sun for the contact shadow (the sky already carries most of the light), a cool fill from the
+  // sky side and a little orange rim from behind, as on the TRECC stage.
+  const key = new THREE.DirectionalLight(0xfff4e6, 1.4);
   key.castShadow = shadows;
   key.shadow.mapSize.set(2048, 2048);
   key.shadow.bias = -0.0004;
   key.shadow.normalBias = 0.02;
   scene.add(key);
   scene.add(key.target);
-  const hemi = new THREE.HemisphereLight(0x9fb7d1, 0x0a0f17, 0.4);
+  const hemi = new THREE.HemisphereLight(0x9fb7d1, 0x0a0f17, 0.2);
   scene.add(hemi);
-  const rim = new THREE.DirectionalLight(0xffb070, 1.1);
+  const rim = new THREE.DirectionalLight(0xffb070, 0.6);
   scene.add(rim);
 
   // Load the model(s).
@@ -130,12 +140,13 @@ export async function createSystemStage(
     key.dispose();
     rim.dispose();
     hemi.dispose();
-    envTex.dispose();
+    envTex?.dispose();
     pmrem.dispose();
     renderer.dispose();
     renderer.forceContextLoss();
   };
 
+  // Soft shelters (and models without articulation) show their packed file; containers fold themselves.
   const swapStowed = !model.articulation && !!model.stowed;
   let gltf: GLTF;
   let stowedGltf: GLTF | null = null;
@@ -151,6 +162,25 @@ export async function createSystemStage(
   // The decoder's workers aren't needed once the files are in.
   draco?.dispose();
   draco = null;
+
+  // The sky file lights the model; if it couldn't load, the studio room the TRECC stage uses stands
+  // in, with the stronger lights that stage uses.
+  const hdr = await hdrLoad;
+  if (hdr) {
+    hdr.mapping = THREE.EquirectangularReflectionMapping;
+    envTex = pmrem.fromEquirectangular(hdr).texture;
+    hdr.dispose();
+    scene.environmentIntensity = 0.9;
+  } else {
+    const room = new RoomEnvironment();
+    envTex = pmrem.fromScene(room, 0.04).texture;
+    room.dispose();
+    scene.environmentIntensity = 0.42;
+    key.intensity = 2.3;
+    hemi.intensity = 0.4;
+    rim.intensity = 1.1;
+  }
+  scene.environment = envTex;
 
   const root = gltf.scene;
   scene.add(root);
@@ -189,7 +219,25 @@ export async function createSystemStage(
   if (stowedGltf) prep(stowedGltf.scene);
   for (const t of tinted) t.rel = t.rel / (groupRef[t.group] ?? Math.max(t.rel, 1e-4));
 
-  // ---- articulation ---------------------------------------------------------------
+  // ---- deploy animation -------------------------------------------------------------
+  const clip = gltf.animations[0] ?? null;
+  const mixer = clip ? new THREE.AnimationMixer(root) : null;
+  const action = mixer && clip ? mixer.clipAction(clip) : null;
+  if (action) {
+    action.setLoop(THREE.LoopOnce, 1);
+    action.clampWhenFinished = true;
+    action.play();
+  }
+  /** Poses the model at a point in its clip (a finished LoopOnce action pauses itself, so un-pause). */
+  const scrub = (seconds: number) => {
+    if (!mixer || !action || !clip) return;
+    action.enabled = true;
+    action.paused = false;
+    action.time = Math.min(Math.max(seconds, 0), clip.duration);
+    mixer.update(0);
+  };
+
+  // ---- articulation (files without a clip) ---------------------------------------------
   const byName = (name: string) => root.getObjectByName(name) ?? null;
   const hinges = (model.articulation?.hinges ?? []).flatMap(({ node, stowed }) => {
     const obj = byName(node);
@@ -212,14 +260,16 @@ export async function createSystemStage(
     const obj = byName(name);
     return obj ? [obj] : [];
   });
-  const canStow = hinges.length > 0 || unfolds.length > 0 || !!stowedGltf;
+  // Parts the clip grows in last (interior, site kit): left out of the framing, as `hidden` is.
+  const grown = clip ? root.children.filter((n) => /_(interior|site_kit)$/i.test(n.name)) : [];
+  const canStow = !!clip || hinges.length > 0 || unfolds.length > 0 || !!stowedGltf;
 
   // ---- framing ------------------------------------------------------------------------
   // The deployed footprint without the nodes hidden while packed: interiors sit inside it anyway,
   // and site kits (cables, earth rods) spread out on the ground and would shrink the model in frame.
   const box = new THREE.Box3();
   const leaveOut = new Set<THREE.Object3D>();
-  for (const h of hidden) h.traverse((o) => leaveOut.add(o));
+  for (const h of [...hidden, ...grown]) h.traverse((o) => leaveOut.add(o));
   root.updateMatrixWorld(true);
   // Guy ropes and other thin lines reach far past the shelter; frame on the shelter itself.
   const thin = (mesh: THREE.Mesh) =>
@@ -283,7 +333,7 @@ export async function createSystemStage(
 
   // Camera: three-quarter view of the end with the door (the side the site kit lies on, when there
   // is one; otherwise +Z), framed on the deployed footprint.
-  const siteKit = hidden.find((h) => /site|kit/i.test(h.name));
+  const siteKit = [...hidden, ...grown].find((h) => /site|kit/i.test(h.name));
   let doorSign = 1;
   if (siteKit) {
     const kb = new THREE.Box3().setFromObject(siteKit);
@@ -345,6 +395,20 @@ export async function createSystemStage(
     const next = clamp01(t);
     if (next === deploy) return;
     deploy = next;
+    if (mixer && clip) {
+      if (stowedGltf) {
+        // Packed file first; it sinks away as the shelter starts to go up from the ground.
+        const k = smooth(PACKED_SHARE - 0.07, PACKED_SHARE, deploy);
+        stowedGltf.scene.visible = k < 1;
+        stowedGltf.scene.scale.setScalar(Math.max(1 - k, 0.0001));
+        root.visible = deploy > PACKED_SHARE - 0.01;
+        scrub(clamp01((deploy - PACKED_SHARE) / (1 - PACKED_SHARE)) * clip.duration);
+      } else {
+        scrub(deploy * clip.duration);
+      }
+      renderer.shadowMap.needsUpdate = true;
+      return;
+    }
     // The walls swing down first; the fabric opens out over them; the inside appears last.
     const wall = smooth(0, 0.58, deploy);
     for (const h of hinges) h.obj.quaternion.slerpQuaternions(h.closed, h.open, wall);
@@ -534,6 +598,8 @@ export async function createSystemStage(
 
   return {
     canStow,
+    // The clips run 3 to 7.4 s; played a little brisker, plus the packed file's share.
+    deployMs: clip ? Math.round((clip.duration * 0.8 * 1000) / (stowedGltf ? 1 - PACKED_SHARE : 1)) : 2600,
     hasInside: !!model.inside,
     setInside,
     preloadInside: loadFitout,
